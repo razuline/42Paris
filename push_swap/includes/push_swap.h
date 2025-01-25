@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/22 12:23:22 by erazumov          #+#    #+#             */
-/*   Updated: 2025/01/22 13:41:20 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/01/25 17:55:18 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,8 +28,12 @@ typedef struct	s_stacks
 }	t_stacks;
 
 /* Stack Operations */
-void	swap_a(t_stacks *stack);
-void	swap_b(t_stacks *stack);
+void	swap_a(t_stacks *stack_a);
+void	swap_b(t_stacks *stack_b);
+void	push_a(t_stacks *stack_a, t_stacks *stack_b);
+void	push_b(t_stacks *stack_a, t_stacks *stack_b);
+void	rotate_a(t_stacks *stack_a);
+void	rotate_b(t_stacks *stack_b);
 
 
 
