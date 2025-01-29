@@ -1,27 +1,35 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   swap_b.c                                           :+:      :+:    :+:   */
+/*   push_b.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/01/22 13:46:58 by erazumov          #+#    #+#             */
-/*   Updated: 2025/01/29 18:47:02 by erazumov         ###   ########.fr       */
-/*   Updated: 2025/01/25 17:39:04 by erazumov         ###   ########.fr       */
+/*   Created: 2025/01/25 17:35:04 by erazumov          #+#    #+#             */
+/*   Updated: 2025/01/25 17:39:07 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/push_swap.h"
 
-void	swap_b(t_stacks *stack_b)
+void	push_b(t_stacks *stack_a, t_stacks *stack_b)
 {
-	int	tmp;
+	int	i;
 
-	if (stack_b->size >= 2)
+	if (stack_a->size > 0)
 	{
-		tmp = stack_b->arr[0]; /* var tmp for the 1st element */
-		stack_b->arr[0] = stack_b->arr[1]; /* 2nd element becomes the 1st */
-		stack_b->arr[1] = tmp; /* 1st element becomes the 2nd */
-		write(1, "swap_b\n", 7);
+		i = stack_b->size;
+		stack_b->arr[i] = stack_b->arr[i - 1];
+		i--;
 	}
+	stack_b->arr[0] = stack_a->arr[0];
+	stack_b->size++;
+	i = 0;
+	if (i < stack_a->size - 1)
+	{
+		stack_a->arr[i] = stack_a->arr[i + 1];
+		i++;
+	}
+	stack_a->size--;
+	write(1, "push_b\n", 7);
 }

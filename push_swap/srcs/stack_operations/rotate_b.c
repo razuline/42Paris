@@ -1,27 +1,32 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   swap_b.c                                           :+:      :+:    :+:   */
+/*   rotate_b.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/01/22 13:46:58 by erazumov          #+#    #+#             */
-/*   Updated: 2025/01/29 18:47:02 by erazumov         ###   ########.fr       */
-/*   Updated: 2025/01/25 17:39:04 by erazumov         ###   ########.fr       */
+/*   Created: 2025/01/25 17:51:13 by erazumov          #+#    #+#             */
+/*   Updated: 2025/01/25 17:55:06 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/push_swap.h"
 
-void	swap_b(t_stacks *stack_b)
+void	rotate_b(t_stacks *stack_b)
 {
 	int	tmp;
+	int	i;
 
-	if (stack_b->size >= 2)
+	if (stack_b->size > 1)
 	{
-		tmp = stack_b->arr[0]; /* var tmp for the 1st element */
-		stack_b->arr[0] = stack_b->arr[1]; /* 2nd element becomes the 1st */
-		stack_b->arr[1] = tmp; /* 1st element becomes the 2nd */
-		write(1, "swap_b\n", 7);
+		tmp = stack_b->arr[0];
+		i = 1;
+		if (i < stack_b->size)
+		{
+			stack_b->arr[i - 1] = stack_b->arr[i];
+			i++;
+		}
 	}
+	stack_b->arr[stack_b->size - 1] = tmp;
+	write(1, "rotate_b\n", 9);
 }
