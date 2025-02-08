@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/07 17:17:26 by erazumov          #+#    #+#             */
-/*   Updated: 2025/02/08 13:38:33 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/02/08 16:17:41 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,18 +42,18 @@ bool	**make_visited(int height, int width)
 	return (visited);
 }
 
-bool	is_valid(char **map, int x, int y, int height, int width)
+bool	is_valid(char **map, bool **visited, int x, int y, int height, int width)
 {
-	if (x < 0 || x >= height || y < 0 || y >= width)
+	if (x < 0 || x >= height || y < 0 || y >= width) /* Out of bounds */
 	{
 		return (false);
 	}
 
-	if (map[x][y] == '1')
+	if (map[x][y] == '1') /* Wall */
 	{
 		return (false);
 	}
-	return (true);
+	return (!visited[x][y]); /* Not visited */
 }
 
 typedef struct s_queue
@@ -93,6 +93,19 @@ bool	is_empty(t_queue *q)
 	return (q->front == q->rear);
 }
 
+void	free_visited(bool **visited, int height)
+{
+	int	i;
+
+	i = 0;
+	while (i < height)
+	{
+		free(visited[i]);
+		i++;
+	}
+	free(visited);
+}
+
 void	free_queue(t_queue *q)
 {
 	free(q->positions);
@@ -103,7 +116,39 @@ bool	bfs(char **map, int start_x, int start_y, int end_x, int end_y, int height,
 	bool	**visited;
 	int		directions[4][2] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}}; /* up, down, left, right */
 	t_queue	queue;
-	/* Starting point P = {1, 1} */
-	visited = make_visited(height, width);
+	int		x;
+	int		y;
+	int		new_x;
+	int		new_y;
+	int		dir;
 
+	visited = make_visited(height, width);
+	enqueue(&queue, start_x, start_y); /* Starting point */
+	visited[start_x][start_y] = true; /* Mark starting point like visited */
+
+	while (!is_empty(&queue))
+	{
+		dequeue(&queue, &x, &y); /* Extract current cell from queue */
+		if (x == end_x && y == end_y) /* If the goal is achieved */
+		{
+			free_queue(&queue);
+			free_visited(visited, height); /* Free all memory */
+			return (true);
+		}
+		dir = 0;
+		while (dir < 4)
+		{
+			new_x = x + directions[dir][1];
+			new_y = y + directions[dir][0];
+			if (is_valid(map, visited, new_x, new_y, height, width))
+			{
+				visited[new_x][new_y] = true;
+				enqueue(&queue, new_x, new_y);
+			}
+			dir++;
+		}
+	}
+	free_queue(&queue);
+	free_visited(visited, height);
+	return (false); /* No path found */
 }
