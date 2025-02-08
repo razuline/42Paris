@@ -6,20 +6,13 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/07 17:17:26 by erazumov          #+#    #+#             */
-/*   Updated: 2025/02/07 18:24:02 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/02/08 13:38:33 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <stdbool.h>
 #include <stdlib.h>
 #include <unistd.h>
-/* Starting point P = {1, 1} */
-int	directions[4][2] = {
-	{-1, 0}, /* up */
-	{1, 0}, /* down */
-	{0, -1}, /* left */
-	{0, 1} /* right */
-};
 
 typedef struct s_cell
 {
@@ -49,7 +42,7 @@ bool	**make_visited(int height, int width)
 	return (visited);
 }
 
-bool	valid_direction(int x, int y, int height, int width, char **map)
+bool	is_valid(char **map, int x, int y, int height, int width)
 {
 	if (x < 0 || x >= height || y < 0 || y >= width)
 	{
@@ -63,7 +56,54 @@ bool	valid_direction(int x, int y, int height, int width, char **map)
 	return (true);
 }
 
-void	bfs(char **map, int x, int y, int height, int width)
+typedef struct s_queue
+{
+	t_cell	*positions;
+	int		front;
+	int		rear;
+	int		size;
+}	t_queue;
+
+void	make_queue(t_queue *q, int max_size)
+{
+	q->positions = (t_cell *)malloc(sizeof(t_cell) * max_size);
+	q->front = q->rear = 0;
+	q->size = max_size;
+}
+
+void	enqueue(t_queue *q, int x, int y)
+{
+	q->positions[q->rear].x = x;
+	q->positions[q->rear].y = y;
+	q->rear = (q->rear + 1) % q->size;
+}
+
+bool	dequeue(t_queue *q, int *x, int *y)
+{
+	if (q->front == q->rear)
+		return (false); /* Queue is empty */
+	*x = q->positions[q->front].x;
+	*y = q->positions[q->front].y;
+	q->front = (q->front + 1) % q->size;
+	return (true);
+}
+
+bool	is_empty(t_queue *q)
+{
+	return (q->front == q->rear);
+}
+
+void	free_queue(t_queue *q)
+{
+	free(q->positions);
+}
+
+bool	bfs(char **map, int start_x, int start_y, int end_x, int end_y, int height, int width)
 {
 	bool	**visited;
+	int		directions[4][2] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}}; /* up, down, left, right */
+	t_queue	queue;
+	/* Starting point P = {1, 1} */
+	visited = make_visited(height, width);
+
 }
