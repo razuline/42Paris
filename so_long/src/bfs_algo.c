@@ -6,19 +6,11 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/07 17:17:26 by erazumov          #+#    #+#             */
-/*   Updated: 2025/02/08 16:17:41 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/02/09 15:59:25 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <stdbool.h>
-#include <stdlib.h>
-#include <unistd.h>
-
-typedef struct s_cell
-{
-	int	x;
-	int	y;
-}	t_cell;
+# include "so_long.h"
 
 bool	**make_visited(int height, int width)
 {
@@ -55,14 +47,6 @@ bool	is_valid(char **map, bool **visited, int x, int y, int height, int width)
 	}
 	return (!visited[x][y]); /* Not visited */
 }
-
-typedef struct s_queue
-{
-	t_cell	*positions;
-	int		front;
-	int		rear;
-	int		size;
-}	t_queue;
 
 void	make_queue(t_queue *q, int max_size)
 {
