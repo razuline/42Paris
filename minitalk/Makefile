@@ -6,45 +6,46 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/02/15 11:19:09 by erazumov          #+#    #+#              #
-#    Updated: 2025/02/15 11:47:08 by erazumov         ###   ########.fr        #
+#    Updated: 2025/02/16 16:08:29 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = minitalk
-
-CFLAGS = -Wall -Wextra -Werror -Iincludes
-
-SRC_DIR = src
-OBJ_DIR = obj
-SRCS = $(shell find $(SRC_DIR) -name \*.c)
-OBJS = $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
-
 SERVER = server
 CLIENT = client
-SERVER_OBJS = $(OBJ_DIR)/server.o
-CLIENT_OBJS = $(OBJ_DIR)/client.o
+PRINTF = libftprintf.a
 
-all: $(SERVER) $(CLIENT)
+CFLAGS = -Wall -Wextra -Werror
+INCLUDE = -I includes/
 
-$(OBJ_DIR):
-	mkdir -p $(OBJ_DIR)
+SERVER_FILES = server.c
+CLIENT_FILES = client.c
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
-	$(CC) $(CFLAGS) -c $< -o $@
+SRC_DIR = src/
+SERVER_SRC = $(addprefix $(SRC_DIR), $(SERVER_FILES))
+CLIENT_SRC = $(addprefix $(SRC_DIR), $(CLIENT_FILES))
 
-$(SERVER): $(SERVER_OBJS)
-	$(CC) $(CFLAGS) $(SERVER_OBJS) -o $(SERVER)
-$(CLIENT): $(CLIENT_OBJS)
-	$(CC) $(CFLAGS) $(CLIENT_OBJS) -o $(CLIENT)
+SERVER_OBJ = $(SERVER_SRC:.c=.o)
+CLIENT_OBJ = $(CLIENT_SRC:.c=.o)
+
+all: $(SERVER) $(CLIENT) $(PRINTF)
+
+$(SERVER): $(SERVER_OBJ)
+	@make -C ft_printf/
+	$(CC) $(CFLAGS) $(SERVER_OBJ) $(INCLUDE) ft_printf/$(PRINTF) -o $(SERVER)
+
+$(CLIENT): $(CLIENT_OBJ)
+	@make -C ft_printf/
+	$(CC) $(CFLAGS) $(CLIENT_OBJ) $(INCLUDE) ft_printf/$(PRINTF) -o $(CLIENT)
 
 clean:
-	rm -rf $(OBJ_DIR)
+	@make clean -C ft_printf/
+	rm -rf $(SERVER_OBJ) $(CLIENT_OBJ)
 
 fclean: clean
+	@make fclean -C ft_printf/
 	rm -f $(SERVER) $(CLIENT)
 
 re: fclean all
 
 .PHONY: all clean fclean re
-
-

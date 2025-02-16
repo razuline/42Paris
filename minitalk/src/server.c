@@ -6,48 +6,47 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/15 11:19:22 by erazumov          #+#    #+#             */
-/*   Updated: 2025/02/15 13:56:10 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/02/16 16:05:27 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minitalk.h"
+#include "../includes/minitalk.h"
 
-static int	bit = 0; /* Track the bit we're currently processing */
-static int	char_value = 0; /* Accumulate the character value */
-
-void	signal_handler(int sig)
+void	handler(int signal)
 {
-	/* Add the value of the bit at position `bit` by adding 2^bit */
-	if (sig == SIGUSR1)
-		char_value += (1 << bit); /* Add value of the current bit */
-	bit++;
+	static char	ch;
+	static int	bit;
 
-	/* If we've processed all 8 bits (one character) */
+	if (signal == SIGUSR1)
+		ch += (1 << bit);
+	bit++;
 	if (bit == 8)
 	{
-		/* Print the character corresponding to the accumulated bits */
-		write(1, &char_value, 1);
-		/* Reset bit counter and character accumulator for the next byte */
+		ft_printf("%c", ch);
 		bit = 0;
-		char_value = 0;
+		ch = 0;
 	}
 }
 
-#include <stdio.h>
-
-int	main(void)
+int	main(int ac, char **av)
 {
 	int	pid;
 
-	pid = getpid();
-	printf("Server PID: %d\n", pid);
-
-	signal(SIGUSR1, signal_handler);
-	signal(SIGUSR2, signal_handler);
-	/* Wait indefinitely for signals */
-	while (1)
+	(void)av;
+	if (ac != 1)
 	{
-		pause (); /* Wait for signals to arrive */
+		ft_printf("Error: wrong format.\n");
+		ft_printf("Try: ./server\n");
+		return (0);
+	}
+	pid = getpid();
+	ft_printf("Server PID: %d\n", pid);
+	ft_printf("Waiting for a message...\n");
+	while (ac == 1)
+	{
+		signal(SIGUSR1, handler);
+		signal(SIGUSR2, handler);
+		pause ();
 	}
 	return (0);
 }

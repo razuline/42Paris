@@ -1,26 +1,34 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   minitalk.h                                         :+:      :+:    :+:   */
+/*   ft_printf.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/02/15 11:19:56 by erazumov          #+#    #+#             */
-/*   Updated: 2025/02/15 14:00:35 by erazumov         ###   ########.fr       */
+/*   Created: 2024/11/25 14:16:37 by erazumov          #+#    #+#             */
+/*   Updated: 2024/12/03 15:11:47 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef MINITALK_H
-#define MINITALK_H
+#ifndef FT_PRINTF_H
+# define FT_PRINTF_H
 
-# include <signal.h>
+# include <ctype.h>
+# include <fcntl.h>
+# include <stdarg.h>
 # include <stdlib.h>
+# include <string.h>
 # include <unistd.h>
 
-/* Server functions */
-void	signal_handler(int sig);
+int		ft_printf(const char *format, ...);
+int		ft_formats(va_list args, const char format);
 
-/* Client functions */
-void	send_bit(char c, int pid);
+int		ft_printchar(char c);
+int		ft_printstr(char *str);
+int		ft_printptr(unsigned long long ptr);
+int		ft_printnbr(int n);
+int		ft_print_u(unsigned int n);
+int		ft_printhex(unsigned int nbr, const char format);
+char	*ft_itoa(int num);
 
 #endif
