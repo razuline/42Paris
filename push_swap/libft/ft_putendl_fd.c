@@ -1,27 +1,33 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   swap_b.c                                           :+:      :+:    :+:   */
+/*   ft_putendl_fd.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/01/22 13:46:58 by erazumov          #+#    #+#             */
-/*   Updated: 2025/01/29 18:47:02 by erazumov         ###   ########.fr       */
-/*   Updated: 2025/01/25 17:39:04 by erazumov         ###   ########.fr       */
+/*   Created: 2024/11/14 18:42:46 by erazumov          #+#    #+#             */
+/*   Updated: 2024/11/26 15:18:16 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/push_swap.h"
+/* Outputs the string ’s’ to the given file descriptor followed by a newline.
+External functions: write. Returns nothing. */
 
-void	swap_b(t_stacks *stack_b)
+#include "libft.h"
+
+void	ft_putendl_fd(char *s, int fd)
 {
-	int	tmp;
-
-	if (stack_b->size >= 2)
-	{
-		tmp = stack_b->arr[0]; /* var tmp for the 1st element */
-		stack_b->arr[0] = stack_b->arr[1]; /* 2nd element becomes the 1st */
-		stack_b->arr[1] = tmp; /* 1st element becomes the 2nd */
-		write(1, "swap_b\n", 7);
-	}
+	while (*s)
+		write(fd, s++, 1);
+	write(fd, "\n", 1);
 }
+/*
+int	main(void)
+{
+	char	*s;
+
+	s = "Hello!";
+	ft_putendl_fd(s, 2);
+	return (0);
+}
+*/

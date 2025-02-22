@@ -1,28 +1,35 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   push_swap.h                                        :+:      :+:    :+:   */
+/*   ft_isprint.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/02/22 15:30:03 by erazumov          #+#    #+#             */
-/*   Updated: 2025/02/22 15:33:54 by erazumov         ###   ########.fr       */
+/*   Created: 2024/11/09 18:14:10 by erazumov          #+#    #+#             */
+/*   Updated: 2024/11/26 14:24:46 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef PUSH_SWAP_H
-# define PUSH_SWAP_H
+/* Checks for any printable character including space. */
 
-# include <stdlib.h>
-# include <unistd.h>
-# include "libft/libft.h"
-# include "ft_printf/ft_printf.h"
+#include "libft.h"
 
-typedef struct s_stack
+int	ft_isprint(int c)
 {
-	int				value;
-	int				index;
-	struct s_stack	*next;
-}	t_stack;
+	if (c >= 32 && c < 127)
+		return (1);
+	return (0);
+}
+/*
+int	main(void)
+{
+	int	c;
 
-#endif
+	c = ' ';
+	if (ft_isprint(c) == 1)
+		write (1, "Printable", 10);
+	else
+		write (1, "Another character", 17);
+	return (0);
+}
+*/

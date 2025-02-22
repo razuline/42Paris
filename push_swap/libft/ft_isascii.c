@@ -1,35 +1,36 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   push_b.c                                           :+:      :+:    :+:   */
+/*   ft_isascii.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/01/25 17:35:04 by erazumov          #+#    #+#             */
-/*   Updated: 2025/01/25 17:39:07 by erazumov         ###   ########.fr       */
+/*   Created: 2024/11/09 18:13:21 by erazumov          #+#    #+#             */
+/*   Updated: 2024/11/26 14:24:16 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/push_swap.h"
+/* Checks whether c is a 7-bit unsigned char value that fits into
+the ASCII character set. */
 
-void	push_b(t_stacks *stack_a, t_stacks *stack_b)
+#include "libft.h"
+
+int	ft_isascii(int c)
 {
-	int	i;
-
-	if (stack_a->size > 0)
-	{
-		i = stack_b->size;
-		stack_b->arr[i] = stack_b->arr[i - 1];
-		i--;
-	}
-	stack_b->arr[0] = stack_a->arr[0];
-	stack_b->size++;
-	i = 0;
-	if (i < stack_a->size - 1)
-	{
-		stack_a->arr[i] = stack_a->arr[i + 1];
-		i++;
-	}
-	stack_a->size--;
-	write(1, "push_b\n", 7);
+	if (c >= 0 && c <= 127)
+		return (1);
+	return (0);
 }
+/*
+int	main(void)
+{
+	int	c;
+
+	c = 'G';
+	if (ft_isascii(c) == 1)
+		write (1, "ASCII character", 15);
+	else
+		write (1, "Another character", 17);
+	return (0);
+}
+*/

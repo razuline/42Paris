@@ -1,28 +1,32 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   push_swap.h                                        :+:      :+:    :+:   */
+/*   ft_putchar_fd.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/02/22 15:30:03 by erazumov          #+#    #+#             */
-/*   Updated: 2025/02/22 15:33:54 by erazumov         ###   ########.fr       */
+/*   Created: 2024/11/14 18:41:25 by erazumov          #+#    #+#             */
+/*   Updated: 2024/11/26 15:15:51 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef PUSH_SWAP_H
-# define PUSH_SWAP_H
+/* Outputs the character ’c’ to the given file descriptor. External functions:
+write. Returns nothing. */
 
-# include <stdlib.h>
-# include <unistd.h>
-# include "libft/libft.h"
-# include "ft_printf/ft_printf.h"
+#include "libft.h"
 
-typedef struct s_stack
+void	ft_putchar_fd(char c, int fd)
 {
-	int				value;
-	int				index;
-	struct s_stack	*next;
-}	t_stack;
+	write(fd, &c, 1);
+}
+/*
+int	main(void)
+{
+	char	my_letter;
 
-#endif
+	my_letter = 'c';
+	ft_putchar_fd(my_letter, 2);
+	ft_putchar_fd('\n', 2);
+	return (0);
+}
+*/

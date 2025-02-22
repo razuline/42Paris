@@ -1,28 +1,35 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   push_swap.h                                        :+:      :+:    :+:   */
+/*   ft_isdigit.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/02/22 15:30:03 by erazumov          #+#    #+#             */
-/*   Updated: 2025/02/22 15:33:54 by erazumov         ###   ########.fr       */
+/*   Created: 2024/11/09 18:12:49 by erazumov          #+#    #+#             */
+/*   Updated: 2024/11/26 14:22:50 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef PUSH_SWAP_H
-# define PUSH_SWAP_H
+/* Checks for a digit (0 through 9). */
 
-# include <stdlib.h>
-# include <unistd.h>
-# include "libft/libft.h"
-# include "ft_printf/ft_printf.h"
+#include "libft.h"
 
-typedef struct s_stack
+int	ft_isdigit(int c)
 {
-	int				value;
-	int				index;
-	struct s_stack	*next;
-}	t_stack;
+	if (c >= '0' && c <= '9')
+		return (1);
+	return (0);
+}
+/*
+int	main(void)
+{
+	int	c;
 
-#endif
+	c = '1';
+	if (ft_isdigit(c) == 1)
+		write(1, "Digit", 5);
+	else
+		write(1, "Another character", 17);
+	return (0);
+}
+*/

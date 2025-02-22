@@ -1,32 +1,37 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   rotate_b.c                                         :+:      :+:    :+:   */
+/*   ft_isalnum.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/01/25 17:51:13 by erazumov          #+#    #+#             */
-/*   Updated: 2025/01/25 17:55:06 by erazumov         ###   ########.fr       */
+/*   Created: 2024/11/09 18:13:06 by erazumov          #+#    #+#             */
+/*   Updated: 2024/11/26 14:23:34 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/push_swap.h"
+/* Checks for an alphanumeric character;
+it is equivalent to (isalpha(c) || isdigit(c)). */
 
-void	rotate_b(t_stacks *stack_b)
+#include "libft.h"
+
+int	ft_isalnum(int c)
 {
-	int	tmp;
-	int	i;
-
-	if (stack_b->size > 1)
-	{
-		tmp = stack_b->arr[0];
-		i = 1;
-		if (i < stack_b->size)
-		{
-			stack_b->arr[i - 1] = stack_b->arr[i];
-			i++;
-		}
-	}
-	stack_b->arr[stack_b->size - 1] = tmp;
-	write(1, "rotate_b\n", 9);
+	if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')
+		|| (c >= '0' && c <= '9'))
+		return (1);
+	return (0);
 }
+/*
+int	main(void)
+{
+	int	c;
+
+	c = '5';
+	if (ft_isalnum(c) == 1)
+		write (1, "Alpha or digit", 14);
+	else
+		write (1, "Another character", 17);
+	return (0);
+}
+*/

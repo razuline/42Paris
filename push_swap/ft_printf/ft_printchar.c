@@ -1,28 +1,30 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   push_swap.h                                        :+:      :+:    :+:   */
+/*   ft_printchar.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
+/*   By: razuline <razuline@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/02/22 15:30:03 by erazumov          #+#    #+#             */
-/*   Updated: 2025/02/22 15:33:54 by erazumov         ###   ########.fr       */
+/*   Created: 2024/11/25 14:14:43 by erazumov          #+#    #+#             */
+/*   Updated: 2024/12/02 16:49:34 by razuline         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef PUSH_SWAP_H
-# define PUSH_SWAP_H
+#include "ft_printf.h"
 
-# include <stdlib.h>
-# include <unistd.h>
-# include "libft/libft.h"
-# include "ft_printf/ft_printf.h"
-
-typedef struct s_stack
+int	ft_printchar(char c)
 {
-	int				value;
-	int				index;
-	struct s_stack	*next;
-}	t_stack;
+	write(1, &c, 1);
+	return (1);
+}
+/*
+int	main(void)
+{
+	char	c;
 
-#endif
+	c = 'G';
+	ft_printchar(c);
+	ft_printchar('\n');
+	return (0);
+}
+*/

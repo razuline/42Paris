@@ -1,28 +1,53 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   push_swap.h                                        :+:      :+:    :+:   */
+/*   ft_printstr.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/02/22 15:30:03 by erazumov          #+#    #+#             */
-/*   Updated: 2025/02/22 15:33:54 by erazumov         ###   ########.fr       */
+/*   Created: 2024/11/27 13:07:02 by erazumov          #+#    #+#             */
+/*   Updated: 2024/12/03 15:12:12 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef PUSH_SWAP_H
-# define PUSH_SWAP_H
+#include "ft_printf.h"
 
-# include <stdlib.h>
-# include <unistd.h>
-# include "libft/libft.h"
-# include "ft_printf/ft_printf.h"
-
-typedef struct s_stack
+static void	ft_putstr(char *str)
 {
-	int				value;
-	int				index;
-	struct s_stack	*next;
-}	t_stack;
+	int	i;
 
-#endif
+	i = 0;
+	while (str[i])
+	{
+		write(1, &str[i], 1);
+		i++;
+	}
+}
+
+int	ft_printstr(char *str)
+{
+	int		len;
+
+	len = 0;
+	if (str == NULL)
+	{
+		ft_putstr("(null)");
+		return (6);
+	}
+	while (str[len])
+	{
+		write(1, &str[len], 1);
+		len++;
+	}
+	return (len);
+}
+/*
+int	main(void)
+{
+	char	*str;
+
+	str = "Hello";
+	ft_putstr(str);
+	return (0);
+}
+*/
