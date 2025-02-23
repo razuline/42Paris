@@ -6,7 +6,7 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/02/22 15:13:07 by erazumov          #+#    #+#              #
-#    Updated: 2025/02/22 15:29:20 by erazumov         ###   ########.fr        #
+#    Updated: 2025/02/23 11:17:29 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,7 +15,7 @@ NAME = push_swap
 CFLAGS = -Wall -Wextra -Werror
 INCLUDES = -I includes/
 
-SRCS_DIR = src/
+SRCS_DIR = srcs/
 OBJS = $(SRCS_DIR:.c=.o)
 
 LIBFT_DIR = libft/
