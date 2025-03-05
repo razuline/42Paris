@@ -6,7 +6,7 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/02/22 15:13:07 by erazumov          #+#    #+#              #
-#    Updated: 2025/02/23 11:17:29 by erazumov         ###   ########.fr        #
+#    Updated: 2025/03/05 11:39:10 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -33,20 +33,20 @@ $(LIBFT):
 	@make -C $(LIBFT_DIR)
 
 $(FT_PRINTF):
-	make -C $(FT_PRINTF_DIR)
+	@make -C $(FT_PRINTF_DIR)
 
 %.o: %.c $(INCLUDES)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
 	rm -f $(OBJS)
-	make clean -C $(LIBFT_DIR)
-	make clean -C $(FT_PRINTF_DIR)
+	@make clean -C $(LIBFT_DIR)
+	@make clean -C $(FT_PRINTF_DIR)
 
 fclean: clean
 	rm -f $(NAME)
-	make fclean -C $(LIBFT_DIR)
-	make fclean -C $(FT_PRINTF_DIR)
+	@make fclean -C $(LIBFT_DIR)
+	@make fclean -C $(FT_PRINTF_DIR)
 
 re: fclean all
 
