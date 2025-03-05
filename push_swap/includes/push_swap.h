@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/22 15:30:03 by erazumov          #+#    #+#             */
-/*   Updated: 2025/03/05 12:04:43 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/03/05 12:05:41 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,8 @@ int		check_dup(t_stack *stack);
 void	free_if_error(t_stack **stack);
 void	add_node(t_stack **stack, int element);
 t_stack	*create_node(int element);
+
+/* Algorithm utils */
 
 /* Instruction functions */
 void	swap(t_stack **stack);
