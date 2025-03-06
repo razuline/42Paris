@@ -1,37 +1,46 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   push.c                                             :+:      :+:    :+:   */
+/*   stack_utils.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/02/23 15:37:40 by erazumov          #+#    #+#             */
-/*   Updated: 2025/02/23 16:19:29 by erazumov         ###   ########.fr       */
+/*   Created: 2025/03/06 12:53:26 by erazumov          #+#    #+#             */
+/*   Updated: 2025/03/06 13:10:16 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "push_swap.h"
 
-void	push(t_stack **src, t_stack **dest)
+/* Remove an element from the stack */
+int	pop(t_stack **stack)
 {
-	t_stack	*top;
+	int		num;
+	t_stack	*tmp;
 
-	if (!src || !*src)
-		return ;
-	top = *src;
-	*src = top->next;
-	top->next = *dest;
-	*dest = top;
+	if (!stack)
+		return (0);
+	tmp = *stack;
+	*stack = (*stack)->next;
+	num = tmp->number;
+	free(tmp);
+	return (num);
 }
 
-void	pa(t_stack **a, t_stack **b)
+int	stack_size(t_stack *stack)
 {
-	push(a, b);
-	ft_printf("pa\n");
+	int	size;
+
+	size = 0;
+	while (stack)
+	{
+		size++;
+		stack = stack->next;
+	}
+	return (size);
 }
 
-void	pb(t_stack **a, t_stack **b)
+int	if_stack_empty(t_stack *stack)
 {
-	push(a, b);
-	ft_printf("pb\n");
+	return (stack == NULL);
 }

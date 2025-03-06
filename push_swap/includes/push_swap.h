@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/22 15:30:03 by erazumov          #+#    #+#             */
-/*   Updated: 2025/03/05 12:05:41 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/03/06 13:38:03 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,33 +20,34 @@
 
 typedef struct s_stack
 {
-	int				item;
-	int				index;
+	int				number;
 	struct s_stack	*next;
 }	t_stack;
 
-/* Sorting out functions */
-int		sort_nbr(char *str, t_stack **stack);
-int		sort_arg(char *arg, t_stack **stack);
-t_stack	*sort_input(int ac, char **av);
+/* Sorting functions */ 
+void	sort_two(t_stack **stack);
+void	sort_three(t_stack **stack);
+void	sort_five(t_stack **stack);
+
+/* Stack functions */
+void	push(t_stack **stack, int num);
+int		pop(t_stack **stack);
+int		stack_size(t_stack *stack);
+int		if_stack_empty(t_stack *stack);
 
 /* Util functions */
-int		if_sorted(t_stack *stack);
-int		safe_atoi(char *str, int *error);
-int		check_digit(char *str);
-int		check_dup(t_stack *stack);
-void	free_if_error(t_stack **stack);
-void	add_node(t_stack **stack, int element);
-t_stack	*create_node(int element);
+int	*if_valid_input(int ac, char **av, int *size);
 
 /* Algorithm utils */
 
-/* Instruction functions */
+/* Instructions */
 void	swap(t_stack **stack);
-void	push(t_stack **src, t_stack **dest);
+void	push(t_stack **stack, int num);
 void	rotate(t_stack **stack);
 void	reverse_rotate(t_stack **stack);
 
+
+/*
 void	sa(t_stack **a);
 void	sb(t_stack **b);
 void	ss(t_stack **a, t_stack **b);
@@ -58,5 +59,5 @@ void	rr(t_stack **a, t_stack **b);
 void	rra(t_stack **a);
 void	rrb(t_stack **b);
 void	rrr(t_stack **a, t_stack **b);
-
+*/
 #endif
