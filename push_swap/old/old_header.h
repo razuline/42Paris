@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/22 15:30:03 by erazumov          #+#    #+#             */
-/*   Updated: 2025/03/06 13:38:03 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/03/07 11:18:55 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,13 +18,13 @@
 # include "libft/libft.h"
 # include "ft_printf/ft_printf.h"
 
-typedef struct s_stack
+typedef struct	s_stack
 {
 	int				number;
 	struct s_stack	*next;
 }	t_stack;
 
-/* Sorting functions */ 
+/* Sorting functions */
 void	sort_two(t_stack **stack);
 void	sort_three(t_stack **stack);
 void	sort_five(t_stack **stack);
