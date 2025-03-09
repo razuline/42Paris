@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/07 18:30:58 by erazumov          #+#    #+#             */
-/*   Updated: 2025/03/09 09:15:20 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/03/09 09:48:27 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,3 +34,15 @@ void	parse_args(t_stack *a, char **av)
 	}
 }
 
+t_node	*new_node(int value)
+{
+	t_node	*node;
+
+	node = (t_node *)malloc(sizeof(t_node));
+	if (!node)
+		if_error("Error: Memory allocation failed!\n");
+	node->value = value;
+	node->prev = NULL;
+	node->next = NULL;
+	return (node);
+}

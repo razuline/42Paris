@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/07 11:17:32 by erazumov          #+#    #+#             */
-/*   Updated: 2025/03/09 09:15:36 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/03/09 09:45:11 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,5 +71,6 @@ void	rrr(t_stack *a, t_stack *b);
 /* Utils */
 void	if_error(const char *str);
 void	parse_args(t_stack *a, char **av);
+t_node	*new_node(int value);
 
 #endif
