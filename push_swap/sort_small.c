@@ -6,11 +6,11 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/07 12:51:07 by erazumov          #+#    #+#             */
-/*   Updated: 2025/03/09 09:18:11 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/03/09 13:56:09 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "../push_swap.h"
+# include "push_swap.h"
 
 t_node	*find_min(t_stack *stack)
 {

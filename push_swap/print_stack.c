@@ -6,11 +6,11 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/09 09:36:26 by erazumov          #+#    #+#             */
-/*   Updated: 2025/03/09 09:53:52 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/03/09 14:37:27 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "../push_swap.h"
+# include "push_swap.h"
 
 void	print_stack(t_stack *stack)
 {
@@ -29,7 +29,7 @@ void	print_stack(t_stack *stack)
 	}
 	ft_printf("\n");
 }
-
+/*
 int	main(void)
 {
 	t_stack	stack;
@@ -44,3 +44,4 @@ int	main(void)
 	
 	return (0);
 }
+*/

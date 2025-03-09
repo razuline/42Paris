@@ -6,11 +6,11 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/07 17:46:34 by erazumov          #+#    #+#             */
-/*   Updated: 2025/03/09 09:12:13 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/03/09 14:35:57 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "../push_swap.h"
+# include "push_swap.h"
 
 /* Create an empty stack */
 t_stack	*init_stack(void)
@@ -101,7 +101,7 @@ void	parse_input(t_stack *stack, char **av)
 		while (nbrs[j])
 		{
 			nb = ft_atoi(nbrs[j]);
-			push(stack, nb);
+			push_to(stack, nb);
 			free(nbrs[j]);
 			j++;
 		}
