@@ -1,39 +1,34 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   push.c                                             :+:      :+:    :+:   */
+/*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/02/23 15:37:40 by erazumov          #+#    #+#             */
-/*   Updated: 2025/03/06 13:10:56 by erazumov         ###   ########.fr       */
+/*   Created: 2025/03/09 09:16:13 by erazumov          #+#    #+#             */
+/*   Updated: 2025/03/09 09:20:07 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "push_swap.h"
+# include "../push_swap.h"
 
-/* Add an element to the stack */
-void	push(t_stack **stack, int num)
+int	main(int ac, char **av)
 {
-	t_stack	*new_node;
+	t_stack	*a;
+	t_stack	*b;
 
-	new_node = (t_stack *)malloc(sizeof(t_stack));
-	if (!new_node)
-		return ;
-	new_node->number = num;
-	new_node->next = *stack;
-	*stack = new_node;
+	if (ac < 2)
+		return (0);
+	a = init_stack();
+	b = init_stack();
+	if (!a || !b)
+		return (1);
+	parse_args(a, av);
+	if (a->size <= 5)
+		sort_small(a, b);
+	else
+		turk_sort(a, b);
+	free_stack(a);
+	free_stack(b);
+	return (0);
 }
-/*
-void	pa(t_stack **a, t_stack **b)
-{
-	push(a, b);
-	ft_printf("pa\n");
-}
-
-void	pb(t_stack **a, t_stack **b)
-{
-	push(a, b);
-	ft_printf("pb\n");
-}
-*/

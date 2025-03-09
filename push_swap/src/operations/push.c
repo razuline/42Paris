@@ -1,21 +1,35 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   utils.c                                            :+:      :+:    :+:   */
+/*   push.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/03/07 18:30:58 by erazumov          #+#    #+#             */
-/*   Updated: 2025/03/07 18:38:56 by erazumov         ###   ########.fr       */
+/*   Created: 2025/03/07 14:35:03 by erazumov          #+#    #+#             */
+/*   Updated: 2025/03/09 08:29:58 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "../push_swap.h"
 
-void	if_error(const char *str)
+void	push(t_stack *dst, t_stack *src)
 {
-	if (str)
-		write(2, str, ft_strlen(str));
-	write(2, "\n", 1);
-	exit(1);
+	int	value;
+
+	if (!src || src->size == 0)
+		return ;
+	value = pop(src);
+	push_to(dst, value);
+}
+
+void	pa(t_stack *a, t_stack *b)
+{
+	push(a, b);
+	ft_printf("pa\n");
+}
+
+void	pb(t_stack *a, t_stack *b)
+{
+	push(b, a);
+	ft_printf("pb\n");
 }
