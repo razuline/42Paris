@@ -6,13 +6,13 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 16:36:51 by erazumov          #+#    #+#             */
-/*   Updated: 2024/12/19 15:44:34 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/03/10 17:58:31 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-size_t	ft_strlen(char *str)
+size_t	ft_strlen(const char *str)
 {
 	size_t	i;
 
@@ -53,7 +53,7 @@ char	*ft_str_join(char *remainder, char *buff)
 	return (result);
 }
 
-char	*ft_strchr(char *str, int c)
+char	*ft_strchr(const char *str, int c)
 {
 	char	ch;
 

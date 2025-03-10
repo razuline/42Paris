@@ -1,26 +1,24 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   push.c                                             :+:      :+:    :+:   */
+/*   print_stack.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/03/10 14:24:19 by erazumov          #+#    #+#             */
-/*   Updated: 2025/03/10 14:26:47 by erazumov         ###   ########.fr       */
+/*   Created: 2025/03/10 17:39:12 by erazumov          #+#    #+#             */
+/*   Updated: 2025/03/10 17:39:41 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "checker.h"
 
-void	push(t_stack **src, t_stack **dst)
+void	print_stack(t_stack *stack)
 {
-	t_stack	*tmp;
-
-	if (!*src)
-		return ;
-
-	tmp = *src;
-	*src = (*src)->next;
-	tmp->next = *dst;
-	*dst = tmp;
+	while (stack)
+	{
+		ft_putnbr_fd(stack->value, 1);
+		ft_putchar_fd(' ', 1);
+		stack = stack->next;
+	}
+	ft_putchar_fd('\n', 1);
 }
