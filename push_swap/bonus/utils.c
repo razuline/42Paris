@@ -5,44 +5,47 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/03/07 18:30:58 by erazumov          #+#    #+#             */
-/*   Updated: 2025/03/10 14:17:14 by erazumov         ###   ########.fr       */
+/*   Created: 2025/03/10 18:11:00 by erazumov          #+#    #+#             */
+/*   Updated: 2025/03/10 18:13:08 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "push_swap.h"
+# include "checker.h"
 
-void	if_error(const char *str)
+void	free_stack(t_stack *stack)
 {
-	if (str)
-		write(2, str, ft_strlen(str));
-	write(2, "\n", 1);
-	exit(1);
-}
-
-void	parse_args(t_stack *a, char **av)
-{
-	int	i;
-	int	value;
-
-	i = 1;
-	while (av[i])
+	t_stack	*tmp;
+	while (stack)
 	{
-		value = ft_atoi(av[i]);
-		push_to(a, value);
-		i++;
+		tmp = stack;
+		stack = stack->next;
+		free(tmp);
 	}
 }
 
-t_node	*new_node(int value)
+void	if_error(void)
 {
-	t_node	*node;
+	ft_putstr_fd("Error\n", 2);
+	exit(1);
+}
 
-	node = (t_node *)malloc(sizeof(t_node));
-	if (!node)
-		if_error("Error: Memory allocation failed!\n");
-	node->value = value;
-	node->prev = NULL;
-	node->next = NULL;
-	return (node);
+int	is_empty(t_stack *stack)
+{
+	return (stack == NULL);
+}
+
+int	is_sorted(t_stack *a)
+{
+	t_stack	*current;
+
+	if (!a)
+		return (1);
+	current = a;
+	while (current->next)
+	{
+		if (current->value > current->next->value)
+			return (0);
+		current = current->next;
+	}
+	return (1);
 }
