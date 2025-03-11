@@ -6,49 +6,49 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/09 15:47:11 by erazumov          #+#    #+#             */
-/*   Updated: 2025/02/09 15:56:14 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/03/11 15:57:57 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SO_LONG_H
-#define SO_LONG_H
+# define SO_LONG_H
 
 # include <fcntl.h>
+/* # include <mlx.h> */
 # include <stdbool.h>
+# include <stdio.h>
 # include <stdlib.h>
 # include <unistd.h>
-# include "libft.h"
+# include "libft/libft.h"
+# include "ft_printf/ft_printf.h"
 
-typedef struct s_cell
+# define SQUARE_SIZE 32
+
+typedef struct	s_map
 {
-	int	x;
-	int	y;
-}	t_cell;
+	char	**grid;
+	int		width;
+	int		height;
+	int		player_x;
+	int		player_y;
+	int		object;
+	int		exit_x;
+	int		exit_y;
+}				t_map;
 
-typedef struct s_queue
+typedef struct	s_game
 {
-	t_cell	*positions;
-	int		front;
-	int		rear;
-	int		size;
-}	t_queue;
+	t_map	map;
+	int		moves;
+	void	*mlx;
+	void	*win;
+	void	*player_img;
+	void	*floor_img;
+	void	*object_img;
+	void	*exit_img;
+}				t_game;
 
-/* Queue operations */
-void	make_queue(t_queue *q, int max_size);
-void	enqueue(t_queue *q, int x, int y);
-bool	dequeue(t_queue *q, int *x, int *y);
-bool	is_empty(t_queue *q);
-void	free_queue(t_queue *q);
 
-/* BFS Algorithm */
-bool	bfs(char **map, int start_x, int start_y, int end_x, int end_y, int height, int width);
-
-/* Map utilities */
-bool	**make_visited(int height, int width);
-void	free_visited(bool **visited, int height);
-bool	is_valid(char **map, bool **visited, int x, int y, int height, int width);
-
-/* Map handling */
-
+int	close_game(t_game *game);
 
 #endif
