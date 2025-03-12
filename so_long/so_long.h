@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/09 15:47:11 by erazumov          #+#    #+#             */
-/*   Updated: 2025/03/11 15:57:57 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/03/12 11:42:45 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,19 +36,31 @@ typedef struct	s_map
 	int		exit_y;
 }				t_map;
 
-typedef struct	s_game
+typedef struct	s_images
 {
-	t_map	map;
-	int		moves;
-	void	*mlx;
-	void	*win;
 	void	*player_img;
+	void	*wall_img;
 	void	*floor_img;
 	void	*object_img;
 	void	*exit_img;
+}				t_images;
+
+
+typedef struct	s_game
+{
+	void		*mlx;
+	void		*win;
+	t_map		map;
+	t_images	img;
 }				t_game;
 
+void	load_images(t_game *game);
+int		init_game(t_game *game, char *map_file);
+void	render_square(t_game *game, char square, int x, int y);
+void	render_game(t_game *game);
 
-int	close_game(t_game *game);
+void	free_game(t_game *game);
+void	free_map(t_map *map);
+int		close_game(t_game *game);
 
 #endif
