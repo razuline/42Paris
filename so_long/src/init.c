@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/11 15:51:16 by erazumov          #+#    #+#             */
-/*   Updated: 2025/03/12 11:21:55 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/03/21 14:09:13 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,8 +38,8 @@ int	init_game(t_game *game, char *map_file)
 	game->mlx = mlx_init();
 	if (!game->mlx || !parse_map(&game->map, map_file))
 		return (0);
-	game->win = mlx_new_window(game->mlx, game->map.width * SQUARE_SIZE,
-		game->map.height * SQUARE_SIZE, "so_long");
+	game->win = mlx_new_window(game->mlx, game->map.width * TILE_SIZE,
+		game->map.height * TILE_SIZE, "so_long");
 	if (!game->win)
 		return (0);
 	load_images(game);

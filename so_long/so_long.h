@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/09 15:47:11 by erazumov          #+#    #+#             */
-/*   Updated: 2025/03/12 11:42:45 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/03/21 14:11:10 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,13 @@
 # include "libft/libft.h"
 # include "ft_printf/ft_printf.h"
 
-# define SQUARE_SIZE 32
+# define  TILE_SIZE 32
+
+# define KEY_W 13
+# define KEY_A 0
+# define KEY_S 1
+# define KEY_D 2
+# define KEY_ESC 53
 
 typedef struct	s_map
 {
@@ -48,19 +54,32 @@ typedef struct	s_images
 
 typedef struct	s_game
 {
+	int			move;
 	void		*mlx;
 	void		*win;
 	t_map		map;
 	t_images	img;
 }				t_game;
 
-void	load_images(t_game *game);
+/* Initialisation */
 int		init_game(t_game *game, char *map_file);
-void	render_square(t_game *game, char square, int x, int y);
-void	render_game(t_game *game);
 
-void	free_game(t_game *game);
+/* Map */
+
 void	free_map(t_map *map);
+
+/* Rendering */
+void	load_images(t_game *game);
+void	render_game(t_game *game);
+void	render_square(t_game *game, char square, int x, int y);
+
+/* Player */
+int		move_player(int key, t_game *game);
+
+
+
+/* End game */
 int		close_game(t_game *game);
+void	free_game(t_game *game);
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/12 11:28:56 by erazumov          #+#    #+#             */
-/*   Updated: 2025/03/12 11:42:04 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/03/21 14:09:43 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,19 +16,19 @@ void	render_square(t_game *game, char square, int x, int y)
 {
 	if (square == '1') /* Wall */
 		mlx_put_image_to_window(game->mlx, game->win, game->img.wall_img,
-			x * SQUARE_SIZE, y * SQUARE_SIZE);
+			x * TILE_SIZE, y * TILE_SIZE);
 	else if (square == '0') /* Floor */
 		mlx_put_image_to_window(game->mlx, game->win, game->img.floor_img,
-			x * SQUARE_SIZE, y * SQUARE_SIZE);
+			x * TILE_SIZE, y * TILE_SIZE);
 	else if (square == 'P') /* Player */
 		mlx_put_image_to_window(game->mlx, game->win, game->img.player_img,
-			x * SQUARE_SIZE, y * SQUARE_SIZE);
+			x * TILE_SIZE, y * TILE_SIZE);
 	else if (square == 'C') /* Object */
 		mlx_put_image_to_window(game->mlx, game->win, game->img.object_img,
-			x * SQUARE_SIZE, y * SQUARE_SIZE);
+			x * TILE_SIZE, y * TILE_SIZE);
 	else if (square == 'E') /* Exit */
 		mlx_put_image_to_window(game->mlx, game->win, game->img.exit_img,
-			x * SQUARE_SIZE, y * SQUARE_SIZE);
+			x * TILE_SIZE, y * TILE_SIZE);
 }
 
 void	render_game(t_game *game)
