@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/09 15:47:11 by erazumov          #+#    #+#             */
-/*   Updated: 2025/03/21 14:11:10 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/03/22 12:41:30 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 # include <unistd.h>
 # include "libft/libft.h"
 # include "ft_printf/ft_printf.h"
+# include "get_next_line/get_next_line.h"
 
 # define  TILE_SIZE 32
 
@@ -65,7 +66,11 @@ typedef struct	s_game
 int		init_game(t_game *game, char *map_file);
 
 /* Map */
-
+int		get_map_height(char *map_file);
+int		read_map(char *map_file, t_map *map);
+int		check_walls(t_map *map);
+int		check_elements(t_map *map);
+int		parce_map(t_map *map, char *map_file);
 void	free_map(t_map *map);
 
 /* Rendering */
