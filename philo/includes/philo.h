@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/26 11:40:18 by erazumov          #+#    #+#             */
-/*   Updated: 2025/03/28 11:30:04 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/03/28 17:26:14 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,8 +51,11 @@ typedef struct	s_data
 
 /* Initialisation */
 int		init_data(t_data *data, int ac, char **av);
+int		init_mutexes(t_data *data);
+int		setup_philos(t_data *data);
+
 int		simulation_start(t_data *data);
-void	cleanup(t_data *data);
+void	clear_data(t_data *data);
 
 /* Utils */
 int	ft_atoi(char *str);
