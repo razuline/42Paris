@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/28 16:25:00 by erazumov          #+#    #+#             */
-/*   Updated: 2025/03/28 17:29:04 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/03/31 12:00:41 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,11 @@
 static int	alloc_resources(t_data *data)
 {
 	data->philos = malloc(sizeof(t_philo) * data->number_of_philosophers);
+	if (!data->philos)
+		return (ERROR);
 	data->forks = malloc(sizeof(pthread_mutex_t) * data->number_of_philosophers);
-	if (!data->philos || !data->forks)
-		return (free(data->philos), free(data->forks), ERROR);
+	if (!data->forks)
+		return (free(data->philos), ERROR);
 	return (SUCCESS);
 }
 
@@ -84,14 +86,12 @@ int	init_data(t_data *data, int ac, char **av)
 	data->someone_died = 0;
 	data->philos_ate_enough = 0;
 	data->start_time = get_current_time();
-	/* Allocation of memory */
-	if (!alloc_resources(data))
+	if (alloc_resources(data) != SUCCESS)
 		return (ERROR);
-	/* Initialisation of mutexes */
-	if (!init_mutexes(data) != SUCCESS)
+	if (init_mutexes(data) != SUCCESS)
 		return (clear_data(data), ERROR);
-	/* Set up philos and forks */
-	setup_philos(data);
+	if (setup_philos(data) != SUCCESS)
+		return (clear_data(data), ERROR);
 	return (SUCCESS);
 }
 

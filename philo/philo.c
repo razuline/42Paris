@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/28 10:38:02 by erazumov          #+#    #+#             */
-/*   Updated: 2025/03/28 16:30:50 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/03/31 12:01:17 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,6 @@ int	main(int ac, char **av)
 		cleanup(&data);
 		return (1);
 	}
-	cleanup(&data); /* !!! Clean up all the resources */
+	clear_data(&data); /* !!! Clean up all the resources */
 	return (0);
 }
