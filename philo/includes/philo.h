@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/26 11:40:18 by erazumov          #+#    #+#             */
-/*   Updated: 2025/03/28 17:26:14 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/02 15:37:20 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,13 @@
 
 # define SUCCESS 0
 # define ERROR 1
+
+/* Philos' messages*/
+# define TAKE_FORKS "has taken a fork"
+# define THINKING "is thinking"
+# define SLEEPING "is sleeping"
+# define EATING "is eating"
+# define DIED "died"
 
 typedef struct	s_philo
 {
@@ -54,10 +61,25 @@ int		init_data(t_data *data, int ac, char **av);
 int		init_mutexes(t_data *data);
 int		setup_philos(t_data *data);
 
+int		should_continue(t_data *data);
 int		simulation_start(t_data *data);
 void	clear_data(t_data *data);
 
+/* Philo */
+void	philo_routine(void *arg);
+void	take_forks(t_philo *philo);
+void	put_forks(t_philo *philo);
+void	philo_eat(t_philo *philo);
+void	philo_sleep(t_philo *philo);
+void	philo_think(t_philo *philo);
+
+/* Time (+ test) */
+u_int64_t	get_time(void);
+void		ft_sleep(u_int64_t ms);
+
 /* Utils */
-int	ft_atoi(char *str);
+void	print_status(t_philo *philo, char *status);
+int		ft_atoi(char *str); /* (+ test) */
+
 
 #endif

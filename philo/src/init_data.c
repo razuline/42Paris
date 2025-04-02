@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/28 16:25:00 by erazumov          #+#    #+#             */
-/*   Updated: 2025/03/31 12:00:41 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/02 12:54:03 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,12 +94,3 @@ int	init_data(t_data *data, int ac, char **av)
 		return (clear_data(data), ERROR);
 	return (SUCCESS);
 }
-
-/*
-int	main(int ac, char **av)
-{
-	t_data	data;
-
-	
-}
-*/
