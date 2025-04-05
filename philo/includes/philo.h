@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/26 11:40:18 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/02 15:37:20 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/05 10:40:16 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,25 +61,32 @@ int		init_data(t_data *data, int ac, char **av);
 int		init_mutexes(t_data *data);
 int		setup_philos(t_data *data);
 
-int		should_continue(t_data *data);
-int		simulation_start(t_data *data);
-void	clear_data(t_data *data);
+/* Time (+ test) */
+u_int64_t	get_time(void);
+void		ft_sleep(u_int64_t ms);
 
 /* Philo */
-void	philo_routine(void *arg);
 void	take_forks(t_philo *philo);
 void	put_forks(t_philo *philo);
 void	philo_eat(t_philo *philo);
 void	philo_sleep(t_philo *philo);
 void	philo_think(t_philo *philo);
 
-/* Time (+ test) */
-u_int64_t	get_time(void);
-void		ft_sleep(u_int64_t ms);
+/* Simulations */
+int		should_continue(t_data *data);
+.
+void	philo_routine(void *arg);
+
+/* Monitor */
+void	monitor(t_data *data);
+
 
 /* Utils */
 void	print_status(t_philo *philo, char *status);
 int		ft_atoi(char *str); /* (+ test) */
+void	clear_data(t_data *data);
+.
 
+int		simulation_start(t_data *data);
 
 #endif

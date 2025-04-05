@@ -1,28 +1,37 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_atoi.c                                          :+:      :+:    :+:   */
+/*   simulation.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/03/28 11:09:27 by erazumov          #+#    #+#             */
-/*   Updated: 2025/03/28 12:05:17 by erazumov         ###   ########.fr       */
+/*   Created: 2025/04/02 12:56:03 by erazumov          #+#    #+#             */
+/*   Updated: 2025/04/05 10:33:02 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/philo.h"
 
-int	ft_atoi(char *str)
+int	should_continue(t_data *data)
 {
-	int	result;
+	return !(data->someone_died || data->philos_ate_enough);
+}
 
-	result = 0;
-	while (*str == ' ')
-		str++;
-	while (*str >= '0' && *str <= '9')
+void	philo_routine(void *arg)
+{
+	t_philo	*philo;
+
+	philo = (t_philo *)arg;
+	while (should_continue(philo->data))
 	{
-		result = result * 10 + (*str - '0');
-		str++;
+		take_forks(philo);
+		philo_eat(philo);
+		put_forks(philo);
+		usleep(100);
+		philo_sleep(philo);
+		usleep(100);
+		philo_think(philo);
+		usleep(100);
 	}
-	return (result);
+	return (NULL);
 }
