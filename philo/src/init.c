@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/28 16:25:00 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/07 14:29:29 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/07 16:11:48 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,7 @@ static void	setup_philo(t_data *data, int index)
 {
 	data->philos[index].philo_id = index + 1;
 	data->philos[index].meals_eaten = 0;
-	data->philos[index].last_meal_time = data->start_time;
+	data->philos[index].last_meal_time = 0;
 	data->philos[index].left_fork = &data->forks[index];
 	data->philos[index].right_fork = &data->forks[(index + 1)
 		% data->number_of_philosophers];

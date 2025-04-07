@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 12:56:03 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/07 13:06:01 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/07 16:03:54 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,12 @@
 
 int	should_continue(t_data *data)
 {
-	return (!(data->someone_died) || !(data->philos_ate_enough));
+	int	result;
+
+	pthread_mutex_lock(&data->meal_mutex);
+	result = !data->someone_died && !data->philos_ate_enough;
+	pthread_mutex_unlock(&data->meal_mutex);
+	return (result);
 }
 
 void	*philo_routine(void *arg)
@@ -22,16 +27,15 @@ void	*philo_routine(void *arg)
 	t_philo	*philo;
 
 	philo = (t_philo *)arg;
+	if (philo->philo_id % 2 == 0)
+		usleep(1000);
 	while (should_continue(philo->data))
 	{
 		take_forks(philo);
 		philo_eat(philo);
 		put_forks(philo);
-		usleep(100);
 		philo_sleep(philo);
-		usleep(100);
 		philo_think(philo);
-		usleep(100);
 	}
 	return (NULL);
 }
