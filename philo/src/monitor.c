@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/05 10:29:35 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/05 11:09:24 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/07 11:42:37 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,9 +44,9 @@ void	monitor(t_data *data)
 {
 	int	i;
 
-	while (should_continue(data) && (i = -1))
+	i = -1;
+	while (should_continue(data) && i)
 	{
-		i = 0;
 		while (++i < data->number_of_philosophers && should_continue(data))
 		{
 			if (check_death(&data->philos[i]))
@@ -67,4 +67,16 @@ void	monitor(t_data *data)
 		}
 		usleep(1000);
 	}
+}
+
+int	alloc_resources(t_data *data)
+{
+	data->philos = malloc(sizeof(t_philo) * data->number_of_philosophers);
+	if (!data->philos)
+		return (ERROR);
+	data->forks = malloc(sizeof(pthread_mutex_t)
+			* data->number_of_philosophers);
+	if (!data->forks)
+		return (free(data->philos), ERROR);
+	return (SUCCESS);
 }

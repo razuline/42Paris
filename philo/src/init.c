@@ -6,22 +6,11 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/28 16:25:00 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/05 10:27:24 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/07 11:39:34 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/philo.h"
-
-static int	alloc_resources(t_data *data)
-{
-	data->philos = malloc(sizeof(t_philo) * data->number_of_philosophers);
-	if (!data->philos)
-		return (ERROR);
-	data->forks = malloc(sizeof(pthread_mutex_t) * data->number_of_philosophers);
-	if (!data->forks)
-		return (free(data->philos), ERROR);
-	return (SUCCESS);
-}
 
 static int	init_forks(t_data *data, int index)
 {
@@ -82,7 +71,6 @@ int	init_data(t_data *data, int ac, char **av)
 		|| data->time_to_eat <= 0 || data->time_to_sleep <= 0
 		|| (ac == 6 && data->must_eat_count <= 0))
 		return (ERROR);
-	/* Status */
 	data->someone_died = 0;
 	data->philos_ate_enough = 0;
 	data->start_time = get_current_time();
