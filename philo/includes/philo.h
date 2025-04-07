@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/26 11:40:18 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/07 14:25:26 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/07 15:41:00 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,9 @@
 
 # include <pthread.h>
 # include <stdio.h>
-# include <stdlib.h>
 # include <stdint.h>
+# include <stdlib.h>
+# include <string.h>
 # include <sys/time.h>
 # include <unistd.h>
 
