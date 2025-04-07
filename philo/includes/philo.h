@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/26 11:40:18 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/07 11:38:53 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/07 13:08:37 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ typedef struct s_data
 	int				number_of_philosophers;
 	int				time_to_eat;
 	int				time_to_sleep;
-	int				time_to_die;
+	uint64_t		time_to_die;
 	int				must_eat_count;
 	int				someone_died;
 	int				philos_ate_enough;
@@ -75,7 +75,7 @@ void		philo_think(t_philo *philo);
 
 /* Simulation */
 int			should_continue(t_data *data);
-void		philo_routine(void *arg);
+void		*philo_routine(void *arg);
 int			simulation_start(t_data *data);
 
 /* Monitor */

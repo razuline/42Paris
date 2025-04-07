@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/28 16:25:00 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/07 11:39:34 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/07 12:59:33 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,7 @@ int	init_data(t_data *data, int ac, char **av)
 		return (ERROR);
 	data->someone_died = 0;
 	data->philos_ate_enough = 0;
-	data->start_time = get_current_time();
+	data->start_time = get_time();
 	if (alloc_resources(data) != SUCCESS)
 		return (ERROR);
 	if (init_mutexes(data) != SUCCESS)

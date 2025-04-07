@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 13:10:31 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/07 10:43:15 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/07 13:09:38 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 void	print_status(t_philo *philo, char *status)
 {
 	pthread_mutex_lock(&philo->data->print_mutex);
-	printf("%llu %d %s\n", get_time() - philo->data->start_time,
+	printf("%lu %d %s\n", get_time() - philo->data->start_time,
 		philo->philo_id, status);
 	pthread_mutex_unlock(&philo->data->print_mutex);
 }

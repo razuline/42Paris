@@ -6,35 +6,42 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/07 10:29:29 by erazumov          #+#    #+#              #
-#    Updated: 2025/04/07 11:30:48 by erazumov         ###   ########.fr        #
+#    Updated: 2025/04/07 12:58:07 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = philo
+CFLAGS = -Wall -Wextra -Werror -pthread
+INCLUDE = -I includes/
 
-CFLAGS = -Wall -Wextra -Werror
-
-SRC = src/main.c src/init.c src/time.c src/actions.c src/forks.c \
-		src/simulation.c src/monitor.c src/utils.c
-
-OBJ = $(SRC:.c=.o)
+SRC_DIR = src/
+SRC = main.c init.c time.c actions.c forks.c simulation.c monitor.c utils.c
+OBJ_DIR = obj/
+OBJ = $(addprefix $(OBJ_DIR)/,$(SRC:.c=.o))
 
 all: $(NAME)
 
 $(NAME): $(OBJ)
 	$(CC) $(CFLAGS) $(OBJ) -o $(NAME)
+	@echo "Compilation successful ➜ $(NAME)"
 
-%.o: %.c
-	$(CC) $(CFLAGS) -I . -c $< -o $@
+$(OBJ_DIR)/%.o: $(SRC_DIR)%.c | $(OBJ_DIR)
+	@$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
+
+$(OBJ_DIR):
+	@mkdir -p $(OBJ_DIR)
 
 clean:
-	rm -f $(OBJ)
+	@rm -rf $(OBJ_DIR)
+	@echo "Object files removed"
 
 fclean: clean
-	rm -f $(NAME)
+	@rm -f $(NAME)
+	@echo "Executable removed"
 
 re: fclean all
 
-norm: norminette -R CheckForbiddenSourceHeader
+norm:
+	@norminette $(SRC_DIR) includes/ | grep -v "OK" || true
 
 .PHONY: all clean fclean re norm

@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/05 10:29:35 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/07 11:42:37 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/07 13:06:55 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ static int	check_meals(t_data *data)
 
 	i = 0;
 	all_ate = 1;
-	while (i < data->number_of_philosophers && (all_ate == all_ate))
+	while (i < data->number_of_philosophers && all_ate)
 	{
 		pthread_mutex_lock(&data->meal_mutex);
 		if (data->philos[i].meals_eaten < data->must_eat_count)
