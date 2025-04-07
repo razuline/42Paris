@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/26 11:40:18 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/07 15:41:00 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/07 16:21:27 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,10 +46,10 @@ typedef struct s_data
 {
 	t_philo			*philos;
 	pthread_mutex_t	*forks;
-	uint64_t		start_time;
 	int				number_of_philosophers;
-	int				time_to_eat;
-	int				time_to_sleep;
+	uint64_t		start_time;
+	uint64_t		time_to_eat;
+	uint64_t		time_to_sleep;
 	uint64_t		time_to_die;
 	int				must_eat_count;
 	int				someone_died;
@@ -85,7 +85,7 @@ int			alloc_resources(t_data *data);
 
 /* Utils (+ test_atoi) */
 void		print_status(t_philo *philo, char *status);
-int			ft_atoi(char *str);
+long		ft_atoi(const char *str);
 void		clear_data(t_data *data);
 
 #endif
