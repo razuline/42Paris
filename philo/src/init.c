@@ -6,19 +6,28 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/28 16:25:00 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/07 12:59:33 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/07 14:29:29 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/philo.h"
 
-static int	init_forks(t_data *data, int index)
+static int	init_forks(t_data *data)
 {
-	if (index >= data->number_of_philosophers)
-		return (SUCCESS);
-	if (pthread_mutex_init(&data->forks[index], NULL) != 0)
-		return (ERROR);
-	return (init_forks(data, index + 1));
+	int	i;
+
+	i = 0;
+	while (i < data->number_of_philosophers)
+	{
+		if (pthread_mutex_init(&data->forks[i], NULL) != 0)
+		{
+			while (--i >= 0)
+				pthread_mutex_destroy(&data->forks[i]);
+			return (ERROR);
+		}
+		i++;
+	}
+	return (SUCCESS);
 }
 
 int	init_mutexes(t_data *data)
@@ -32,33 +41,38 @@ int	init_mutexes(t_data *data)
 		pthread_mutex_destroy(&data->print_mutex);
 		return (ERROR);
 	}
-	return (init_forks(data, 0));
+	return (init_forks(data));
 }
 
-static int	setup_philosopher(t_data *data, int index)
+static void	setup_philo(t_data *data, int index)
 {
-	if (index >= data->number_of_philosophers)
-		return (SUCCESS);
 	data->philos[index].philo_id = index + 1;
 	data->philos[index].meals_eaten = 0;
-	data->philos[index].last_meal_time = 0;
+	data->philos[index].last_meal_time = data->start_time;
 	data->philos[index].left_fork = &data->forks[index];
 	data->philos[index].right_fork = &data->forks[(index + 1)
 		% data->number_of_philosophers];
 	data->philos[index].data = data;
-	return (setup_philosopher(data, index + 1));
 }
 
-int	setup_philos(t_data *data)
+int	init_philos(t_data *data)
 {
+	int	i;
+
+	i = 0;
 	if (!data || !data->philos || !data->forks)
 		return (ERROR);
-	return (setup_philosopher(data, 0));
+	while (i < data->number_of_philosophers)
+	{
+		setup_philo(data, i);
+		i++;
+	}
+	return (SUCCESS);
 }
 
 int	init_data(t_data *data, int ac, char **av)
 {
-	if (!data || !av[1] || !av[2] || !av[3] || !av[4] || (ac == 6 && !av[5]))
+	if (ac < 5 || !data)
 		return (ERROR);
 	data->number_of_philosophers = ft_atoi(av[1]);
 	data->time_to_die = ft_atoi(av[2]);
@@ -78,7 +92,7 @@ int	init_data(t_data *data, int ac, char **av)
 		return (ERROR);
 	if (init_mutexes(data) != SUCCESS)
 		return (clear_data(data), ERROR);
-	if (setup_philos(data) != SUCCESS)
+	if (init_philos(data) != SUCCESS)
 		return (clear_data(data), ERROR);
 	return (SUCCESS);
 }

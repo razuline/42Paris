@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/26 11:40:18 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/07 13:08:37 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/07 14:25:26 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,7 @@ typedef struct s_data
 /* Initialisation */
 int			init_data(t_data *data, int ac, char **av);
 int			init_mutexes(t_data *data);
-int			setup_philos(t_data *data);
+int			init_philos(t_data *data);
 
 /* Time (+ test) */
 uint64_t	get_time(void);
