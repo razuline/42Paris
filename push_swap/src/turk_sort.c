@@ -6,11 +6,11 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/09 09:03:18 by erazumov          #+#    #+#             */
-/*   Updated: 2025/03/09 13:56:18 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/09 12:25:23 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "push_swap.h"
+# include "../includes/push_swap.h"
 
 int	max_bits(t_stack *stack)
 {

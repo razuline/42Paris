@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/07 11:17:32 by erazumov          #+#    #+#             */
-/*   Updated: 2025/03/09 09:45:11 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/09 12:46:09 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,23 +18,27 @@
 # include "libft/libft.h"
 # include "ft_printf/ft_printf.h"
 
-typedef struct	s_node
+typedef struct s_node
 {
 	int				value;
 	struct s_node	*prev;
 	struct s_node	*next;
-}				t_node;
+}			t_node;
 
-typedef struct	s_stack
+typedef struct s_stack
 {
 	int		size;
 	t_node	*head;
 	t_node	*tail;
-}				t_stack;
+}			t_stack;
 
-/* Stack's functions */
+/* Initialisation */
 t_stack	*init_stack(void);
 void	free_stack(t_stack *stack);
+
+
+/* Stack's functions */
+
 void	push_to(t_stack *stack, int value);
 int		pop(t_stack *stack);
 void	parse_input(t_stack *stack, char **av);

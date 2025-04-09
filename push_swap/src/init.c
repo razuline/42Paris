@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   init_stack.c                                       :+:      :+:    :+:   */
+/*   init.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/07 17:46:34 by erazumov          #+#    #+#             */
-/*   Updated: 2025/03/09 14:35:57 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/09 12:53:48 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "push_swap.h"
+# include "../includes/push_swap.h"
 
 /* Create an empty stack */
 t_stack	*init_stack(void)
@@ -19,14 +19,14 @@ t_stack	*init_stack(void)
 
 	stack = (t_stack *)malloc(sizeof(t_stack));
 	if (!stack)
-		return (NULL);
+		if_error("Error: Memory allocation failed!\n");
 	stack->head = NULL;
 	stack->tail = NULL;
 	stack->size = 0;
 	return (stack);
 }
 
-/* Free mamory of a stack */
+/* Free memory of a stack */
 void	free_stack(t_stack *stack)
 {
 	t_node	*current;
@@ -47,19 +47,17 @@ void	free_stack(t_stack *stack)
 /* Add a new element at the end of a stack */
 void	push_to(t_stack *stack, int value)
 {
-	t_node	*new_node;
+	t_node	*new;
 
-	new_node = (t_node *)malloc(sizeof(t_node));
-	if (!new_node)
-		if_error("Error!\n");
-	new_node->value = value;
-	new_node->prev = stack->tail;
-	new_node->next = NULL;
-	if (stack->tail)
-		stack->tail->next = new_node;
+	new = new_node(value);
+	if (!stack->tail)
+		stack->head = new;
 	else
-		stack->head = new_node;
-	stack->tail = new_node;
+	{
+		stack->tail->next = new;
+		new->prev = stack->tail;
+	}
+	stack->tail = new;
 	stack->size++;
 }
 
@@ -69,43 +67,16 @@ int	pop(t_stack *stack)
 	int		value;
 	t_node	*tmp;
 
-	if (!stack->tail)
-		if_error("Error!\n");
-	tmp = stack->tail;
+	if (!stack->head)
+		if_error("Error: Stack is empty!\n");
+	tmp = stack->head;
 	value = tmp->value;
-	stack->tail = tmp->prev;
-	if (stack->tail)
-		stack->tail->next = NULL;
+	stack->head = tmp->next;
+	if (stack->head)
+		stack->head->prev = NULL;
 	else
-		stack->head = NULL;
+		stack->tail = NULL;
 	free(tmp);
 	stack->size--;
 	return (value);
-}
-
-/* */
-void	parse_input(t_stack *stack, char **av)
-{
-	int		i;
-	int		j;
-	int		nb;
-	char	**nbrs;
-
-	i = 1;
-	while (av[i])
-	{
-		nbrs = ft_split(av[i], ' ');
-		if (!nbrs)
-			if_error("Error!\n");
-		j = 0;
-		while (nbrs[j])
-		{
-			nb = ft_atoi(nbrs[j]);
-			push_to(stack, nb);
-			free(nbrs[j]);
-			j++;
-		}
-		free(nbrs);
-		i++;
-	}
 }

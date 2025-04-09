@@ -1,24 +1,35 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   print_stack.c                                      :+:      :+:    :+:   */
+/*   push.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/03/10 17:39:12 by erazumov          #+#    #+#             */
-/*   Updated: 2025/03/10 17:39:41 by erazumov         ###   ########.fr       */
+/*   Created: 2025/03/07 14:35:03 by erazumov          #+#    #+#             */
+/*   Updated: 2025/04/09 12:24:59 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "checker.h"
+# include "../includes/push_swap.h"
 
-void	print_stack(t_stack *stack)
+void	push(t_stack *dst, t_stack *src)
 {
-	while (stack)
-	{
-		ft_putnbr_fd(stack->value, 1);
-		ft_putchar_fd(' ', 1);
-		stack = stack->next;
-	}
-	ft_putchar_fd('\n', 1);
+	int	value;
+
+	if (!src || src->size == 0)
+		return ;
+	value = pop(src);
+	push_to(dst, value);
+}
+
+void	pa(t_stack *a, t_stack *b)
+{
+	push(a, b);
+	ft_printf("pa\n");
+}
+
+void	pb(t_stack *a, t_stack *b)
+{
+	push(b, a);
+	ft_printf("pb\n");
 }

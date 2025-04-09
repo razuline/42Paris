@@ -6,11 +6,11 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/07 18:30:58 by erazumov          #+#    #+#             */
-/*   Updated: 2025/03/10 14:17:14 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/09 12:25:28 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "push_swap.h"
+# include "../includes/push_swap.h"
 
 void	if_error(const char *str)
 {

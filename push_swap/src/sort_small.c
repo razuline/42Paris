@@ -6,11 +6,11 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/07 12:51:07 by erazumov          #+#    #+#             */
-/*   Updated: 2025/03/09 13:56:09 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/09 12:28:36 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "push_swap.h"
+# include "../includes/push_swap.h"
 
 t_node	*find_min(t_stack *stack)
 {
@@ -31,21 +31,28 @@ t_node	*find_min(t_stack *stack)
 }
 void	sort_three(t_stack *a)
 {
-	int	first;
-	int	second;
-	int	third;
+	int	top;
+	int	mid;
+	int	bot;
 
-	first = a->head->value;
-	second = a->head->next->value;
-	third = a->tail->value;
-	if (first > second && second < third && first < third)
-		sa(a);
-	else if (first > second && second > third)
+	top = a->head->value;
+	mid = a->head->next->value;
+	bot = a->tail->value;
+	if (top > mid && mid < bot && top < bot)
+		swap(a);
+	else if (top > mid && mid > bot)
 	{
-		sa(a);
+		swap(a);
+		rra(a);
+	}
+	else if (top > mid && mid < bot && top > bot)
+		ra(a);
+	else if (top < mid && mid > bot && top < bot)
+	{
+		swap(a);
 		ra(a);
 	}
-	else if (first < second && second > third && first > third)
+	else if (top < mid && mid > bot && top > bot)
 		rra(a);
 }
 
