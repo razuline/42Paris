@@ -6,13 +6,14 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/07 11:17:32 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/09 14:08:45 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/09 15:37:45 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PUSH_SWAP_H
 # define PUSH_SWAP_H
 
+# include <limits.h>
 # include <stdlib.h>
 # include <unistd.h>
 # include "libft/libft.h"
@@ -79,6 +80,8 @@ t_node	*new_node(int value);
 int		is_sorted(t_stack *stack);
 void	if_error(const char *str);
 int		find_min(t_stack *stack);
+int		find_max(t_stack *stack);
 int		find_target_position(t_stack *a, int value);
+int		find_position(t_stack *stack, int value);
 
 #endif

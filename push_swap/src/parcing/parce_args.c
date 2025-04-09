@@ -6,49 +6,21 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/07 18:30:58 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/09 13:31:28 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/09 15:39:14 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "../includes/push_swap.h"
 
-void	parse_args(t_stack *a, char **av)
-{
-	int		i;
-	int		j;
-	int		num;
-	char	**split;
-
-	i = 1;
-	while (av[i])
-	{
-		split = ft_split(av[i], ' ');
-		if (!split)
-			if_error("Error: Memory allocation failed!\n");
-		j = 0;
-		while (split[j])
-		{
-			if (!is_valid_number(split[j]))
-				if_error("Error: Invalid number!\n");
-			num = ft_atoi(split[j]);
-			if (is_duplicate(a, num))
-				if_error("Error: Duplicate number!\n");
-			push_to(a, num);
-			free(split[j]);
-			j++;
-		}
-		free(split);
-		i++;
-	}
-}
-
-int	is_valid_number(char *str)
+static int	validate_number(char *str)
 {
 	int	i;
 
 	i = 0;
 	if (str[i] == '-' || str[i] == '+')
 		i++;
+	if (!str[i])
+		return (0);
 	while (str[i])
 	{
 		if (!ft_isdigit(str[i]))
@@ -58,16 +30,46 @@ int	is_valid_number(char *str)
 	return (1);
 }
 
-int	is_duplicate(t_stack *stack, int value)
+static void	handle_number(t_stack *a, char *str)
 {
-	t_node	*current;
+	long	num;
 
-	current = stack->head;
-	while (current)
+	if (!validate_number(str))
+		if_error("Error");
+	num = ft_atol(str);
+	if (num < INT_MIN || num > INT_MAX)
+		if_error("Error");
+	if (is_duplicate(a, (int)num))
+		if_error("Error");
+	push_to(a, (int)num);
+}
+
+static void	process_arg(t_stack *a, char *arg)
+{
+	char	**split;
+	int		i;
+
+	split = ft_split(arg, ' ');
+	if (!split)
+		if_error("Error");
+	i = 0;
+	while (split[i])
 	{
-		if (current->value == value)
-			return (1);
-		current = current->next;
+		handle_number(a, split[i]);
+		free(split[i]);
+		i++;
 	}
-	return (0);
+	free(split);
+}
+
+void	parse_args(t_stack *a, char **av)
+{
+	int	i;
+
+	i = 1;
+	while (av[i])
+	{
+		process_arg(a, av[i]);
+		i++;
+	}
 }
