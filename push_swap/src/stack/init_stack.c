@@ -1,52 +1,43 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   turk_sort.c                                        :+:      :+:    :+:   */
+/*   init_stack.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/03/09 09:03:18 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/09 12:25:23 by erazumov         ###   ########.fr       */
+/*   Created: 2025/03/07 17:46:34 by erazumov          #+#    #+#             */
+/*   Updated: 2025/04/09 13:23:32 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "../includes/push_swap.h"
 
-int	max_bits(t_stack *stack)
+t_stack	*init_stack(void)
 {
-	int	max;
-	int	bits;
+	t_stack	*stack;
 
-	max = stack->size - 1;
-	bits = 0;
-	while ((max >> bits) != 0)
-		bits++;
-	return (bits);
+	stack = (t_stack *)malloc(sizeof(t_stack));
+	if (!stack)
+		if_error("Error: Memory allocation failed!\n");
+	stack->head = NULL;
+	stack->tail = NULL;
+	stack->size = 0;
+	return (stack);
 }
 
-void	turk_sort(t_stack *a, t_stack *b)
+void	free_stack(t_stack *stack)
 {
-	int	i;
-	int	j;
-	int	size;
-	int	max_bit;
+	t_node	*current;
+	t_node	*tmp;
 
-	size = a->size;
-	max_bit = max_bits(a);
-	i = 0;
-	while (i < max_bit)
+	if (!stack)
+		return ;
+	current = stack->head;
+	while (current)
 	{
-		j = 0;
-		while (j < size)
-		{
-			if (((a->head->value >> i) & 1) == 0)
-				pb(a, b);
-			else
-				ra(a);
-			j++;
-		}
-		while (b->size > 0)
-			pa(a, b);
-		i++;
+		tmp = current->next;
+		free(current);
+		current = tmp;
 	}
+	free(stack);
 }
