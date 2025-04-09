@@ -6,11 +6,11 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 15:14:16 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/09 15:18:50 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/09 16:36:00 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "../includes/push_swap.h"
+#include "../includes/push_swap.h"
 
 int	find_position(t_stack *stack, int value)
 {
@@ -59,4 +59,3 @@ int	find_target_position(t_stack *a, int value)
 	}
 	return (target_pos);
 }
-

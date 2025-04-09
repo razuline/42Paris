@@ -6,11 +6,11 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/07 17:46:34 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/09 13:23:32 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/09 16:35:09 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "../includes/push_swap.h"
+#include "../includes/push_swap.h"
 
 t_stack	*init_stack(void)
 {

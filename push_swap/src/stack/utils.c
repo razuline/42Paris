@@ -6,11 +6,11 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 13:15:41 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/09 15:15:16 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/09 16:35:34 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "../includes/push_swap.h"
+#include "../includes/push_swap.h"
 
 t_node	*new_node(int value)
 {

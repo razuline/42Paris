@@ -6,11 +6,11 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/09 09:03:18 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/09 14:02:47 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/09 16:37:09 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "../includes/push_swap.h"
+#include "../includes/push_swap.h"
 
 static int	get_median(t_stack *stack)
 {
@@ -77,7 +77,7 @@ static void	push_back_to_a(t_stack *a, t_stack *b)
 	while (b->size > 0)
 	{
 		target_pos = find_target_position(a, b->head->value);
-		move_to_position(a, target_pos, 1); // 1 = RA, 0 = RRA
+		move_to_position(a, target_pos, 1);
 		pa(a, b);
 	}
 }

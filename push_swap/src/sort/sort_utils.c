@@ -6,11 +6,11 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 14:05:04 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/09 14:07:48 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/09 16:37:43 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "../includes/push_swap.h"
+#include "../includes/push_swap.h"
 
 void	ft_sort_int_tab(int *tab, int size)
 {

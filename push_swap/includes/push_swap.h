@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/07 11:17:32 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/09 15:37:45 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/09 16:31:12 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,8 @@
 # include <limits.h>
 # include <stdlib.h>
 # include <unistd.h>
-# include "libft/libft.h"
-# include "ft_printf/ft_printf.h"
+# include "../libft/libft.h"
+# include "../ft_printf/ft_printf.h"
 
 typedef struct s_node
 {

@@ -6,11 +6,11 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/07 18:30:58 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/09 15:39:14 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/09 16:36:45 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "../includes/push_swap.h"
+#include "../includes/push_swap.h"
 
 static int	validate_number(char *str)
 {
@@ -36,7 +36,7 @@ static void	handle_number(t_stack *a, char *str)
 
 	if (!validate_number(str))
 		if_error("Error");
-	num = ft_atol(str);
+	num = ft_atoi(str);
 	if (num < INT_MIN || num > INT_MAX)
 		if_error("Error");
 	if (is_duplicate(a, (int)num))
