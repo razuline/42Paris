@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/07 11:17:32 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/09 16:31:12 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/09 17:20:09 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,6 +74,7 @@ void	turk_sort(t_stack *a, t_stack *b);
 void	ft_sort_int_tab(int *tab, int size);
 void	final_rotate(t_stack *a);
 void	move_to_position(t_stack *stack, int pos, int direction);
+int		find_min_position(t_stack *stack);
 
 /* Utils */
 t_node	*new_node(int value);

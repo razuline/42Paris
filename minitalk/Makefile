@@ -6,46 +6,68 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/02/15 11:19:09 by erazumov          #+#    #+#              #
-#    Updated: 2025/02/16 16:08:29 by erazumov         ###   ########.fr        #
+#    Updated: 2025/04/10 14:04:47 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-NAME = minitalk
-SERVER = server
-CLIENT = client
-PRINTF = libftprintf.a
+# Project Name
+SERVER		= server
+CLIENT		= client
+CFLAGS		= -Wall -Wextra -Werror
+INCLUDE		= -I includes/
 
-CFLAGS = -Wall -Wextra -Werror
-INCLUDE = -I includes/
+# Directories
+SRC_DIR		= src/
+OBJ_DIR		= obj/
+LIBFT_DIR	= libft/
+LIBFT		= $(LIBFT_DIR)/libft.a
 
-SERVER_FILES = server.c
-CLIENT_FILES = client.c
+# Source Files
+SERVER_SRC	= server.c
+CLIENT_SRC	= client.c
+SERVER_OBJ	= $(addprefix $(OBJ_DIR)/,$(SERVER_SRC:.c=.o))
+CLIENT_OBJ	= $(addprefix $(OBJ_DIR)/,$(CLIENT_SRC:.c=.o))
 
-SRC_DIR = src/
-SERVER_SRC = $(addprefix $(SRC_DIR), $(SERVER_FILES))
-CLIENT_SRC = $(addprefix $(SRC_DIR), $(CLIENT_FILES))
+# Colors
+GREEN		= \033[0;32m
+RED			= \033[0;31m
+BLUE		= \033[0;34m
+RESET		= \033[0m
 
-SERVER_OBJ = $(SERVER_SRC:.c=.o)
-CLIENT_OBJ = $(CLIENT_SRC:.c=.o)
+# Rules
+all: $(SERVER) $(CLIENT)
 
-all: $(SERVER) $(CLIENT) $(PRINTF)
+$(SERVER): $(LIBFT) $(SERVER_OBJ)
+	@$(CC) $(CFLAGS) $(SERVER_OBJ) $(LIBFT) -o $(SERVER)
+	@echo "$(GREEN)✅ Server compiled ➜ ./$(SERVER)$(RESET)"
 
-$(SERVER): $(SERVER_OBJ)
-	@make -C ft_printf/
-	$(CC) $(CFLAGS) $(SERVER_OBJ) $(INCLUDE) ft_printf/$(PRINTF) -o $(SERVER)
+$(CLIENT): $(LIBFT) $(CLIENT_OBJ)
+	@$(CC) $(CFLAGS) $(CLIENT_OBJ) $(LIBFT) -o $(CLIENT)
+	@echo "$(GREEN)✅ Client compiled ➜ ./$(CLIENT)$(RESET)"
 
-$(CLIENT): $(CLIENT_OBJ)
-	@make -C ft_printf/
-	$(CC) $(CFLAGS) $(CLIENT_OBJ) $(INCLUDE) ft_printf/$(PRINTF) -o $(CLIENT)
+$(OBJ_DIR)/%.o: $(SRC_DIR)%.c | $(OBJ_DIR)
+	@mkdir -p $(@D)
+	@$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
+
+$(OBJ_DIR):
+	@mkdir -p $(OBJ_DIR)
+
+$(LIBFT):
+	@make -C $(LIBFT_DIR) --no-print-directory
 
 clean:
-	@make clean -C ft_printf/
-	rm -rf $(SERVER_OBJ) $(CLIENT_OBJ)
+	@rm -rf $(OBJ_DIR)
+	@make clean -C $(LIBFT_DIR) --no-print-directory
+	@echo "$(RED)🧹 Object files removed$(RESET)"
 
 fclean: clean
-	@make fclean -C ft_printf/
-	rm -f $(SERVER) $(CLIENT)
+	@rm -f $(SERVER) $(CLIENT)
+	@make fclean -C $(LIBFT_DIR) --no-print-directory
+	@echo "$(RED)🗑️  Executables removed$(RESET)"
 
 re: fclean all
 
-.PHONY: all clean fclean re
+norm:
+	@norminette $(SRC_DIR) includes/ $(LIBFT_DIR) | grep -v "OK" || true
+
+.PHONY: all clean fclean re norm

@@ -6,47 +6,49 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/15 11:19:22 by erazumov          #+#    #+#             */
-/*   Updated: 2025/02/16 16:05:27 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/10 14:17:08 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minitalk.h"
 
-void	handler(int signal)
+void	handler(int signal, siginfo_t *info, void *context)
 {
-	static char	ch;
+	static char	c;
 	static int	bit;
 
+	(void)context;
 	if (signal == SIGUSR1)
-		ch += (1 << bit);
+		c |= (1 << bit);
 	bit++;
 	if (bit == 8)
 	{
-		ft_printf("%c", ch);
+		if (c == '\0')
+			ft_printf("\nMessage received from PID: %d\n", info->si_pid);
+		else
+			ft_printf("%c", c);
 		bit = 0;
-		ch = 0;
+		c = 0;
 	}
 }
 
 int	main(int ac, char **av)
 {
-	int	pid;
+	struct sigaction	sa;
 
 	(void)av;
 	if (ac != 1)
 	{
-		ft_printf("Error: wrong format.\n");
-		ft_printf("Try: ./server\n");
-		return (0);
+		ft_printf("Usage: ./server\n");
+		return (1);
 	}
-	pid = getpid();
-	ft_printf("Server PID: %d\n", pid);
-	ft_printf("Waiting for a message...\n");
-	while (ac == 1)
-	{
-		signal(SIGUSR1, handler);
-		signal(SIGUSR2, handler);
-		pause ();
-	}
+	ft_printf("Server PID: %d\n", getpid());
+	sa.sa_sigaction = handler;
+	sa.sa_flags = SA_SIGINFO;
+	sigemptyset(&sa.sa_mask);
+	sigaction(SIGUSR1, &sa, NULL);
+	sigaction(SIGUSR2, &sa, NULL);
+	while (1)
+		pause();
 	return (0);
 }

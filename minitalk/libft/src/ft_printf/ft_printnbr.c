@@ -1,29 +1,39 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   minitalk.h                                         :+:      :+:    :+:   */
+/*   ft_printnbr.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/02/15 11:19:56 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/10 14:18:35 by erazumov         ###   ########.fr       */
+/*   Created: 2024/11/28 14:46:37 by erazumov          #+#    #+#             */
+/*   Updated: 2025/04/10 13:49:06 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef MINITALK_H
-# define MINITALK_H
+#include "libft.h"
 
-# include "../libft/includes/libft.h"
+int	ft_printnbr(int n)
+{
+	int		len;
+	char	*num;
 
-# include <signal.h>
-# include <stdarg.h>
-# include <stdlib.h>
-# include <unistd.h>
+	len = 0;
+	num = ft_itoa(n);
+	len = ft_printstr(num);
+	free (num);
+	return (len);
+}
+/*
+#include <stdio.h>
 
-/* Server functions */
-void	handler(int signal, siginfo_t *info, void *context);
+int	main(void)
+{
+	int nb;
+	int	len;
 
-/* Client functions */
-void	send_char(char c, int pid);
-
-#endif
+	nb = 10;
+	len = ft_printnbr(nb);
+	printf("%d\n", len);
+	return (0);
+}
+*/

@@ -1,29 +1,32 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   minitalk.h                                         :+:      :+:    :+:   */
+/*   ft_putchar_fd.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/02/15 11:19:56 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/10 14:18:35 by erazumov         ###   ########.fr       */
+/*   Created: 2024/11/14 18:41:25 by erazumov          #+#    #+#             */
+/*   Updated: 2024/11/26 15:15:51 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef MINITALK_H
-# define MINITALK_H
+/* Outputs the character ’c’ to the given file descriptor. External functions:
+write. Returns nothing. */
 
-# include "../libft/includes/libft.h"
+#include "libft.h"
 
-# include <signal.h>
-# include <stdarg.h>
-# include <stdlib.h>
-# include <unistd.h>
+void	ft_putchar_fd(char c, int fd)
+{
+	write(fd, &c, 1);
+}
+/*
+int	main(void)
+{
+	char	my_letter;
 
-/* Server functions */
-void	handler(int signal, siginfo_t *info, void *context);
-
-/* Client functions */
-void	send_char(char c, int pid);
-
-#endif
+	my_letter = 'c';
+	ft_putchar_fd(my_letter, 2);
+	ft_putchar_fd('\n', 2);
+	return (0);
+}
+*/

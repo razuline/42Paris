@@ -1,29 +1,30 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   minitalk.h                                         :+:      :+:    :+:   */
+/*   ft_printchar.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/02/15 11:19:56 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/10 14:18:35 by erazumov         ###   ########.fr       */
+/*   Created: 2024/11/25 14:14:43 by erazumov          #+#    #+#             */
+/*   Updated: 2025/04/10 13:49:06 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef MINITALK_H
-# define MINITALK_H
+#include "libft.h"
 
-# include "../libft/includes/libft.h"
+int	ft_printchar(char c)
+{
+	write(1, &c, 1);
+	return (1);
+}
+/*
+int	main(void)
+{
+	char	c;
 
-# include <signal.h>
-# include <stdarg.h>
-# include <stdlib.h>
-# include <unistd.h>
-
-/* Server functions */
-void	handler(int signal, siginfo_t *info, void *context);
-
-/* Client functions */
-void	send_char(char c, int pid);
-
-#endif
+	c = 'G';
+	ft_printchar(c);
+	ft_printchar('\n');
+	return (0);
+}
+*/

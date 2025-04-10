@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 14:05:04 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/09 16:37:43 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/09 17:19:09 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,4 +68,24 @@ void	move_to_position(t_stack *stack, int pos, int direction)
 			rra(stack);
 		i++;
 	}
+}
+
+int	find_min_position(t_stack *stack)
+{
+	t_node	*current = stack->head;
+	int	min = current->value;
+	int	pos = 0;
+	int	min_pos = 0;
+
+	while (current)
+	{
+		if (current->value < min)
+		{
+			min = current->value;
+			min_pos = pos;
+		}
+		current = current->next;
+		pos++;
+	}
+	return (min_pos);
 }

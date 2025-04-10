@@ -1,29 +1,33 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   minitalk.h                                         :+:      :+:    :+:   */
+/*   ft_putendl_fd.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/02/15 11:19:56 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/10 14:18:35 by erazumov         ###   ########.fr       */
+/*   Created: 2024/11/14 18:42:46 by erazumov          #+#    #+#             */
+/*   Updated: 2024/11/26 15:18:16 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef MINITALK_H
-# define MINITALK_H
+/* Outputs the string ’s’ to the given file descriptor followed by a newline.
+External functions: write. Returns nothing. */
 
-# include "../libft/includes/libft.h"
+#include "libft.h"
 
-# include <signal.h>
-# include <stdarg.h>
-# include <stdlib.h>
-# include <unistd.h>
+void	ft_putendl_fd(char *s, int fd)
+{
+	while (*s)
+		write(fd, s++, 1);
+	write(fd, "\n", 1);
+}
+/*
+int	main(void)
+{
+	char	*s;
 
-/* Server functions */
-void	handler(int signal, siginfo_t *info, void *context);
-
-/* Client functions */
-void	send_char(char c, int pid);
-
-#endif
+	s = "Hello!";
+	ft_putendl_fd(s, 2);
+	return (0);
+}
+*/

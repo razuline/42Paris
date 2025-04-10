@@ -1,29 +1,37 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   minitalk.h                                         :+:      :+:    :+:   */
+/*   ft_isalnum.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/02/15 11:19:56 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/10 14:18:35 by erazumov         ###   ########.fr       */
+/*   Created: 2024/11/09 18:13:06 by erazumov          #+#    #+#             */
+/*   Updated: 2024/11/26 14:23:34 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef MINITALK_H
-# define MINITALK_H
+/* Checks for an alphanumeric character;
+it is equivalent to (isalpha(c) || isdigit(c)). */
 
-# include "../libft/includes/libft.h"
+#include "libft.h"
 
-# include <signal.h>
-# include <stdarg.h>
-# include <stdlib.h>
-# include <unistd.h>
+int	ft_isalnum(int c)
+{
+	if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')
+		|| (c >= '0' && c <= '9'))
+		return (1);
+	return (0);
+}
+/*
+int	main(void)
+{
+	int	c;
 
-/* Server functions */
-void	handler(int signal, siginfo_t *info, void *context);
-
-/* Client functions */
-void	send_char(char c, int pid);
-
-#endif
+	c = '5';
+	if (ft_isalnum(c) == 1)
+		write (1, "Alpha or digit", 14);
+	else
+		write (1, "Another character", 17);
+	return (0);
+}
+*/
