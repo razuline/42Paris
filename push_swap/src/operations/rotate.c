@@ -6,11 +6,11 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/09 08:31:49 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/09 16:36:25 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/09 17:51:24 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/push_swap.h"
+#include "push_swap.h"
 
 void	rotate(t_stack *stack)
 {

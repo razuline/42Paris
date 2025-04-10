@@ -6,11 +6,11 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/28 21:03:22 by erazumov          #+#    #+#             */
-/*   Updated: 2024/12/03 14:48:44 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/10 13:49:06 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ft_printf.h"
+#include "libft.h"
 
 int	ft_formats(va_list args, const char format)
 {

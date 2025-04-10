@@ -1,30 +1,39 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_printchar.c                                     :+:      :+:    :+:   */
+/*   ft_printnbr.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: razuline <razuline@student.42.fr>          +#+  +:+       +#+        */
+/*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/11/25 14:14:43 by erazumov          #+#    #+#             */
-/*   Updated: 2024/12/02 16:49:34 by razuline         ###   ########.fr       */
+/*   Created: 2024/11/28 14:46:37 by erazumov          #+#    #+#             */
+/*   Updated: 2025/04/10 13:49:06 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ft_printf.h"
+#include "libft.h"
 
-int	ft_printchar(char c)
+int	ft_printnbr(int n)
 {
-	write(1, &c, 1);
-	return (1);
+	int		len;
+	char	*num;
+
+	len = 0;
+	num = ft_itoa(n);
+	len = ft_printstr(num);
+	free (num);
+	return (len);
 }
 /*
+#include <stdio.h>
+
 int	main(void)
 {
-	char	c;
+	int nb;
+	int	len;
 
-	c = 'G';
-	ft_printchar(c);
-	ft_printchar('\n');
+	nb = 10;
+	len = ft_printnbr(nb);
+	printf("%d\n", len);
 	return (0);
 }
 */

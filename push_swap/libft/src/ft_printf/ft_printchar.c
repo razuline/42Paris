@@ -1,53 +1,30 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_printstr.c                                      :+:      :+:    :+:   */
+/*   ft_printchar.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/11/27 13:07:02 by erazumov          #+#    #+#             */
-/*   Updated: 2024/12/03 15:12:12 by erazumov         ###   ########.fr       */
+/*   Created: 2024/11/25 14:14:43 by erazumov          #+#    #+#             */
+/*   Updated: 2025/04/10 13:49:06 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ft_printf.h"
+#include "libft.h"
 
-static void	ft_putstr(char *str)
+int	ft_printchar(char c)
 {
-	int	i;
-
-	i = 0;
-	while (str[i])
-	{
-		write(1, &str[i], 1);
-		i++;
-	}
-}
-
-int	ft_printstr(char *str)
-{
-	int		len;
-
-	len = 0;
-	if (str == NULL)
-	{
-		ft_putstr("(null)");
-		return (6);
-	}
-	while (str[len])
-	{
-		write(1, &str[len], 1);
-		len++;
-	}
-	return (len);
+	write(1, &c, 1);
+	return (1);
 }
 /*
 int	main(void)
 {
-	char	*str;
+	char	c;
 
-	str = "Hello";
-	ft_putstr(str);
+	c = 'G';
+	ft_printchar(c);
+	ft_printchar('\n');
 	return (0);
 }
 */

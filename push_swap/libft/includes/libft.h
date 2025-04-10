@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/09 18:10:42 by erazumov          #+#    #+#             */
-/*   Updated: 2024/11/26 15:39:59 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/10 13:52:09 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 # include <ctype.h>
 # include <fcntl.h>
+# include <stdarg.h>
 # include <stdlib.h>
 # include <string.h>
 # include <unistd.h>
@@ -58,5 +59,18 @@ void	ft_putchar_fd(char c, int fd);
 void	ft_putstr_fd(char *s, int fd);
 void	ft_putendl_fd(char *s, int fd);
 void	ft_putnbr_fd(int nb, int fd);
+
+/* FT_PRINTF */
+
+int		ft_printf(const char *format, ...);
+int		ft_formats(va_list args, const char format);
+
+int		ft_printchar(char c);
+int		ft_printstr(char *str);
+int		ft_printptr(unsigned long long ptr);
+int		ft_printnbr(int n);
+int		ft_print_u(unsigned int n);
+int		ft_printhex(unsigned int nbr, const char format);
+char	*ft_itoa(int num);
 
 #endif

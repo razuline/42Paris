@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_itoa.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: razuline <razuline@student.42.fr>          +#+  +:+       +#+        */
+/*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 13:49:22 by erazumov          #+#    #+#             */
-/*   Updated: 2024/12/02 16:49:26 by razuline         ###   ########.fr       */
+/*   Updated: 2025/04/10 13:49:06 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 received as an argument. Negative numbers must be handled.
 The string representing the integer. NULL if the allocation fails. */
 
-#include "ft_printf.h"
+#include "libft.h"
 
 static int	ft_intlen(int nb)
 {

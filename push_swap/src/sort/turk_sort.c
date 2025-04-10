@@ -6,11 +6,11 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/09 09:03:18 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/09 16:37:09 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/09 17:51:24 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/push_swap.h"
+#include "push_swap.h"
 
 static int	get_median(t_stack *stack)
 {
