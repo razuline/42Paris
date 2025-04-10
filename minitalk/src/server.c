@@ -6,19 +6,19 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/15 11:19:22 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/10 14:17:08 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/10 14:34:19 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minitalk.h"
 
-void	handler(int signal, siginfo_t *info, void *context)
+void	handler(int sig, siginfo_t *info, void *context)
 {
-	static char	c;
 	static int	bit;
+	static char	c;
 
 	(void)context;
-	if (signal == SIGUSR1)
+	if (sig == SIGUSR1)
 		c |= (1 << bit);
 	bit++;
 	if (bit == 8)
@@ -30,6 +30,7 @@ void	handler(int signal, siginfo_t *info, void *context)
 		bit = 0;
 		c = 0;
 	}
+	kill(info->si_pid, SIGUSR1);
 }
 
 int	main(int ac, char **av)
