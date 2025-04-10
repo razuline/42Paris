@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/07 12:51:07 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/09 17:50:42 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/10 18:18:56 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,35 +37,6 @@ void	sort_three(t_stack *a)
 	}
 	else if (top < mid && mid > bot && top > bot)
 		rra(a);
-}
-
-static void	push_smallest_to_b(t_stack *a, t_stack *b)
-{
-	int	min_pos;
-	int	size;
-
-	min_pos = find_min_position(a);
-	size = a->size;
-	if (min_pos <= size / 2)
-	{
-		while (min_pos-- > 0)
-			ra(a);
-	}
-	else
-	{
-		while (min_pos++ < size)
-			rra(a);
-	}
-	pb(a, b);
-}
-
-void	sort_five(t_stack *a, t_stack *b)
-{
-	push_smallest_to_b(a, b);
-	push_smallest_to_b(a, b);
-	sort_three(a);
-	pa(a, b);
-	pa(a, b);
 }
 
 void	sort_small(t_stack *a, t_stack *b)

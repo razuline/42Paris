@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/07 11:17:32 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/10 17:56:13 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/10 18:25:36 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,12 +76,6 @@ void	move_to_position(t_stack *stack, int pos, int direction);
 int		find_min_position(t_stack *stack);
 
 /* Utils */
-t_node	*new_node(int value);
-int		is_sorted(t_stack *stack);
-void	if_error(const char *str);
-int		find_min(t_stack *stack);
-int		find_max(t_stack *stack);
-int		find_target_position(t_stack *a, int value);
-int		find_position(t_stack *stack, int value);
+void	parse_args(t_stack *a, char **av);
 
 #endif

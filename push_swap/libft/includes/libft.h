@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/09 18:10:42 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/10 13:52:09 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/10 18:33:37 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 # include <ctype.h>
 # include <fcntl.h>
+# include <limits.h>
 # include <stdarg.h>
 # include <stdlib.h>
 # include <string.h>
