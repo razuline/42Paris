@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/07 12:51:07 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/10 18:18:56 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/12 11:01:48 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,9 +28,9 @@ void	sort_three(t_stack *a)
 		sa(a);
 		rra(a);
 	}
-	else if (top > mid && mid < bot && top > bot)
+	else if (top > mid && mid < bot)
 		ra(a);
-	else if (top < mid && mid > bot && top < bot)
+	else if (top < mid && mid > bot && top > bot)
 	{
 		sa(a);
 		ra(a);
@@ -39,12 +39,18 @@ void	sort_three(t_stack *a)
 		rra(a);
 }
 
-void	sort_small(t_stack *a, t_stack *b)
+void	small_sort(t_stack *a, t_stack *b)
 {
 	if (a->size == 2 && a->head->value > a->head->next->value)
 		sa(a);
 	else if (a->size == 3)
 		sort_three(a);
 	else if (a->size <= 5)
-		sort_five(a, b);
+	{
+		while (a->size > 3)
+			pb(a, b);
+		sort_three(a);
+		while (b->size > 0)
+			pa(a, b);
+	}
 }

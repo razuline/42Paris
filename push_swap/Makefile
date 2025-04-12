@@ -6,7 +6,7 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/02/22 15:13:07 by erazumov          #+#    #+#              #
-#    Updated: 2025/04/10 17:53:03 by erazumov         ###   ########.fr        #
+#    Updated: 2025/04/12 12:49:55 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -23,13 +23,20 @@ LIBFT = $(LIBFT_DIR)/libft.a
 
 # Source Files
 SRC = main.c \
-		stack/init_stack.c stack/push_pop.c stack/utils.c  \
-			stack/utils_2.c \
-		operations/swap.c operations/push.c operations/rotate.c \
-			operations/reverse_rotate.c \
-		sort/small_sort.c sort/turk_sort.c sort/sort_utils.c \
-			parcing/parce_args.c parcing/parce_utils.c
+		operations/swap.c \
+		operations/push.c \
+		operations/rotate.c \
+		operations/reverse_rotate.c \
+		parcing/parce.c \
+		sort/small_sort.c \
+		sort/chunk_sort.c \
+		utils/utils.c \
+		utils/parce_utils.c \
+		utils/positions.c
 OBJ = $(addprefix $(OBJ_DIR)/,$(SRC:.c=.o))
+
+# Variables
+RM = rm -rf
 
 # Colors
 GREEN = \033[0;32m
@@ -55,13 +62,13 @@ $(LIBFT):
 	@make -C $(LIBFT_DIR)
 
 clean:
-	@rm -rf $(OBJ_DIR)
+	$(RM) $(OBJ_DIR)
 	@make clean -C $(LIBFT_DIR)
 	@echo "$(RED)🧹 Object files removed$(RESET)"
 
 
 fclean: clean
-	@rm -f $(NAME)
+	$(RM) $(NAME)
 	@make fclean -C $(LIBFT_DIR)
 	@echo "$(RED)🗑️  Executables removed$(RESET)"
 

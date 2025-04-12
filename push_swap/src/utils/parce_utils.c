@@ -6,26 +6,28 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 15:36:34 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/09 17:51:24 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/12 12:33:08 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "push_swap.h"
 
-int	is_valid_number(char *str)
+void	add_node(t_stack *stack, int value)
 {
-	int	i;
+	t_node	*new_node;
 
-	i = 0;
-	if (str[i] == '-' || str[i] == '+')
-		i++;
-	while (str[i])
-	{
-		if (!ft_isdigit(str[i]))
-			return (0);
-		i++;
-	}
-	return (1);
+	new_node = malloc(sizeof(t_node));
+	if (!new_node)
+		error_exit(stack, NULL);
+	new_node->value = value;
+	new_node->next = NULL;
+	new_node->prev = stack->tail;
+	if (stack->tail)
+		stack->tail->next = new_node;
+	else
+		stack->head = new_node;
+	stack->tail = new_node;
+	stack->size++;
 }
 
 int	is_duplicate(t_stack *stack, int value)

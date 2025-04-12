@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/07 14:35:03 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/09 17:51:24 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/12 10:57:18 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,12 +14,24 @@
 
 void	push(t_stack *dst, t_stack *src)
 {
-	int	value;
+	t_node	*node;
 
-	if (!src || src->size == 0)
+	if (!src || !src->head)
 		return ;
-	value = pop(src);
-	push_to(dst, value);
+	node = src->head;
+	src->head = node->next;
+	if (src->head)
+		src->head->prev = NULL;
+	else
+		src->tail = NULL;
+	node->next = dst->head;
+	if (dst->head)
+		dst->head->prev = node;
+	else
+		dst->tail = node;
+	dst->head = node;
+	src->size--;
+	dst->size++;
 }
 
 void	pa(t_stack *a, t_stack *b)

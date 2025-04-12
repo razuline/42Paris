@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/07 11:17:32 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/10 18:25:36 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/12 12:33:45 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,12 +32,6 @@ typedef struct s_stack
 	t_node	*tail;
 }			t_stack;
 
-/* Stack */
-t_stack	*init_stack(void);
-void	free_stack(t_stack *stack);
-void	push_to(t_stack *stack, int value);
-int		pop(t_stack *stack);
-
 /* Operations */
 void	swap(t_stack *stack);
 void	sa(t_stack *a);
@@ -58,24 +52,26 @@ void	rra(t_stack *a);
 void	rrb(t_stack *b);
 void	rrr(t_stack *a, t_stack *b);
 
-/* Parcing */
-void	parse_args(t_stack *a, char **av);
-int		is_valid_number(char *str);
-int		is_duplicate(t_stack *stack, int value);
-
-/* Sort */
+/* Small sort */
 void	sort_three(t_stack *a);
-void	sort_five(t_stack *a, t_stack *b);
-void	sort_small(t_stack *a, t_stack *b);
-void	turk_sort(t_stack *a, t_stack *b);
+void	small_sort(t_stack *a, t_stack *b);
+void	chunk_sort(t_stack *a, t_stack *b);
 
-/* Sort utils */
-void	ft_sort_int_tab(int *tab, int size);
-void	final_rotate(t_stack *a);
-void	move_to_position(t_stack *stack, int pos, int direction);
+/* Positions */
 int		find_min_position(t_stack *stack);
+int		find_target_pos(t_stack *a, int val);
+void	while_pos(t_stack *s, int pos, int rev);
+
+/* Parcing */
+void	parse_args(t_stack *a, t_stack *b, char **av);
+int		is_duplicate(t_stack *stack, int value);
+void	add_node(t_stack *stack, int value);
 
 /* Utils */
-void	parse_args(t_stack *a, char **av);
+int		is_sorted(t_stack *stack);
+int		find_min(t_stack *stack);
+void	final_rotate(t_stack *a);
+void	free_stack(t_stack *stack);
+void	error_exit(t_stack *a, t_stack *b);
 
 #endif
