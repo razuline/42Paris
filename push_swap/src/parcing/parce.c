@@ -6,23 +6,11 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/10 18:23:47 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/12 12:42:43 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/12 13:14:15 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "push_swap.h"
-
-static int	is_num(char *s)
-{
-	if (*s == '-' || *s == '+')
-		s++;
-	while (*s)
-	{
-		if (!ft_isdigit(*s++))
-			return (0);
-	}
-	return (1);
-}
 
 static long	push_swap_atol(char *str, t_stack *a, t_stack *b)
 {
@@ -46,24 +34,36 @@ static long	push_swap_atol(char *str, t_stack *a, t_stack *b)
 	return (nb * sign);
 }
 
+static void	process_number(char *str, t_stack *a, t_stack *b)
+{
+	long	num;
+
+	num = push_swap_atol(str, a, b);
+	if (num < INT_MIN || num > INT_MAX || is_duplicate(a, num))
+		error_exit(a, b);
+	add_node(a, num);
+}
+
 void	parse_args(t_stack *a, t_stack *b, char **av)
 {
 	char	**split;
-	long	num;
+	int		i;
+	int		j;
 
-	while (*++av)
+	i = 1;
+	while (av[i])
 	{
-		split = ft_split(*av, ' ');
-		while (split && *split)
+		split = ft_split(av[i], ' ');
+		if (!split)
+			error_exit(a, b);
+		j = 0;
+		while (split[j])
 		{
-			if (!is_num(*split))
-				error_exit(a, b);
-			num = push_swap_atol(*split, a, b);
-			if (num < INT_MIN || num > INT_MAX || is_duplicate(a, num))
-				error_exit(a, b);
-			add_node(a, num);
-			free(*split++);
+			process_number(split[j], a, b);
+			free(split[j]);
+			j++;
 		}
 		free(split);
+		i++;
 	}
 }

@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 13:15:41 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/12 12:51:31 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/12 13:00:49 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,12 +51,31 @@ void	final_rotate(t_stack *a)
 		ra(a);
 }
 
+void	free_stack(t_stack *stack)
+{
+	t_node	*current;
+	t_node	*next;
+
+	if (!stack)
+		return ;
+	current = stack->head;
+	while (current)
+	{
+		next = current->next;
+		free(current);
+		current = next;
+	}
+	stack->head = NULL;
+	stack->tail = NULL;
+	stack->size = 0;
+}
+
 void	error_exit(t_stack *a, t_stack *b)
 {
-	ft_printf("Error\n");
 	if (a)
 		free_stack(a);
 	if (b)
 		free_stack(b);
-	exit(1);
+	ft_printf("Error\n");
+	exit(EXIT_FAILURE);
 }
