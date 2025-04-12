@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/12 16:05:46 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/12 17:19:37 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/12 17:36:09 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ int	is_sorted(t_stack *stack)
 {
 	t_node	*current;
 
-	if (!stack || !stack->head || stack->size < 2)
+	if (!stack || stack->size < 2)
 		return (1);
 	current = stack->head;
 	while (current->next)

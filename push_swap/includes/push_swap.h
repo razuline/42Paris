@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/07 11:17:32 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/12 16:59:17 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/12 17:57:24 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define PUSH_SWAP_H
 
 # include <limits.h>
+# include <stdbool.h>
 # include <stdlib.h>
 # include <unistd.h>
 # include "../libft/includes/libft.h"
@@ -65,6 +66,7 @@ int		find_min_pos(t_stack *stack);
 int		find_second_min(t_stack *stack);
 int		find_target_pos(t_stack *a, int val);
 void	while_pos(t_stack *s, int pos, int rev);
+void	find_best_move(t_stack *a, t_stack *b);
 
 /* Parcing */
 void	parse_args(t_stack *a, t_stack *b, char **av);

@@ -6,52 +6,92 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/12 11:02:33 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/12 11:13:59 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/12 18:10:41 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "push_swap.h"
 
-static void	push_chunk(t_stack *a, t_stack *b, int *chunk_size)
+static int	calculate_distance(t_stack *a, int pos)
 {
-	int	pushed;
-
-	pushed = 0;
-	while (pushed++ < *chunk_size && a->size > 3)
-	{
-		if (a->head->value <= *chunk_size)
-			pb(a, b);
-		else
-			ra(a);
-	}
-	*chunk_size += a->size / 5 + 1;
+	if (pos <= a->size / 2)
+		return (pos);
+	else
+		return (a->size - pos);
 }
 
-static void	return_to_a(t_stack *a, t_stack *b)
+static bool	is_in_chunk(int value, int chunk_start, int chunk_end)
 {
-	int	target_pos;
+	return (value >= chunk_start && value <= chunk_end);
+}
 
-	while (b->size)
+static int	find_next_chunk(t_stack *a, int c_start, int c_end)
+{
+	t_node	*cur;
+	int		dist;
+	int		pos;
+	int		best[2] = {-1, INT_MAX};
+
+	cur = a->head;
+	pos = 0;
+	while (cur && best[1] != 0)
 	{
-		target_pos = find_target_pos(a, b->head->value);
-		if (target_pos > a->size / 2)
-			while (target_pos++ < a->size)
-				rra(a);
-		else
-			while (target_pos--)
+		if (cur->value >= c_start && cur->value <= c_end)
+		{
+			dist = (pos <= a->size / 2);
+			if (dist)
+				dist = pos;
+			dist = a->size - pos;
+			if (dist < best[1])
+			{
+				best[0] = pos;
+				best[1] = dist;
+			}
+		}
+		cur = cur->next;
+		pos++;
+	}
+	return (best[0]);
+}
+
+static void	push_chunk(t_stack *a, t_stack *b, int chunk_start, int chunk_end)
+{
+	int	pos;
+
+	while (1)
+	{
+		pos = find_next_chunk(a, chunk_start, chunk_end);
+		if (pos == -1)
+			break ;
+		if (pos <= a->size / 2)
+			while (pos-- > 0)
 				ra(a);
-		pa(a, b);
+		else
+			while (pos++ < a->size)
+				rra(a);
+		pb(a, b);
 	}
 }
 
 void	chunk_sort(t_stack *a, t_stack *b)
 {
 	int	chunk_size;
+	int	num_chunks;
+	int	i;
 
-	chunk_size = a->size / 5 + 1;
-	while (a->size > 3)
-		push_chunk(a, b, &chunk_size);
+	chunk_size = a->size / 5 + (a->size % 5 != 0);
+	num_chunks = 5;
+	i = 0;
+	while (i < num_chunks)
+	{
+		push_chunk(a, b, i * chunk_size, (i + 1) * chunk_size);
+		i++;
+	}
 	sort_three(a);
-	return_to_a(a, b);
+	while (b->size)
+	{
+		find_best_move(a, b);
+		pa(a, b);
+	}
 	final_rotate(a);
 }

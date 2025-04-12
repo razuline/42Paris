@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/09 09:16:13 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/12 17:12:08 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/12 17:48:33 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,4 +27,10 @@ int	main(int ac, char **av)
 		free_stack(&a);
 		return (0);
 	}
+	if (a.size <= 5)
+		small_sort(&a, &b);
+	else
+		chunk_sort(&a, &b);
+	free_stack(&a);
+	return (0);
 }

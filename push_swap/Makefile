@@ -6,7 +6,7 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/02/22 15:13:07 by erazumov          #+#    #+#              #
-#    Updated: 2025/04/12 16:11:13 by erazumov         ###   ########.fr        #
+#    Updated: 2025/04/12 17:52:29 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -32,6 +32,7 @@ SRC = main.c \
 		sort/chunk_sort.c \
 		utils/utils.c \
 		utils/sort_utils.c \
+		utils/pos_utils.c \
 		utils/parce_utils.c \
 		utils/positions.c
 OBJ = $(addprefix $(OBJ_DIR)/,$(SRC:.c=.o))
