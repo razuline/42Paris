@@ -1,30 +1,21 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
+/*   ft_isspace.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/03/09 09:16:13 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/12 17:12:08 by erazumov         ###   ########.fr       */
+/*   Created: 2025/04/12 17:01:12 by erazumov          #+#    #+#             */
+/*   Updated: 2025/04/12 17:03:12 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "push_swap.h"
+#include "libft.h"
 
-int	main(int ac, char **av)
+int	ft_isspace(int c)
 {
-	t_stack	a;
-	t_stack	b;
-
-	if (ac < 2)
-		return (0);
-	ft_memset(&a, 0, sizeof(t_stack));
-	ft_memset(&b, 0, sizeof(t_stack));
-	parse_args(&a, &b, av);
-	if (is_sorted(&a))
-	{
-		free_stack(&a);
-		return (0);
-	}
+	if (c == ' ' || c == '\f' || c == '\n' || c == '\r'
+			|| c == '\t' || c == '\v')
+		return (1);
+	return (0);
 }

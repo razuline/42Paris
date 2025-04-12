@@ -6,48 +6,47 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 13:15:41 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/12 13:00:49 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/12 16:15:33 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "push_swap.h"
 
-int	is_sorted(t_stack *stack)
+int	is_valid_number(char *str)
 {
-	t_node	*tmp;
+	int	i;
 
-	tmp = stack->head;
-	while (tmp && tmp->next)
+	i = 0;
+	if (str[i] == '-' || str[i] == '+')
+		i++;
+	while (str[i])
 	{
-		if (tmp->value > tmp->next->value)
+		if (!ft_isdigit(str[i]))
 			return (0);
-		tmp = tmp->next;
+		i++;
 	}
 	return (1);
 }
 
-int	find_min(t_stack *stack)
+void	free_split(char **split)
 {
-	int		min;
-	t_node	*tmp;
+	char	**tmp;
 
-	min = stack->head->value;
-	tmp = stack->head->next;
-	while (tmp)
+	tmp = split;
+	while (*tmp)
 	{
-		if (tmp->value < min)
-			min = tmp->value;
-		tmp = tmp->next;
+		free(*tmp);
+		tmp++;
 	}
-	return (min);
+	free(split);
 }
 
 void	final_rotate(t_stack *a)
 {
-	int	min;
+	int	min_pos;
 
-	min = find_min(a);
-	while (a->head->value != min)
+	min_pos = find_min_pos(a);
+	while (min_pos-- > 0)
 		ra(a);
 }
 

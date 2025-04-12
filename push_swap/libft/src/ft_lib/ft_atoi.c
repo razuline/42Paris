@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/09 18:19:28 by erazumov          #+#    #+#             */
-/*   Updated: 2024/11/26 14:59:14 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/12 17:04:09 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,14 +17,6 @@ Returns the converted value or 0 on error. */
 #include "libft.h"
 
 int	ft_atoi(const char *str);
-
-static int	ft_isspace(int c)
-{
-	if (c == ' ' || c == '\f' || c == '\n' || c == '\r'
-		|| c == '\t' || c == '\v')
-		return (1);
-	return (0);
-}
 
 int	ft_atoi(const char *str)
 {
