@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/26 11:40:18 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/05 10:40:16 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/05 11:26:43 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,19 +74,15 @@ void	philo_think(t_philo *philo);
 
 /* Simulations */
 int		should_continue(t_data *data);
-.
+int		simulation_start(t_data *data);
 void	philo_routine(void *arg);
 
 /* Monitor */
 void	monitor(t_data *data);
 
-
 /* Utils */
 void	print_status(t_philo *philo, char *status);
 int		ft_atoi(char *str); /* (+ test) */
 void	clear_data(t_data *data);
-.
-
-int		simulation_start(t_data *data);
 
 #endif

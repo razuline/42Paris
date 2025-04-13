@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 13:10:31 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/05 10:32:25 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/05 11:26:43 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,9 +53,4 @@ void	clear_data(t_data *data)
 		free(data->philos);
 	pthread_mutex_destroy(&data->print_mutex);
 	pthread_mutex_destroy(&data->meal_mutex);
-}
-
-void	error_exit(t_data *data, char *msg)
-{
-	
 }
