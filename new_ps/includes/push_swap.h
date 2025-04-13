@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/13 11:40:46 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/13 18:18:20 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/13 19:46:46 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,12 +63,11 @@ void	rrb(t_stack *stack_b);
 void	rrr(t_stack *stack_a, t_stack *stack_b);
 
 /* Sorting */
-t_node	*find_min_node(t_stack *stack);
 void	sort_two(t_stack *stack_a);
 void	sort_three(t_stack *stack_a);
 void	sort_four(t_stack *stack_a, t_stack *stack_b);
 void	sort_five(t_stack *stack_a, t_stack *stack_b);
-void	sort_large(t_stack *stack_a, t_stack *stack_b);
+void	sort_large(t_stack *stack_a, t_stack *stack_b);;
 
 /* Sorting utils */
 bool	is_sorted(t_stack *stack);

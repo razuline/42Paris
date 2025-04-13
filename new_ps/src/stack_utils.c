@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/13 12:47:14 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/13 12:55:40 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/13 19:45:20 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ t_node	*create_node(int value)
 	if (!new_node)
 		return (NULL);
 	new_node->value = value;
+	new_node->index = -1;
 	new_node->prev = NULL;
 	new_node->next = NULL;
 	return (new_node);

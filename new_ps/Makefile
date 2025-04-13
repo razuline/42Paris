@@ -6,7 +6,7 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/13 18:21:02 by erazumov          #+#    #+#              #
-#    Updated: 2025/04/13 19:10:51 by erazumov         ###   ########.fr        #
+#    Updated: 2025/04/13 19:30:22 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -61,11 +61,13 @@ $(NAME): $(OBJS) $(LIBFT_A)
 	@$(CC) $(CFLAGS) $(OBJS) $(LIBFT_A) -o $(NAME)
 	@echo "$(GREEN)✅ Compilation successful ➜ $(NAME)$(RESET)"
 
+$(OBJS): | $(OBJ_DIR)
+
 $(OBJ_DIR):
 	@mkdir -p $(OBJ_DIR)
 	@echo "$(BLUE)📁 Created object directory: $(OBJ_DIR)$(RESET)"
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)%.c | $(OBJ_DIR)
+$(OBJ_DIR)/%.o: $(SRC_DIR)%.c
 	@$(CC) $(CFLAGS) $(INCLUDES) $(LIBFT_INC) -c $< -o $@
 	@echo "$(YELLOW)🪄 Compiling:$(RESET) $< -> $@"
 

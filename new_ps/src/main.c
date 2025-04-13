@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/13 13:31:30 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/13 14:04:40 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/13 19:45:44 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,9 +38,9 @@ int	main(int ac, char **av)
 		sort_four(stack_a, stack_b);
 	else if (stack_a->size == 5)
 		sort_five(stack_a, stack_b);
-	else // stack_a->size > 5
+	else
 	{
-		
+		sort_large(stack_a, stack_b);
 	}
 	free_stack(stack_a);
 	free_stack(stack_b);

@@ -6,13 +6,13 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/13 13:50:38 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/13 18:17:14 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/13 19:46:08 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/push_swap.h"
 
-t_node	*find_min_node(t_stack *stack)
+static t_node	*find_min_node(t_stack *stack)
 {
 	t_node	*min_node;
 	t_node	*current;
