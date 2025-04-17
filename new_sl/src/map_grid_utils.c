@@ -6,11 +6,11 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 18:33:14 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/17 18:34:22 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/17 21:12:26 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/so_long.h"
+#include "so_long.h"
 
 int	copy_map_grid(t_game *game, char ***grid_copy_ptr)
 {

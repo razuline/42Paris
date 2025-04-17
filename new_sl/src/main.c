@@ -6,11 +6,11 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 14:02:08 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/17 14:17:19 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/17 20:42:51 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/so_long.h"
+#include "so_long.h"
 
 void	init_game_struct(t_game *game)
 {

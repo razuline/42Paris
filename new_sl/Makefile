@@ -6,7 +6,7 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/17 13:28:17 by erazumov          #+#    #+#              #
-#    Updated: 2025/04/17 13:30:20 by erazumov         ###   ########.fr        #
+#    Updated: 2025/04/17 21:23:09 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -21,6 +21,7 @@ RM = rm -f
 SRC_DIR = src/
 OBJ_DIR = obj/
 LIBFT_DIR = libft/
+MLX_DIR = mlx/
 INCLUDES = -I includes/
 
 # Libft specifics
@@ -29,19 +30,27 @@ LIBFT_INC = -I $(LIBFT_DIR)/includes
 
 # Source Files
 SRC = main.c \
-		swap.c \
-		push.c \
-		rotate.c \
-		rev_rotate.c \
-		parse.c \
-		sort_small.c \
-		sort_large.c \
-		utils.c \
-		stack_utils.c \
-		move_utils.c \
-		find_utils.c \
-		idx_utils.c
+		error.c \
+		init.c \
+		hooks.c \
+		render.c \
+		map_reader.c map_reader_utils.c \
+		map_valid.c map_valid_utils.c \
+		valid_path.c map_grid_utils.c \
+		player_move.c game_logic.c cleanup.c
+VPATH = $(SRC_DIR)
 OBJS = $(addprefix $(OBJ_DIR)/,$(SRC:.c=.o))
+
+OS = $(shell uname -s)
+
+ifeq ($(OS), Linux)
+	MLXFLAGS = -L$(MLX_DIR) -lmlx -lXext -lX11 -lm -lbsd
+else
+	$(warning "Unsupported OS detected: $(OS). Using Linux MLX flags.")
+	MLXFLAGS = -L$(MLX_DIR) -lmlx -lXext -lX11 -lm -lbsd
+
+INCFLAGS = -I includes -I $(LIBFT_DIR) -I $(MLX_DIR)
+LDFLAGS = -L $(LIBFT_DIR) -lft $(MLXFLAGS)
 
 # Colors
 RESET = \033[0m

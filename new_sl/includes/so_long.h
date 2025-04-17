@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 13:55:51 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/17 18:34:33 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/17 20:56:47 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,35 +84,24 @@ void	read_map(char *filename, t_game *game);
 void	valid_map_struct(t_game *game);
 void	valid_path(t_game *game);
 
-// init.c
+/* Init */
 void	init_game(t_game *game);
-void	load_textures(t_game *game);
-
-// render.c
 int		render_frame(t_game *game);
-void	draw_map(t_game *game);
-void	draw_player(t_game *game);
-void	image_to_window(t_game *game, void *img, int x, int y);
-
-
-// hooks.c
 void	setup_hooks(t_game *game);
-int		handle_keypress(int keycode, t_game *game);
-int		window_close(t_game *game);
 
-// player_movement.c
-void	try_move_player(t_game *game, int dx, int dy);
+/* Player */
+int		move_player(t_game *game, int dx, int dy);
 
-// game_logic.c
+/* Logic */
 void	collect_item(t_game *game, int x, int y);
 void	check_exit(t_game *game, int x, int y);
 void	win_game(t_game *game);
 
-// cleanup.c
+/* Cleanup */
 void	cleanup_game(t_game *game);
 void	exit_game(t_game *game, int exit_code);
 void	free_map_grid(char **grid, int height);
-void    destroy_textures(t_game *game);
+void	destroy_textures(t_game *game);
 
 /* Utils */
 void	trim_newline(char *line);
