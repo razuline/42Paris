@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 13:55:51 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/17 17:41:46 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/17 18:34:33 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,13 +79,9 @@ void	run_game(t_game *game);
 void	exit_error(t_game *game, char *msg);
 void	print_error(char *msg);
 
-/* Map reader */
+/* Map */
 void	read_map(char *filename, t_game *game);
-
-// map_validation_check.c
 void	valid_map_struct(t_game *game);
-
-// map_validation_path.c
 void	valid_path(t_game *game);
 
 // init.c
@@ -124,6 +120,12 @@ int		process_dimen_line(char *line, t_game *game, int *first_line);
 void	cleanup_fill_error(t_game *game, int count);
 int		check_remain_lines(int fd);
 int		allocate_grid(t_game *game);
-
+int		check_horiz_walls(t_game *game);
+int		check_vert_walls(t_game *game);
+int		is_valid_char(char c);
+void	update_counts(char c, t_game *game, int x, int y, int counts[3]);
+int		final_count_check(t_game *game, int counts[3]);
+int		copy_map_grid(t_game *game, char ***grid_copy_ptr);
+void	free_grid_copy(char **grid_copy, int height);
 
 #endif
