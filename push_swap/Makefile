@@ -5,74 +5,82 @@
 #                                                     +:+ +:+         +:+      #
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2025/02/22 15:13:07 by erazumov          #+#    #+#              #
-#    Updated: 2025/04/12 17:52:29 by erazumov         ###   ########.fr        #
+#    Created: 2025/04/13 18:21:02 by erazumov          #+#    #+#              #
+#    Updated: 2025/04/13 19:30:22 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 # Project Name
 NAME = push_swap
-CFLAGS = -Wall -Wextra -Werror
-INCLUDE = -I includes/
+
+# Compiler and flags
+CFLAGS = -Wall -Wextra -Werror -g
+RM = rm -f
 
 # Directories
 SRC_DIR = src/
 OBJ_DIR = obj/
 LIBFT_DIR = libft/
-LIBFT = $(LIBFT_DIR)/libft.a
+INCLUDES = -I includes/
+
+# Libft specifics
+LIBFT_A = $(LIBFT_DIR)/libft.a
+LIBFT_INC = -I $(LIBFT_DIR)/includes
 
 # Source Files
 SRC = main.c \
-		operations/swap.c \
-		operations/push.c \
-		operations/rotate.c \
-		operations/reverse_rotate.c \
-		parcing/parce.c \
-		sort/small_sort.c \
-		sort/chunk_sort.c \
-		utils/utils.c \
-		utils/sort_utils.c \
-		utils/pos_utils.c \
-		utils/parce_utils.c \
-		utils/positions.c
-OBJ = $(addprefix $(OBJ_DIR)/,$(SRC:.c=.o))
-
-# Variables
-RM = rm -rf
+		swap.c \
+		push.c \
+		rotate.c \
+		rev_rotate.c \
+		parse.c \
+		sort_small.c \
+		sort_large.c \
+		utils.c \
+		stack_utils.c \
+		move_utils.c \
+		find_utils.c \
+		idx_utils.c
+OBJS = $(addprefix $(OBJ_DIR)/,$(SRC:.c=.o))
 
 # Colors
-GREEN = \033[0;32m
-RED = \033[0;31m
-BLUE = \033[0;34m
 RESET = \033[0m
+RED = \033[0;31m
+GREEN = \033[0;32m
+YELLOW = \033[0;33m
+BLUE = \033[0;34m
 
 # Rules
 all: $(NAME)
 
-$(NAME): $(LIBFT) $(OBJ)
-	$(CC) $(CFLAGS) $(OBJ) $(LIBFT) $(FT_PRINTF) -o $(NAME)
+$(LIBFT_A):
+	@echo "$(BLUE)📘 Building Libft...$(RESET)"
+	@make -s -C $(LIBFT_DIR)
+
+$(NAME): $(OBJS) $(LIBFT_A)
+	@$(CC) $(CFLAGS) $(OBJS) $(LIBFT_A) -o $(NAME)
 	@echo "$(GREEN)✅ Compilation successful ➜ $(NAME)$(RESET)"
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)%.c | $(OBJ_DIR)
-	@mkdir -p $(@D)
-	@$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
+$(OBJS): | $(OBJ_DIR)
 
 $(OBJ_DIR):
 	@mkdir -p $(OBJ_DIR)
+	@echo "$(BLUE)📁 Created object directory: $(OBJ_DIR)$(RESET)"
 
-$(LIBFT):
-	@make -C $(LIBFT_DIR)
+$(OBJ_DIR)/%.o: $(SRC_DIR)%.c
+	@$(CC) $(CFLAGS) $(INCLUDES) $(LIBFT_INC) -c $< -o $@
+	@echo "$(YELLOW)🪄 Compiling:$(RESET) $< -> $@"
 
 clean:
-	$(RM) $(OBJ_DIR)
-	@make clean -C $(LIBFT_DIR)
+	@$(RM) -r $(OBJ_DIR)
+	@make clean -s -C $(LIBFT_DIR)
 	@echo "$(RED)🧹 Object files removed$(RESET)"
-
-
+	
 fclean: clean
-	$(RM) $(NAME)
-	@make fclean -C $(LIBFT_DIR)
-	@echo "$(RED)🗑️  Executables removed$(RESET)"
+	@$(RM) $(NAME)
+	@make fclean -s -C $(LIBFT_DIR)
+	@echo "$(RED)🗑️ Executables removed$(RESET)"
+	@echo "$(RED)🗑️ Libft cleaned$(RESET)"
 
 re: fclean all
 

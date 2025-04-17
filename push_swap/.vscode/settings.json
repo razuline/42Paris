@@ -1,0 +1,7 @@
+{
+	"files.associations": {
+		"*.c": "c",
+		"find_utils.C": "cpp",
+		"push_swap.h": "c"
+	}
+}

@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/03/07 11:17:32 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/12 17:57:24 by erazumov         ###   ########.fr       */
+/*   Created: 2025/04/13 11:40:46 by erazumov          #+#    #+#             */
+/*   Updated: 2025/04/13 19:46:46 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 # include <limits.h>
 # include <stdbool.h>
+# include <stdio.h>
 # include <stdlib.h>
 # include <unistd.h>
 # include "../libft/includes/libft.h"
@@ -22,6 +23,7 @@
 typedef struct s_node
 {
 	int				value;
+	int				index;
 	struct s_node	*prev;
 	struct s_node	*next;
 }			t_node;
@@ -33,53 +35,54 @@ typedef struct s_stack
 	t_node	*tail;
 }			t_stack;
 
+/* Init */
+t_stack	*init_stack(void);
+t_node	*create_node(int value);
+void	free_stack(t_stack *stack);
+void	add_node_front(t_stack *stack, t_node *new_node);
+void	add_node_back(t_stack *stack, t_node *new_node);
+
+/* Parsing */
+void	parse_fill_stack(int ac, char **av, t_stack *stack_a);
+
 /* Operations */
-void	swap(t_stack *stack);
-void	sa(t_stack *a);
-void	sb(t_stack *b);
-void	ss(t_stack *a, t_stack *b);
+/* Swap */
+void	sa(t_stack *stack_a);
+void	sb(t_stack *stack_b);
+void	ss(t_stack *stack_a, t_stack *stack_b);
+/* Push */
+void	pa(t_stack *stack_a, t_stack *stack_b);
+void	pb(t_stack *stack_a, t_stack *stack_b);
+/* Rotate */
+void	ra(t_stack *stack_a);
+void	rb(t_stack *stack_b);
+void	rr(t_stack *stack_a, t_stack *stack_b);
+/* Reverse rotate */
+void	rra(t_stack *stack_a);
+void	rrb(t_stack *stack_b);
+void	rrr(t_stack *stack_a, t_stack *stack_b);
 
-void	push(t_stack *dst, t_stack *src);
-void	pa(t_stack *a, t_stack *b);
-void	pb(t_stack *a, t_stack *b);
+/* Sorting */
+void	sort_two(t_stack *stack_a);
+void	sort_three(t_stack *stack_a);
+void	sort_four(t_stack *stack_a, t_stack *stack_b);
+void	sort_five(t_stack *stack_a, t_stack *stack_b);
+void	sort_large(t_stack *stack_a, t_stack *stack_b);;
 
-void	rotate(t_stack *stack);
-void	ra(t_stack *a);
-void	rb(t_stack *b);
-void	rr(t_stack *a, t_stack *b);
+/* Sorting utils */
+bool	is_sorted(t_stack *stack);
+t_node	*find_node_by_idx(t_stack *stack, int idx);
+t_node	*find_cheapest_node(t_stack *stack, int max_idx);
+int		node_position(t_stack *stack, t_node *node_to_find);
+void	node_to_top_a(t_stack *stack_a, t_node *target_node);
+void	node_to_top_b(t_stack *stack_b, t_node *target_node);
 
-void	reverse_rotate(t_stack *stack);
-void	rra(t_stack *a);
-void	rrb(t_stack *b);
-void	rrr(t_stack *a, t_stack *b);
-
-/* Small sort */
-void	sort_three(t_stack *a);
-void	sort_four(t_stack *a, t_stack *b);
-void	sort_five(t_stack *a, t_stack *b);
-void	small_sort(t_stack *a, t_stack *b);
-void	chunk_sort(t_stack *a, t_stack *b);
-
-/* Positions */
-int		find_min(t_stack *stack);
-int		find_min_pos(t_stack *stack);
-int		find_second_min(t_stack *stack);
-int		find_target_pos(t_stack *a, int val);
-void	while_pos(t_stack *s, int pos, int rev);
-void	find_best_move(t_stack *a, t_stack *b);
-
-/* Parcing */
-void	parse_args(t_stack *a, t_stack *b, char **av);
-long	push_swap_atol(const char *str, t_stack *a, t_stack *b);
-int		is_duplicate(t_stack *a, int num);
-void	add_node(t_stack *stack, int value);
+/* Index utils */
+void	assign_index(t_stack *stack_a);
 
 /* Utils */
-int		is_sorted(t_stack *stack);
-int		is_valid_number(char *str);
-void	final_rotate(t_stack *a);
-void	free_stack(t_stack *stack);
-void	free_split(char **split);
-void	error_exit(t_stack *a, t_stack *b);
+bool	is_num(const char *str);
+void	error_exit(t_stack *stack_a, t_stack *stack_b);
+
 
 #endif

@@ -5,32 +5,44 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/03/09 09:16:13 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/12 17:48:33 by erazumov         ###   ########.fr       */
+/*   Created: 2025/04/13 13:31:30 by erazumov          #+#    #+#             */
+/*   Updated: 2025/04/13 19:45:44 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "push_swap.h"
+#include "../includes/push_swap.h"
 
 int	main(int ac, char **av)
 {
-	t_stack	a;
-	t_stack	b;
+	t_stack	*stack_a;
+	t_stack	*stack_b;
 
-	if (ac < 2)
+	if (ac == 1)
 		return (0);
-	ft_memset(&a, 0, sizeof(t_stack));
-	ft_memset(&b, 0, sizeof(t_stack));
-	parse_args(&a, &b, av);
-	if (is_sorted(&a))
+	stack_a = init_stack();
+	stack_b = init_stack();
+	if (!stack_a || !stack_b)
+		error_exit(stack_a, stack_b);
+	parse_fill_stack(ac, av, stack_a);
+	if (is_sorted(stack_a))
 	{
-		free_stack(&a);
+		free_stack(stack_a);
+		free_stack(stack_b);
 		return (0);
 	}
-	if (a.size <= 5)
-		small_sort(&a, &b);
+	if (stack_a->size == 2)
+		sort_two(stack_a);
+	else if (stack_a->size == 3)
+		sort_three(stack_a);
+	else if (stack_a->size == 4)
+		sort_four(stack_a, stack_b);
+	else if (stack_a->size == 5)
+		sort_five(stack_a, stack_b);
 	else
-		chunk_sort(&a, &b);
-	free_stack(&a);
+	{
+		sort_large(stack_a, stack_b);
+	}
+	free_stack(stack_a);
+	free_stack(stack_b);
 	return (0);
 }

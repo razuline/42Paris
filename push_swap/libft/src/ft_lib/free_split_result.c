@@ -1,31 +1,29 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   sort_utils.c                                       :+:      :+:    :+:   */
+/*   free_split_result.c                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/04/12 16:05:46 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/12 17:36:09 by erazumov         ###   ########.fr       */
+/*   Created: 2025/04/13 18:49:23 by erazumov          #+#    #+#             */
+/*   Updated: 2025/04/13 18:52:05 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "push_swap.h"
+#include "libft.h"
 
-int	is_sorted(t_stack *stack)
+void	free_split_result(char **split_array)
 {
-	t_node	*current;
+	int	i;
 
-	if (!stack || stack->size < 2)
-		return (1);
-	current = stack->head;
-	while (current->next)
+	if (!split_array)
+		return ;
+	i = 0;
+	while (split_array[i] != NULL)
 	{
-		if (current->value > current->next->value)
-			return (0);
-		current = current->next;
+		free(split_array[i]);
+		split_array[i] = NULL;
+		i++;
 	}
-	return (1);
+	free(split_array);
 }
-
-
