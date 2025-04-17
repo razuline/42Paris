@@ -6,7 +6,7 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/12 13:03:55 by erazumov          #+#    #+#              #
-#    Updated: 2025/04/13 18:51:58 by erazumov         ###   ########.fr        #
+#    Updated: 2025/04/17 15:16:53 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -18,25 +18,26 @@ LIBC = ar rcs
 SRC_DIR = src/
 OBJ_DIR = obj/
 
-LIBFT_SRC = ft_lib/ft_isalpha.c ft_lib/ft_isdigit.c ft_lib/ft_isalnum.c \
-		ft_lib/ft_isascii.c ft_lib/ft_isspace.c ft_lib/ft_isprint.c \
-		ft_lib/ft_strlen.c ft_lib/ft_memset.c ft_lib/ft_bzero.c \
-		ft_lib/ft_memcpy.c ft_lib/ft_memmove.c ft_lib/ft_strlcpy.c \
-		ft_lib/ft_strlcat.c \
-		ft_lib/ft_toupper.c ft_lib/ft_tolower.c ft_lib/ft_strchr.c \
-		ft_lib/ft_strrchr.c ft_lib/ft_strncmp.c ft_lib/ft_memchr.c \
-		ft_lib/ft_memcmp.c ft_lib/ft_strnstr.c ft_lib/ft_atoi.c \
-		ft_lib/ft_calloc.c ft_lib/ft_strdup.c ft_lib/ft_substr.c \
-		ft_lib/ft_strjoin.c ft_lib/ft_strtrim.c ft_lib/ft_split.c \
-		ft_lib/ft_itoa.c ft_lib/ft_strmapi.c ft_lib/ft_striteri.c \
-		ft_lib/ft_putchar_fd.c ft_lib/ft_putstr_fd.c ft_lib/ft_putendl_fd.c \
-		ft_lib/ft_putnbr_fd.c ft_lib/ft_atol.c ft_lib/free_split_result.c
-PRINTF_SRC = ft_printf/ft_printf.c ft_printf/ft_formats.c \
-		ft_printf/ft_printstr.c ft_printf/ft_printnbr.c \
-		ft_printf/ft_printchar.c ft_printf/ft_printhex.c ft_printf/ft_printptr.c \
-		ft_printf/ft_print_u.c
+LIBFT_SRC = lib/ft_isalpha.c lib/ft_isdigit.c lib/ft_isalnum.c \
+		lib/ft_isascii.c lib/ft_isspace.c lib/ft_isprint.c \
+		lib/ft_strlen.c lib/ft_memset.c lib/ft_bzero.c \
+		lib/ft_memcpy.c lib/ft_memmove.c lib/ft_strlcpy.c \
+		lib/ft_strlcat.c \
+		lib/ft_toupper.c lib/ft_tolower.c lib/ft_strchr.c \
+		lib/ft_strrchr.c lib/ft_strncmp.c lib/ft_memchr.c \
+		lib/ft_memcmp.c lib/ft_strnstr.c lib/ft_atoi.c \
+		lib/ft_calloc.c lib/ft_strdup.c lib/ft_substr.c \
+		lib/ft_strjoin.c lib/ft_strtrim.c lib/ft_split.c \
+		lib/ft_itoa.c lib/ft_strmapi.c lib/ft_striteri.c \
+		lib/ft_putchar_fd.c lib/ft_putstr_fd.c lib/ft_putendl_fd.c \
+		lib/ft_putnbr_fd.c lib/ft_atol.c lib/free_split_result.c
+PRINTF_SRC = printf/ft_printf.c printf/ft_formats.c \
+		printf/ft_printstr.c printf/ft_printnbr.c \
+		printf/ft_printchar.c printf/ft_printhex.c printf/ft_printptr.c \
+		printf/ft_print_u.c
+GNL_SRC = gnl/get_neext_line.c gnl/get_next_line_utils.c
 
-SRC = $(LIBFT_SRC) $(PRINTF_SRC)
+SRC = $(LIBFT_SRC) $(PRINTF_SRC) $(GNL_SRC)
 OBJ = $(addprefix $(OBJ_DIR)/,$(SRC:.c=.o))
 
 all: $(NAME)
