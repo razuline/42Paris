@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 13:55:51 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/17 14:11:32 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/17 17:41:46 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,11 +75,11 @@ void	check_args(int ac, char **av);
 void	init_game_struct(t_game *game);
 void	run_game(t_game *game);
 
-// error.c
+/* Error */
 void	exit_error(t_game *game, char *msg);
 void	print_error(char *msg);
 
-// map_reader.c
+/* Map reader */
 void	read_map(char *filename, t_game *game);
 
 // map_validation_check.c
@@ -118,8 +118,12 @@ void	exit_game(t_game *game, int exit_code);
 void	free_map_grid(char **grid, int height);
 void    destroy_textures(t_game *game);
 
+/* Utils */
+void	trim_newline(char *line);
+int		process_dimen_line(char *line, t_game *game, int *first_line);
+void	cleanup_fill_error(t_game *game, int count);
+int		check_remain_lines(int fd);
+int		allocate_grid(t_game *game);
 
-// utils.c
-// ...
 
 #endif

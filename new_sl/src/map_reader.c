@@ -6,69 +6,59 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 14:13:49 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/17 15:29:33 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/17 17:40:28 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/so_long.h"
 
-static void	trim_newline(char *line)
-{
-	int	len;
+int		process_dimen_line(char *line, t_game *game, int *first_line);
+void	cleanup_fill_error(t_game *game, int count);
+int		check_remain_lines(int fd);
+void	trim_newline(char *line);
+int		allocate_grid(t_game *game);
 
-	if (!line)
-		return;
-	len = ft_strlen(line);
-	if (len > 0 && line[len - 1] == '\n')
-	{
-		line[len - 1] = '\0';
-	}
-}
-
-static int	get_map_dimensions(int fd, t_game *game)
+static int	get_map_dimen(int fd, t_game *game)
 {
 	char	*line;
 	int		first_line;
+	int		status;
 
 	game->map.height = 0;
 	game->map.width = -1;
 	first_line = 1;
-	while ((line = get_next_line(fd)) != NULL)
+	status = 0;
+	while (status == 0)
 	{
-		if (*line != '\0')
-		{
-			trim_newline(line);
-			if (first_line)
-			{
-				game->map.width = ft_strlen(line);
-				if (game->map.width == 0)
-				{
-					free(line);
-					return (-1);
-				}
-				first_line = 0;
-			}
-			game->map.height++;
-		}
-		free(line);
+		line = get_next_line(fd);
+		if (line == NULL)
+			break ;
+		status = process_dimen_line(line, game, &first_line);
 	}
-	if (game->map.height == 0 || game->map.width <= 0)
+	if (status == 0 && (game->map.height == 0 || game->map.width <= 0))
+		return (-1);
+	if (status < 0)
 		return (-1);
 	return (0);
 }
 
-static int	allocate_grid(t_game *game)
+static int	do_first_pass(char *filename, t_game *game)
 {
-	if (game->map.height <= 0)
+	int		fd;
+	int		status;
+
+	fd = open(filename, O_RDONLY);
+	if (fd < 0)
 		return (-1);
-	game->map.grid = (char **)malloc(sizeof(char *) * (game->map.height + 1));
-	if (!game->map.grid)
+	status = 0;
+	status = get_map_dimen(fd, game);
+	close(fd);
+	if (status < 0)
 		return (-1);
-	game->map.grid[game->map.height] = NULL;
 	return (0);
 }
 
-static int	fill_grid(int fd, t_game *game)
+static int	fill_grid_loop(int fd, t_game *game)
 {
 	char	*line;
 	int		i;
@@ -79,60 +69,52 @@ static int	fill_grid(int fd, t_game *game)
 		line = get_next_line(fd);
 		if (line == NULL)
 		{
-			while (--i >= 0)
-				free(game->map.grid[i]);
-			free(game->map.grid);
-			game->map.grid = NULL;
+			cleanup_fill_error(game, i);
 			return (-1);
 		}
-		if (*line != '\0')
+		if (*line == '\0')
 		{
-			trim_newline(line);
-			game->map.grid[i] = line;
-			i++;
-		}
-		else
 			free(line);
+			continue ;
+		}
+		trim_newline(line);
+		game->map.grid[i] = line;
+		i++;
 	}
-	line = get_next_line(fd);
-	if (line != NULL)
+	return (0);
+}
+
+static int	do_second_pass(char *filename, t_game *game)
+{
+	int		fd;
+	int		status;
+
+	fd = open(filename, O_RDONLY);
+	if (fd < 0)
+		return (-1);
+	status = fill_grid_loop(fd, game);
+	if (status == 0)
+		status = check_remain_lines(fd);
+	close(fd);
+	if (status < 0)
 	{
-		if (*line != '\0')
-		{
-			free(line);
-			while (--i >= 0)
-				free(game->map.grid[i]);
-			free(game->map.grid);
-			game->map.grid = NULL;
-			return (-1);
-		}
-		free(line);
+		cleanup_fill_error(game, game->map.height);
+		return (-1);
 	}
 	return (0);
 }
 
 void	read_map(char *filename, t_game *game)
 {
-	int		fd;
+	int		status;
 
-	fd = open(filename, O_RDONLY);
-	if (fd < 0)
-		exit_error(game, "Could not open map file.");
-	if (get_map_dimensions(fd, game) < 0)
-	{
-		close(fd);
+	status = do_first_pass(filename, game);
+	if (status < 0)
 		exit_error(game, "Failed to read map dimensions or map is empty/invalid.");
-	}
-	close(fd);
-	if (allocate_grid(game) < 0)
+	status = allocate_grid(game);
+	if (status < 0)
 		exit_error(game, "Memory allocation failed for map grid.");
-	fd = open(filename, O_RDONLY);
-	if (fd < 0)
-		exit_error(game, "Could not reopen map file for second read.");
-	if (fill_grid(fd, game) < 0)
-	{
-		close(fd);
-		exit_error(game, "Failed to fill map grid or map format error.");
-	}
-	close(fd);
+	status = do_second_pass(filename, game);
+	if (status < 0)
+		exit_error(game, "Failed to fill map grid or extra lines found in file.");
 }
