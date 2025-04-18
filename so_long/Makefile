@@ -6,7 +6,7 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/17 13:28:17 by erazumov          #+#    #+#              #
-#    Updated: 2025/04/18 12:06:54 by erazumov         ###   ########.fr        #
+#    Updated: 2025/04/18 16:02:21 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -79,7 +79,7 @@ $(LIBFT):
 $(NAME): $(OBJS) | $(LIBFT)
 	@if [ ! -d "$(MLX_DIR)" ]; then \
 	echo "$(RED)❌ Error: $(MLX_DIR) not found.$(RESET)"; \
-		exit 1; \
+		exit (1); \
 	fi
 	@echo "$(BLUE)🔗 Linking $(NAME)...$(RESET)"
 	@$(CC) $(CFLAGS) $(OBJS) $(LDFLAGS) -o $(NAME)
