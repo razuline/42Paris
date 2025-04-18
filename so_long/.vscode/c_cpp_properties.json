@@ -1,0 +1,30 @@
+{
+    "configurations": [
+        {
+            "name": "so_long_config",
+            "includePath": [
+                "${workspaceFolder}/includes",
+                "${workspaceFolder}/libft",
+                "${workspaceFolder}/mlx",
+                "${workspaceFolder}/libft/includes"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c99",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "linux-gcc-x64"
+        },
+        {
+            "name": "so_long",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c17",
+            "cppStandard": "c++14",
+            "intelliSenseMode": "linux-clang-x64"
+        }
+    ],
+    "version": 4
+}
