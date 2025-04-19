@@ -6,14 +6,14 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/13 12:58:44 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/13 13:27:00 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/19 12:04:07 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/push_swap.h"
 
 static bool	check_dup(t_stack *stack, int num);
-static bool	validate_add_node(char *num_str, t_stack *stack_a);
+static bool	valid_add_node(char *num_str, t_stack *stack_a);
 static void	process_single_str_arg(char *arg_str, t_stack *stack_a);
 static void	process_mult_args(int ac, char **av, t_stack *stack_a);
 
@@ -41,7 +41,7 @@ static bool	check_dup(t_stack *stack, int num)
 	return (false);
 }
 
-static bool	validate_add_node(char *num_str, t_stack *stack_a)
+static bool	valid_add_node(char *num_str, t_stack *stack_a)
 {
 	long	num_long;
 	int		num_int;
@@ -49,7 +49,6 @@ static bool	validate_add_node(char *num_str, t_stack *stack_a)
 
 	if (!is_num(num_str))
 		return (false);
-
 	num_long = ft_atol(num_str);
 	if (num_long > INT_MAX || num_long < INT_MIN)
 		return (false);
@@ -80,7 +79,7 @@ static void	process_single_str_arg(char *arg_str, t_stack *stack_a)
 	i = 0;
 	while (nums[i])
 	{
-		success = validate_add_node(nums[i], stack_a);
+		success = valid_add_node(nums[i], stack_a);
 		if (!success)
 		{
 			free_split_result(nums);
@@ -99,7 +98,7 @@ static void	process_mult_args(int ac, char **av, t_stack *stack_a)
 	i = 1;
 	while (i < ac)
 	{
-		success = validate_add_node(av[i], stack_a);
+		success = valid_add_node(av[i], stack_a);
 		if (!success)
 			error_exit(stack_a, NULL);
 		i++;

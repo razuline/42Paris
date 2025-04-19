@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/13 13:50:38 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/13 19:46:08 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/19 12:01:31 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,6 @@ void	sort_five(t_stack *stack_a, t_stack *stack_b)
 	min_node = find_min_node(stack_a);
 	node_to_top_a(stack_a, min_node);
 	pb(stack_a, stack_b);
-
 	min_node = find_min_node(stack_a);
 	node_to_top_a(stack_a, min_node);
 	pb(stack_a, stack_b);

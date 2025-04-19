@@ -6,35 +6,32 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/13 14:18:38 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/13 18:13:55 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/19 12:01:05 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/push_swap.h"
 
-static void process_one_chunk(t_stack *a, t_stack *b, int elems_to_push,
-			int max_idx);
-static void push_chunks_to_b(t_stack *a, t_stack *b, int n_chunks,
-			int chunk_sz, int n);
-static void push_sorted_to_a(t_stack *a, t_stack *b, int n);
+static void	process_one_chunk(t_stack *a, t_stack *b, int elems_to_push,
+				int max_idx);
+static void	push_chunks_to_b(t_stack *a, t_stack *b, t_chunk_info *info);
+static void	push_sorted_to_a(t_stack *a, t_stack *b, t_chunk_info *info);
 
 void	sort_large(t_stack *stack_a, t_stack *stack_b)
 {
-	int	n;
-	int	num_chunks;
-	int	chunk_size;
+	t_chunk_info	info;
 
-	n = stack_a->size;
-	if (n <= 5)
+	info.total_size = stack_a->size;
+	if (info.total_size <= 5)
 		return ;
 	assign_index(stack_a);
-	if (n <= 100)
-		num_chunks = 5;
+	if (info.total_size <= 100)
+		info.num_chunks = 5;
 	else
-		num_chunks = 11;
-	chunk_size = n / num_chunks;
-	push_chunks_to_b(stack_a, stack_b, num_chunks, chunk_size, n);
-	push_sorted_to_a(stack_a, stack_b, n);
+		info.num_chunks = 11;
+	info.chunk_size = info.total_size / info.num_chunks;
+	push_chunks_to_b(stack_a, stack_b, &info);
+	push_sorted_to_a(stack_a, stack_b, &info);
 }
 
 static void	process_one_chunk(t_stack *a, t_stack *b, int elems_to_push,
@@ -55,22 +52,21 @@ static void	process_one_chunk(t_stack *a, t_stack *b, int elems_to_push,
 	}
 }
 
-static void	push_chunks_to_b(t_stack *a, t_stack *b, int n_chunks,
-		int chunk_sz, int n)
+static void	push_chunks_to_b(t_stack *a, t_stack *b, t_chunk_info *info)
 {
 	int	curr_chunk;
 	int	max_idx_in_chunk;
 	int	elems_in_chunk;
 
 	curr_chunk = 0;
-	while (curr_chunk < n_chunks)
+	while (curr_chunk < info->num_chunks)
 	{
-		max_idx_in_chunk = (curr_chunk + 1) * chunk_sz - 1;
-		if (curr_chunk == n_chunks - 1)
-			max_idx_in_chunk = n - 1;
-		elems_in_chunk = chunk_sz;
-		if (curr_chunk == n_chunks - 1)
-			elems_in_chunk = n - (curr_chunk * chunk_sz);
+		max_idx_in_chunk = (curr_chunk + 1) * info->chunk_size - 1;
+		if (curr_chunk == info->num_chunks - 1)
+			max_idx_in_chunk = info->total_size - 1;
+		elems_in_chunk = info->chunk_size;
+		if (curr_chunk == info->num_chunks - 1)
+			elems_in_chunk = info->total_size - (curr_chunk * info->chunk_size);
 		process_one_chunk(a, b, elems_in_chunk, max_idx_in_chunk);
 		curr_chunk++;
 	}
@@ -78,12 +74,12 @@ static void	push_chunks_to_b(t_stack *a, t_stack *b, int n_chunks,
 		pb(a, b);
 }
 
-static void	push_sorted_to_a(t_stack *a, t_stack *b, int n)
+static void	push_sorted_to_a(t_stack *a, t_stack *b, t_chunk_info *info)
 {
 	int		target_idx;
 	t_node	*node_to_move;
 
-	target_idx = n - 1;
+	target_idx = info->total_size - 1;
 	while (b->size > 0)
 	{
 		node_to_move = find_node_by_idx(b, target_idx);

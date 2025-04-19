@@ -6,11 +6,25 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/13 17:23:50 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/13 18:10:06 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/19 12:06:13 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/push_swap.h"
+
+t_node	*create_node(int value)
+{
+	t_node	*new_node;
+
+	new_node = (t_node *)malloc(sizeof(t_node));
+	if (!new_node)
+		return (NULL);
+	new_node->value = value;
+	new_node->index = -1;
+	new_node->prev = NULL;
+	new_node->next = NULL;
+	return (new_node);
+}
 
 int	node_position(t_stack *stack, t_node *node_to_find)
 {
@@ -39,8 +53,8 @@ void	node_to_top_a(t_stack *stack_a, t_node *target_node)
 	int	rev;
 
 	if (!stack_a || stack_a->size < 2 || !target_node
-			|| stack_a->head == target_node)
-		return;
+		|| stack_a->head == target_node)
+		return ;
 	pos = node_position(stack_a, target_node);
 	if (pos == -1)
 		return ;
@@ -67,8 +81,8 @@ void	node_to_top_b(t_stack *stack_b, t_node *target_node)
 	int	rev;
 
 	if (!stack_b || stack_b->size < 2 || !target_node
-			|| stack_b->head == target_node)
-		return;
+		|| stack_b->head == target_node)
+		return ;
 	pos = node_position(stack_b, target_node);
 	if (pos == -1)
 		return ;

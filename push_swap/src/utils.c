@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/13 13:11:06 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/13 13:29:27 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/19 12:02:22 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ bool	is_num(const char *str)
 	if (str[i] == '-' || str[i] == '+')
 		i++;
 	if (!str[i])
-			return (false);
+		return (false);
 	while (str[i])
 	{
 		if (str[i] < '0' || str[i] > '9')
@@ -41,4 +41,3 @@ void	error_exit(t_stack *stack_a, t_stack *stack_b)
 	write(2, "Error\n", 6);
 	exit(1);
 }
-
