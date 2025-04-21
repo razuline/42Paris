@@ -6,22 +6,40 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 20:20:11 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/17 20:26:58 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/21 13:45:51 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "so_long.h"
 
-static void	img_to_window(t_game *game, void *img, int x, int y)
-{
-	int	pixel_x;
-	int	pixel_y;
+static void	draw_map(t_game *game);
+static void	draw_tile(t_game *game, int x, int y);
+static void	draw_player(t_game *game);
+static void	img_to_window(t_game *game, void *img, int x, int y);
 
-	if (!img)
-		return ;
-	pixel_x = x * TILE_SIZE;
-	pixel_y = y * TILE_SIZE;
-	mlx_put_image_to_window(game->mlx, game->win, img, pixel_x, pixel_y);
+int	render_frame(t_game *game)
+{
+	draw_map(game);
+	draw_player(game);
+	return (0);
+}
+
+static void	draw_map(t_game *game)
+{
+	int	x;
+	int	y;
+
+	y = 0;
+	while (y < game->map.height)
+	{
+		x = 0;
+		while (x < game->map.width)
+		{
+			draw_tile(game, x, y);
+			x++;
+		}
+		y++;
+	}
 }
 
 static void	draw_tile(t_game *game, int x, int y)
@@ -44,33 +62,20 @@ static void	draw_tile(t_game *game, int x, int y)
 	}
 }
 
-static void	draw_map(t_game *game)
-{
-	int	x;
-	int	y;
-
-	y = 0;
-	while (y < game->map.height)
-	{
-		x = 0;
-		while (x < game->map.width)
-		{
-			draw_tile(game, x, y);
-			x++;
-		}
-		y++;
-	}
-}
-
 static void	draw_player(t_game *game)
 {
 	img_to_window(game, game->tex.player,
 		game->player_pos.x, game->player_pos.y);
 }
 
-int	render_frame(t_game *game)
+static void	img_to_window(t_game *game, void *img, int x, int y)
 {
-	draw_map(game);
-	draw_player(game);
-	return (0);
+	int	pixel_x;
+	int	pixel_y;
+
+	if (!img)
+		return ;
+	pixel_x = x * TILE_SIZE;
+	pixel_y = y * TILE_SIZE;
+	mlx_put_image_to_window(game->mlx, game->win, img, pixel_x, pixel_y);
 }

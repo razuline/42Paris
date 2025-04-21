@@ -6,12 +6,12 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/12 13:03:55 by erazumov          #+#    #+#              #
-#    Updated: 2025/04/18 11:37:21 by erazumov         ###   ########.fr        #
+#    Updated: 2025/04/19 17:06:02 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = libft.a
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -Wall -Wextra -Werror -fPIC
 INCLUDE = -I includes/
 LIBC = ar rcs
 

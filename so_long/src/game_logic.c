@@ -6,13 +6,13 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 20:49:38 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/17 21:01:00 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/21 13:51:58 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "so_long.h"
 
-void	exit_game(t_game *game, int exit_code);
+static void	win_game(t_game *game);
 
 void	collect_item(t_game *game, int x, int y)
 {
@@ -26,15 +26,6 @@ void	collect_item(t_game *game, int x, int y)
 	}
 }
 
-void	win_game(t_game *game)
-{
-	ft_printf("------------------------------\n");
-	ft_printf("       CONGRATULATIONS!       \n");
-	ft_printf(" You escaped in %d moves!\n", game->moves);
-	ft_printf("------------------------------\n");
-	exit_game(game, EXIT_SUCCESS);
-}
-
 void	check_exit(t_game *game, int x, int y)
 {
 	(void)x;
@@ -45,4 +36,13 @@ void	check_exit(t_game *game, int x, int y)
 	else
 		ft_printf("Exit is closed. Collect all items first!\n");
 
+}
+
+static void	win_game(t_game *game)
+{
+	ft_printf("------------------------------\n");
+	ft_printf("       CONGRATULATIONS!       \n");
+	ft_printf(" You escaped in %d moves!\n", game->moves);
+	ft_printf("------------------------------\n");
+	exit_game(game, EXIT_SUCCESS);
 }

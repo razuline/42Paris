@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 17:12:41 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/18 11:27:48 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/21 13:32:06 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,17 @@ int	process_dimen_line(char *line, t_game *game, int *first_line)
 	return (0);
 }
 
+int	allocate_grid(t_game *game)
+{
+	if (game->map.height <= 0)
+		return (-1);
+	game->map.grid = (char **)malloc(sizeof(char *) * (game->map.height + 1));
+	if (!game->map.grid)
+		return (-1);
+	game->map.grid[game->map.height] = NULL;
+	return (0);
+}
+
 void	cleanup_fill_error(t_game *game, int count)
 {
 	int	i;
@@ -79,16 +90,5 @@ int	check_remain_lines(int fd)
 	}
 	if (existed)
 		return (-1);
-	return (0);
-}
-
-int	allocate_grid(t_game *game)
-{
-	if (game->map.height <= 0)
-		return (-1);
-	game->map.grid = (char **)malloc(sizeof(char *) * (game->map.height + 1));
-	if (!game->map.grid)
-		return (-1);
-	game->map.grid[game->map.height] = NULL;
 	return (0);
 }

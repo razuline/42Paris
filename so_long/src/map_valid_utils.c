@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 18:06:03 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/18 11:27:57 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/21 13:57:24 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ int	is_valid_char(char c)
 	return (0);
 }
 
-void	update_counts(char c, t_game *game, int x, int y, int counts[3])
+void	upd_counts(char c, t_game *game, int x, int y, int counts[3])
 {
 	if (c == PLAYER)
 	{

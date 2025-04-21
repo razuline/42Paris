@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 13:55:51 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/18 11:27:27 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/21 13:57:32 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 # include "libft.h"
 # include "mlx.h"
 
-# define TILE_SIZE 32
+# define TILE_SIZE 16
 
 # define WALL '1'
 # define FLOOR '0'
@@ -76,8 +76,8 @@ void	init_game_struct(t_game *game);
 void	run_game(t_game *game);
 
 /* Error */
-void	exit_error(t_game *game, char *msg);
 void	print_error(char *msg);
+void	exit_error(t_game *game, char *msg);
 
 /* Map */
 void	read_map(char *filename, t_game *game);
@@ -95,7 +95,6 @@ int		move_player(t_game *game, int dx, int dy);
 /* Logic */
 void	collect_item(t_game *game, int x, int y);
 void	check_exit(t_game *game, int x, int y);
-void	win_game(t_game *game);
 
 /* Cleanup */
 void	cleanup_game(t_game *game);
@@ -106,14 +105,16 @@ void	destroy_textures(t_game *game);
 /* Utils */
 void	trim_newline(char *line);
 int		process_dimen_line(char *line, t_game *game, int *first_line);
+int		allocate_grid(t_game *game);
 void	cleanup_fill_error(t_game *game, int count);
 int		check_remain_lines(int fd);
-int		allocate_grid(t_game *game);
+
 int		check_horiz_walls(t_game *game);
 int		check_vert_walls(t_game *game);
 int		is_valid_char(char c);
-void	update_counts(char c, t_game *game, int x, int y, int counts[3]);
+void	upd_counts(char c, t_game *game, int x, int y, int counts[3]);
 int		final_count_check(t_game *game, int counts[3]);
+
 int		copy_map_grid(t_game *game, char ***grid_copy_ptr);
 void	free_grid_copy(char **grid_copy, int height);
 

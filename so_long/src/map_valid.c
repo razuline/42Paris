@@ -6,17 +6,27 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 18:16:34 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/18 11:28:00 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/21 14:01:19 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "so_long.h"
 
-int		check_horiz_walls(t_game *game);
-int		check_vert_walls(t_game *game);
-int		is_valid_char(char c);
-void	update_counts(char c, t_game *game, int x, int y, int counts[3]);
-int		final_count_check(t_game *game, int counts[3]);
+static int	check_rectang(t_game *game);
+static int	check_walls(t_game *game);
+static int	check_chars_and_count(t_game *game);
+static int	process_char(t_game *game, int x, int y, int counts[3]);
+
+void	valid_map_struct(t_game *game)
+{
+	if (!check_rectang(game))
+		exit_error(game, "Map validation failed: Not rectangular.");
+	if (!check_walls(game))
+		exit_error(game, "Map validation failed: Walls incomplete.");
+	if (!check_chars_and_count(game))
+		exit_error(game, "Map validation failed: Invalid characters or counts.");
+	ft_printf("Map structure is valid.\n");
+}
 
 static int	check_rectang(t_game *game)
 {
@@ -52,20 +62,6 @@ static int	check_walls(t_game *game)
 	return (1);
 }
 
-static int	process_char(t_game *game, int x, int y, int counts[3])
-{
-	char	curr_char;
-
-	curr_char = game->map.grid[y][x];
-	if (!is_valid_char(curr_char))
-	{
-		print_error("Invalid character found in map.");
-		return (0);
-	}
-	update_counts(curr_char, game, x, y, counts);
-	return (1);
-}
-
 static int	check_chars_and_count(t_game *game)
 {
 	int	x;
@@ -94,13 +90,16 @@ static int	check_chars_and_count(t_game *game)
 	return (1);
 }
 
-void	valid_map_struct(t_game *game)
+static int	process_char(t_game *game, int x, int y, int counts[3])
 {
-	if (!check_rectang(game))
-		exit_error(game, "Map validation failed: Not rectangular.");
-	if (!check_walls(game))
-		exit_error(game, "Map validation failed: Walls incomplete.");
-	if (!check_chars_and_count(game))
-		exit_error(game, "Map validation failed: Invalid characters or counts.");
-	ft_printf("Map structure is valid.\n");
+	char	curr_char;
+
+	curr_char = game->map.grid[y][x];
+	if (!is_valid_char(curr_char))
+	{
+		print_error("Invalid character found in map.");
+		return (0);
+	}
+	upd_counts(curr_char, game, x, y, counts);
+	return (1);
 }

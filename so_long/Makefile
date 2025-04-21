@@ -6,7 +6,7 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/17 13:28:17 by erazumov          #+#    #+#              #
-#    Updated: 2025/04/18 16:02:21 by erazumov         ###   ########.fr        #
+#    Updated: 2025/04/19 17:07:59 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,10 +14,11 @@
 NAME = so_long
 
 # Compiler and flags
+CC = gcc
 CFLAGS = -Wall -Wextra -Werror
+LDFLAGS = -L$(LIBFT_DIR) -lft $(MLXFLAGS) -pie
 RM = rm -f
 RMDIR = rm -rf
-INCLUDES = -I includes/ -I $(MLX_DIR) -I $(LIBFT_DIR)/includes
 
 # Directories
 SRC_DIR = src/
@@ -25,42 +26,43 @@ OBJ_DIR = obj/
 LIBFT_DIR = libft/
 MLX_DIR = mlx/
 
-# Libft specifics
+# Includes
+INCLUDES = -I includes/ -I $(MLX_DIR) -I $(LIBFT_DIR)/includes
+
+# Libft
 LIBFT = $(LIBFT_DIR)/libft.a
-LIBFT_INC = -I $(LIBFT_DIR)/includes
 
 # Source files
 SRC = main.c \
-		error.c \
-		init.c \
-		hooks.c \
-		render.c \
-		cleanup.c \
-		game_logic.c \
-		map_reader.c \
-		map_reader_utils.c \
-		map_valid.c \
-		map_valid_utils.c \
-		map_grid_utils.c \
-		valid_path.c \
-		player_move.c
+	  error.c \
+	  init.c \
+	  hooks.c \
+	  render.c \
+	  cleanup.c \
+	  game_logic.c \
+	  map_reader.c \
+	  map_reader_utils.c \
+	  map_valid.c \
+	  map_valid_utils.c \
+	  map_grid_utils.c \
+	  valid_path.c \
+	  player_move.c
 
-VPATH = $(SRC_DIR)
-$(OBJ_DIR)/%.o: %.c
 OBJS = $(addprefix $(OBJ_DIR)/,$(SRC:.c=.o))
 
-# OS
+# OS Detection and MLX Configuration
 OS = $(shell uname -s)
 
 ifeq ($(OS), Linux)
-	MLXFLAGS = -L$(MLX_DIR) -lmlx -lXext -lX11 -lm -lbsd
+	# Linux configuration
+	MLXFLAGS = $(MLX_DIR)/libmlx.a -lXext -lX11 -lm -lbsd
+	CFLAGS += -D__linux__
 else
-	$(warning "Unsupported OS detected: $(OS). Using Linux MLX flags.")
-	MLXFLAGS = -L$(MLX_DIR) -lmlx -lXext -lX11 -lm -lbsd
+	$(error "Unsupported OS: $(OS)")
 endif
 
-# Flags
-LDFLAGS = -L $(LIBFT_DIR) -lft $(MLXFLAGS)
+# Linker flags
+LDFLAGS = -L$(LIBFT_DIR) -lft $(MLXFLAGS)
 
 # Colors
 RESET = \033[0m
@@ -78,8 +80,8 @@ $(LIBFT):
 
 $(NAME): $(OBJS) | $(LIBFT)
 	@if [ ! -d "$(MLX_DIR)" ]; then \
-	echo "$(RED)❌ Error: $(MLX_DIR) not found.$(RESET)"; \
-		exit (1); \
+		echo "$(RED)❌ Error: $(MLX_DIR) not found.$(RESET)"; \
+		exit 1; \
 	fi
 	@echo "$(BLUE)🔗 Linking $(NAME)...$(RESET)"
 	@$(CC) $(CFLAGS) $(OBJS) $(LDFLAGS) -o $(NAME)

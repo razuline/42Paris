@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 20:29:13 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/17 20:40:03 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/21 14:11:56 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ static int	window_close(t_game *game)
 
 static int	keypress(int keycode, t_game *game)
 {
-	int moved;
+	int	moved;
 
 	moved = 0;
 	if (keycode == KEY_ESC)
@@ -33,6 +33,7 @@ static int	keypress(int keycode, t_game *game)
 		moved = move_player(game, 0, 1);
 	else if (keycode == KEY_D)
 		moved = move_player(game, 1, 0);
+	(void)moved;
 	return (0);
 }
 
