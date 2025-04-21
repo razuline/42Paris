@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 20:56:22 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/21 14:10:51 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/21 17:04:55 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,10 +56,8 @@ static void	cleanup_mlx(t_game *game)
 	}
 	if (game->mlx)
 	{
-		#ifdef __linux__
 		mlx_destroy_display(game->mlx);
 		free(game->mlx);
-		#endif
 		game->mlx = NULL;
 	}
 }
@@ -67,7 +65,7 @@ static void	cleanup_mlx(t_game *game)
 void	cleanup_game(t_game *game)
 {
 	if (!game)
-		return;
+		return ;
 	free_map_grid(game->map.grid, game->map.height);
 	game->map.grid = NULL;
 	destroy_textures(game);

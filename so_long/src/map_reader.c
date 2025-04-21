@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 14:13:49 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/21 14:06:20 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/21 15:15:42 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,14 +24,14 @@ void	read_map(char *filename, t_game *game)
 	status = do_first_pass(filename, game);
 	if (status < 0)
 		exit_error(game, "Failed to read map dimensions or map is"
-				"empty/invalid.");
+			"empty/invalid.");
 	status = allocate_grid(game);
 	if (status < 0)
 		exit_error(game, "Memory allocation failed for map grid.");
 	status = do_second_pass(filename, game);
 	if (status < 0)
 		exit_error(game, "Failed to fill map grid or extra lines"
-				"found in file.");
+			"found in file.");
 }
 
 static int	do_first_pass(char *filename, t_game *game)
@@ -119,5 +119,3 @@ static int	fill_grid_loop(int fd, t_game *game)
 	}
 	return (0);
 }
-
-

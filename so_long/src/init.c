@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 20:07:57 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/21 13:42:09 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/21 15:58:07 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,25 +54,42 @@ static void	load_all_textures(t_game *game)
 	load_one_texture(game, &game->tex.exit_open, EXIT_OPEN_XPM);
 }
 
+static void	handle_texture_error(t_game *game, char *path, char *reason,
+	t_point size)
+{
+	ft_putstr_fd("Error\nTexture Error: ", 2);
+	ft_putstr_fd(reason, 2);
+	ft_putstr_fd("\nPath: ", 2);
+	ft_putstr_fd(path, 2);
+	if (size.x > 0)
+	{
+		ft_putstr_fd("\nSize: ", 2);
+		ft_putnbr_fd(size.x, 2);
+		ft_putstr_fd("x", 2);
+		ft_putnbr_fd(size.y, 2);
+		ft_putstr_fd(" Expected: ", 2);
+		ft_putnbr_fd(TILE_SIZE, 2);
+		ft_putstr_fd("x", 2);
+		ft_putnbr_fd(TILE_SIZE, 2);
+	}
+	ft_putstr_fd("\n", 2);
+	cleanup_game(game);
+	exit(EXIT_FAILURE);
+}
+
 static void	load_one_texture(t_game *game, void **texture_ptr, char *path)
 {
-	int	width;
-	int	height;
+	int		width;
+	int		height;
+	t_point	img_size;
 
 	*texture_ptr = mlx_xpm_file_to_image(game->mlx, path, &width, &height);
 	if (*texture_ptr == NULL)
-	{
-		char msg_buffer[100];
-		sprintf(msg_buffer, "Failed to load texture: %s", path);
-		exit_error(game, msg_buffer);
-	}
+		handle_texture_error(game, path, "Failed to load", (t_point){-1, -1});
 	if (width != TILE_SIZE || height != TILE_SIZE)
 	{
-		printf("Warning: Texture '%s' size (%dx%d) differs from TILE_SIZE (%d)\n",
-				path, width, height, TILE_SIZE);
-		char msg_buffer[150];
-		sprintf(msg_buffer, "Texture %s has wrong size (%dx%d), expected %dx%d",
-				path, width, height, TILE_SIZE, TILE_SIZE);
-		exit_error(game, msg_buffer);
+		img_size.x = width;
+		img_size.y = height;
+		handle_texture_error(game, path, "Wrong size", img_size);
 	}
 }

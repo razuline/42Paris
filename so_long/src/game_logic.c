@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 20:49:38 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/21 13:51:58 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/21 15:15:05 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,12 +30,10 @@ void	check_exit(t_game *game, int x, int y)
 {
 	(void)x;
 	(void)y;
-
 	if (game->exit_access == 1)
 		win_game(game);
 	else
 		ft_printf("Exit is closed. Collect all items first!\n");
-
 }
 
 static void	win_game(t_game *game)

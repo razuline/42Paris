@@ -1,6 +1,6 @@
 /* XPM */
-static char * player_xpm[] = {
-"16 15 7 1",
+static char * player1_xpm[] = {
+"16 16 7 1",
 " 	c None",
 ".	c #66844E",
 "+	c #77C46F",
@@ -8,6 +8,7 @@ static char * player_xpm[] = {
 "#	c #422F4F",
 "$	c #F6CA9F",
 "%	c #D3FC7E",
+"                ",
 "   ...    ...   ",
 "  .+++....+++.  ",
 " @++++++++++++@ ",

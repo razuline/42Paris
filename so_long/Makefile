@@ -6,7 +6,7 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/17 13:28:17 by erazumov          #+#    #+#              #
-#    Updated: 2025/04/19 17:07:59 by erazumov         ###   ########.fr        #
+#    Updated: 2025/04/21 16:50:41 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -45,6 +45,8 @@ SRC = main.c \
 	  map_valid.c \
 	  map_valid_utils.c \
 	  map_grid_utils.c \
+	  path_utils.c \
+	  stack_utils.c \
 	  valid_path.c \
 	  player_move.c
 

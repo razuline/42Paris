@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 13:55:51 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/21 13:57:32 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/21 17:02:39 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,11 +28,13 @@
 # define PLAYER 'P'
 # define EXIT 'E'
 
-#  define KEY_W 119
-#  define KEY_A 97
-#  define KEY_S 115
-#  define KEY_D 100
-#  define KEY_ESC 65307
+# define KEY_W 119
+# define KEY_A 97
+# define KEY_S 115
+# define KEY_D 100
+# define KEY_ESC 65307
+
+# define MAX_STACK_SIZE 1024
 
 typedef struct s_point
 {
@@ -70,6 +72,12 @@ typedef struct s_game
 	int			exit_access;
 }			t_game;
 
+typedef struct s_stack
+{
+	t_point	coords[MAX_STACK_SIZE];
+	int		top;
+}			t_stack;
+
 /* main.c */
 void	check_args(int ac, char **av);
 void	init_game_struct(t_game *game);
@@ -88,6 +96,11 @@ void	valid_path(t_game *game);
 void	init_game(t_game *game);
 int		render_frame(t_game *game);
 void	setup_hooks(t_game *game);
+
+/* Stack */
+void	init_stack(t_stack *stack);
+int		push(t_stack *stack, t_point p);
+t_point	pop(t_stack *stack);
 
 /* Player */
 int		move_player(t_game *game, int dx, int dy);
@@ -112,8 +125,11 @@ int		check_remain_lines(int fd);
 int		check_horiz_walls(t_game *game);
 int		check_vert_walls(t_game *game);
 int		is_valid_char(char c);
-void	upd_counts(char c, t_game *game, int x, int y, int counts[3]);
+void	upd_char_counts(char c, int counts[3]);
+void	store_player_pos(t_game *game, int x, int y);
 int		final_count_check(t_game *game, int counts[3]);
+int		is_valid_cell(char **grid, t_point size, t_point current);
+int		is_reach(t_game *game, char **grid_copy);
 
 int		copy_map_grid(t_game *game, char ***grid_copy_ptr);
 void	free_grid_copy(char **grid_copy, int height);
