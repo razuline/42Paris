@@ -6,7 +6,7 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/17 13:28:17 by erazumov          #+#    #+#              #
-#    Updated: 2025/04/21 16:50:41 by erazumov         ###   ########.fr        #
+#    Updated: 2025/04/21 18:07:16 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,7 +15,7 @@ NAME = so_long
 
 # Compiler and flags
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -Wall -Wextra -Werror -g
 LDFLAGS = -L$(LIBFT_DIR) -lft $(MLXFLAGS) -pie
 RM = rm -f
 RMDIR = rm -rf

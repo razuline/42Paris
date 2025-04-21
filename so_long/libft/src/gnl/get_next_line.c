@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 16:36:23 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/17 14:31:56 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/21 18:21:11 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,34 +19,45 @@ occurred. */
 
 #include "libft.h"
 
-char	*ft_if_error(char *remainder)
+static char	*join_and_upd(char *remainder, char *buff)
 {
-	free(remainder);
-	remainder = NULL;
-	return (NULL);
+	char	*tmp_join;
+
+	tmp_join = ft_str_join(remainder, buff);
+	if (remainder)
+	{
+		free(remainder);
+		remainder = NULL;
+	}
+	return (tmp_join);
 }
 
 char	*ft_read(int fd, char *remainder)
 {
 	char	*buff;
-	int		bytes;
+	int		bytes_read;
 
-	buff = malloc(sizeof(char) * (BUFFER_SIZE + 1));
-	if (!buff)
+	if (!(buff = malloc(sizeof(char) * (BUFFER_SIZE + 1))))
 		return (ft_if_error(remainder));
-	bytes = 1;
-	while (!ft_strchr(remainder, '\n') && bytes != 0)
+	bytes_read = 1;
+	while (bytes_read > 0)
 	{
-		bytes = read(fd, buff, BUFFER_SIZE);
-		if (bytes == -1)
+		if (remainder && ft_strchr(remainder, '\n'))
+			break ;
+		bytes_read = read(fd, buff, BUFFER_SIZE);
+		if (bytes_read <= 0)
+			break ;
+		buff[bytes_read] = '\0';
+		remainder = join_and_upd(remainder, buff);
+		if (!remainder)
 		{
-			free(buff);
-			return (ft_if_error(remainder));
+			bytes_read = -1;
+			break ;
 		}
-		buff[bytes] = '\0';
-		remainder = ft_str_join(remainder, buff);
 	}
 	free(buff);
+	if (bytes_read == -1)
+		return (ft_if_error(remainder));
 	return (remainder);
 }
 

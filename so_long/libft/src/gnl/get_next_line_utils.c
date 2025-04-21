@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 16:36:51 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/17 14:31:22 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/21 18:17:42 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,13 @@ char	*ft_str_join(char *remainder, char *buff)
 	result[ft_strlen(remainder) + ft_strlen(buff)] = '\0';
 	ft_if_error(remainder);
 	return (result);
+}
+
+char	*ft_if_error(char *remainder)
+{
+	free(remainder);
+	remainder = NULL;
+	return (NULL);
 }
 
 /*
