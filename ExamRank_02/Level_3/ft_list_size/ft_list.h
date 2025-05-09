@@ -1,44 +1,22 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   hidenp.c                                           :+:      :+:    :+:   */
+/*   ft_list.h                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/05/09 19:52:46 by erazumov          #+#    #+#             */
-/*   Updated: 2025/05/09 20:02:11 by erazumov         ###   ########.fr       */
+/*   Created: 2025/05/09 19:44:35 by erazumov          #+#    #+#             */
+/*   Updated: 2025/05/09 19:49:51 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <unistd.h>
+#ifndef FT_LIST_H
+# define FT_LIST_H
 
-int	is_hidden(char *s1, char *s2)
+typedef struct	s_list
 {
-	if (*s1 == '\0')
-		return (1);
-	while (*s2 != '\0')
-	{
-		if (*s1 == *s2)
-		{
-			s1++;
-			if (*s1 == '\0')
-				return (1);
-		}
-		s2++;
-	}
-	return (0);
-}
+	struct s_list	*next;
+	void			*data;
+}				t_list;
 
-int	main(int ac, char **av)
-{
-	if (ac != 3)
-	{
-		write(1, "\n", 1);
-		return (0);
-	}
-	if (is_hidden(av[1], av[2]))
-		write(1, "1\n", 2);
-	else
-		write(1, "0\n", 2);
-	return (0);
-}
+#endif
