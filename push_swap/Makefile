@@ -5,51 +5,86 @@
 #                                                     +:+ +:+         +:+      #
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2025/02/22 15:13:07 by erazumov          #+#    #+#              #
-#    Updated: 2025/03/09 14:34:48 by erazumov         ###   ########.fr        #
+#    Created: 2025/04/13 18:21:02 by erazumov          #+#    #+#              #
+#    Updated: 2025/04/13 19:30:22 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
+# Project Name
 NAME = push_swap
-CFLAGS = -Wall -Wextra -Werror
 
-SRCS = main.c \
-			sort_small.c turk_sort.c \
-			swap.c push.c rotate.c reverse_rotate.c \
-			init_stack.c print_stack.c utils.c
+# Compiler and flags
+CFLAGS = -Wall -Wextra -Werror -g
+RM = rm -f
 
-OBJS = $(SRCS:.c=.o)
-
+# Directories
+SRC_DIR = src/
+OBJ_DIR = obj/
 LIBFT_DIR = libft/
-FT_PRINTF_DIR = ft_printf/
+INCLUDES = -I includes/
 
-LIBFT = $(LIBFT_DIR)/libft.a
-FT_PRINTF = $(FT_PRINTF_DIR)/libftprintf.a
+# Libft specifics
+LIBFT_A = $(LIBFT_DIR)/libft.a
+LIBFT_INC = -I $(LIBFT_DIR)/includes
 
+# Source Files
+SRC = main.c \
+		swap.c \
+		push.c \
+		rotate.c \
+		rev_rotate.c \
+		parse.c \
+		sort_small.c \
+		sort_large.c \
+		utils.c \
+		stack_utils.c \
+		move_utils.c \
+		find_utils.c \
+		idx_utils.c
+OBJS = $(addprefix $(OBJ_DIR)/,$(SRC:.c=.o))
+
+# Colors
+RESET = \033[0m
+RED = \033[0;31m
+GREEN = \033[0;32m
+YELLOW = \033[0;33m
+BLUE = \033[0;34m
+
+# Rules
 all: $(NAME)
 
-$(NAME): $(LIBFT) $(FT_PRINTF) $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) $(LIBFT) $(FT_PRINTF) -o $(NAME)
+$(LIBFT_A):
+	@echo "$(BLUE)📘 Building Libft...$(RESET)"
+	@make -s -C $(LIBFT_DIR)
 
-$(LIBFT):
-	make -C $(LIBFT_DIR)
+$(NAME): $(OBJS) $(LIBFT_A)
+	@$(CC) $(CFLAGS) $(OBJS) $(LIBFT_A) -o $(NAME)
+	@echo "$(GREEN)✅ Compilation successful ➜ $(NAME)$(RESET)"
 
-$(FT_PRINTF):
-	make -C $(FT_PRINTF_DIR)
+$(OBJS): | $(OBJ_DIR)
 
-%.o: %.c
-	$(CC) $(CFLAGS) -I . -c $< -o $@
+$(OBJ_DIR):
+	@mkdir -p $(OBJ_DIR)
+	@echo "$(BLUE)📁 Created object directory: $(OBJ_DIR)$(RESET)"
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)%.c
+	@$(CC) $(CFLAGS) $(INCLUDES) $(LIBFT_INC) -c $< -o $@
+	@echo "$(YELLOW)🪄 Compiling:$(RESET) $< -> $@"
 
 clean:
-	make clean -C $(LIBFT_DIR)
-	make clean -C $(FT_PRINTF_DIR)
-
+	@$(RM) -r $(OBJ_DIR)
+	@make clean -s -C $(LIBFT_DIR)
+	@echo "$(RED)🧹 Object files removed$(RESET)"
+	
 fclean: clean
-	rm -f $(NAME)
-	rm -rf $(OBJS)
-	make fclean -C $(LIBFT_DIR)
-	make fclean -C $(FT_PRINTF_DIR)
+	@$(RM) $(NAME)
+	@make fclean -s -C $(LIBFT_DIR)
+	@echo "$(RED)🗑️ Executables removed$(RESET)"
+	@echo "$(RED)🗑️ Libft cleaned$(RESET)"
 
 re: fclean all
 
-.PHONY: all clean fclean re
+norm:
+	@norminette $(SRC_DIR) includes/ | grep -v "OK" || true
+
+.PHONY: all clean fclean re norm

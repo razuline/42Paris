@@ -6,7 +6,11 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 13:10:31 by erazumov          #+#    #+#             */
+<<<<<<< HEAD
 /*   Updated: 2025/04/05 11:26:43 by erazumov         ###   ########.fr       */
+=======
+/*   Updated: 2025/04/07 16:21:18 by erazumov         ###   ########.fr       */
+>>>>>>> 067c015f5ab24bc9e53b58248916ec800799bc19
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,14 +19,14 @@
 void	print_status(t_philo *philo, char *status)
 {
 	pthread_mutex_lock(&philo->data->print_mutex);
-	printf("%llu %d %s\n", get_time() - philo->data->start_time,
+	printf("%lu %d %s\n", get_time() - philo->data->start_time,
 		philo->philo_id, status);
 	pthread_mutex_unlock(&philo->data->print_mutex);
 }
 
-int	ft_atoi(char *str)
+long	ft_atoi(const char *str)
 {
-	int	result;
+	long	result;
 
 	result = 0;
 	while (*str == ' ')

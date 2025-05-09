@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/05 10:29:35 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/05 11:09:24 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/04/07 16:06:58 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ static int	check_meals(t_data *data)
 
 	i = 0;
 	all_ate = 1;
-	while (i < data->number_of_philosophers && (all_ate == all_ate))
+	while (i < data->number_of_philosophers && all_ate)
 	{
 		pthread_mutex_lock(&data->meal_mutex);
 		if (data->philos[i].meals_eaten < data->must_eat_count)
@@ -44,7 +44,7 @@ void	monitor(t_data *data)
 {
 	int	i;
 
-	while (should_continue(data) && (i = -1))
+	while (should_continue(data))
 	{
 		i = 0;
 		while (++i < data->number_of_philosophers && should_continue(data))
@@ -58,7 +58,7 @@ void	monitor(t_data *data)
 				return ;
 			}
 		}
-		if (check_meals(data))
+		if (data->must_eat_count != -1 && check_meals(data))
 		{
 			pthread_mutex_lock(&data->meal_mutex);
 			data->philos_ate_enough = 1;
@@ -67,4 +67,16 @@ void	monitor(t_data *data)
 		}
 		usleep(1000);
 	}
+}
+
+int	alloc_resources(t_data *data)
+{
+	data->philos = malloc(sizeof(t_philo) * data->number_of_philosophers);
+	if (!data->philos)
+		return (ERROR);
+	data->forks = malloc(sizeof(pthread_mutex_t)
+			* data->number_of_philosophers);
+	if (!data->forks)
+		return (free(data->philos), ERROR);
+	return (SUCCESS);
 }

@@ -5,44 +5,91 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/03/11 15:51:16 by erazumov          #+#    #+#             */
-/*   Updated: 2025/03/21 14:09:13 by erazumov         ###   ########.fr       */
+/*   Created: 2025/04/17 20:07:57 by erazumov          #+#    #+#             */
+/*   Updated: 2025/04/21 15:58:07 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "so_long.h"
+#include "so_long.h"
 
-void	load_images(t_game *game)
+#define WALL_XPM        "images/wall.xpm"
+#define FLOOR_XPM       "images/floor.xpm"
+#define COLLECTIBLE_XPM "images/collectible.xpm"
+#define PLAYER_XPM      "images/player.xpm"
+#define EXIT_CLOSED_XPM "images/exit_closed.xpm"
+#define EXIT_OPEN_XPM   "images/exit_open.xpm"
+
+static void	init_mlx_and_window(t_game *game);
+static void	load_all_textures(t_game *game);
+static void	load_one_texture(t_game *game, void **texture_ptr, char *path);
+
+void	init_game(t_game *game)
 {
-	game->img.player_img = mlx_xpm_file_to_image(game->mlx, "assets/player.xpm",
-		&game->map.width, &game->map.height);
-	game->img.wall_img = mlx_xpm_file_to_image(game->mlx, "assets/wall.xpm",
-		&game->map.width, &game->map.height);
-	game->img.floor_img = mlx_xpm_file_to_image(game->mlx, "assets/floor.xpm",
-		&game->map.width, &game->map.height);
-	game->img.object_img = mlx_xpm_file_to_image(game->mlx, "assets/object.xpm",
-		&game->map.width, &game->map.height);
-	game->img.exit_img = mlx_xpm_file_to_image(game->mlx, "assets/exit.xpm",
-		&game->map.width, &game->map.height);
-	if (!game->img.player_img || !game->img.wall_img || !game->img.floor_img || 
-		!game->img.object_img || !game->img.exit_img)
-	{
-		ft_printf("Error: failed to load textures.\n");
-		free_game(game);
-		exit(1);
-	}
+	init_mlx_and_window(game);
+	load_all_textures(game);
 }
 
-int	init_game(t_game *game, char *map_file)
+static void	init_mlx_and_window(t_game *game)
 {
+	int	win_width;
+	int	win_height;
+
 	game->mlx = mlx_init();
-	if (!game->mlx || !parse_map(&game->map, map_file))
-		return (0);
-	game->win = mlx_new_window(game->mlx, game->map.width * TILE_SIZE,
-		game->map.height * TILE_SIZE, "so_long");
-	if (!game->win)
-		return (0);
-	load_images(game);
-	render_game(game);
-	return (1);
+	if (game->mlx == NULL)
+		exit_error(game, "Failed to initialize MiniLibX.");
+	win_width = game->map.width * TILE_SIZE;
+	win_height = game->map.height * TILE_SIZE;
+	game->win = mlx_new_window(game->mlx, win_width, win_height, "so_long");
+	if (game->win == NULL)
+		exit_error(game, "Failed to create game window.");
+}
+
+static void	load_all_textures(t_game *game)
+{
+	load_one_texture(game, &game->tex.wall, WALL_XPM);
+	load_one_texture(game, &game->tex.floor, FLOOR_XPM);
+	load_one_texture(game, &game->tex.collect, COLLECTIBLE_XPM);
+	load_one_texture(game, &game->tex.player, PLAYER_XPM);
+	load_one_texture(game, &game->tex.exit_closed, EXIT_CLOSED_XPM);
+	load_one_texture(game, &game->tex.exit_open, EXIT_OPEN_XPM);
+}
+
+static void	handle_texture_error(t_game *game, char *path, char *reason,
+	t_point size)
+{
+	ft_putstr_fd("Error\nTexture Error: ", 2);
+	ft_putstr_fd(reason, 2);
+	ft_putstr_fd("\nPath: ", 2);
+	ft_putstr_fd(path, 2);
+	if (size.x > 0)
+	{
+		ft_putstr_fd("\nSize: ", 2);
+		ft_putnbr_fd(size.x, 2);
+		ft_putstr_fd("x", 2);
+		ft_putnbr_fd(size.y, 2);
+		ft_putstr_fd(" Expected: ", 2);
+		ft_putnbr_fd(TILE_SIZE, 2);
+		ft_putstr_fd("x", 2);
+		ft_putnbr_fd(TILE_SIZE, 2);
+	}
+	ft_putstr_fd("\n", 2);
+	cleanup_game(game);
+	exit(EXIT_FAILURE);
+}
+
+static void	load_one_texture(t_game *game, void **texture_ptr, char *path)
+{
+	int		width;
+	int		height;
+	t_point	img_size;
+
+	*texture_ptr = mlx_xpm_file_to_image(game->mlx, path, &width, &height);
+	if (*texture_ptr == NULL)
+		handle_texture_error(game, path, "Failed to load", (t_point){-1, -1});
+	if (width != TILE_SIZE || height != TILE_SIZE)
+	{
+		img_size.x = width;
+		img_size.y = height;
+		handle_texture_error(game, path, "Wrong size", img_size);
+	}
 }
