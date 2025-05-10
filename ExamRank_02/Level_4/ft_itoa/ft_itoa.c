@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/10 11:59:13 by erazumov          #+#    #+#             */
-/*   Updated: 2025/05/10 11:59:14 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/05/10 14:26:03 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,7 @@ char	*ft_itoa(int nbr)
 	}
 	return (result);
 }
-
+/*
 #include <stdio.h>
 
 int	main(void)
@@ -67,3 +67,4 @@ int	main(void)
 	printf("%s\n", ft_itoa(2147483647));  // "2147483647"
 	printf("%s\n", ft_itoa(-2147483648)); // "-2147483648"
 }
+*/
