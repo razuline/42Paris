@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/10 16:11:29 by erazumov          #+#    #+#             */
-/*   Updated: 2025/05/10 16:31:31 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/05/11 16:57:02 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,28 +18,29 @@ void	ft_list_remove_if(t_list **begin_list, void *data_ref,
 {
 	t_list	*curr;
 	t_list	*prev;
-	t_list	*to_delete;
+	t_list	*to_free;
 
 	curr = *begin_list;
 	prev = NULL;
-	to_delete = NULL;
+	to_free = NULL;
+
 	while (curr != NULL)
 	{
 		if (cmp(curr->data, data_ref) == 0)
 		{
 			if (prev == NULL)
 			{
-				to_delete = *begin_list;
-				*begin_list = (*begin_list)->next;
-				curr = *begin_list;
+				*begin_list = curr->next;
+				to_free = curr;
+				curr = curr->next;
 			}
 			else
 			{
-				to_delete = curr;
 				prev->next = curr->next;
+				to_free = curr;
 				curr = curr->next;
 			}
-			free(to_delete);
+			free(to_free);
 		}
 		else
 		{
