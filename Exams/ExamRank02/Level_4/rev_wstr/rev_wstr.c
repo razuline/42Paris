@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/10 11:59:03 by erazumov          #+#    #+#             */
-/*   Updated: 2025/05/10 14:07:30 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/05/14 16:36:52 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,37 +14,30 @@
 
 void	rev_wstr(char *str)
 {
-	int	i;
-	int	j;
-	int	w_start;
-	int	w_end;
+	int	start;
+	int	end;
 
-	i = 0;
-	w_end = 0;
-	
-	while (str[i])
-		i++;
-	w_end = i - 1;
-	
-	while (i >= 0)
+	end = 0;
+	while (str[end])
+		end++;
+	end--;
+
+	while (end >= 0)
 	{
-		if (str[i] != ' ')
+		if (str[end] == ' ' || str[end] == '\t')
+			end--;
+		else
 		{
-			w_start = i;
-			while (w_start >= 0 && str[w_start] != ' ')
-				w_start--;
+			start = end;
+			while (start >= 0 && str[start] != ' ' && str[start] != '\t')
+				start--;
+			write(1, &str[start + 1], end - start);
 
-			j = w_start + 1;
-			while (j <= w_end)
-				write(1, &str[j++], 1);
-
-			if (w_start > 0)
+			if (start > 0)
 				write(1, " ", 1);
 
-			w_end = w_start - 1;
-			i = w_start;
+			end = start;
 		}
-		i--;
 	}
 }
 
