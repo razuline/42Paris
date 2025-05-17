@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/09 14:46:43 by erazumov          #+#    #+#             */
-/*   Updated: 2025/05/09 15:10:42 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/05/17 17:20:56 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,29 +19,6 @@ void	print_hex(unsigned int n)
 	if (n >= 16)
 		print_hex(n / 16);
 	write(1, &hex_digits[n % 16], 1);
-}
-
-int	ft_atoi(char *str)
-{
-	int	sign;
-	int	result;
-	
-	sign = 1;
-	result = 0;
-	while (*str == ' ' || (*str >= '\t' && *str <= '\r'))
-		str++;
-	if (*str == '+' || *str == '-')
-	{
-		if (*str == '-')
-			sign = -1;
-		str++;
-	}
-	while (*str >= '0' && *str <= '9')
-	{
-		result = result * 10 + (*str - '0');
-		str++;
-	}
-	return (result * sign);
 }
 
 int	main(int ac, char **av)

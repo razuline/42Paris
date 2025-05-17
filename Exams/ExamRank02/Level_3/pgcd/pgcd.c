@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/09 18:46:10 by erazumov          #+#    #+#             */
-/*   Updated: 2025/05/09 18:52:05 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/05/17 13:58:01 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,6 @@ int	pgcd(int a, int b)
 {
 	int	tmp;
 
-	if (a == 0 || b == 0)
-		return (0);
 	while (b != 0)
 	{
 		tmp = b;
@@ -30,21 +28,21 @@ int	pgcd(int a, int b)
 
 int	main(int ac, char **av)
 {
-	int	a;
-	int	b;
+	int	num1;
+	int	num2;
 
 	if (ac != 3)
 	{
 		printf("\n");
 		return (0);
 	}
-	a = atoi(av[1]);
-	b = atoi(av[2]);
-	if (a <= 0 || b <= 0)
+	num1 = atoi(av[1]);
+	num2 = atoi(av[2]);
+	if (num1 <= 0 || num2 <= 0)
 	{
 		printf("\n");
 		return (0);
 	}
-	printf("%d\n", pgcd(a, b));
+	printf("%d\n", pgcd(num1, num2));
 	return (0);
 }
