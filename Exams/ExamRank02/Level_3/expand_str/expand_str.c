@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/08 18:40:56 by erazumov          #+#    #+#             */
-/*   Updated: 2025/05/18 15:58:28 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/05/18 16:30:26 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,10 @@
 void	expand_str(char *str)
 {
 	int	space_flag;
+	int	first_word;
 
 	space_flag = 0;
+	first_word = 1;
 	while (*str == ' ' || *str == '\t')
 		str++;
 
@@ -26,13 +28,11 @@ void	expand_str(char *str)
 			space_flag = 1;
 		else
 		{
-			if (space_flag)
-			{
+			if (space_flag && !first_word)
 				write(1, "   ", 3);
-				space_flag = 0;
-			}
-			if (*str != ' ' && *str != '\t')
-				write(1, str, 1);
+			write(1, str, 1);
+			space_flag = 0;
+			first_word = 0;
 		}
 		str++;
 	}
