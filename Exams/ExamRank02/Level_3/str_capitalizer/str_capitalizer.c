@@ -6,12 +6,35 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/08 20:28:12 by erazumov          #+#    #+#             */
-/*   Updated: 2025/05/18 17:15:50 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/05/18 18:15:06 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <unistd.h>
 
+void	str_capitalizer(char *str)
+{
+	int	i;
+
+	i = 0;
+	while (str[i])
+	{
+		if (i == 0 || str[i-1] == ' ' || str[i-1] == '\t')
+		{
+			if (str[i] >= 'a' && str[i] <= 'z')
+				str[i] -= 32;
+		}
+		else
+		{
+			if (str[i] >= 'A' && str[i] <= 'Z')
+				str[i] += 32;
+		}
+		write(1, &str[i++], 1);
+	}
+}
+
+/* or */
+/*
 void	str_capitalizer(char *str)
 {
 	int	new_word;
@@ -45,6 +68,7 @@ void	str_capitalizer(char *str)
 		str++;
 	}
 }
+*/
 
 int	main(int ac, char **av)
 {

@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/08 20:49:08 by erazumov          #+#    #+#             */
-/*   Updated: 2025/05/09 14:36:31 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/05/18 18:14:49 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ void	rstr_capitalizer(char *str)
 	i = 0;
 	while (str[i])
 	{
-		if (str[i + 1] == ' ' || str[i + 1] == '\t' || str[i + 1] == '\0')
+		if (str[i+1] == ' ' || str[i+1] == '\t' || str[i+1] == '\0')
 		{
 			if (str[i] >= 'a' && str[i] <= 'z')
 				str[i] -= 32;
@@ -29,15 +29,28 @@ void	rstr_capitalizer(char *str)
 			if (str[i] >= 'A' && str[i] <= 'Z')
 				str[i] += 32;
 		}
-		i++;
+		write(1, &str[i++], 1);
 	}
+}
+
+/* or */
+/*
+void	rstr_capitalizer(char *str)
+{
+	int	i;
+	
 	i = 0;
 	while (str[i])
 	{
-		write(1, &str[i], 1);
-		i++;
+		if (str[i] >= 'A' && str[i] <= 'Z')
+			str[i] += 32;
+		if ((str[i] >= 'a' && str[i] <= 'z') &&
+				(str[i+1] == ' ' || str[i+1] == '\t' || str[i+1] == '\0'))
+			str[i] -= 32;
+		write(1, &str[i++], 1);
 	}
 }
+*/
 
 int	main(int ac, char **av)
 {
