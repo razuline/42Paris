@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/13 15:30:55 by erazumov          #+#    #+#             */
-/*   Updated: 2025/05/13 21:15:30 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/05/20 08:09:34 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,34 +14,24 @@
 
 size_t	ft_strspn(const char *s, const char *accept)
 {
-	int			found;
-	size_t		count;
-	const char	*s_ptr;
-	const char	*accept_ptr;
+	size_t		len;
+	const char	*a;
 
-	count = 0;
-	s_ptr = s;
-
-	while (*s_ptr != '\0')
+	len = 0;
+	while (s[len])
 	{
-		found = 0;
-		accept_ptr = accept;
-		while (*accept_ptr != '\0')
+		a = accept;
+		while (*a)
 		{
-			if (*s_ptr == *accept_ptr)
-			{
-				found = 1;
+			if (s[len] == *a)
 				break ;
-			}
-			accept_ptr++;
+			a++;
 		}
-		if (found == 1)
-			count++;
-		else
-			return (count);
-		s_ptr++;
+		if (!*a)
+			return (len);
+		len++;
 	}
-	return (count);
+	return (len);
 }
 
 /*

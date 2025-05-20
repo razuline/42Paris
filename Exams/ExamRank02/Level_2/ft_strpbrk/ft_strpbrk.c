@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/13 15:32:47 by erazumov          #+#    #+#             */
-/*   Updated: 2025/05/13 21:17:35 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/05/20 08:14:48 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,20 +14,18 @@
 
 char	*ft_strpbrk(const char *s1, const char *s2)
 {
-	const char	*s1_ptr;
 	const char	*s2_ptr;
 
-	s1_ptr = s1;
-	while (*s1_ptr)
+	while (*s1)
 	{
 		s2_ptr = s2;
 		while (*s2_ptr)
 		{
-			if (*s1_ptr == *s2_ptr)
-				return ((char *)s1_ptr);
+			if (*s1 == *s2_ptr)
+				return ((char *)s1);
 			s2_ptr++;
 		}
-		s1_ptr++;
+		s1++;
 	}
 	return (NULL);
 }

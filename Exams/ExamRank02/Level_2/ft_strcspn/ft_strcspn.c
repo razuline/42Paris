@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/13 15:31:58 by erazumov          #+#    #+#             */
-/*   Updated: 2025/05/13 21:17:22 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/05/20 08:12:39 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,33 +14,24 @@
 
 size_t	ft_strcspn(const char *s, const char *reject)
 {
-	int		found;
-	size_t	count;
-	const char	*s_ptr;
-	const char	*reject_ptr;
+	size_t	len;
+	const char	*r;
 
-	count = 0;
-	s_ptr = s;
-	while (*s_ptr != '\0')
+	len = 0;
+	while (s[len])
 	{
-		found = 0;
-		reject_ptr = reject;
-		while (*reject_ptr != '\0')
+		r = reject;
+		while (*r)
 		{
-			if (*s_ptr == *reject_ptr)
-			{
-				found = 1;
+			if (s[len] == *r)
 				break ;
-			}
-			reject_ptr++;
+			r++;
 		}
-		if (found == 1)
-			return (count);
-		else
-			count++;
-		s_ptr++;
+		if (*r)
+			return (len);
+		len++;
 	}
-	return (count);
+	return (len);
 }
 
 /*
