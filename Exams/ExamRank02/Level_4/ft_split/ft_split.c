@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/10 14:26:42 by erazumov          #+#    #+#             */
-/*   Updated: 2025/05/21 12:02:12 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/05/22 13:43:00 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ static int	words_count(char *str)
 	return (count);
 }
 
-char	*word_copy(char *str)
+static char	*word_copy(char *str)
 {
 	int		i;
 	int		len;
