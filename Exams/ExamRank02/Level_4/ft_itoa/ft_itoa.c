@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/10 11:59:13 by erazumov          #+#    #+#             */
-/*   Updated: 2025/05/13 22:14:22 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/05/22 13:39:31 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ char	*ft_itoa(int nbr)
 	num = nbr;
 	len = get_num_len(num);
 
-	result = (char*)malloc(sizeof(char) * (len + 1));
+	result = (char *)malloc(sizeof(char) * (len + 1));
 	if (!result)
 		return (NULL);
 

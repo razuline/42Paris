@@ -6,80 +6,99 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/10 14:26:42 by erazumov          #+#    #+#             */
-/*   Updated: 2025/05/13 22:14:45 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/05/22 13:43:00 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <stdlib.h>
 
-int	is_space(char c)
+static int	is_space(char c)
 {
 	return (c == ' ' || c == '\t' || c == '\n');
 }
 
-int	count_words(char *str)
+static int	words_count(char *str)
 {
 	int	count;
+	int	in_word;
 
 	count = 0;
+	in_word = 0;
+
 	while (*str)
 	{
-		while (is_space(*str))
-			str++;
-		if (*str)
+		if (!is_space(*str) && !in_word)
+		{
+			in_word = 1;
 			count++;
-		while (*str && !is_space(*str))
-			str++;
+		}
+		else if (is_space(*str))
+			in_word = 0;
+		str++;
 	}
 	return (count);
+}
+
+static char	*word_copy(char *str)
+{
+	int		i;
+	int		len;
+	char	*word;
+
+	len = 0;
+	while (str[len] && !is_space(str[len]))
+		len++;
+	
+	word = (char *)malloc(sizeof(char) * (len + 1));
+	if (!word)
+		return (NULL);
+	
+	i = 0;
+	while (i < len)
+	{
+		word[i] = str[i];
+		i++;
+	}
+	word[len] = '\0';
+	return (word);
 }
 
 char	**ft_split(char *str)
 {
 	int		i;
-	int		j;
-	int		len;
 	int		words;
-	char	*start;
 	char	**result;
 
 	if (!str)
 		return (NULL);
+	
+	words = words_count(str);
 
-	words = count_words(str);
-	result = malloc(sizeof(char *) * (words + 1));
+	result = (char **)malloc(sizeof(char *) * (words + 1));
 	if (!result)
 		return (NULL);
 
 	i = 0;
 	while (*str)
 	{
-		while (is_space(*str))
+		while (*str && is_space(*str))
 			str++;
+
 		if (!*str)
 			break ;
 		
-		start = str;
-		while (*str && !is_space(*str))
-			str++;
-		len = str - start;
-
-		result[i] = malloc(len + 1);
+		result[i] = word_copy(str);
 		if (!result[i])
 		{
-			while (i > 0)
-				free(result[--i]);
+			while (i-- > 0)
+				free(result[i]);
 			free(result);
 			return (NULL);
 		}
-		
-		j = 0;
-		while (j < len)
-		{
-			result[i][j] = start[j];
-			j++;
-		}
-		result[i++][len] = '\0';
+		i++;
+
+		while (*str && !is_space(*str))
+			str++;
 	}
 	result[i] = NULL;
 	return (result);
