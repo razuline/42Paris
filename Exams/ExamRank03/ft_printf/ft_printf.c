@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/22 13:05:16 by erazumov          #+#    #+#             */
-/*   Updated: 2025/05/22 13:40:22 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/05/27 13:44:53 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,59 +14,51 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-static int	ft_putchar(char c)
-{
-	return (write(1, &c, 1));
-}
-
-static int	ft_putstr(char *str)
+void	ft_putstr(char *s, int *count)
 {
 	int	i;
 
-	if (!str)
-		return (ft_putstr("(null)"));
+	if (!s)
+		s = "(null)";
 	i = 0;
-	while (str[i])
+	while (s[i])
 	{
-		ft_putchar(str[i]);
+		write(1, &s[i], 1);
 		i++;
+		(*count)++;
 	}
-	return (i);
 }
 
-static int	ft_putnbr(int n)
+void	ft_putnbr(int n, int *count)
 {
 	char	c;
-	int		len;
 
-	len = 0;
 	if (n == -2147483648)
-		return (ft_putstr("-2147483648"));
+	{
+		ft_putstr("-2147483648", count);
+		return ;
+	}
 	if (n < 0)
 	{
-		len += ft_putchar('-');
+		write(1, "-", 1);
+		(*count)++;
 		n = -n;
 	}
 	if (n >= 10)
-		len += ft_putnbr(n / 10);
+		ft_putnbr(n / 10, count);
 	c = (n % 10) + '0';
-	len += ft_putchar(c);
-	return (len);
+	write(1, &c, 1);
+	(*count)++;
 }
 
-static int	ft_puthex(unsigned int n, int uppercase)
+void	ft_puthex(unsigned int n, int *count)
 {
-	int		len;
-	char	*hex_digits;
+	char	*hex = "0123456789abcdef";
 
-	len = 0;
-	hex_digits = "0123456789abcdef";
-	if (uppercase)
-		hex_digits = "0123456789ABCDEF";
 	if (n >= 16)
-		len += ft_puthex(n / 16, uppercase);
-	len += ft_putchar(hex_digits[n % 16]);
-	return (len);
+		ft_puthex(n / 16, count);
+	write(1, &hex[n % 16], 1);
+	(*count)++;
 }
 
 int	ft_printf(const char *format, ...)
@@ -75,26 +67,35 @@ int	ft_printf(const char *format, ...)
 	int		count;
 	va_list	args;
 
+	if (!format)
+		return (-1);
+
 	i = 0;
 	count = 0;
 	va_start(args, format);
 
 	while (format[i])
 	{
-		if (format[i] == '%')
+		if (format[i] == '%' && format[i + 1])
 		{
 			i++;
 			if (format[i] == 's')
-				count += ft_putstr(va_arg(args, char *));
+				ft_putstr(va_arg(args, char *), &count);
 			else if (format[i] == 'd')
-				count += ft_putnbr(va_arg(args, int));
+				ft_putnbr(va_arg(args, int), &count);
 			else if (format[i] == 'x')
-				count += ft_puthex(va_arg(args, unsigned int), 0);
-			else if (format[i] == '%')
-				count += ft_putchar('%');
+				ft_puthex(va_arg(args, unsigned int), &count);
+			else
+			{
+				write(1, &format[i], 1);
+				count++;
+			}
 		}
 		else
-			count += ft_putchar(format[i]);
+		{
+			write(1, &format[i], 1);
+			count++;
+		}
 		i++;
 	}
 	va_end(args);
@@ -109,58 +110,58 @@ int	main(void)
 {
 	int	count;
 	int	real_count;
-	
+
 	printf("=== Basic Tests ===\n");
-	
+
 	// Test 1: Simple string
 	count = ft_printf("1. String: %s\n", "Hello");
 	real_count = printf("1. String: %s\n", "Hello");
 	printf("ft_printf: %d chars, printf: %d chars\n\n", count, real_count);
-	
+
 	// Test 2: Integer
 	count = ft_printf("2. Decimal: %d\n", 42);
 	real_count = printf("2. Decimal: %d\n", 42);
 	printf("ft_printf: %d chars, printf: %d chars\n\n", count, real_count);
-	
+
 	// Test 3: Hexadecimal
 	count = ft_printf("3. Hexadecimal: %x\n", 255);
 	real_count = printf("3. Hexadecimal: %x\n", 255);
 	printf("ft_printf: %d chars, printf: %d chars\n\n", count, real_count);
-	
+
 	printf("=== Edge Cases ===\n");
-	
+
 	// Test 4: Empty string
 	count = ft_printf("4. Empty: %s\n", "");
 	real_count = printf("4. Empty: %s\n", "");
 	printf("ft_printf: %d chars, printf: %d chars\n\n", count, real_count);
-	
+
 	// Test 5: NULL string - fixed by casting NULL to char*
 	count = ft_printf("5. NULL: %s\n", (char *)NULL);
 	real_count = printf("5. NULL: %s\n", (char *)NULL);
 	printf("ft_printf: %d chars, printf: %d chars\n\n", count, real_count);
-	
+
 	// Test 6: INT_MIN
 	count = ft_printf("6. INT_MIN: %d\n", INT_MIN);
 	real_count = printf("6. INT_MIN: %d\n", INT_MIN);
 	printf("ft_printf: %d chars, printf: %d chars\n\n", count, real_count);
-	
+
 	// Test 7: Multiple formats
 	count = ft_printf("7. Mixed: %s %d %x\n", "Value:", 42, 42);
 	real_count = printf("7. Mixed: %s %d %x\n", "Value:", 42, 42);
 	printf("ft_printf: %d chars, printf: %d chars\n\n", count, real_count);
-	
+
 	printf("=== Formatting Tests ===\n");
-	
+
 	// Test 8: No format specifiers
 	count = ft_printf("8. Just text\n");
 	real_count = printf("8. Just text\n");
 	printf("ft_printf: %d chars, printf: %d chars\n\n", count, real_count);
-	
+
 	// Test 9: Literal %
 	count = ft_printf("9. Percent sign: %%\n");
 	real_count = printf("9. Percent sign: %%\n");
 	printf("ft_printf: %d chars, printf: %d chars\n\n", count, real_count);
-	
+
 	return (0);
 }
 */
