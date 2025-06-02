@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/28 10:38:02 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/07 15:43:02 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/06/02 15:36:07 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,12 +27,12 @@ int	main(int ac, char **av)
 	if (ac < 5 || ac > 6)
 		return (print_usage());
 	memset(&data, 0, sizeof(t_data));
-	if (init_data(&data, ac, av) == ERROR)
+	if (init_data(&data, ac, av) == FAILURE)
 	{
 		clear_data(&data);
 		return (1);
 	}
-	if (simulation_start(&data) == ERROR)
+	if (start_simulation(&data) == FAILURE)
 	{
 		clear_data(&data);
 		return (1);

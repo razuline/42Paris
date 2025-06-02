@@ -6,11 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/26 11:40:18 by erazumov          #+#    #+#             */
-<<<<<<< HEAD
-/*   Updated: 2025/04/05 11:26:43 by erazumov         ###   ########.fr       */
-=======
-/*   Updated: 2025/04/07 16:21:27 by erazumov         ###   ########.fr       */
->>>>>>> 067c015f5ab24bc9e53b58248916ec800799bc19
+/*   Updated: 2025/06/02 15:36:07 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +22,7 @@
 # include <unistd.h>
 
 # define SUCCESS 0
-# define ERROR 1
+# define FAILURE 1
 
 /* Philos' messages*/
 # define TAKE_FORKS "has taken a fork"
@@ -37,73 +33,57 @@
 
 typedef struct s_philo
 {
-	pthread_t		philo_thread;
-	int				philo_id;
+	int				id;
+	pthread_t		thread;
 	int				meals_eaten;
 	uint64_t		last_meal_time;
-	pthread_mutex_t	*right_fork;
-	pthread_mutex_t	*left_fork;
+	int				left_fork;
+	int				right_fork;
 	struct s_data	*data;
 }			t_philo;
 
 typedef struct s_data
 {
-	t_philo			*philos;
-	pthread_mutex_t	*forks;
-	int				number_of_philosophers;
+	int				num_philos;
+	int				time_to_die;
+	int				time_to_eat;
+	int				time_to_sleep;
+	int				max_meals;
 	uint64_t		start_time;
-	uint64_t		time_to_eat;
-	uint64_t		time_to_sleep;
-	uint64_t		time_to_die;
-	int				must_eat_count;
-	int				someone_died;
-	int				philos_ate_enough;
-	pthread_mutex_t	meal_mutex;
+	pthread_mutex_t	*forks;
 	pthread_mutex_t	print_mutex;
+	pthread_mutex_t	meal_mutex;
+	t_philo			*philos;
+	int				is_dead;
 }			t_data;
 
 /* Initialisation */
 int			init_data(t_data *data, int ac, char **av);
-int			init_mutexes(t_data *data);
+int			init_forks(t_data *data);
 int			init_philos(t_data *data);
 
 /* Time (+ test) */
-uint64_t	get_time(void);
+uint64_t	get_time_in_ms(void);
 void		ft_sleep(uint64_t ms);
 
 /* Actions */
-void		take_forks(t_philo *philo);
-void		put_forks(t_philo *philo);
-void		philo_eat(t_philo *philo);
-void		philo_sleep(t_philo *philo);
-void		philo_think(t_philo *philo);
+void	*philo_routine(void *arg);
+void	take_forks(t_philo *philo);
+void	drop_forks(t_philo *philo);
+void	eat(t_philo *philo);
+void	sleep_and_think(t_philo *philo);
 
-<<<<<<< HEAD
 /* Simulations */
 int		should_continue(t_data *data);
-int		simulation_start(t_data *data);
-void	philo_routine(void *arg);
-=======
-/* Simulation */
-int			should_continue(t_data *data);
-void		*philo_routine(void *arg);
-int			simulation_start(t_data *data);
->>>>>>> 067c015f5ab24bc9e53b58248916ec800799bc19
+int		start_simulation(t_data *data);
 
 /* Monitor */
 void		monitor(t_data *data);
 int			alloc_resources(t_data *data);
 
-<<<<<<< HEAD
 /* Utils */
 void	print_status(t_philo *philo, char *status);
 int		ft_atoi(char *str); /* (+ test) */
 void	clear_data(t_data *data);
-=======
-/* Utils (+ test_atoi) */
-void		print_status(t_philo *philo, char *status);
-long		ft_atoi(const char *str);
-void		clear_data(t_data *data);
->>>>>>> 067c015f5ab24bc9e53b58248916ec800799bc19
 
 #endif

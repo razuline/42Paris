@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/05 10:28:09 by erazumov          #+#    #+#             */
-/*   Updated: 2025/04/07 16:09:55 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/06/02 15:07:00 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ void	take_forks(t_philo *philo)
 
 	if (!should_continue(philo->data))
 		return ;
-	if (philo->philo_id % 2 == 0)
+	if (philo->id % 2 == 0)
 	{
 		first_fork = philo->left_fork;
 		second_fork = philo->right_fork;
@@ -40,12 +40,12 @@ void	take_forks(t_philo *philo)
 	print_status(philo, TAKE_FORKS);
 }
 
-void	put_forks(t_philo *philo)
+void	drop_forks(t_philo *philo)
 {
 	pthread_mutex_t	*first_fork;
 	pthread_mutex_t	*second_fork;
 
-	if (philo->philo_id % 2 == 0)
+	if (philo->id % 2 == 0)
 	{
 		first_fork = philo->left_fork;
 		second_fork = philo->right_fork;

@@ -19,8 +19,8 @@
 void	print_status(t_philo *philo, char *status)
 {
 	pthread_mutex_lock(&philo->data->print_mutex);
-	printf("%lu %d %s\n", get_time() - philo->data->start_time,
-		philo->philo_id, status);
+	printf("%lu %d %s\n", get_time_in_ms() - philo->data->start_time,
+		philo->id, status);
 	pthread_mutex_unlock(&philo->data->print_mutex);
 }
 
@@ -46,7 +46,7 @@ void	clear_data(t_data *data)
 	i = 0;
 	if (data->forks)
 	{
-		while (i < data->number_of_philosophers)
+		while (i < data->num_philos)
 		{
 			pthread_mutex_destroy(&data->forks[i]);
 			i++;
