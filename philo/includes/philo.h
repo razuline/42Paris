@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/26 11:40:18 by erazumov          #+#    #+#             */
-/*   Updated: 2025/06/02 15:36:07 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/06/02 16:07:55 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,9 +62,8 @@ int			init_data(t_data *data, int ac, char **av);
 int			init_forks(t_data *data);
 int			init_philos(t_data *data);
 
-/* Time (+ test) */
-uint64_t	get_time_in_ms(void);
-void		ft_sleep(uint64_t ms);
+/* Simulations */
+int		start_simulation(t_data *data);
 
 /* Actions */
 void	*philo_routine(void *arg);
@@ -73,17 +72,16 @@ void	drop_forks(t_philo *philo);
 void	eat(t_philo *philo);
 void	sleep_and_think(t_philo *philo);
 
-/* Simulations */
-int		should_continue(t_data *data);
-int		start_simulation(t_data *data);
+
 
 /* Monitor */
 void		monitor(t_data *data);
 int			alloc_resources(t_data *data);
 
 /* Utils */
-void	print_status(t_philo *philo, char *status);
-int		ft_atoi(char *str); /* (+ test) */
 void	clear_data(t_data *data);
+uint64_t	get_time_in_ms(void);
+int		ft_atoi(char *str); /* (+ test) */
+
 
 #endif

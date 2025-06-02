@@ -6,22 +6,36 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 13:10:31 by erazumov          #+#    #+#             */
-<<<<<<< HEAD
-/*   Updated: 2025/04/05 11:26:43 by erazumov         ###   ########.fr       */
-=======
-/*   Updated: 2025/04/07 16:21:18 by erazumov         ###   ########.fr       */
->>>>>>> 067c015f5ab24bc9e53b58248916ec800799bc19
+/*   Updated: 2025/06/02 16:07:08 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/philo.h"
 
-void	print_status(t_philo *philo, char *status)
+void	clear_data(t_data *data)
 {
-	pthread_mutex_lock(&philo->data->print_mutex);
-	printf("%lu %d %s\n", get_time_in_ms() - philo->data->start_time,
-		philo->id, status);
-	pthread_mutex_unlock(&philo->data->print_mutex);
+	int	i;
+
+	i = 0;
+	while (i < data->num_philos)
+		pthread_mutex_destroy(&data->forks[i]);
+	i++;
+
+	pthread_mutex_destroy(&data->print_mutex);
+	pthread_mutex_destroy(&data->meal_mutex);
+
+	if (data->forks)
+		free(data->forks);
+	if (data->philos)
+		free(data->philos);
+}
+
+uint64_t	get_time_in_ms(void)
+{
+	struct timeval	tv;
+
+	gettimeofday(&tv, NULL);
+	return ((tv.tv_sec * (uint64_t)1000) + (tv.tv_usec / 1000));
 }
 
 long	ft_atoi(const char *str)
@@ -37,24 +51,4 @@ long	ft_atoi(const char *str)
 		str++;
 	}
 	return (result);
-}
-
-void	clear_data(t_data *data)
-{
-	int	i;
-
-	i = 0;
-	if (data->forks)
-	{
-		while (i < data->num_philos)
-		{
-			pthread_mutex_destroy(&data->forks[i]);
-			i++;
-		}
-		free(data->forks);
-	}
-	if (data->philos)
-		free(data->philos);
-	pthread_mutex_destroy(&data->print_mutex);
-	pthread_mutex_destroy(&data->meal_mutex);
 }
