@@ -6,11 +6,11 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/28 16:25:00 by erazumov          #+#    #+#             */
-/*   Updated: 2025/06/02 15:34:11 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/06/02 16:20:56 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/philo.h"
+#include "philo.h"
 
 int	init_data(t_data *data, int ac, char **av)
 {

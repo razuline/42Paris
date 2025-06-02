@@ -6,11 +6,11 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/28 10:38:02 by erazumov          #+#    #+#             */
-/*   Updated: 2025/06/02 16:01:47 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/06/02 17:04:47 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/philo.h"
+#include "philo.h"
 
 int	main(int ac, char **av)
 {

@@ -6,11 +6,11 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 12:56:03 by erazumov          #+#    #+#             */
-/*   Updated: 2025/06/02 16:05:23 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/06/02 16:41:25 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/philo.h"
+#include "philo.h"
 
 int	start_simulation(t_data *data)
 {
@@ -34,20 +34,35 @@ int	start_simulation(t_data *data)
 	return (SUCCESS);
 }
 
-void	*philo_routine(void *arg)
+void	monitor_simulation(t_data *data)
 {
-	t_philo	*philo;
+	int		i;
+	int		all_ate_enough;
+	long	curr_time;
 
-	philo = (t_philo *)arg;
-	if (philo->id % 2 == 0)
-		usleep(1000);
-	while (should_continue(philo->data))
+	while (1)
 	{
-		take_forks(philo);
-		eat(philo);
-		drop_forks(philo);
-		philo_sleep(philo);
-		philo_think(philo);
+		all_ate_enough = 1;
+		curr_time = get_time_in_ms();
+		while (i < data->num_philos)
+		{
+			pthread_mutex_lock(&data->meal_mutex);
+			if (curr_time - data->philos[i].last_meal_time >= data->time_to_die)
+			{
+				print_status(&data->philos[i], DIED);
+				pthread_mutex_unlock(&data->meal_mutex);
+				data->is_dead = 1;
+				return ;
+			}
+			if (data->max_meals != -1 && data->philos[i].meals_eaten < data->max_meals)
+				all_ate_enough = 0;
+			pthread_mutex_unlock(&data->meal_mutex);
+		}
+		if (data->max_meals != -1 && all_ate_enough)
+		{
+			printf("All philosophers ate %d times\n", data->max_meals);
+			return ;
+		}
+		usleep(1000);
 	}
-	return (NULL);
 }

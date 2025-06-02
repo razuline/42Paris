@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/26 11:40:18 by erazumov          #+#    #+#             */
-/*   Updated: 2025/06/02 16:07:55 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/06/02 17:06:31 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@
 # define FAILURE 1
 
 /* Philos' messages*/
-# define TAKE_FORKS "has taken a fork"
+# define FORK_TAKEN "has taken a fork"
 # define THINKING "is thinking"
 # define SLEEPING "is sleeping"
 # define EATING "is eating"
@@ -64,24 +64,20 @@ int			init_philos(t_data *data);
 
 /* Simulations */
 int		start_simulation(t_data *data);
+void	monitor_simulation(t_data *data);
 
 /* Actions */
 void	*philo_routine(void *arg);
 void	take_forks(t_philo *philo);
 void	drop_forks(t_philo *philo);
 void	eat(t_philo *philo);
-void	sleep_and_think(t_philo *philo);
-
-
-
-/* Monitor */
-void		monitor(t_data *data);
-int			alloc_resources(t_data *data);
+void	one_philo_case(t_philo *philo);
 
 /* Utils */
-void	clear_data(t_data *data);
+void		clear_data(t_data *data);
 uint64_t	get_time_in_ms(void);
-int		ft_atoi(char *str); /* (+ test) */
-
+void		ft_usleep(long ms);
+void		print_status(t_philo *philo, char *msg);
+int			ft_atoi(char *str); /* (+ test) */
 
 #endif
