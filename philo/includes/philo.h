@@ -6,13 +6,14 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/26 11:40:18 by erazumov          #+#    #+#             */
-/*   Updated: 2025/06/02 17:06:31 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/06/03 14:23:33 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PHILO_H
 # define PHILO_H
 
+# include <stdbool.h>
 # include <pthread.h>
 # include <stdio.h>
 # include <stdint.h>
@@ -20,9 +21,6 @@
 # include <string.h>
 # include <sys/time.h>
 # include <unistd.h>
-
-# define SUCCESS 0
-# define FAILURE 1
 
 /* Philos' messages*/
 # define FORK_TAKEN "has taken a fork"
@@ -56,6 +54,19 @@ typedef struct s_data
 	t_philo			*philos;
 	int				is_dead;
 }			t_data;
+
+typedef struct e_errors
+{
+	SUCCESS = 0,
+	ERR_ARG_COUNT,
+	ERR_ARGS_INVALID,
+	ERR_MALLOC,
+	ERR_MUTEX_INIT,
+	ERR_THREAD_CREATE,
+	ERR_THREAD_JOIN,
+	ERR_SIMULATION,
+	ERR_TIME
+}			t_errors;
 
 /* Initialisation */
 int			init_data(t_data *data, int ac, char **av);
