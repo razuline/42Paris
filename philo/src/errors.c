@@ -6,9 +6,11 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 14:50:44 by erazumov          #+#    #+#             */
-/*   Updated: 2025/06/03 14:51:05 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/06/04 16:31:38 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "philo.h"
+#include "../include/philo.h"
+
+
 

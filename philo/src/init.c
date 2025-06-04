@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/28 16:25:00 by erazumov          #+#    #+#             */
-/*   Updated: 2025/06/03 14:53:19 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/06/04 16:30:35 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,13 +16,13 @@ t_errors	init_data(t_data *data, int ac, char **av)
 {
 	if (ac < 5 && ac > 6)
 		return (printf("Error: Wrong number of arguments\n"), ERR_ARGS_COUNT);
-	data->num_philos = ft_atoi(av[1]);
-	data->time_to_die = ft_atoi(av[2]);
-	data->time_to_eat = ft_atoi(av[3]);
-	data->time_to_sleep = ft_atoi(av[4]);
+	data->num_philos = safe_atoi(av[1]);
+	data->time_to_die = safe_atoi(av[2]);
+	data->time_to_eat = safe_atoi(av[3]);
+	data->time_to_sleep = safe_atoi(av[4]);
 	data->max_meals = -1;
 	if (ac == 6)
-		data->max_meals = ft_atoi(av[5]);
+		data->max_meals = safe_atoi(av[5]);
 	if (data->num_philos <= 0 || data->time_to_die <= 0
 		|| data->time_to_eat <= 0 || data->time_to_sleep <= 0 || (ac == 6
 			&& data->max_meals <= 0))

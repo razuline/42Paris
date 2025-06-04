@@ -6,18 +6,19 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/28 10:38:02 by erazumov          #+#    #+#             */
-/*   Updated: 2025/06/02 17:04:47 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/06/04 16:32:59 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "philo.h"
+#include "../include/philo.h"
 
 int	main(int ac, char **av)
 {
-	t_data	data;
+	t_data		data;
+	t_errors	error;
 
-	if (init_data(&data, ac, av) != SUCCESS)
-		return (FAILURE);
+	if (error = init_data(&data, ac, av) != SUCCESS)
+		return (cleanup(&data), error);
 	if (init_forks(&data) != SUCCESS)
 		return (cleanup(&data), FAILURE);
 	if (init_philos(&data) != SUCCESS)
