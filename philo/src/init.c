@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/28 16:25:00 by erazumov          #+#    #+#             */
-/*   Updated: 2025/06/04 16:30:35 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/06/04 18:57:09 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ int	init_forks(t_data *data)
 
 	data->forks = malloc(sizeof(pthread_mutex_t) * data->num_philos);
 	if (!data->forks)
-		return (printf("Error: Fork mutex allocation failed\n"), FAILURE);
+		return (error_exit("Fork mutex allocation failed", ERR_MALLOC));
 	i = 0;
 	while (i < data->num_philos)
 	{
