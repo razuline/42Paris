@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 15:07:58 by erazumov          #+#    #+#             */
-/*   Updated: 2025/06/03 15:16:57 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/06/04 14:35:25 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,8 @@
 
 static bool	is_space(char c)
 {
-	return (c == ' ' || c == '\t' || c == '\n'
-		|| c == '\v' || c == '\f' || c == '\r');
+	return (c == ' ' || c == '\t' || c == '\n' || c == '\v' || c == '\f'
+		|| c == '\r');
 }
 
 static bool	is_digit(char c)
@@ -43,13 +43,15 @@ int	safe_atoi(const char *str, int *result)
 	while (is_digit(*str))
 	{
 		value = value * 10 + (*str - '0');
-		if ((sign == 1 && value > INT_MAX)
-				|| (sign == -1 && value > -(uint64_t)INT_MIN))
-	}
-		while (*str >= '0' && *str <= '9')
+		if ((sign == 1 && value > INT_MAX) || (sign == -1 && value >
+				-(uint64_t)INT_MIN))
 		{
-			result = result * 10 + (*str - '0');
-			str++;
+			while (*str >= '0' && *str <= '9')
+			{
+				result = result * 10 + (*str - '0');
+				str++;
+			}
 		}
+	}
 	return (result);
 }
