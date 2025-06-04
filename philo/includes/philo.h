@@ -6,15 +6,16 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/26 11:40:18 by erazumov          #+#    #+#             */
-/*   Updated: 2025/06/03 14:23:33 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/06/03 15:07:46 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PHILO_H
 # define PHILO_H
 
-# include <stdbool.h>
+# include <limits.h>
 # include <pthread.h>
+# include <stdbool.h>
 # include <stdio.h>
 # include <stdint.h>
 # include <stdlib.h>
@@ -55,7 +56,7 @@ typedef struct s_data
 	int				is_dead;
 }			t_data;
 
-typedef struct e_errors
+typedef enum e_errors
 {
 	SUCCESS = 0,
 	ERR_ARG_COUNT,
@@ -69,7 +70,7 @@ typedef struct e_errors
 }			t_errors;
 
 /* Initialisation */
-int			init_data(t_data *data, int ac, char **av);
+t_errors	init_data(t_data *data, int ac, char **av);
 int			init_forks(t_data *data);
 int			init_philos(t_data *data);
 
@@ -89,6 +90,6 @@ void		clear_data(t_data *data);
 uint64_t	get_time_in_ms(void);
 void		ft_usleep(long ms);
 void		print_status(t_philo *philo, char *msg);
-int			ft_atoi(char *str); /* (+ test) */
+int			safe_atoi(char *str, int *result); /* (+ test) */
 
 #endif

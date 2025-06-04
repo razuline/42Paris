@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 13:10:31 by erazumov          #+#    #+#             */
-/*   Updated: 2025/06/02 16:45:49 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/06/03 15:08:22 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,19 +61,4 @@ void	print_status(t_philo *philo, char *msg)
 		printf(msg, curr_time, philo->id);
 
 	pthread_mutex_unlock(&data->print_mutex);
-}
-
-long	ft_atoi(const char *str)
-{
-	long	result;
-
-	result = 0;
-	while (*str == ' ')
-		str++;
-	while (*str >= '0' && *str <= '9')
-	{
-		result = result * 10 + (*str - '0');
-		str++;
-	}
-	return (result);
 }
