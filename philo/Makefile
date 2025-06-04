@@ -6,13 +6,13 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/07 10:29:29 by erazumov          #+#    #+#              #
-#    Updated: 2025/04/07 12:58:07 by erazumov         ###   ########.fr        #
+#    Updated: 2025/06/04 16:19:16 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = philo
 CFLAGS = -Wall -Wextra -Werror -pthread
-INCLUDE = -I includes/
+INCLUDE = -I include/
 
 SRC_DIR = src/
 SRC = main.c init.c time.c actions.c forks.c simulation.c monitor.c utils.c

@@ -6,11 +6,11 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 15:07:58 by erazumov          #+#    #+#             */
-/*   Updated: 2025/06/04 14:35:25 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/06/04 16:25:34 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "philo.h"
+#include "../include/philo.h"
 
 static bool	is_space(char c)
 {
@@ -26,10 +26,10 @@ static bool	is_digit(char c)
 int	safe_atoi(const char *str, int *result)
 {
 	int			sign;
-	uint64_t	value;
+	uint64_t	n;
 
 	sign = 1;
-	value = 0;
+	n = 0;
 	while (is_space(*str))
 		str++;
 	if (*str == '+' || *str == '-')
@@ -40,18 +40,24 @@ int	safe_atoi(const char *str, int *result)
 	}
 	if (!is_digit(*str))
 		return (printf("Error: Not a number\n"), false);
-	while (is_digit(*str))
-	{
-		value = value * 10 + (*str - '0');
-		if ((sign == 1 && value > INT_MAX) || (sign == -1 && value >
-				-(uint64_t)INT_MIN))
-		{
-			while (*str >= '0' && *str <= '9')
-			{
-				result = result * 10 + (*str - '0');
-				str++;
-			}
-		}
-	}
-	return (result);
+	while (is_digit(*str) && n <= INT_MAX)
+		n = n *10 + (*str++ - '0');
+	if ((n > INT_MAX && sign == 1) || (n - 1 > INT_MAX && sign == -1))
+		return (0);
+	if (*str && (*str < 9 || *str > 13) && *str != ' ')
+		return (0);
+	*result = n * sign;
+	return (1);
 }
+
+/*
+int	main(int ac, char **av)
+{
+	(void)ac;
+	int	n;
+
+	if (!safe_atoi(av[1], &n))
+		return (printf("Error: Invalid input\n"), 1);
+	printf("Parsed: %d\n", n);
+}
+*/

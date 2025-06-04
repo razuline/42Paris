@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/26 11:40:18 by erazumov          #+#    #+#             */
-/*   Updated: 2025/06/03 15:07:46 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/06/04 16:23:16 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,6 +90,6 @@ void		clear_data(t_data *data);
 uint64_t	get_time_in_ms(void);
 void		ft_usleep(long ms);
 void		print_status(t_philo *philo, char *msg);
-int			safe_atoi(char *str, int *result); /* (+ test) */
+int			safe_atoi(const char *str, int *result);
 
 #endif
