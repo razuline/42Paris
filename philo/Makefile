@@ -6,7 +6,7 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/07 10:29:29 by erazumov          #+#    #+#              #
-#    Updated: 2025/06/04 16:19:16 by erazumov         ###   ########.fr        #
+#    Updated: 2025/06/06 15:49:45 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,7 +15,7 @@ CFLAGS = -Wall -Wextra -Werror -pthread
 INCLUDE = -I include/
 
 SRC_DIR = src/
-SRC = main.c init.c time.c actions.c forks.c simulation.c monitor.c utils.c
+SRC = main.c init_data.c init_resources.c philo.c utils.c
 OBJ_DIR = obj/
 OBJ = $(addprefix $(OBJ_DIR)/,$(SRC:.c=.o))
 
