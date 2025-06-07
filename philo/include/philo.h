@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/26 11:40:18 by erazumov          #+#    #+#             */
-/*   Updated: 2025/06/06 18:06:22 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/06/07 14:22:26 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,18 +71,21 @@ typedef enum e_error
 /* Initialisation */
 int					init_data(t_data *data, int ac, char **av);
 int					init_resources(t_data *data);
-void				cleanup(t_data *data);
 
 /* Threads */
 void				*philo_routine(void *arg);
 void				monitor_simulation(t_data *data);
-void				set_simulation_stop(t_data *data);
+void				start_simulation(t_data *data);
 
 /* Utils */
-uint64_t			get_time(void);
-void				ft_usleep(uint64_t ms);
+int					parse_time_value(const char *str, long *time);
+long				get_time(void);
+void				precise_usleep(long ms);
 int					safe_atoi(const char *str, int *num);
 void				print_status(t_philo *philo, char *msg);
+
+/* Clean up */
+void				cleanup(t_data *data);
 int					error_exit(t_data *data, const char *msg, t_error err);
 size_t				ft_strlen(const char *s);
 

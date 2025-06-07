@@ -1,16 +1,44 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   init_resources.c                                   :+:      :+:    :+:   */
+/*   init.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/06/06 15:42:55 by erazumov          #+#    #+#             */
-/*   Updated: 2025/06/06 16:04:24 by erazumov         ###   ########.fr       */
+/*   Created: 2025/06/07 13:38:15 by erazumov          #+#    #+#             */
+/*   Updated: 2025/06/07 14:24:04 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
+
+static int	parse_args(t_data *data, int ac, char **av)
+{
+	if (safe_atoi(av[1], &data->num_philos) != SUCCESS || data->num_philos <= 0)
+		return (error_exit(data, "Error: Invalid philosopher count", ERR_ARGS));
+	if (parse_time_value(av[2], &data->time_to_die) != SUCCESS)
+		return (error_exit(data, "Error: Invalid time_to_die", ERR_ARGS));
+	if (parse_time_value(av[3], &data->time_to_eat) != SUCCESS)
+		return (error_exit(data, "Error: Invalid time_to_eat", ERR_ARGS));
+	if (parse_time_value(av[4], &data->time_to_sleep) != SUCCESS)
+		return (error_exit(data, "Error: Invalid time_to_sleep", ERR_ARGS));
+	if (ac == 6 && (safe_atoi(av[5], &data->max_meals) != SUCCESS
+			|| data->max_meals <= 0))
+		return (error_exit(data, "Error: Invalid max_meals", ERR_ARGS));
+	return (SUCCESS);
+}
+
+int	init_data(t_data *data, int ac, char **av)
+{
+	memset(data, 0, sizeof(t_data));
+	if (ac != 5 && ac != 6)
+		return (error_exit(data, "Usage: ./philo n t_die t_eat t_sleep [meals]",
+				ERR_ARGS));
+	if (parse_args(data, ac, av) != SUCCESS)
+		return (FAILURE);
+	data->start_time = get_time();
+	return (SUCCESS);
+}
 
 static int	init_forks(t_data *data)
 {
