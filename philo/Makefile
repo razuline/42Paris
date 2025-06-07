@@ -6,7 +6,7 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/07 10:29:29 by erazumov          #+#    #+#              #
-#    Updated: 2025/06/07 17:10:01 by erazumov         ###   ########.fr        #
+#    Updated: 2025/06/07 17:27:49 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -50,6 +50,6 @@ fclean: clean
 re: fclean all
 
 norm:
-	@norminette $(SRC_DIR) includes/ | grep -v "OK" || true
+	@norminette $(SRC_DIR) src/ | grep -v "OK" || true
 
 .PHONY: all clean fclean re norm
