@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/07 14:19:27 by erazumov          #+#    #+#             */
-/*   Updated: 2025/06/07 14:19:34 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/06/07 16:22:25 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,8 +33,10 @@ long	get_time(void)
 void	precise_usleep(long ms)
 {
 	long	start;
+	long	end_time;
 
 	start = get_time();
-	while (get_time() - start < ms)
-		usleep(ms / 10);
+	end_time = start + ms;
+	while (get_time() < end_time)
+		usleep(100);
 }

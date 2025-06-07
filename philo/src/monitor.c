@@ -6,36 +6,23 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/07 13:16:55 by erazumov          #+#    #+#             */
-/*   Updated: 2025/06/07 14:26:39 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/06/07 15:53:23 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-static bool	check_simulation_end(t_data *data)
-{
-	bool	stop;
-
-	pthread_mutex_lock(&data->stop_mutex);
-	stop = data->stop_flag;
-	pthread_mutex_unlock(&data->stop_mutex);
-	return (stop);
-}
-
 static bool	check_philo_death(t_data *data, int i)
 {
-	size_t	curr_time;
-	long	time_since_meal;
+	long	curr;
+	long	last_meal;
 
 	pthread_mutex_lock(&data->meal_mutex);
-	curr_time = get_time();
-	time_since_meal = curr_time - data->philos[i].last_meal;
-	if (time_since_meal > data->time_to_die)
+	curr = get_time();
+	last_meal = data->philos[i].last_meal;
+	if (curr - last_meal > data->time_to_die)
 	{
 		print_status(&data->philos[i], "died");
-		pthread_mutex_lock(&data->stop_mutex);
-		data->stop_flag = true;
-		pthread_mutex_unlock(&data->stop_mutex);
 		pthread_mutex_unlock(&data->meal_mutex);
 		return (true);
 	}
@@ -43,7 +30,7 @@ static bool	check_philo_death(t_data *data, int i)
 	return (false);
 }
 
-static bool	check_meals_complete(t_data *data)
+static bool	check_all_ate(t_data *data)
 {
 	int	i;
 
@@ -67,7 +54,7 @@ void	monitor_simulation(t_data *data)
 {
 	int	i;
 
-	while (!check_simulation_end(data))
+	while (true)
 	{
 		i = -1;
 		while (++i < data->num_philos)
@@ -75,7 +62,7 @@ void	monitor_simulation(t_data *data)
 			if (check_philo_death(data, i))
 				return ;
 		}
-		if (check_meals_complete(data))
+		if (check_all_ate(data))
 		{
 			pthread_mutex_lock(&data->print_mutex);
 			printf("All philosophers ate %d times\n", data->max_meals);

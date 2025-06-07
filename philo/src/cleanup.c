@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/07 13:17:05 by erazumov          #+#    #+#             */
-/*   Updated: 2025/06/07 14:00:07 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/06/07 15:37:02 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,20 +16,21 @@ void	cleanup(t_data *data)
 {
 	int	i;
 
+	if (!data)
+		return ;
+	pthread_mutex_lock(&data->stop_mutex);
+	data->stop_flag = true;
+	pthread_mutex_unlock(&data->stop_mutex);
+	i = -1;
+	while (data->philos && ++i < data->num_philos)
+		pthread_join(data->philos[i].thread, NULL);
+	i = -1;
+	while (data->forks && ++i < data->num_philos)
+		pthread_mutex_destroy(&data->forks[i]);
 	if (data->forks)
-	{
-		i = -1;
-		while (++i < data->num_philos)
-			pthread_mutex_destroy(&data->forks[i]);
 		free(data->forks);
-	}
 	if (data->philos)
-	{
-		i = -1;
-		while (++i < data->num_philos)
-			pthread_detach(data->philos[i].thread);
 		free(data->philos);
-	}
 	pthread_mutex_destroy(&data->print_mutex);
 	pthread_mutex_destroy(&data->meal_mutex);
 	pthread_mutex_destroy(&data->stop_mutex);
