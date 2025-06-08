@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/22 13:08:51 by erazumov          #+#    #+#             */
-/*   Updated: 2025/05/24 13:35:12 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/06/08 18:31:10 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,8 @@ int	ft_strlen(char *str)
 	int	len;
 
 	len = 0;
+	if (!str)
+		return (0);
 	while (str[len])
 		len++;
 	return (len);
@@ -24,12 +26,16 @@ int	ft_strlen(char *str)
 
 char	*ft_strchr(const char *s, int c)
 {
-	while (*s)
+	if (!s)
+		return (NULL);
+	while (*s != '\0')
 	{
 		if (*s == (char)c)
 			return ((char *)s);
 		s++;
 	}
+	if (*s == (char)c)
+		return ((char *)s);
 	return (NULL);
 }
 
@@ -39,9 +45,9 @@ char	*ft_strdup(const char *s)
 	int		len;
 	char	*dup;
 
-	len = 0;
-	while (s[len])
-		len++;
+	if (!s)
+		return (NULL);
+	len = ft_strlen((char *)s);
 	
 	dup = malloc(len + 1);
 	if (!dup)
@@ -59,15 +65,19 @@ char	*ft_strdup(const char *s)
 char	*ft_strjoin_free(char *s1, char *s2)
 {
 	int		i;
+	int		j;
 	int		len1;
 	int		len2;
 	char	*joined;
 
+	len1 = 0;
+	len2 = 0;
 	if (!s2)
 		return (s1);
-
-	len1 = ft_strlen(s1);
+	if (s1)
+		len1 = ft_strlen(s1);
 	len2 = ft_strlen(s2);
+
 	joined = malloc(len1 + len2 + 1);
 	if (!joined)
 	{
@@ -76,16 +86,19 @@ char	*ft_strjoin_free(char *s1, char *s2)
 	}
 
 	i = 0;
-	while (i < len1)
+	if (s1)
 	{
-		joined[i] = s1[i];
-		i++;
+		while (i < len1)
+		{
+			joined[i] = s1[i];
+			i++;
+		}
 	}
-	i = 0;
-	while (i <= len2)
+	j = 0;
+	while (j <= len2)
 	{
-		joined[len1 + i] = s2[i];
-		i++;
+		joined[i + j] = s2[j];
+		j++;
 	}
 	free(s1);
 	return (joined);
@@ -101,37 +114,65 @@ char	*get_next_line(int fd)
 
 	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (NULL);
+
 	buff = malloc(BUFFER_SIZE + 1);
 	if (!buff)
+	{
+		free(remainder);
+		remainder = NULL;
 		return (NULL);
+	}
 
 	if (remainder)
 	{
 		line = remainder;
 		remainder = NULL;
 	}
+	else
+	{
+		line = ft_strdup("");
+		if (!line)
+		{
+			free(buff);
+			return (NULL);	
+		}
+	}
 
 	while ((newline = ft_strchr(line, '\n')) == NULL)
 	{
 		bytes_read = read(fd, buff, BUFFER_SIZE);
-		if (bytes_read <= 0)
+		if (bytes_read == -1)
+		{
+			free(buff);
+			free(line);
+			free(remainder);
+			remainder = NULL;
+			return (NULL);
+		}
+		if (bytes_read == 0)
 			break ;
+
 		buff[bytes_read] = '\0';
 
 		line = ft_strjoin_free(line, buff);
 		if (!line)
-			break ;
+		{
+			free(buff);
+			free(remainder);
+			remainder = NULL;
+			return (NULL);
+		}
 	}
 	free (buff);
 
-	if (bytes_read == -1)
-	{
-		free(line);
-		return (NULL);
-	}
 	if (newline)
 	{
 		remainder = ft_strdup(newline + 1);
+		if (!remainder)
+		{
+			free(line);
+			return (NULL);
+		}
 		*(newline + 1) = '\0';
 	}
 	if (!line || !*line)
@@ -146,65 +187,32 @@ char	*get_next_line(int fd)
 #include <fcntl.h>
 #include <stdio.h>
 
-#ifndef BUFFER_SIZE
-# define BUFFER_SIZE 32
-#endif
-
-#define RED "\033[31m"
-#define GREEN "\033[32m"
-#define YELLOW "\033[33m"
-#define RESET "\033[0m"
-
-static void	safe_test(const char *filename)
-{
-	printf(YELLOW "\n[%s]\n" RESET, filename);
-	
-	int		fd = open(filename, O_RDONLY);
-	if (fd == -1)
-	{
-		printf(RED "  ✗ Open failed\n" RESET);
-		return ;
-	}
-
-	char	*line;
-	int		count = 1;
-	while ((line = get_next_line(fd)))
-	{
-		printf(GREEN "  %2d: %s" RESET, count++, line);
-		free(line);
-	}
-	close(fd);
-}
-
 int	main(void)
 {
-	// Text files only (no binary)
-	system("echo -e 'Line 1\\nLine 2' > normal.txt");
-	system("echo -n 'No newline' > no_nl.txt");
-	system("echo -e '\\n\\n' > multi_nl.txt");
-	system("echo -n 'A very very very very very long line' > long.txt");
+	int		fd;
+	char	*line;
 
-	safe_test("normal.txt");
-	safe_test("no_nl.txt");
-	safe_test("multi_nl.txt");
-	safe_test("long.txt");
-
-	// Edge cases
-	printf(YELLOW "\n[Edge Cases]\n" RESET);
-	printf("Invalid FD: ");
-	char	*res = get_next_line(-1);
-	!res ? printf(GREEN "✓ NULL\n" RESET) : printf(RED "✗ Got: %s\n" RESET, res);
-	free(res);
-
-	printf("Empty file: ");
-	system("touch empty.txt");
-	int	fd = open("empty.txt", O_RDONLY);
-	res = get_next_line(fd);
-	!res ? printf(GREEN "✓ NULL\n" RESET) : printf(RED "✗ Got: %s\n" RESET, res);
-	free(res);
+	fd = open("test.txt", O_RDONLY);
+	if (fd == -1)
+	{
+		perror("\nErreur lors de l'ouverture du fichier");
+		return (1);
+	}
+	while ((line = get_next_line(fd)) != NULL)
+	{
+		printf("%s", line);
+		free(line);
+	}
+	line = get_next_line(fd);
+	if (line)
+	{
+		 printf("%s", line);
+		 free(line);
+	}
+	else
+	{
+		printf("\n(Fin du fichier ou erreur)\n");
+	}
 	close(fd);
-
-	// Cleanup
-	system("rm -f normal.txt no_nl.txt multi_nl.txt long.txt empty.txt");
 	return (0);
 }
