@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 13:10:31 by erazumov          #+#    #+#             */
-/*   Updated: 2025/06/07 16:13:13 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/06/12 22:42:08 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,8 +44,8 @@ int	safe_atoi(const char *str, int *num)
 	while (*str >= '0' && *str <= '9')
 	{
 		result = result * 10 + (*str++ - '0');
-		if ((sign == 1 && result > INT_MAX) || (sign == -1
-				&& result > -(long)INT_MIN))
+		if ((sign == 1 && result > INT_MAX) || (sign == -1 && result >
+				-(long)INT_MIN))
 			return (FAILURE);
 	}
 	*num = (int)(result * sign);
@@ -69,3 +69,5 @@ void	print_status(t_philo *philo, char *msg)
 	printf("%zu %d %s\n", timestamp, philo->id, msg);
 	pthread_mutex_unlock(&philo->data->print_mutex);
 }
+
+

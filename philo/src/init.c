@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/07 13:38:15 by erazumov          #+#    #+#             */
-/*   Updated: 2025/06/07 14:24:04 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/06/12 22:45:31 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,11 +16,14 @@ static int	parse_args(t_data *data, int ac, char **av)
 {
 	if (safe_atoi(av[1], &data->num_philos) != SUCCESS || data->num_philos <= 0)
 		return (error_exit(data, "Error: Invalid philosopher count", ERR_ARGS));
-	if (parse_time_value(av[2], &data->time_to_die) != SUCCESS)
+	if (parse_time_value(av[2], &data->time_to_die) != SUCCESS
+		|| data->time_to_die <= 0)
 		return (error_exit(data, "Error: Invalid time_to_die", ERR_ARGS));
-	if (parse_time_value(av[3], &data->time_to_eat) != SUCCESS)
+	if (parse_time_value(av[3], &data->time_to_eat) != SUCCESS
+		|| data->time_to_eat <= 0)
 		return (error_exit(data, "Error: Invalid time_to_eat", ERR_ARGS));
-	if (parse_time_value(av[4], &data->time_to_sleep) != SUCCESS)
+	if (parse_time_value(av[4], &data->time_to_sleep) != SUCCESS
+		|| data->time_to_sleep < 0)
 		return (error_exit(data, "Error: Invalid time_to_sleep", ERR_ARGS));
 	if (ac == 6 && (safe_atoi(av[5], &data->max_meals) != SUCCESS
 			|| data->max_meals <= 0))
@@ -31,6 +34,8 @@ static int	parse_args(t_data *data, int ac, char **av)
 int	init_data(t_data *data, int ac, char **av)
 {
 	memset(data, 0, sizeof(t_data));
+	data->max_meals = -1;
+	data->philos_ate_enough = 0;
 	if (ac != 5 && ac != 6)
 		return (error_exit(data, "Usage: ./philo n t_die t_eat t_sleep [meals]",
 				ERR_ARGS));

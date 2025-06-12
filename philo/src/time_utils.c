@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/07 14:19:27 by erazumov          #+#    #+#             */
-/*   Updated: 2025/06/07 16:22:25 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/06/12 22:33:28 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,13 +30,17 @@ long	get_time(void)
 	return (tv.tv_sec * 1000 + tv.tv_usec / 1000);
 }
 
-void	precise_usleep(long ms)
+void	precise_usleep(long ms, t_data *data)
 {
-	long	start;
+	long	start_time;
 	long	end_time;
 
-	start = get_time();
-	end_time = start + ms;
+	start_time = get_time();
+	end_time = start_time + ms;
 	while (get_time() < end_time)
-		usleep(100);
+	{
+		if (data && is_simulation_stopped(data))
+			return ;
+		usleep(500);
+	}
 }

@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/26 11:40:18 by erazumov          #+#    #+#             */
-/*   Updated: 2025/06/07 14:22:26 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/06/12 22:35:25 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,7 @@ typedef struct s_data
 	long			time_to_die;
 	long			time_to_eat;
 	long			time_to_sleep;
+	int				philos_ate_enough;
 	int				max_meals;
 	long			start_time;
 	pthread_mutex_t	*forks;
@@ -80,9 +81,10 @@ void				start_simulation(t_data *data);
 /* Utils */
 int					parse_time_value(const char *str, long *time);
 long				get_time(void);
-void				precise_usleep(long ms);
+void				precise_usleep(long ms, t_data *data);
 int					safe_atoi(const char *str, int *num);
 void				print_status(t_philo *philo, char *msg);
+bool				is_simulation_stopped(t_data *data);
 
 /* Clean up */
 void				cleanup(t_data *data);

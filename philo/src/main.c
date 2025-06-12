@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/28 10:38:02 by erazumov          #+#    #+#             */
-/*   Updated: 2025/06/07 16:19:51 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/06/12 22:47:10 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,14 +38,18 @@ int	main(int ac, char **av)
 		return (cleanup(&data), 1);
 	if (data.num_philos == 1)
 	{
+		pthread_mutex_lock(&data.forks[0]);
 		print_status(&data.philos[0], FORK_TAKEN);
-		precise_usleep(data.time_to_die);
-		print_status(&data.philos[0], DIED);
+		precise_usleep(data.time_to_die, &data);
+		pthread_mutex_lock(&data.stop_mutex);
+		if (!data.stop_flag)
+		{
+			data.stop_flag = true;
+			print_status(&data.philos[0], DIED);
+		}
+		pthread_mutex_unlock(&data.stop_mutex);
+		pthread_mutex_unlock(&data.forks[0]);
 		cleanup(&data);
 		return (0);
 	}
-	start_simulation(&data);
-	monitor_simulation(&data);
-	cleanup(&data);
-	return (0);
 }
