@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/07 13:16:55 by erazumov          #+#    #+#             */
-/*   Updated: 2025/06/12 22:49:16 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/06/13 12:53:12 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ static bool	check_philo_death(t_data *data, int i)
 	pthread_mutex_lock(&data->meal_mutex);
 	curr_time = get_time();
 	time_since_last_meal = curr_time - data->philos[i].last_meal;
-	should_die = (time_since_last_meal >= data->time_to_die);
+	should_die = (time_since_last_meal > data->time_to_die);
 	pthread_mutex_unlock(&data->meal_mutex);
 	if (should_die)
 	{
@@ -58,26 +58,20 @@ void	monitor_simulation(t_data *data)
 	while (true)
 	{
 		i = -1;
-		all_ate_enough = true;
 		while (++i < data->num_philos)
 		{
 			if (check_philo_death(data, i))
 				return ;
-			if (data->max_meals != -1)
-			{
-				pthread_mutex_lock(&data->meal_mutex);
-				if (data->philos[i].meals_eaten < data->max_meals)
-					all_ate_enough = false;
-				pthread_mutex_unlock(&data->meal_mutex);
-			}
 		}
-		if (data->max_meals != -1 && all_ate_enough)
+		all_ate_enough = check_all_ate(data);
+		if (all_ate_enough)
 		{
 			pthread_mutex_lock(&data->stop_mutex);
-			data->stop_flag = true;
+			if (!data->stop_flag)
+				data->stop_flag = true;
 			pthread_mutex_unlock(&data->stop_mutex);
 			return ;
 		}
-		usleep(1000);
+		usleep(10);
 	}
 }

@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/26 11:40:18 by erazumov          #+#    #+#             */
-/*   Updated: 2025/06/12 22:35:25 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/06/13 12:45:41 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,20 +75,18 @@ int					init_resources(t_data *data);
 
 /* Threads */
 void				*philo_routine(void *arg);
+int					start_simulation(t_data *data);
 void				monitor_simulation(t_data *data);
-void				start_simulation(t_data *data);
+int					handle_single_philo(t_data *data);
 
 /* Utils */
-int					parse_time_value(const char *str, long *time);
+int					safe_atoi(const char *str, int *num);
 long				get_time(void);
 void				precise_usleep(long ms, t_data *data);
-int					safe_atoi(const char *str, int *num);
 void				print_status(t_philo *philo, char *msg);
 bool				is_simulation_stopped(t_data *data);
-
-/* Clean up */
-void				cleanup(t_data *data);
+int					parse_time_value(const char *str, long *time);
 int					error_exit(t_data *data, const char *msg, t_error err);
-size_t				ft_strlen(const char *s);
+void				cleanup(t_data *data);
 
 #endif

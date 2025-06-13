@@ -6,22 +6,8 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/02 13:10:31 by erazumov          #+#    #+#             */
-/*   Updated: 2025/06/12 22:42:08 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/06/13 12:24:37 by erazumov         ###   ########.fr       */
 /*                                                                            */
-/* ************************************************************************** */
-
-#include "philo.h"
-
-/* ************************************************************************** */
-/* */
-/* :::      ::::::::   */
-/* utils.c                                            :+:      :+:    :+:   */
-/* +:+ +:+         +:+     */
-/* By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
-/* +#+#+#+#+#+   +#+           */
-/* Created: 2025/04/02 13:10:31 by erazumov          #+#    #+#             */
-/* Updated: 2025/06/07 14:23:02 by erazumov         ###   ########.fr       */
-/* */
 /* ************************************************************************** */
 
 #include "philo.h"
@@ -44,8 +30,8 @@ int	safe_atoi(const char *str, int *num)
 	while (*str >= '0' && *str <= '9')
 	{
 		result = result * 10 + (*str++ - '0');
-		if ((sign == 1 && result > INT_MAX) || (sign == -1 && result >
-				-(long)INT_MIN))
+		if ((sign == 1 && result > INT_MAX) || (sign == -1 && result
+				> -(long)INT_MIN))
 			return (FAILURE);
 	}
 	*num = (int)(result * sign);
@@ -54,20 +40,17 @@ int	safe_atoi(const char *str, int *num)
 
 void	print_status(t_philo *philo, char *msg)
 {
-	size_t	timestamp;
-
 	pthread_mutex_lock(&philo->data->print_mutex);
-	pthread_mutex_lock(&philo->data->stop_mutex);
-	if (philo->data->stop_flag)
-	{
-		pthread_mutex_unlock(&philo->data->stop_mutex);
-		pthread_mutex_unlock(&philo->data->print_mutex);
-		return ;
-	}
-	pthread_mutex_unlock(&philo->data->stop_mutex);
-	timestamp = get_time() - philo->data->start_time;
-	printf("%zu %d %s\n", timestamp, philo->id, msg);
+	printf("%ld %d %s\n", get_time() - philo->data->start_time, philo->id, msg);
 	pthread_mutex_unlock(&philo->data->print_mutex);
 }
 
+bool	is_simulation_stopped(t_data *data)
+{
+	bool	status;
 
+	pthread_mutex_lock(&data->stop_mutex);
+	status = data->stop_flag;
+	pthread_mutex_unlock(&data->stop_mutex);
+	return (status);
+}

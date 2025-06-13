@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/07 13:38:15 by erazumov          #+#    #+#             */
-/*   Updated: 2025/06/12 22:45:31 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/06/13 12:13:40 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,6 +62,8 @@ static int	init_forks(t_data *data)
 		return (error_exit(data, "Error: Print mutex init failed", ERR_MUTEX));
 	if (pthread_mutex_init(&data->meal_mutex, NULL) != 0)
 		return (error_exit(data, "Error: Meal mutex init failed", ERR_MUTEX));
+	if (pthread_mutex_init(&data->stop_mutex, NULL) != 0)
+		return (error_exit(data, "Error: Stop mutex init failed", ERR_MUTEX));
 	return (SUCCESS);
 }
 
