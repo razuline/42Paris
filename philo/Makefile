@@ -6,50 +6,58 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/07 10:29:29 by erazumov          #+#    #+#              #
-#    Updated: 2025/06/07 17:27:49 by erazumov         ###   ########.fr        #
+#    Updated: 2025/06/16 18:41:43 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = philo
-CFLAGS = -Wall -Wextra -Werror -pthread
-INCLUDE = -I include/
+CC = cc
+CFLAGS = -Wall -Wextra -Werror -g -pthread
+INCLUDE = -I
 
-SRC_DIR = src/
-SRC = main.c init.c philo.c monitor.c utils.c time_utils.c cleanup.c
-OBJ_DIR = obj/
-OBJ = $(addprefix $(OBJ_DIR)/,$(SRC:.c=.o))
+HFILES = philo.h
+
+CFILES = main.c \
+		 init.c \
+		 simulation.c \
+		 actions.c \
+		 cleanup.c \
+		 utils.c
+
+OBJECTS = $(CFILES:.c=.o)
 
 # Colors
-RESET = \033[0m
-RED = \033[0;31m
-GREEN = \033[0;32m
-YELLOW = \033[0;33m
-BLUE = \033[0;34m
+Y = \033[33m
+R = \033[31m
+G = \033[32m
+B = \033[34m
+X = \033[0m
+UP = \033[A
+CUT = \033[K
 
 all: $(NAME)
 
-$(NAME): $(OBJ)
-	$(CC) $(CFLAGS) $(OBJ) -o $(NAME)
-	@echo "$(GREEN)✅ Compilation successful ➜ $(NAME)$(RESET)"
+%.o : %.c
+	@echo "$(Y)Compiling [$<]...$(X)"
+	@$(CC) $(CFLAGS) -c $< -o $@
+	@printf "$(UP)$(CUT)"
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)%.c | $(OBJ_DIR)
-	@$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
-
-$(OBJ_DIR):
-	@mkdir -p $(OBJ_DIR)
-	@echo "$(BLUE)📁 Created object directory: $(OBJ_DIR)$(RESET)"
+$(NAME): $(OBJECTS)
+	@echo "$(Y)📁 Compiling object files [$(NAME)]...$(X)"
+	@$(CC) $(CFLAGS) $(OBJECTS) -o $(NAME)
+	@echo "$(G)✅ Finished [$(NAME)]$(X)"
 
 clean:
-	@rm -rf $(OBJ_DIR)
-	@echo "$(RED)🧹 Object files removed$(RESET)"
+	@rm -f $(OBJECTS)
+	@echo "$(R)🧹 Object files removed [$(OBJECTS)]$(X)"
 
 fclean: clean
 	@rm -f $(NAME)
-	@echo "$(RED)🗑️  Executables removed$(RESET)"
+	@echo "$(R)🗑️  Executables removed [$(NAME)]$(X)"
 
 re: fclean all
 
 norm:
-	@norminette $(SRC_DIR) src/ | grep -v "OK" || true
+	@norminette $(HFILES) $(CFILES) | grep -v "OK" || true
 
 .PHONY: all clean fclean re norm
