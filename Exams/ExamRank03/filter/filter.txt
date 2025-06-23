@@ -1,0 +1,37 @@
+Assignement name : filter
+
+Expected files : filter.c
+
+Allowed functions : printf, perror, calloc, malloc, realloc, strlen,
+                    read, free
+-------------------------------------------------------------------------
+
+Write a program that will take one argument s.
+
+Your program will then read from stdin and write all the content read in
+stdout except that every occurence of s must be replaced by '' (as many
+as the length of s).
+
+For example :
+
+./filter bonjour
+will behave the same way as :
+sed 's/bonjour/**/g'
+
+./filter abc
+will behave the same way as :
+sed 's/abc//g'
+
+more generally your program must be the equivalent of the shell script
+filter.sh present in this directory (you can compare your program with
+it)
+
+In case of error during read or a malloc you must write "Error: "
+followed by the error message in stderr and return 1.
+
+For example this should work :
+$> echo 'abcdefaaaabcdeabcabcdabc' | ./filter abc | cat -e
+defaaade**d**$
+
+$> echo 'ababcabababc' | ./a.out ababc | cat -e
+ab$
