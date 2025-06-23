@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 18:26:43 by erazumov          #+#    #+#             */
-/*   Updated: 2025/06/16 21:43:13 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/06/23 13:21:00 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,9 +28,9 @@ int	init_data(t_data *data, int ac, char **av)
 		data->nbr_must_eat = -1;
 	if (validate_args(data, ac) != 0)
 		return (1);
-	data->simulation_end = false;
 	data->philos = NULL;
 	data->forks = NULL;
+	data->simulation_end = false;
 	if (init_mutexes(data) != 0)
 		return (1);
 	if (init_philos(data) != 0)
@@ -63,7 +63,12 @@ static int	init_mutexes(t_data *data)
 	while (++i < data->num_philos)
 	{
 		if (pthread_mutex_init(&data->forks[i], NULL) != 0)
+		{
+			while (--i >= 0)
+				pthread_mutex_destroy(&data->forks[i]);
+			free(data->forks);
 			return (printf("Error: Fork mutex init failed.\n"), 1);
+		}
 	}
 	if (pthread_mutex_init(&data->print_lock, NULL) != 0)
 		return (printf("Error: Write mutex init failed.\n"), 1);
@@ -88,7 +93,12 @@ static int	init_philos(t_data *data)
 		data->philos[i].left_fork = &data->forks[i];
 		data->philos[i].right_fork = &data->forks[(i + 1) % data->num_philos];
 		if (pthread_mutex_init(&data->philos[i].philo_lock, NULL) != 0)
+		{
+			while (--i >= 0)
+				pthread_mutex_destroy(&data->philos[i].philo_lock);
+			free(data->philos);
 			return (printf("Error: Philosopher mutex init failed.\n"), 1);
+		}
 	}
 	return (0);
 }
