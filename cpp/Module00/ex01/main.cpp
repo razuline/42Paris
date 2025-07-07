@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/07 12:10:53 by erazumov          #+#    #+#             */
-/*   Updated: 2025/07/07 12:37:33 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/07/07 16:22:04 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,10 @@ int	main(void)
 		std::cin >> command;
 		if (command == "EXIT")
 			break ;
-		
+		else if (command == "ADD")
+			phonebook.addContact();
+		else if (command == "SEARCH")
+			phonebook.searchContact();
 	}
 	return (0);
 }

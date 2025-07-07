@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/07 12:10:42 by erazumov          #+#    #+#             */
-/*   Updated: 2025/07/07 12:47:48 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/07/07 16:13:59 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,13 @@ class Contact {
 		void	setLastName(std::string str);
 		void	setNickname(std::string str);
 		void	setPhoneNumber(std::string str);
-		void	setDarkestSecret(std::string str);
+		void	setSecret(std::string str);
+	
+		std::string	getFirstName(void) const;
+		std::string	getLastName(void) const;
+		std::string	getNickname(void) const;
+		std::string	getPhoneNumber(void) const;
+		std::string	getSecret(void) const;
 };
 
 #endif
