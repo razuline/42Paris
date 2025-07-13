@@ -1,0 +1,48 @@
+Assignment name : powerset
+Expected files : *.c *.h
+Allowed functions : atoi, printf, malloc, calloc, realloc, free.
+---------------------------------------------------------------
+
+Write a program that will take as argument an integer n follow by a set of integers,
+your program should display all the subsets of whose sum of elements is n.
+
+In case of a malloc error your program will exit with the code 1.
+We will not test invalid test(for example '1 1 2')
+hint: the empty set is a subset of anyset.
+
+
+For example this should work:
+$> ./powerset 3 1 0 2 4 5 3 | cat -e
+3$
+0 3$
+1 2$
+1 0 2$
+$> ./powerset 12 5 2 1 8 4 3 7 11 | cat -e
+8 4$
+1 11$
+1 4 7$
+2 3 7$
+5 4 3$
+5 7$
+5 2 1 4$
+$> ./powerset 7 3 8 2| cat -e
+$
+$> ./powerset 0 1 -1| cat -e
+1 -1$
+
+The order of lines is not important, but the order of the element in a subset is.
+You must not have any duplicates (for example 2 1, 1 2)
+$> ./powerset 5 1 2 3 4 5| cat -e
+valid:
+1 4$
+2 3$
+5$
+
+or:
+2 3$
+5$
+1 4$
+not valid:
+4 1$
+3 2$
+5$
