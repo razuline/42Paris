@@ -6,9 +6,11 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/13 13:25:45 by erazumov          #+#    #+#             */
-/*   Updated: 2025/07/15 13:54:19 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/07/15 15:19:40 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+#include "n_queens.h"
 
 /**
  * @brief Vérifie si une position est sûre.
