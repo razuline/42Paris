@@ -6,36 +6,11 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/13 15:32:10 by erazumov          #+#    #+#             */
-/*   Updated: 2025/07/13 16:20:24 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/07/15 16:16:52 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <stdio.h>
-#include <stdlib.h>
-
-void	sort_array(int *arr, int size)
-{
-	int	i;
-	int	j;
-	int	tmp;
-
-	i = 0;
-	while (i < size - 1)
-	{
-		j = 0;
-		while (j < size - i - 1)
-		{
-			if (arr[j] > arr[j + 1])
-			{
-				tmp = arr[j];
-				arr[j] = arr[j + 1];
-				arr[j + 1] = tmp;
-			}
-			j++;
-		}
-		i++;
-	}
-}
+#include "powerset.h"
 
 /**
  * @brief Affiche les éléments d'un sous-ensemble
@@ -65,7 +40,7 @@ void	print_subset(int *subset, int size)
  * @param subset_size La taille actuelle de 'current_subset'
  */
 void	find_subsets(int target, int *nums, int size, int idx,
-	int *curr_subset, int subset_size)
+	int *curr_subset, int subset_size, int *solution)
 {
 	int	i;
 	int	curr_sum;
@@ -83,18 +58,24 @@ void	find_subsets(int target, int *nums, int size, int idx,
 		}
 		// Si la somme est égale à la cible, on affiche la solution
 		if (curr_sum == target)
-			print_subset(curr_subset, subset_size);
+		{
+			if (subset_size > 0)
+			{
+				print_subset(curr_subset, subset_size);
+				*solution = 1;
+			}
+		}
 		return ;
 	}
 	// -- Exploration par choix binaire --
 
 	// Choix 1 : On IGNORE le nombre à l'index actuel et on continue l'exploration
-	find_subsets(target, nums, size, idx + 1, curr_subset, subset_size);
+	find_subsets(target, nums, size, idx + 1, curr_subset, subset_size, solution);
 
 	// Choix 2 : On PREND le nombre à l'index actuel
 	curr_subset[subset_size] = nums[idx];
 	// Et on continue l'exploration avec ce nombre ajouté au "panier"
-	find_subsets(target, nums, size, idx + 1, curr_subset, subset_size + 1);
+	find_subsets(target, nums, size, idx + 1, curr_subset, subset_size + 1, solution);
 }
 
 int	main(int ac, char **av)
@@ -104,6 +85,7 @@ int	main(int ac, char **av)
 	int	num_count;
 	int	*nums;
 	int	*curr_subset;
+	int	solution;
 
 	if (ac < 2)
 		return (1);
@@ -124,8 +106,13 @@ int	main(int ac, char **av)
 		i++;
 	}
 
-	// L'appel initial commence avec un sous-ensemble vide (taille 0)
-	find_subsets(target, nums, num_count, 0, curr_subset, 0);
+	// 1. On initialise le flag à 0 (faux)
+	solution = 0;
+	// 2. On lance la recherche en passant l'ADRESSE du flag (&)
+	find_subsets(target, nums, num_count, 0, curr_subset, 0, &solution);
+	// 3. On applique la règle spéciale pour l'ensemble vide
+	if (target == 0 && !solution)
+		printf("\n");
 
 	// Nettoyer
 	free(nums);
