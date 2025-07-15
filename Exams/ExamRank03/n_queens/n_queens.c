@@ -6,26 +6,15 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/13 13:25:45 by erazumov          #+#    #+#             */
-/*   Updated: 2025/07/13 14:02:03 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/07/15 13:54:19 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <stdlib.h>
-#include <unistd.h>
-
-// Le tableau pour stocker les positions des reines reste le même
-int	g_board[15];
-
 /**
- * @brief Vérifie si il est sûr de placer une reine à la position (row, col)
- * @param row La ligne où on veut placer la reine
- * @param col La colonne où on veut placer la reine
- * @return int 1 si la position est sûre, 0 sinon
- * @abs La fonction qui calcule la valeur absolue d'un nombre entier (int).
- * 		La valeur absolue d'un nombre est sa distance par rapport à zéro,
- * 		sans tenir compte de son signe.
+ * @brief Vérifie si une position est sûre.
+ * @param board Le tableau représentant l'échiquier.
  */
-int	is_safe(int row, int col)
+int	is_safe(int row, int col, int *board)
 {
 	int	i;
 
@@ -33,7 +22,7 @@ int	is_safe(int row, int col)
 	while (i < col)
 	{
 		// Vérification des menaces (ligne et diagonale) est inchangée
-		if (g_board[i] == row || abs(g_board[i] - row) == abs(i - col))
+		if (board[i] == row || abs(board[i] - row) == abs(i - col))
 			return (0); // Position non sûre
 		i++;
 	}
@@ -41,10 +30,10 @@ int	is_safe(int row, int col)
 }
 
 /**
- * @brief Affiche une solution trouvée au format requis
- * @param n La taille de l'échiquier
+ * @brief Affiche une solution.
+ * @param board Le tableau représentant l'échiquier.
  */
-void	print_solution(int n)
+void	print_solution(int n, int *board)
 {
 	int		i;
 	char	c;
@@ -52,7 +41,7 @@ void	print_solution(int n)
 	i = 0;
 	while (i < n)
 	{
-		c = g_board[i] + '0';
+		c = board[i] + '0';
 		write(1, &c, 1);
 		if (i < n - 1)
 			write(1, " ", 1);
@@ -61,22 +50,27 @@ void	print_solution(int n)
 	write(1, "\n", 1);
 }
 
-void	solve_n_queens(int col, int n)
+/**
+ * @brief Fonction récursive pour résoudre le problème.
+ * @param board Le tableau représentant l'échiquier.
+ */
+void	solve_n_queens(int col, int n, int *board)
 {
 	int	row;
 
 	if (col == n)
 	{
-		print_solution(n);
+		print_solution(n, board);
 		return ;
 	}
 	row = 0;
 	while (row < n)
 	{
-		if (is_safe(row, col))
+		if (is_safe(row, col, board))
 		{
-			g_board[col] = row;
-			solve_n_queens(col + 1, n);
+			board[col] = row;
+			// On passe le 'board' à l'appel récursif
+			solve_n_queens(col + 1, n, board);
 		}
 		row++;
 	}
@@ -85,16 +79,15 @@ void	solve_n_queens(int col, int n)
 int	main(int ac, char **av)
 {
 	int	n;
+	int	board[15]; // Le tableau est créé localement dans main
 
-	// Verifier, si le programme a l'autres arguments que son nom
 	if (ac != 2)
 		return (1);
 
 	n = atoi(av[1]);
-
-	if (n <= 0)
+	if (n <= 0 || n > 15)
 		return (0);
-
-	solve_n_queens(0, n);
+	// On lance la récursion en passant le tableau 'board'
+	solve_n_queens(0, n, board);
 	return (0);
 }
