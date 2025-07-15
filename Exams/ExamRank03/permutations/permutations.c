@@ -6,13 +6,11 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/13 14:54:34 by erazumov          #+#    #+#             */
-/*   Updated: 2025/07/13 15:23:51 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/07/15 15:16:37 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <unistd.h>
-#include <stdlib.h>
-#include <stdio.h>
+#include "permutations.h"
 
 int	ft_strlen(char *str)
 {
