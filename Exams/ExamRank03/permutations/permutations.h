@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/15 14:00:26 by erazumov          #+#    #+#             */
-/*   Updated: 2025/07/15 14:17:54 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/07/17 16:02:58 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,12 +15,11 @@
 
 #include <unistd.h>
 #include <stdlib.h>
-#include <stdio.h>
 
 int		ft_strlen(char *str);
+void	ft_putstr(char *str);
 void	ft_swap(char *a, char *b);
-void	sort_str(char *str);
-void	find_permutations(char *orig_str, char *curr_perm, int *used,
-			int k, int len);
+void	sort_str(char *str, int len);
+int		next_permutation(char *str, int len);
 
 #endif
