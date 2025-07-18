@@ -1,4 +1,0 @@
-Ceci est la premiere ligne.
-Ceci est la deuxieme ligne.
-Et la troisieme ligne.
-Une derniere ligne sans retour chariot.

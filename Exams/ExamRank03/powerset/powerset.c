@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/13 15:32:10 by erazumov          #+#    #+#             */
-/*   Updated: 2025/07/18 15:35:04 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/07/18 19:01:26 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,20 +18,15 @@
 
 #include "powerset.h"
 
-int	*g_nums;
-int	*g_subset;
-int	g_target;
-int	g_nums_size;
-
 // Affiche les éléments d'un sous-ensemble
-void	print_result(int size)
+void	print_subset(int *subset, int size)
 {
 	int	i;
 
 	i = 0;
 	while (i < size)
 	{
-		printf("%d", g_subset[i]);
+		printf("%d", subset[i]);
 		if (i < size - 1)
 			printf(" ");
 		i++;
@@ -40,49 +35,61 @@ void	print_result(int size)
 }
 
 // Fonction récursive pour trouver et afficher les sous-ensembles valides
-void	find_subsets(int pos, int sum, int start)
+void	find_subsets(int *nums, int num_count, int target, int *subset,
+		int subset_size, int sum, int start_idx, int *solution)
 {
-	int	i;
-
-	if (sum == g_target && pos > 0)
-		print_result(pos);
-	i = start;
-	while (i < g_nums_size)
+	if (start_idx == num_count)
 	{
-		if (sum + g_nums[i] > g_target)
-			continue ;
-		g_subset[pos] = g_nums[i];
-		find_subsets(pos + 1, sum + g_nums[i], i + 1);
+		if (sum == target)
+		{
+			if (subset_size > 0)
+			{
+				print_subset(subset, subset_size);
+				*solution = 1;
+			}
+		}
+		return ;
 	}
+	find_subsets(nums, num_count, target, subset, subset_size, sum,
+		start_idx + 1, solution);
+	subset[subset_size] = nums[start_idx];
+	find_subsets(nums, num_count, target, subset, subset_size + 1,
+		sum + nums[start_idx], start_idx + 1, solution);
 }
 
 int	main(int ac, char **av)
 {
 	int	i;
+	int	target;
+	int	num_count;
+	int *nums;
+	int	*subset;
+	int	solution;
 
 	if (ac < 2)
-	{
-		printf("\n");
 		return (0);
-	}
-	g_target = atoi(av[1]);
-	g_nums_size = ac - 2;
-	g_nums = malloc(sizeof(int) * g_nums_size);
-	g_subset = malloc(sizeof(int) * g_nums_size);
-	if (!g_nums || !g_subset)
-	{
-		free(g_nums);
-		free(g_subset);
+	target = atoi(av[1]);
+	num_count = ac - 2;
+	nums = malloc(sizeof(int) * num_count);
+	if (!nums)
 		return (1);
-	}
 	i = 0;
-	while (i < g_nums_size)
+	while (i < num_count)
 	{
-		g_nums[i] = atoi(av[i + 2]);
+		nums[i] = atoi(av[i + 2]);
 		i++;
 	}
-	find_subsets(0, 0, 0);
-	free(g_nums);
-	free(g_subset);
+	subset = malloc(sizeof(int) * num_count);
+	if (!subset)
+	{
+		free(nums);
+		return (1);
+	}
+	solution = 0;
+	find_subsets(nums, num_count, target, subset, 0, 0, 0, &solution);
+	if (target == 0 && !solution)
+		printf("\n");
+	free(nums);
+	free(subset);
 	return (0);
 }
