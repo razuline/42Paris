@@ -6,9 +6,15 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/13 15:32:10 by erazumov          #+#    #+#             */
-/*   Updated: 2025/07/15 16:16:52 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/07/15 16:27:30 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+/** Le terme mathématique pour "powerset" (l'ensemble de toutes les parties
+ * d'un ensemble).
+ * Concernant l'exercice que nous avons fait, le sujet était de trouver
+ * les sous-ensembles dont la somme correspond à un nombre cible.
+ */
 
 #include "powerset.h"
 
