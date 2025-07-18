@@ -6,160 +6,177 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/11 17:02:02 by erazumov          #+#    #+#             */
-/*   Updated: 2025/07/11 17:28:37 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/07/18 12:04:41 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef BUFFER_SIZE
-# define BUFFER_SIZE 3
-#endif
-
 #include <fcntl.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
+#include "given_gnl.h"
 
-//cc broken_gnl.c -Wall -Wextra -Werror -D BUFFER_SIZE=3 -o gnl
-
-int	ft_strlen(char *c)
+static char	*ft_strchr(const char *s, int c)
 {
-	int	i;
+	char	ch;
 
-	i = 0;
-	if (c == NULL)
-		return (0);
-	while (c[i])
+	ch = c;
+	while (*s)
 	{
-		i++;
+		if (*s == ch)
+			return ((char *)s);
+		s++;
 	}
-	return (i);
-}
-
-char	*ft_strchr(char *s, int c)
-{
-	int	i;
-
-	i = 0;
-	while (s[i] && s[i] != c)
-	{
-		i++;
-	}
-	if (s[i] == c)
-		return (&s[i]);
+	if (ch == '\0')
+		return ((char *)s);
 	return (NULL);
 }
 
-char	*ft_memmove(char *dest, char *src, int n)
+static size_t	ft_strlen(const char *s)
 {
-	int	i;
+	size_t	i;
 
-	if (dest == NULL && src == NULL)
-		return (NULL);
-	if (src > dest)
-	{
-		i = 0;
-		while (i < n)
-		{
-			dest[i] = src[i];
-			i++;
-		}
-	}
-	else
-	{
-		i = n - 1;
-		while (i >= 0)
-		{
-			dest[i] = src[i];
-			i--;
-		}
-	}
-	return (dest);
+	i = 0;
+	if (!s)
+		return (0);
+	while (s[i])
+		i++;
+	return (i);
 }
 
-char	*ft_join(char *s1, char *s2, int n)
+static char	*ft_strjoin_free(char *s1, char *s2)
 {
-	int		size1;
-	char	*retj;
+	size_t	i;
+	size_t	j;
+	char	*new_str;
 
-	size1 = ft_strlen(s1);
-	retj = malloc(sizeof(char) * (size1 + n + 1));
-	if (retj == NULL)
+	if (!s1)
+	{
+		s1 = malloc(1);
+		if (!s1)
+			return (NULL);
+		s1[0] = '\0';
+	}
+	new_str = malloc(ft_strlen(s1) + ft_strlen(s2) + 1);
+	if (!new_str)
 	{
 		free(s1);
 		return (NULL);
 	}
-	ft_memmove(retj, s1, size1);
-	ft_memmove(retj + size1, s2, n);
-	retj[size1 + n] = '\0';
-	free(s1);
-	s1 = NULL;
-	return (retj);
-}
-
-char	*b_gnl(fd)
-{
-	static char	buf[BUFFER_SIZE + 1];
-	char		*tmp;
-	char		*rest;
-	int			nb_read;
-	int			deb;
-	int			j;
-
-	tmp = NULL;
-	rest = NULL;
-	nb_read = 0;
-	//	printf("buffer_size  = %d\n", BUFFER_SIZE);
-	while (rest == NULL)
+	i = 0;
+	while (s1[i])
 	{
-		if (buf[0] == '\0')
-		{
-			nb_read = read(fd, buf, BUFFER_SIZE);
-			if (nb_read == 0)
-			{
-				free(tmp);
-				return (NULL);
-			}
-		}
-		rest = ft_strchr(buf, '\n');
-		if (rest)
-		{
-			deb = 0;
-			deb = rest - buf;
-			tmp = ft_join(tmp, buf, deb + 1);
-			j = 0;
-			while (buf[j + deb + 1])
-			{
-				buf[j] = buf[j + deb + 1];
-				j++;
-			}
-			buf[j] = '\0';
-			return (tmp);
-		}
-		else
-		{
-			tmp = ft_join(tmp, buf, ft_strlen(buf));
-			buf[0] = '\0';
-		}
+		new_str[i] = s1[i];
+		i++;
 	}
-	return (tmp);
+	j = 0;
+	while (s2[j])
+	{
+		new_str[i + j] = s2[j];
+		j++;
+	}
+	new_str[i + j] = '\0';
+	free(s1);
+	return (new_str);
 }
 
-int	main(void)
+static char	*read_and_stash(int fd, char *stash)
 {
-	int fd = 0;
+	char	*buff;
+	ssize_t	bytes_read;
 
-	fd = open("text1.txt", O_RDONLY);
-	if (fd < 0)
-		perror("open");
+	buff = malloc(sizeof(char) * (BUFFER_SIZE + 1));
+	if (!buff)
+		return (NULL);
+	bytes_read = 1;
+	while (!ft_strchr(stash, '\n') && bytes_read > 0)
+	{
+		bytes_read = read(fd, buff, BUFFER_SIZE);
+		if (bytes_read < 0)
+		{
+			free(buff);
+			free(stash);
+			return (NULL);
+		}
+		buff[bytes_read] = '\0';
+		stash = ft_strjoin_free(stash, buff);
+	}
+	free(buff);
+	return (stash);
+}
 
-	printf("line = %s", b_gnl(fd));
-	printf("line = %s", b_gnl(fd));
-	printf("line = %s", b_gnl(fd));
-	printf("line = %s", b_gnl(fd));
-	printf("line = %s", b_gnl(fd));
-	printf("line = %s", b_gnl(fd));
-	printf("line = %s", b_gnl(fd));
+static char	*extract_and_clean(char **stash)
+{
+	char	*line;
+	char	*new_stash;
+	char	*newline;
+	size_t	line_len;
+	size_t	i;
 
-	return (0);
+	newline = ft_strchr(*stash, '\n');
+	if (!newline)
+	{
+		line = *stash;
+		*stash = NULL;
+		return (line);
+	}
+	line_len = (newline - *stash) + 1;
+	line = malloc(sizeof(char) * (line_len + 1));
+	if (!line)
+		return (NULL);
+	
+	// --- CORRECTION 1 : Copier les caractères de la ligne ---
+	i = 0;
+	while (i < line_len)
+	{
+		line[i] = (*stash)[i];
+		i++;
+	}
+	line[i] = '\0';
+
+	new_stash = malloc(sizeof(char) * (ft_strlen(newline + 1) + 1));
+	if (!new_stash)
+	{
+		free(line);
+		return (NULL);
+	}
+	// --- CORRECTION 2 : Copier les caractères restants dans la nouvelle réserve ---
+	i = 0;
+	while ((newline + 1)[i])
+	{
+		new_stash[i] = (newline + 1)[i];
+		i++;
+	}
+	new_stash[i] = '\0';
+
+	// On libère l'ancienne réserve et on la met à jour
+	free(*stash);
+	*stash = new_stash;
+	return (line);
+}
+
+char	*get_next_line(int fd)
+{
+	static char	*stash;
+	char		*line;
+
+	if (fd < 0 || BUFFER_SIZE <= 0)
+		return (NULL);
+
+	// Étape 1: Lire depuis le fichier
+	stash = read_and_stash(fd, stash);
+
+	// On vérifie d'abord si stash est NULL
+	if (!stash)
+		return (NULL);
+	// Ensuite, on vérifie s'il est vide
+	if (*stash == '\0')
+	{
+		free(stash);
+		stash = NULL;
+		return (NULL);
+	}
+	// Étape 2: Extraire la ligne de la réserve
+	line = extract_and_clean(&stash);
+
+	return (line);
 }

@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/23 12:01:22 by erazumov          #+#    #+#             */
-/*   Updated: 2025/06/23 12:31:10 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/07/18 10:43:04 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,44 +15,101 @@
 #include <string.h>
 #include <unistd.h>
 
-/* Taille de buffer pour la lecture */
-#define BUFFER_SIZE 4096
-
-/* Compare les 'n' premiers caractères de deux chaînes */
-static int	ft_strncmp(const char *s1, const char *s2, size_t n)
-{
-	if (n == 0)
-		return (0);
-	while (*s1 && *s1 == *s2 && --n > 0)
-	{
-		s1++;
-		s2++;
-	}
-	return (*(unsigned char *)s1 - *(unsigned char *)s2);
-}
-
-/* Écrit le nombre spécifié d'étoiles sur la sortie standard */
-static void	print_stars(int count)
+int	is_match(const char *buffer, const char *s)
 {
 	int	i;
 
 	i = 0;
-	while (i < count)
+	while (s[i])
 	{
-		write(STDOUT_FILENO, "*", 1);
+		if (buffer[i] != s[i])
+			return (0);
 		i++;
 	}
+	return (1);
 }
 
-static int	process_and_write(char *work_buff, int work_len,
-		const char *find_str, int find_len)
+char	*read_stdin(void)
 {
-	int	i;
-	int	last_print_pos;
-	int	limit;
+	int		i;
+	char	*buff;
+	char	chunk[1024];
+	size_t	total_size;
+	ssize_t	bytes_read;
 
+	total_size = 0;
+	buff = malloc(1);
+	if (!buff)
+		return (NULL);
+	buff[0] = '\0';
+	while ((bytes_read = read(STDIN_FILENO, chunk, 1024)) > 0)
+	{
+		
+		buff = realloc(buff, total_size + bytes_read + 1);
+		if (!buff)
+			return (NULL);
+		i = 0;
+		while (i < bytes_read)
+		{
+			buff[total_size + i] = chunk[i];
+			i++;
+		}
+		total_size += bytes_read;
+		buff[total_size] = '\0';
+	}
+	if (bytes_read < 0)
+	{
+		free(buff);
+		return (NULL);
+	}
+	return (buff);
+}
+
+int	main(int ac, char **av)
+{
+	int		i;
+	int		j;
+	int		s_len;
+	char	*s;
+	char	*input;
+	char	*result;
+
+	if (ac != 2)
+		return (1);
+	s = av[1];
+	s_len = strlen(s);
+	input = read_stdin();
+	if (!input)
+	{
+		perror("Error");
+		return (1);
+	}
+	result = malloc(strlen(input) + 1);
+	if (!result)
+	{
+		free(input);
+		perror("Error");
+		return (1);
+	}
 	i = 0;
-	last_print_pos = 0;
-	limit = work_len - (find_len - 1);
-	if ()
+	j = 0;
+	if (s_len > 0)
+	{
+		while (input[i])
+		{
+			if (is_match(input + i, s))
+				i += s_len;
+			else
+			{
+				result[j] = input[i];
+				i++;
+				j++;
+			}
+		}
+	}
+	result[j] = '\0';
+	printf("%s", result);
+	free(input);
+	free(result);
+	return (0);
 }

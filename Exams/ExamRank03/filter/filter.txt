@@ -33,5 +33,5 @@ For example this should work :
 $> echo 'abcdefaaaabcdeabcabcdabc' | ./filter abc | cat -e
 defaaade**d**$
 
-$> echo 'ababcabababc' | ./a.out ababc | cat -e
+$> echo 'ababcabababc' | ./filter ababc | cat -e
 ab$
