@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/13 15:32:18 by erazumov          #+#    #+#             */
-/*   Updated: 2025/07/15 16:18:16 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/07/17 21:42:07 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void	print_subset(int *subset, int size);
-void	find_subsets(int target, int *nums, int size, int idx,
-			int *curr_subset, int subset_size, int *solution);
+void	print_result(int size);
+void	find_subsets(int pos, int sum, int start);
 
 #endif
