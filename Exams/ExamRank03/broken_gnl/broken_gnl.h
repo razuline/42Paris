@@ -1,36 +1,22 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
+/*   broken_gnl.h                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/07/18 11:49:27 by erazumov          #+#    #+#             */
-/*   Updated: 2025/07/18 15:41:21 by erazumov         ###   ########.fr       */
+/*   Created: 2025/07/11 17:00:22 by erazumov          #+#    #+#             */
+/*   Updated: 2025/07/18 15:43:15 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
-#include <fcntl.h>
-#include <stdio.h>
+#ifndef GNL
+# define GNL
 
-int	main(void)
-{
-	int		fd;
-	char	*line;
+# ifndef BUFFER_SIZE
+#  define BUFFER_SIZE 10
+# endif
 
-	fd = open("test.txt", O_RDONLY);
-	if (fd == -1)
-	{
-		perror("Erreur");
-		return (1);
-	}
-	while ((line = get_next_line(fd)) != NULL)
-	{
-		printf("%s", line);
-		free(line);
-	}
-	printf("\n(Fin du fichier ou erreur)\n");
-	close(fd);
-	return (0);
-}
+char	*get_next_line(int fd);
+
+#endif
