@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/13 16:36:37 by erazumov          #+#    #+#             */
-/*   Updated: 2025/07/13 16:37:34 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/07/19 13:30:48 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,23 +19,23 @@
 #include <sys/types.h>
 
 // compute the distance between two points
-float	distance(float a[2], float b[2])
+float    distance(float a[2], float b[2])
 {
 	return sqrtf((b[0] - a[0]) * (b[0] - a[0]) + (b[1] - a[1]) * (b[1] - a[1]));
 }
 
-float	tsp(float (*array)[2], ssize_t size)
+float tsp(float (*array)[2], ssize_t size)
 {
 	float best_distance;
 	// ...
 	return (best_distance);
 }
 
-ssize_t	file_size(FILE *file)
+ssize_t    file_size(FILE *file)
 {
-	char	*buffer = NULL;
-	size_t	n = 0;
-	ssize_t	ret;
+	char    *buffer = NULL;
+	size_t    n = 0;
+	ssize_t ret;
 
 	errno = 0;
 
@@ -44,10 +44,10 @@ ssize_t	file_size(FILE *file)
 	free(buffer);
 	if (errno || fseek(file, 0, SEEK_SET))
 		return -1;
-	return (ret);
+	return ret;
 }
 
-int	retrieve_file(float (*array)[2], FILE *file)
+int        retrieve_file(float (*array)[2], FILE *file)
 {
 	int tmp;
 	for (size_t i = 0; (tmp = fscanf(file, "%f, %f\n", array[i] + 0, array[i] + 1)) != EOF; i++)
@@ -61,7 +61,7 @@ int	retrieve_file(float (*array)[2], FILE *file)
 	return 0;
 }
 
-int	main(int ac, char **av)
+int        main(int ac, char **av)
 {
 	char *filename = "stdin";
 	FILE *file = stdin;
