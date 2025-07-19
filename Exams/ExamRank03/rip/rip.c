@@ -6,81 +6,63 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/13 16:30:32 by erazumov          #+#    #+#             */
-/*   Updated: 2025/07/15 16:02:11 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/07/19 13:12:31 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "rip.h"
 
-// Fonction utilitaire pour calculer la longueur de la chaîne
-int	ft_strlen(char *str)
+void	get_solutions(char *buf, int n, int idx, int balance, int left,
+		int right)
 {
-	int	len;
+	char	c;
 
-	len = 0;
-	while (str[len])
-		len++;
-	return (len);
-}
-
-/**
- * @brief Fonction récursive qui génère et affiche toutes les solutions valides.
- * @param str La chaîne de caractères (modifiée sur place).
- * @param index La position actuelle dans la chaîne.
- * @param left_rem Le nombre de '(' qu'il reste à retirer.
- * @param right_rem Le nombre de ')' qu'il reste à retirer.
- * @param balance Le bilan actuel des parenthèses (doit toujours être >= 0).
- */
-void	generate(char *str, int idx, int left_rem, int right_rem, int balance)
-{
-	char	curr_ch;
-
-	// Cas de base : on est à la fin de la chaîne
-	if (str[idx] == '\0')
+	if (idx == n)
 	{
-		// Si on a retiré le bon nombre de parenthèses ET
-		// que la chaîne est équilibrée
-		if (left_rem == 0 && right_rem == 0 && balance == 0)
-			puts(str); // On affiche la solution
+		if (balance == 0 && left == 0 && right == 0)
+		{
+			buf[n] = 0;
+			puts(buf);
+		}
 		return ;
 	}
-	curr_ch = str[idx];
-	// Si le caractère est '(': on explore deux possibilités
-	if (curr_ch == '(')
+	c = buf[idx];
+	if (c == '(')
 	{
-		// 1. On le RETIRE (s'il nous en reste à retirer)
-		if (left_rem > 0)
+		// 1. Essayer de retirer la parenthèse
+		if (left > 0)
 		{
-			str[idx] = ' '; // On le remplace par un espace
-			generate(str, idx + 1, left_rem - 1, right_rem, balance + 1);
-			str[idx] = '('; // BACKTRACK: on le remet en place pour
-							// les autres explorations
+			buf[idx] = ' ';
+			get_solutions(buf, n, idx + 1, balance, left - 1, right);
+			buf[idx] = '('; // Backtrack : on la remet pour l'autre chemin
 		}
-		// 2. On le GARDE
-		generate(str, idx + 1, left_rem, right_rem, balance + 1);
+		// 2. Essayer de garder la parenthèse
+		get_solutions(buf, n, idx + 1, balance + 1, left, right);
 	}
-	// Si le caractère est ')': on explore deux possibilités
-	else if (curr_ch == ')')
+	else if (c == ')')
 	{
-		// 1. On le RETIRE (s'il nous en reste à retirer)
-		if (right_rem > 0)
+		// 1. Essayer de retirer la parenthèse
+		if (right > 0)
 		{
-			str[idx] = ' '; // On le remplace par un espace
-			generate(str, idx + 1, left_rem, right_rem - 1, balance);
-			str[idx] = ')'; // BACKTRACK: on le remet en place
+			buf[idx] = ' ';
+			get_solutions(buf, n, idx + 1, balance, left, right - 1);
+			buf[idx] = ')'; // Backtrack
 		}
-		// 2. On le GARDE (seulement si la chaîne reste valide)
+		// 2. Essayer de garder la parenthèse (si valide)
 		if (balance > 0)
-			generate(str, idx + 1, left_rem, right_rem, balance);
+			get_solutions(buf, n, idx + 1, balance - 1, left, right);
 	}
+	else // Pour les caractères qui ne sont pas des parenthèses (ex: espaces)
+		get_solutions(buf, n, idx + 1, balance, left, right);
 }
 
 int	main(int ac, char **av)
 {
 	char	*input;
 	int		i;
-	int		left_to_remove;
-	int		right_to_remove;
+	int		n;
+	int		left;
+	int		right;
 
 	if (ac != 2)
 	{
@@ -88,24 +70,37 @@ int	main(int ac, char **av)
 		return (0);
 	}
 	input = av[1];
-	left_to_remove = 0;
-	right_to_remove = 0;
-	// --- Étape 1 : Compter les parenthèses à retirer ---
+	n = 0;
+	while (input[n] != '\0')
+		n++;
+	if (n == 0)
+		return (0);
+
+	char	buf[n + 1];
+
 	i = 0;
-	while (input[i])
+	while (i <= n)
 	{
-		if (input[i] == '(')
-			left_to_remove++;
-		else if (input[i] == ')')
+		buf[i] = input[i];
+		i++;
+	}
+	
+	left = 0;
+	right = 0;
+	i = 0;
+	while (i < n)
+	{
+		if (buf[i] == '(')
+			left++;
+		else if (buf[i] == ')')
 		{
-			if (left_to_remove > 0)
-				left_to_remove--; // Cette ')' ferme une '('
+			if (left > 0)
+				left--;
 			else
-				right_to_remove++; // Cette ')' est en trop
+				right++;
 		}
 		i++;
 	}
-	// --- Étape 2 : Lancer la génération des solutions ---
-	generate(input, 0, left_to_remove, right_to_remove, 0);
+	get_solutions(buf, n, 0, 0, left, right);
 	return (0);
 }
