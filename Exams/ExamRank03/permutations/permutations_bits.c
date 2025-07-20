@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/20 19:54:05 by erazumov          #+#    #+#             */
-/*   Updated: 2025/07/20 20:01:55 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/07/20 20:26:17 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ void	perm(int *cnt, int n, int depth, char *buf)
 		{
 			buf[depth] = (char)c;
 			--cnt[c];
-			perm(cnt, n , depth + 1, buf);
+			perm(cnt, n, depth + 1, buf);
 			++cnt[c];
 		}
 		c++;
