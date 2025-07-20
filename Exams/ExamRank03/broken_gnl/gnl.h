@@ -1,17 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.h                                    :+:      :+:    :+:   */
+/*   gnl.h                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/05/22 13:09:07 by erazumov          #+#    #+#             */
-/*   Updated: 2025/07/20 20:28:49 by erazumov         ###   ########.fr       */
+/*   Created: 2025/07/20 20:28:40 by erazumov          #+#    #+#             */
+/*   Updated: 2025/07/20 20:47:15 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef GET_NEXT_LINE_H
-# define GET_NEXT_LINE_H
+#ifndef GNL_H
+# define GNL_H
 
 # include <stdlib.h>
 # include <unistd.h>
@@ -20,10 +20,6 @@
 #  define BUFFER_SIZE 42
 # endif
 
-char	*get_next_line(int fd);
-int		ft_strlen(char *str);
-char	*ft_strchr(const char *s, int c);
-char	*ft_strdup(const char *s);
-char	*ft_strjoin_free(char *s1, char *s2);
+char		*get_next_line(int fd);
 
 #endif
