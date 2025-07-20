@@ -1,19 +1,20 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   permutations.h                                     :+:      :+:    :+:   */
+/*   permutations_bits.h                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/07/15 14:00:26 by erazumov          #+#    #+#             */
-/*   Updated: 2025/07/20 19:54:18 by erazumov         ###   ########.fr       */
+/*   Created: 2025/07/20 19:54:02 by erazumov          #+#    #+#             */
+/*   Updated: 2025/07/20 19:55:24 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef PERMUTATIONS_H
-# define PERMUTATIONS_H
+#ifndef PERMUTATIONS_BITS_H
+# define PERMUTATIONS_BITS_H
 
-#include <unistd.h>
+#include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 
 int		ft_strlen(char *str);
