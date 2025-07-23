@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/22 19:54:19 by erazumov          #+#    #+#             */
-/*   Updated: 2025/07/23 12:45:08 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/07/23 12:50:00 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,7 +99,7 @@ static int	scan_string(FILE *f, va_list ap)
 	return (found);
 }
 
-
+/*
 int	match_conv(FILE *f, const char **format, va_list ap)
 {
 	switch (**format)
@@ -152,7 +152,7 @@ int	ft_vfscanf(FILE *f, const char *format, va_list ap)
 		return EOF;
 	return nconv;
 }
-
+*/
 
 int	ft_scanf(const char *format, ...)
 {
