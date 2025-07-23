@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/22 19:54:19 by erazumov          #+#    #+#             */
-/*   Updated: 2025/07/22 20:08:32 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/07/23 12:45:08 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ static int	match_space(FILE *f)
 {
 	int	c;
 
-	while ((c == fgetc(f)) != EOF && isspace(c))
+	while ((c = fgetc(f)) != EOF && isspace(c))
 		;
 	if (c != EOF)
 		ungetc(c, f);
@@ -99,7 +99,7 @@ static int	scan_string(FILE *f, va_list ap)
 	return (found);
 }
 
-/*
+
 int	match_conv(FILE *f, const char **format, va_list ap)
 {
 	switch (**format)
@@ -153,11 +153,14 @@ int	ft_vfscanf(FILE *f, const char *format, va_list ap)
 	return nconv;
 }
 
+
 int	ft_scanf(const char *format, ...)
 {
-	// ...
-	int ret = ft_vfscanf(stdin, format, ap);
-	// ...
-	return ret;
+	va_list	ap;
+	int		ret;
+
+	va_start(ap, format);
+	ret = ft_vfscanf(stdin, format, ap);
+	va_end(ap);
+	return (ret);
 }
-*/
