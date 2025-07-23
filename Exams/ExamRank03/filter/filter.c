@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/23 12:01:22 by erazumov          #+#    #+#             */
-/*   Updated: 2025/07/18 10:43:04 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/07/23 16:07:37 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,12 +39,9 @@ char	*read_stdin(void)
 
 	total_size = 0;
 	buff = malloc(1);
-	if (!buff)
-		return (NULL);
 	buff[0] = '\0';
 	while ((bytes_read = read(STDIN_FILENO, chunk, 1024)) > 0)
 	{
-		
 		buff = realloc(buff, total_size + bytes_read + 1);
 		if (!buff)
 			return (NULL);
