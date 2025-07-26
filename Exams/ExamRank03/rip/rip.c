@@ -6,20 +6,20 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/13 16:30:32 by erazumov          #+#    #+#             */
-/*   Updated: 2025/07/19 13:12:31 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/07/26 13:28:41 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "rip.h"
 
-void	get_solutions(char *buf, int n, int idx, int balance, int left,
-		int right)
+void	get_solutions(char *buf, int n, int idx, int balance, int open,
+		int close)
 {
 	char	c;
 
 	if (idx == n)
 	{
-		if (balance == 0 && left == 0 && right == 0)
+		if (balance == 0 && open == 0 && close == 0)
 		{
 			buf[n] = 0;
 			puts(buf);
@@ -29,31 +29,27 @@ void	get_solutions(char *buf, int n, int idx, int balance, int left,
 	c = buf[idx];
 	if (c == '(')
 	{
-		// 1. Essayer de retirer la parenthèse
-		if (left > 0)
+		if (open > 0)
 		{
 			buf[idx] = ' ';
-			get_solutions(buf, n, idx + 1, balance, left - 1, right);
-			buf[idx] = '('; // Backtrack : on la remet pour l'autre chemin
+			get_solutions(buf, n, idx + 1, balance, open - 1, close);
+			buf[idx] = '(';
 		}
-		// 2. Essayer de garder la parenthèse
-		get_solutions(buf, n, idx + 1, balance + 1, left, right);
+		get_solutions(buf, n, idx + 1, balance + 1, open, close);
 	}
 	else if (c == ')')
 	{
-		// 1. Essayer de retirer la parenthèse
-		if (right > 0)
+		if (close > 0)
 		{
 			buf[idx] = ' ';
-			get_solutions(buf, n, idx + 1, balance, left, right - 1);
-			buf[idx] = ')'; // Backtrack
+			get_solutions(buf, n, idx + 1, balance, open, close - 1);
+			buf[idx] = ')';
 		}
-		// 2. Essayer de garder la parenthèse (si valide)
 		if (balance > 0)
-			get_solutions(buf, n, idx + 1, balance - 1, left, right);
+			get_solutions(buf, n, idx + 1, balance - 1, open, close);
 	}
-	else // Pour les caractères qui ne sont pas des parenthèses (ex: espaces)
-		get_solutions(buf, n, idx + 1, balance, left, right);
+	else
+		get_solutions(buf, n, idx + 1, balance, open, close);
 }
 
 int	main(int ac, char **av)
@@ -61,8 +57,8 @@ int	main(int ac, char **av)
 	char	*input;
 	int		i;
 	int		n;
-	int		left;
-	int		right;
+	int		open;
+	int		close;
 
 	if (ac != 2)
 	{
@@ -85,22 +81,22 @@ int	main(int ac, char **av)
 		i++;
 	}
 	
-	left = 0;
-	right = 0;
+	open = 0;
+	close = 0;
 	i = 0;
 	while (i < n)
 	{
 		if (buf[i] == '(')
-			left++;
+			open++;
 		else if (buf[i] == ')')
 		{
-			if (left > 0)
-				left--;
+			if (open > 0)
+				open--;
 			else
-				right++;
+				close++;
 		}
 		i++;
 	}
-	get_solutions(buf, n, 0, 0, left, right);
+	get_solutions(buf, n, 0, 0, open, close);
 	return (0);
 }
