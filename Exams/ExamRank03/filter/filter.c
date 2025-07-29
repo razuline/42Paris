@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/23 12:01:22 by erazumov          #+#    #+#             */
-/*   Updated: 2025/07/23 16:07:37 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/07/29 13:31:39 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,31 +15,40 @@
 #include <string.h>
 #include <unistd.h>
 
-int	is_match(const char *buffer, const char *s)
+/*
+** Vérifie si le début de 'buff' correspond à la chaîne 's'.
+** L'appelant doit s'assurer que 'buff' est assez long.
+*/
+int	is_match(const char *buff, const char *s)
 {
 	int	i;
 
 	i = 0;
 	while (s[i])
 	{
-		if (buffer[i] != s[i])
+		if (buff[i] != s[i])
 			return (0);
 		i++;
 	}
 	return (1);
 }
 
+/*
+** Lit l'intégralité de l'entrée standard et la retourne.
+*/
 char	*read_stdin(void)
 {
 	int		i;
 	char	*buff;
 	char	chunk[1024];
-	size_t	total_size;
+	size_t	total_size = 0;
 	ssize_t	bytes_read;
 
-	total_size = 0;
 	buff = malloc(1);
+	if (!buff)
+		return (NULL);
 	buff[0] = '\0';
+
 	while ((bytes_read = read(STDIN_FILENO, chunk, 1024)) > 0)
 	{
 		buff = realloc(buff, total_size + bytes_read + 1);
@@ -67,46 +76,45 @@ int	main(int ac, char **av)
 	int		i;
 	int		j;
 	int		s_len;
+	int		input_len;
 	char	*s;
 	char	*input;
-	char	*result;
 
 	if (ac != 2)
 		return (1);
+
 	s = av[1];
 	s_len = strlen(s);
+
 	input = read_stdin();
 	if (!input)
 	{
 		perror("Error");
 		return (1);
 	}
-	result = malloc(strlen(input) + 1);
-	if (!result)
-	{
-		free(input);
-		perror("Error");
-		return (1);
-	}
-	i = 0;
-	j = 0;
+
 	if (s_len > 0)
 	{
-		while (input[i])
+		i = 0;
+		input_len = strlen(input);
+		while (i < input_len)
 		{
-			if (is_match(input + i, s))
-				i += s_len;
-			else
+			if ((i <= input_len - s_len) && is_match(input + i, s))
 			{
-				result[j] = input[i];
-				i++;
-				j++;
+				j = 0;
+				while (j < s_len)
+				{
+					input[i + j] = '*';
+					j++;
+				}
+				i += s_len;
 			}
+			else
+				i++;
 		}
 	}
-	result[j] = '\0';
-	printf("%s", result);
+	printf("%s", input);
 	free(input);
-	free(result);
+
 	return (0);
 }

@@ -9,7 +9,7 @@ Allowed functions : printf, perror, calloc, malloc, realloc, strlen,
 Write a program that will take one argument s.
 
 Your program will then read from stdin and write all the content read in
-stdout except that every occurence of s must be replaced by '' (as many
+stdout except that every occurence of s must be replaced by '*' (as many
 as the length of s).
 
 For example :
@@ -31,7 +31,7 @@ followed by the error message in stderr and return 1.
 
 For example this should work :
 $> echo 'abcdefaaaabcdeabcabcdabc' | ./filter abc | cat -e
-defaaade**d**$
+***defaaa***de******d***$
 
 $> echo 'ababcabababc' | ./filter ababc | cat -e
-ab$
+*****ab*****$
