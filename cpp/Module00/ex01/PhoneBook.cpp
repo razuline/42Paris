@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/05 15:24:26 by erazumov          #+#    #+#             */
-/*   Updated: 2025/07/07 16:34:55 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/08/02 12:39:33 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 PhoneBook::PhoneBook(void)
 {
 	this->_index = 0;
+	this->_contact_count = 0;
 }
 
 void	PhoneBook::addContact()
@@ -45,6 +46,8 @@ void	PhoneBook::addContact()
 
 	std::cout << "Contact ajouté !" << std::endl;
 	_index = (_index + 1) % 8;
+	if (this->_contact_count < 8)
+		this->_contact_count++;
 }
 
 void	PhoneBook::searchContact()
@@ -76,4 +79,28 @@ void	PhoneBook::searchContact()
 
 		std::cout << std::endl;
 	}
+	// 1. Déclarer la variable
+	std::string	index_str;
+	// 2. Demander à l'utilisateur
+	std::cout << "Enter the index of contact to show: ";
+	// 3. Lire l'entrée de l'utilisateur
+	std::getline(std::cin, index_str);
+
+	if (index_str.length() == 1 && index_str[0] >= '0' && index_str[0] <= '7')
+	{
+		int	index_num = index_str[0] - '0'; // Convertit le caractère '5' en entier 5
+
+		if (index_num < this->_contact_count)
+		{
+			std::cout << "Prénom          : " << _contacts[index_num].getFirstName() << std::endl;
+			std::cout << "Nom de famille  : " << _contacts[index_num].getLastName() << std::endl;
+			std::cout << "Surnom          : " << _contacts[index_num].getNickname() << std::endl;
+			std::cout << "Numéro de tel.  : " << _contacts[index_num].getPhoneNumber() << std::endl;
+			std::cout << "Plus lourd secret : " << _contacts[index_num].getSecret() << std::endl;
+		}
+		else
+			std::cout << "Erreur : Ce contact n'existe pas." << std::endl;
+	}
+	else
+		std::cout << "Erreur : Index invalide." << std::endl;
 }
