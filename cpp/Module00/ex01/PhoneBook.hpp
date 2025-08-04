@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/07 12:10:02 by erazumov          #+#    #+#             */
-/*   Updated: 2025/07/07 16:21:02 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/08/02 12:27:37 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@ class PhoneBook {
 	private:
 		Contact 	_contacts[8];
 		int			_index;
+		int			_contact_count;
 
 	public:
 		PhoneBook(void);

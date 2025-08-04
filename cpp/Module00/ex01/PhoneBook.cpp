@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/05 15:24:26 by erazumov          #+#    #+#             */
-/*   Updated: 2025/07/07 16:34:55 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/08/02 13:54:55 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 PhoneBook::PhoneBook(void)
 {
 	this->_index = 0;
+	this->_contact_count = 0;
 }
 
 void	PhoneBook::addContact()
@@ -43,8 +44,10 @@ void	PhoneBook::addContact()
 	_contacts[_index].setPhoneNumber(phoneNumber);
 	_contacts[_index].setSecret(secret);
 
-	std::cout << "Contact ajouté !" << std::endl;
+	std::cout << "Contact added !" << std::endl;
 	_index = (_index + 1) % 8;
+	if (this->_contact_count < 8)
+		this->_contact_count++;
 }
 
 void	PhoneBook::searchContact()
@@ -76,4 +79,28 @@ void	PhoneBook::searchContact()
 
 		std::cout << std::endl;
 	}
+	// 1. Déclarer la variable
+	std::string	index_str;
+	// 2. Demander à l'utilisateur
+	std::cout << "Enter index of contact to show: ";
+	// 3. Lire l'entrée de l'utilisateur
+	std::getline(std::cin, index_str);
+
+	if (index_str.length() == 1 && index_str[0] >= '0' && index_str[0] <= '7')
+	{
+		int	index_num = index_str[0] - '0'; // Convertit le caractère '5' en entier 5
+
+		if (index_num < this->_contact_count)
+		{
+			std::cout << "First name      : " << _contacts[index_num].getFirstName() << std::endl;
+			std::cout << "Last name       : " << _contacts[index_num].getLastName() << std::endl;
+			std::cout << "Nickname        : " << _contacts[index_num].getNickname() << std::endl;
+			std::cout << "Phone number    : " << _contacts[index_num].getPhoneNumber() << std::endl;
+			std::cout << "Darkest secret  : " << _contacts[index_num].getSecret() << std::endl;
+		}
+		else
+			std::cout << "Error: This contact doesn't exist." << std::endl;
+	}
+	else
+		std::cout << "Error: Invalid index." << std::endl;
 }

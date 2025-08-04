@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/13 16:30:40 by erazumov          #+#    #+#             */
-/*   Updated: 2025/07/19 12:46:00 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/07/26 13:29:53 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 #include <unistd.h>
 #include <stdio.h>
 
-void	get_solutions(char *buf, int n, int idx, int balance, int left,
-		int right);
+void	get_solutions(char *buf, int n, int idx, int balance, int open,
+		int close);
 
 #endif

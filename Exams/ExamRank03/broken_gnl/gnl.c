@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/20 20:28:13 by erazumov          #+#    #+#             */
-/*   Updated: 2025/07/20 20:50:40 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/07/29 13:39:40 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,14 +48,13 @@ char	*get_next_line(int fd)
 {
 	static char	buf[BUFFER_SIZE];
 	static int	bytes_buf;
-	static int	pos;
-	char		*line;
-	int			found;
+	static int	pos = 0;
+	char		*line = NULL;
+	int			found = 0;
 
 	if (fd < 0 || BUFFER_SIZE <= 0)
-		return (0);
-	line = NULL;
-	found = 0;
+		return (NULL);
+
 	while (!found)
 	{
 		if (pos >= bytes_buf)
