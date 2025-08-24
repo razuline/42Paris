@@ -1,0 +1,13 @@
+{
+    "files.associations": {
+        "cmath": "c",
+        "compare": "c",
+        "concepts": "c",
+        "exception": "c",
+        "type_traits": "c",
+        "limits": "c",
+        "new": "c",
+        "typeinfo": "c",
+        "history.h": "c"
+    }
+}
