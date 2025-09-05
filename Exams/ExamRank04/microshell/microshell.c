@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/03 13:24:42 by erazumov          #+#    #+#             */
-/*   Updated: 2025/09/03 17:23:10 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/09/05 14:09:26 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -157,7 +157,7 @@ void	execute_sequence(char **args, char **envp)
 				close(fd_pipe[1]);
 				fd_in = fd_pipe[0];
 			}
-			if (has_pipe)
+			if (args[i])
 				i++;
 		}
 	}
@@ -171,6 +171,28 @@ void	execute_sequence(char **args, char **envp)
 // FONCTION PRINCIPALE
 //-----------------------------------------------------------------------------
 
-int	main(int ac, char **av)
+int	main(int ac, char **av, char **envp)
 {
+	int	i = 1;
+	int	start_seq = 1;
+
+	if (ac < 2)
+		return (0);
+
+	while (av[i])
+	{
+		if (!strcmp(av[i], ";"))
+		{
+			av[i] = NULL;
+			execute_sequence(&av[start_seq], envp);
+			av[i] = ";";
+			start_seq = i + 1;
+		}
+		i++;
+	}
+	if (av[start_seq])
+	{
+		execute_sequence(&av[start_seq], envp);
+	}
+	return (0);
 }
