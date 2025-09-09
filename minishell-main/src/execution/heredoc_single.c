@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   heredoc_single.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: preltien <preltien@student.42.fr>          +#+  +:+       +#+        */
+/*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/04 18:51:10 by preltien          #+#    #+#             */
-/*   Updated: 2025/09/05 16:27:41 by preltien         ###   ########.fr       */
+/*   Updated: 2025/09/09 17:10:40 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,27 +72,20 @@ static int	heredoc_loop(int fd, t_redir *redir, t_shell *state)
 int	read_single_heredoc(t_redir *redir, t_shell *state)
 {
 	int					fd;
-	struct sigaction	sa_new;
 	struct sigaction	sa_old;
 	int					ret;
 
 	ret = 0;
-	if (init_heredoc_fd(redir, &fd, &sa_old) < 0)
+	if (init_heredoc_fd(redir, &fd) < 0)
 		return (-1);
-	sa_new.sa_handler = heredoc_sigint;
-	sigemptyset(&sa_new.sa_mask);
-	sa_new.sa_flags = 0;
-	sigaction(SIGINT, &sa_new, NULL);
-	rl_catch_signals = 0;
+	setup_heredoc_signals(&sa_old);
 	if (heredoc_loop(fd, redir, state) < 0)
 	{
-		close(fd);
-		sigaction(SIGINT, &sa_old, NULL);
+		restore_signals(fd, &sa_old);
 		g_exit_status = 1;
 		return (-1);
 	}
-	close(fd);
-	sigaction(SIGINT, &sa_old, NULL);
+	restore_signals(fd, &sa_old);
 	if (g_exit_status == 130)
 		ret = -1;
 	return (ret);

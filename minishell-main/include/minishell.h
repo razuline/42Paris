@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/11 17:45:03 by erazumov          #+#    #+#             */
-/*   Updated: 2025/09/05 18:32:09 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/09/09 18:45:11 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@
 // ************************************************************************** //
 
 extern volatile sig_atomic_t	g_exit_status;
+extern volatile sig_atomic_t	g_signal_received;
 
 // ************************************************************************** //
 //                                 Structures                                 //
@@ -161,7 +162,12 @@ void							free_tokens(t_token *head);
 
 /* expansion.c */
 int								expand_token(t_token *head, t_shell *state);
+
+/* expansion_str.c */
 char							*expand_str(const char *value, t_shell *state);
+
+/* expansion_handlers.c */
+void							expand_pid(char *dest, size_t *j);
 
 /* expansion_len_utils.c */
 size_t							calculate_expanded_len(const char *value,
@@ -199,6 +205,9 @@ void							free_commands(t_command *cmd_head);
 void							free_argv(char **argv);
 int								fill_argv(t_command *cmd, t_token **tok_ptr);
 t_redir							*create_redir(t_token *token, int type);
+
+/* syntax_checker.c */
+int								has_unclosed_quotes(char *line);
 
 /* EXECUTION ---------------------------------------------------------------- */
 

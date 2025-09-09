@@ -1,66 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   parser_free_utils.c                                :+:      :+:    :+:   */
+/*   parser_built_utils.c                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/06/25 12:28:46 by erazumov          #+#    #+#             */
-/*   Updated: 2025/09/05 19:10:49 by erazumov         ###   ########.fr       */
+/*   Created: 2025/09/09 17:17:01 by erazumov          #+#    #+#             */
+/*   Updated: 2025/09/09 18:31:41 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
-
-/* Frees a NULL-terminated argument vector (argv) and all its strings. */
-void	free_argv(char **argv)
-{
-	int	i;
-
-	if (!argv)
-		return ;
-	i = 0;
-	while (argv[i])
-	{
-		free(argv[i]);
-		i++;
-	}
-	free(argv);
-}
-
-/* Frees the memory of a linked list of redirections. */
-static void	free_redir(t_redir *redir_head)
-{
-	t_redir	*curr;
-	t_redir	*next;
-
-	curr = redir_head;
-	while (curr != NULL)
-	{
-		next = curr->next;
-		free(curr->file);
-		free(curr);
-		curr = next;
-	}
-}
-
-/* Frees the memory of a linked list of commands and all their content
- * (argv and redirection lists). */
-void	free_commands(t_command *cmd_head)
-{
-	t_command	*curr;
-	t_command	*next;
-
-	curr = cmd_head;
-	while (curr != NULL)
-	{
-		next = curr->next;
-		free_redir(curr->redir);
-		free_argv(curr->argv);
-		free(curr);
-		curr = next;
-	}
-}
 
 int	fill_argv(t_command *cmd, t_token **tok_ptr)
 {
@@ -112,4 +62,32 @@ t_redir	*create_redir(t_token *token, int type)
 			redir->expand = 1;
 	}
 	return (redir);
+}
+
+/* Handles a redirection token by creating a redirection structure.
+ * Expects the next token to be a WORD representing the filename. */
+int	process_redir(t_command *cmd, t_token **tok_ptr)
+{
+	t_token	*token_file;
+	t_redir	*new_redir;
+
+	token_file = (*tok_ptr)->next;
+	if (!token_file)
+	{
+		ft_putstr_fd("minishell: syntax error near unexpected token `newline'\n", 2);
+		return (1);
+	}
+	if (token_file->type != WORD)
+	{
+		ft_putstr_fd("minishell: syntax error near unexpected token `", 2);
+		ft_putstr_fd(token_file->value, 2);
+		ft_putstr_fd("'\n", 2);
+		return (1);
+	}
+	new_redir = create_redir(token_file, (*tok_ptr)->type);
+	if (!new_redir)
+		return (1);
+	add_redir_to_cmd(cmd, new_redir);
+	*tok_ptr = token_file->next;
+	return (0);
 }
