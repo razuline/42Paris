@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   heredoc.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: preltien <preltien@student.42.fr>          +#+  +:+       +#+        */
+/*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/04 18:51:10 by preltien          #+#    #+#             */
-/*   Updated: 2025/09/05 16:01:18 by preltien         ###   ########.fr       */
+/*   Updated: 2025/09/09 20:56:04 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,20 +35,20 @@ int	write_heredoc_line(int fd, char *line, t_redir *redir, t_shell *state)
 int	handle_all_heredocs(t_redir *redir_list, t_shell *state)
 {
 	t_redir	*curr;
-	int		res;
 
 	curr = redir_list;
 	while (curr)
 	{
-		if (curr->type == HEREDOC && !curr->is_heredoc)
+		if (curr->type == HEREDOC)
 		{
-			res = read_single_heredoc(curr, state);
-			if (res < 0)
+			g_signal_received = 0;
+			if (read_single_heredoc(curr, state) < 0)
 			{
+				if (g_signal_received == SIGINT)
+					return (-1);
 				cleanup_heredocs(redir_list);
 				return (-1);
 			}
-			curr->is_heredoc = 1;
 		}
 		curr = curr->next;
 	}

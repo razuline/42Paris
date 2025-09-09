@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/11 17:45:03 by erazumov          #+#    #+#             */
-/*   Updated: 2025/09/09 18:45:11 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/09/09 20:59:04 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define MINISHELL_H
 
 # include "libft.h"
+# include <stdio.h>
 # include <ctype.h>
 # include <errno.h>
 # include <fcntl.h>
@@ -22,7 +23,6 @@
 # include <readline/readline.h>
 # include <signal.h>
 # include <stdbool.h>
-# include <stdio.h>
 # include <stdlib.h>
 # include <string.h>
 # include <sys/stat.h>
@@ -132,6 +132,12 @@ typedef enum e_quote_type
 /* input.c */
 char							*read_line_input(void);
 
+/* prompt.c */
+void							parse_and_execute(t_shell *state, char *line);
+void							prompt_loop(t_shell *state);
+void							expand_regular_var(const char *src, char *dest,
+									t_indices *indices, t_shell *state);
+
 /* LEXER -------------------------------------------------------------------- */
 
 /* lexer.c */
@@ -154,7 +160,6 @@ char							*extract_and_clean_word(const char *start,
 /* lexer_token_utils.c */
 t_token							*create_token(t_token_lst *lst, char *word,
 									int type, int quote_info);
-
 void							print_tokens(t_token *head);
 void							free_tokens(t_token *head);
 
@@ -167,6 +172,8 @@ int								expand_token(t_token *head, t_shell *state);
 char							*expand_str(const char *value, t_shell *state);
 
 /* expansion_handlers.c */
+void							expand_exit_status(char *dest, size_t *j,
+									t_shell *state);
 void							expand_pid(char *dest, size_t *j);
 
 /* expansion_len_utils.c */
@@ -196,7 +203,8 @@ int								count_commands(t_command *cmds);
 int								has_pipe(t_command *cmds);
 int								is_redirection(int type);
 int								parser_loop(t_command **current_cmd,
-									t_token **token_lst, t_shell *state);
+									t_token **token_lst,
+									t_shell *state);
 t_command						*parser_error(t_command *cmd_head,
 									t_shell *state);
 
@@ -218,6 +226,7 @@ void							run_child_process(t_command *cmd,
 /* children.c */
 void							run_child_process(t_command *cmd,
 									t_shell *state);
+int								handle_child_status(int status);
 
 /* execution_utils.c */
 int								is_builtin(char *cmd);
@@ -257,6 +266,10 @@ int								handle_heredocs_and_redirections(t_command *cmd,
 									t_shell *state);
 int								write_heredoc_line(int fd, char *line,
 									t_redir *redir, t_shell *state);
+int								handle_all_heredocs(t_redir *redir_list,
+									t_shell *state);
+int								apply_redirections(t_redir *redir_list);
+void							cleanup_heredocs(t_redir *redir_list);
 
 /* heredoc single */
 int								read_single_heredoc(t_redir *redir,
@@ -292,6 +305,12 @@ void							setup_non_interactive_signals(void);
 void							setup_child_signals(void);
 
 /* BUILTINS ----------------------------------------------------------------- */
+
+/* builtins_dispatch.c */
+int								is_builtin(char *cmd);
+int								execute_builtin(char **argv, t_shell *state);
+int								execute_builtin_with_redirections(t_command
+									*cmd, t_shell *state);
 
 /* builtin_cd.c */
 int								builtin_cd(char **argv, t_shell *state);

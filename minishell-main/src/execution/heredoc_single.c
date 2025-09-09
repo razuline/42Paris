@@ -1,3 +1,4 @@
+#define _POSIX_C_SOURCE 200809L
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
@@ -6,7 +7,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/04 18:51:10 by preltien          #+#    #+#             */
-/*   Updated: 2025/09/09 17:10:40 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/09/09 20:40:37 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,37 +17,43 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-static int	init_heredoc_fd(t_redir *redir, int *fd, struct sigaction *sa_old)
+/* (HELPER) Initializes the temporary file for the heredoc. */
+static int	init_heredoc_fd(t_redir *redir, int *fd)
 {
 	char	tmp_name[32];
 
-	redir->tmp_name[0] = '\0';
 	ft_strcpy(tmp_name, "/tmp/heredocXXXXXX");
 	*fd = mkstemp(tmp_name);
 	if (*fd < 0)
-		return (perror("mkstemp failed"), g_exit_status = 1, -1);
-	ft_strcpy(redir->tmp_name, tmp_name);
-	sigaction(SIGINT, NULL, sa_old);
-	return (0);
-}
-
-static int	check_heredoc_end(char *line, t_redir *redir)
-{
-	if (!line)
-		return (1);
-	if (g_exit_status == 130 || !ft_strcmp(line, redir->file))
-		return (1);
-	return (0);
-}
-
-static int	process_heredoc_line(int fd, char *line, t_redir *redir,
-		t_shell *state)
-{
-	if (write_heredoc_line(fd, line, redir, state) < 0)
+	{
+		perror("minishell: mkstemp");
 		return (-1);
+	}
+	ft_strcpy(redir->tmp_name, tmp_name);
 	return (0);
 }
 
+/* (HELPER) Configures a temporary signal handler for SIGINT (Ctrl-C). */
+static void	setup_heredoc_signals(struct sigaction *sa_old)
+{
+	struct sigaction	sa_new;
+
+	sa_new.sa_handler = heredoc_sigint;
+	sigemptyset(&sa_new.sa_mask);
+	sa_new.sa_flags = 0;
+	sigaction(SIGINT, &sa_new, sa_old);
+	rl_catch_signals = 0;
+}
+
+/* (HELPER) Restores the original signal handler for SIGINT. */
+static void	restore_signals(int fd, struct sigaction *sa_old)
+{
+	close(fd);
+	sigaction(SIGINT, sa_old, NULL);
+	rl_catch_signals = 1;
+}
+
+/* The main loop for reading heredoc input line by line. */
 static int	heredoc_loop(int fd, t_redir *redir, t_shell *state)
 {
 	char	*line;
@@ -54,12 +61,13 @@ static int	heredoc_loop(int fd, t_redir *redir, t_shell *state)
 	while (1)
 	{
 		line = readline("> ");
-		if (check_heredoc_end(line, redir))
+		if (!line || g_signal_received == SIGINT
+			|| ft_strcmp(line, redir->file) == 0)
 		{
 			free(line);
 			break ;
 		}
-		if (process_heredoc_line(fd, line, redir, state) < 0)
+		if (write_heredoc_line(fd, line, redir, state) < 0)
 		{
 			free(line);
 			return (-1);
@@ -69,24 +77,21 @@ static int	heredoc_loop(int fd, t_redir *redir, t_shell *state)
 	return (0);
 }
 
+/* Manages the process of reading a single heredoc. */
 int	read_single_heredoc(t_redir *redir, t_shell *state)
 {
 	int					fd;
 	struct sigaction	sa_old;
-	int					ret;
 
-	ret = 0;
 	if (init_heredoc_fd(redir, &fd) < 0)
-		return (-1);
+		return (-1); // Return -1 only on a true error
 	setup_heredoc_signals(&sa_old);
-	if (heredoc_loop(fd, redir, state) < 0)
-	{
-		restore_signals(fd, &sa_old);
-		g_exit_status = 1;
-		return (-1);
-	}
+	heredoc_loop(fd, redir, state);
 	restore_signals(fd, &sa_old);
-	if (g_exit_status == 130)
-		ret = -1;
-	return (ret);
+	if (g_signal_received == SIGINT)
+	{
+		g_exit_status = 130;
+		unlink(redir->tmp_name);
+	}
+	return (0);
 }

@@ -6,11 +6,13 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 12:28:18 by erazumov          #+#    #+#             */
-/*   Updated: 2025/08/24 13:20:46 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/09/09 19:55:39 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#ifdef DEBUG
+
+# include "minishell.h"
 
 /* Gets the string name of a token type enum. */
 char	*get_type_name(int type)
@@ -67,3 +69,5 @@ void	debug_print_tokens(t_token *head)
 	}
 	printf("\033[1;34m------------------\033[0m\n\n");
 }
+
+#endif

@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/09 14:47:21 by erazumov          #+#    #+#             */
-/*   Updated: 2025/08/24 13:01:15 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/09/09 19:54:06 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,13 +39,17 @@ static void	launch_all_children(t_command *cmds, pid_t *pids, t_shell *state)
 static void	wait_for_all_children(pid_t *pids, int num_cmds, t_shell *state)
 {
 	int	i;
+	int	status;
 
 	i = 0;
-	while (i < num_cmds)
+	while (i < num_cmds - 1)
 	{
-		wait_for_child(pids[i], state);
+		waitpid(pids[i], NULL, 0);
 		i++;
 	}
+	waitpid(pids[num_cmds - 1], &status, 0);
+	state->exit_code = handle_child_status(status);
+	g_exit_status = state->exit_code;
 }
 
 /* Logic executed by a child process within a pipeline.

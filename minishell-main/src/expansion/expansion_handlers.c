@@ -6,14 +6,14 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/09 18:15:27 by erazumov          #+#    #+#             */
-/*   Updated: 2025/09/09 18:17:03 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/09/09 20:26:36 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
 /* (Second pass helper) Handles the expansion of the $? variable. */
-static void	expand_exit_status(char *dest, size_t *j, t_shell *state)
+void	expand_exit_status(char *dest, size_t *j, t_shell *state)
 {
 	char	*exit_code_str;
 
@@ -35,7 +35,7 @@ void	expand_pid(char *dest, size_t *j)
 }
 
 /* (Second pass helper) Handles the expansion of a regular env variable. */
-static void	expand_regular_var(const char *src, char *dest, t_indices *indices,
+void	expand_regular_var(const char *src, char *dest, t_indices *indices,
 		t_shell *state)
 {
 	char	*var_name;

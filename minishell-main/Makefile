@@ -6,7 +6,7 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/06/11 17:31:34 by erazumov          #+#    #+#              #
-#    Updated: 2025/09/09 18:42:09 by erazumov         ###   ########.fr        #
+#    Updated: 2025/09/09 20:32:24 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -47,14 +47,14 @@ EXEC_FILES = execution.c execution_utils.c pipeline.c pipeline_utils.c \
 SIGNALS_FILES = signals.c
 BUILTINS_FILES = builtin_cd.c builtin_echo.c builtin_env.c builtin_export.c \
 				 builtin_export_utils.c builtin_exit.c builtin_pwd.c \
-				 builtin_unset.c builtin_exit_utils.c
+				 builtin_unset.c builtin_exit_utils.c builtins_dispatch.c
 UTILS_FILES = title.c text.c
 DEBUG_FILES = debug_commands.c debug_tokens.c
 
 # ============================================================================ #
 #                  Construction des chemins et des objets                      #
 # ============================================================================ #
-MAIN_SRC = $(SRC_DIR)/main.c prompt.c
+MAIN_SRC = $(SRC_DIR)/main.c $(SRC_DIR)/prompt.c
 CORE_SRC = $(addprefix $(SRC_DIR)/core/, $(CORE_FILES))
 LEXER_SRC = $(addprefix $(SRC_DIR)/lexer/, $(LEXER_FILES))
 PARSER_SRC = $(addprefix $(SRC_DIR)/parser/, $(PARSER_FILES))

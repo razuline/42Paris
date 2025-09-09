@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/09 17:51:32 by erazumov          #+#    #+#             */
-/*   Updated: 2025/09/09 17:52:47 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/09/09 20:20:35 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,13 +75,17 @@ int	parser_loop(t_command **current_cmd, t_token **token_lst, t_shell *state)
 {
 	int	argc;
 
-	argc = count_args(*token_lst);
-	if (fill_command(*current_cmd, token_lst, argc) != 0)
-		return (1);
-	if (*token_lst && (*token_lst)->type == PIPE)
+	(void)state;
+	while (*token_lst)
 	{
-		if (handle_pipe_token(current_cmd, token_lst) != 0)
+		argc = count_args(*token_lst);
+		if (fill_command(*current_cmd, token_lst, argc) != 0)
 			return (1);
+		if (*token_lst && (*token_lst)->type == PIPE)
+		{
+			if (handle_pipe_token(current_cmd, token_lst) != 0)
+				return (1);
+		}
 	}
 	return (0);
 }

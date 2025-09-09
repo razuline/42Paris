@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   children.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: preltien <preltien@student.42.fr>          +#+  +:+       +#+        */
+/*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/05 15:00:00 by preltien          #+#    #+#             */
-/*   Updated: 2025/09/05 17:01:35 by preltien         ###   ########.fr       */
+/*   Updated: 2025/09/09 19:52:54 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,19 +71,13 @@ void	run_child_process(t_command *cmd, t_shell *state)
 	original_stdout = -1;
 	if (save_original_fds(&original_stdin, &original_stdout) != 0)
 		exit(1);
-	if (has_heredoc(cmd->redir))
+	if (handle_all_heredocs(cmd->redir, state) != 0
+		|| apply_redirections(cmd->redir) != 0)
 	{
-		if (handle_heredocs_and_redirections(cmd, state) < 0
-			|| apply_redirections(cmd->redir) < 0)
-			restore_and_exit(original_stdin, original_stdout, g_exit_status);
-	}
-	else if (apply_redirections(cmd->redir) < 0)
-	{
-		restore_and_exit(original_stdin, original_stdout, g_exit_status);
+		restore_and_exit(original_stdin, original_stdout, 1);
 	}
 	handle_pre_execution(cmd, state, original_stdin, original_stdout);
-	signal(SIGINT, SIG_DFL);
-	signal(SIGQUIT, SIG_DFL);
+	setup_child_signals();
 	execve(cmd->argv[0], cmd->argv, state->envp);
 	handle_execve_error(original_stdin, original_stdout);
 }

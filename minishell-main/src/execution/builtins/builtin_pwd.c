@@ -1,3 +1,4 @@
+#define _POSIX_C_SOURCE 200809L
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
@@ -6,17 +7,19 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/09 16:58:30 by erazumov          #+#    #+#             */
-/*   Updated: 2025/08/18 10:27:32 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/09/09 19:57:13 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+#include <limits.h>
+#include <unistd.h>
 
 /* Built-in command: pwd.
  * Prints the current working directory path to standard output. */
 int	builtin_pwd(void)
 {
-	char	cwd[4096];
+	char	cwd[PATH_MAX];
 
 	if (getcwd(cwd, sizeof(cwd)) == NULL)
 	{

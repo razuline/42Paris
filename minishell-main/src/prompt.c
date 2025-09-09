@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/09 18:39:38 by erazumov          #+#    #+#             */
-/*   Updated: 2025/09/09 18:41:32 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/09/09 20:08:29 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,7 @@ static void	process_line(t_shell *state)
 {
 	char	*line;
 
+	state->exit_code = g_exit_status;
 	g_signal_received = 0;
 	line = read_line_input();
 	if (g_signal_received == SIGINT)

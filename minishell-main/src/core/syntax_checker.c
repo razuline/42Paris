@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/09 17:01:48 by erazumov          #+#    #+#             */
-/*   Updated: 2025/09/09 17:02:53 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/09/09 20:00:36 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,13 +25,9 @@ int	has_unclosed_quotes(char *line)
 	while (line[i])
 	{
 		if (quote_char == 0 && (line[i] == '\'' || line[i] == '"'))
-		{
 			quote_char = line[i];
-		}
 		else if (quote_char != 0 && line[i] == quote_char)
-		{
 			quote_char = 0;
-		}
 		i++;
 	}
 	if (quote_char != 0)
