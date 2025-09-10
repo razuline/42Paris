@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/04 14:33:07 by preltien          #+#    #+#             */
-/*   Updated: 2025/09/09 20:36:33 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/09/10 13:30:07 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ static int	execute_single_command(t_command *cmd, t_shell *state)
 	int		ret;
 
 	if (cmd->argv && is_builtin(cmd->argv[0]))
-		return (execute_builtin_with_redirections(cmd, state));
+		return (execute_builtin_with_redir(cmd, state));
 	setup_non_interactive_signals();
 	pid = fork();
 	if (pid < 0)

@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/05 15:51:14 by preltien          #+#    #+#             */
-/*   Updated: 2025/09/09 18:44:27 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/09/10 13:38:45 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ static int	handle_non_interactive(char **argv, t_shell *state)
 }
 
 /* Initialises the main shell structure (t_shell). */
-static void	init_shell_state(t_shell *state, char **envp)
+void	init_shell_state(t_shell *state, char **envp)
 {
 	state->envp = create_env_copy(envp);
 	if (!state->envp)

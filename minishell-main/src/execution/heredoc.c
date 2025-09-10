@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/04 18:51:10 by preltien          #+#    #+#             */
-/*   Updated: 2025/09/09 20:56:04 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/09/10 13:32:20 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,7 @@ static int	copy_heredoc_to_tmp(int fd_tmp, t_redir *redir)
 	return (0);
 }
 
-int	apply_heredoc_redirections(t_redir *redir_list)
+int	apply_heredoc_redir(t_redir *redir_list)
 {
 	t_redir	*curr;
 	int		fd_tmp;
@@ -102,14 +102,14 @@ int	apply_heredoc_redirections(t_redir *redir_list)
 	return (0);
 }
 
-int	handle_heredocs_and_redirections(t_command *cmd, t_shell *state)
+int	handle_heredocs_and_redir(t_command *cmd, t_shell *state)
 {
 	printf(" [DEBUG] Handle heredoc appele\n");
 	if (handle_all_heredocs(cmd->redir, state) < 0)
 	{
 		return (g_exit_status);
 	}
-	if (apply_heredoc_redirections(cmd->redir) < 0)
+	if (apply_heredoc_redir(cmd->redir) < 0)
 	{
 		return (g_exit_status);
 	}

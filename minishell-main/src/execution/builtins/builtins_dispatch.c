@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/09 20:29:42 by erazumov          #+#    #+#             */
-/*   Updated: 2025/09/09 20:34:25 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/09/10 13:30:22 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ int	execute_builtin(char **argv, t_shell *state)
 }
 
 /* Handles the execution of a built-in command with its redirections. */
-int	execute_builtin_with_redirections(t_command *cmd, t_shell *state)
+int	execute_builtin_with_redir(t_command *cmd, t_shell *state)
 {
 	int original_stdin;
 	int original_stdout;
