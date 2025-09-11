@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/11 17:45:03 by erazumov          #+#    #+#             */
-/*   Updated: 2025/09/05 18:32:09 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/09/06 15:29:13 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define MINISHELL_H
 
 # include "libft.h"
+# include <stdio.h>
 # include <ctype.h>
 # include <errno.h>
 # include <fcntl.h>
@@ -22,7 +23,6 @@
 # include <readline/readline.h>
 # include <signal.h>
 # include <stdbool.h>
-# include <stdio.h>
 # include <stdlib.h>
 # include <string.h>
 # include <sys/stat.h>
