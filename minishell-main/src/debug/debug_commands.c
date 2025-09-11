@@ -6,11 +6,13 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/24 13:06:18 by erazumov          #+#    #+#             */
-/*   Updated: 2025/08/24 13:21:03 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/09/09 19:56:40 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#ifdef DEBUG
+
+# include "minishell.h"
 
 /* (HELPER) Prints the argument vector (argv) of a command. */
 static void	print_argv(char **argv)
@@ -76,3 +78,5 @@ void	debug_print_commands(t_command *cmd_head)
 	}
 	printf("\033[1;35m--------------------\033[0m\n\n");
 }
+
+#endif

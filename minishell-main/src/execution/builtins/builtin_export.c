@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_export.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: preltien <preltien@student.42.fr>          +#+  +:+       +#+        */
+/*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/09 16:58:00 by erazumov          #+#    #+#             */
-/*   Updated: 2025/09/05 17:02:00 by preltien         ###   ########.fr       */
+/*   Updated: 2025/09/09 19:54:36 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,18 +27,22 @@ static int	handle_export_with_value(t_shell *state, char *arg)
 	char	*key;
 	char	*value;
 	int		ret;
+	int		key_len;
 
 	value = ft_strchr(arg, '=');
-	*value = '\0';
-	key = arg;
+	key_len = value - arg;
+	key = ft_substr(arg, 0, key_len);
+	if (!key)
+		return (1);
 	value++;
 	if (!is_valid_varname(key))
 	{
-		*(--value) = '=';
-		return (print_export_error(key));
+		print_export_error(arg);
+		free(key);
+		return (1);
 	}
 	ret = set_env_var(state, key, value);
-	*(--value) = '=';
+	free(key);
 	return (ret);
 }
 

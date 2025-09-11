@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/10 15:22:40 by erazumov          #+#    #+#             */
-/*   Updated: 2025/09/06 15:19:57 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/09/11 18:54:56 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,20 @@ void	add_redir_to_cmd(t_command *cmd, t_redir *new_redir)
 	}
 }
 
+/* Checks if a token type is a redirection type. */
+int	is_redirection(int type)
+{
+	return (type == REDIRECT_IN || type == REDIRECT_OUT || type == APPEND_OUT
+		|| type == HEREDOC);
+}
+
+/* Checks if a command list contains a pipe (i.e., has more
+ * than one command). */
+int	has_pipe(t_command *cmds)
+{
+	return (cmds && cmds->next != NULL);
+}
+
 /* Counts the number of commands in a linked list. */
 int	count_commands(t_command *cmds)
 {
@@ -54,18 +68,4 @@ int	count_commands(t_command *cmds)
 		cmds = cmds->next;
 	}
 	return (count);
-}
-
-/* Checks if a command list contains a pipe (i.e., has more
- * than one command). */
-int	has_pipe(t_command *cmds)
-{
-	return (cmds && cmds->next != NULL);
-}
-
-/* Checks if a token type is a redirection type. */
-int	is_redirection(int type)
-{
-	return (type == REDIRECT_IN || type == REDIRECT_OUT || type == APPEND_OUT
-		|| type == HEREDOC);
 }

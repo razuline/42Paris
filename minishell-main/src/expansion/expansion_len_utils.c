@@ -6,11 +6,25 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/04 15:21:15 by erazumov          #+#    #+#             */
-/*   Updated: 2025/08/20 13:11:31 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/09/09 18:11:11 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
+/* (First pass helper) Calculates the length of the Process ID ($$). */
+static size_t	get_len_pid(void)
+{
+	char	*pid_str;
+	size_t	len;
+
+	pid_str = ft_itoa(getpid());
+	if (!pid_str)
+		return (0);
+	len = ft_strlen(pid_str);
+	free(pid_str);
+	return (len);
+}
 
 /* (First pass helper) Calculates the length of an env variable's value. */
 static size_t	get_len_var(const char *input, int *i_ptr, t_shell *state)
@@ -45,8 +59,7 @@ static size_t	get_len_exit_status(t_shell *state)
 	return (len);
 }
 
-/* (First pass helper) Analyses a segment ($VAR, $?, char) and updates
- * the total length. */
+/* (First pass helper) Analyses a segment and updates the total length. */
 static void	update_len_for_segment(const char *value, int *i, size_t *len,
 		t_shell *state)
 {
@@ -57,6 +70,11 @@ static void	update_len_for_segment(const char *value, int *i, size_t *len,
 		{
 			(*i)++;
 			*len += get_len_exit_status(state);
+		}
+		else if (value[*i] == '$')
+		{
+			(*i)++;
+			*len += get_len_pid();
 		}
 		else if (ft_isalnum(value[*i]) || value[*i] == '_')
 			*len += get_len_var(value, i, state);

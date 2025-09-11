@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   redirections.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: preltien <preltien@student.42.fr>          +#+  +:+       +#+        */
+/*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/04 16:42:33 by preltien          #+#    #+#             */
-/*   Updated: 2025/09/05 14:24:31 by preltien         ###   ########.fr       */
+/*   Updated: 2025/09/09 20:10:37 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,8 @@ static int	redirect_input(const char *file)
 }
 
 /* Applies all redirections for a single command.
- * Iterates through the redirection list and handles each type. */
+ * It iterates through the list, and each subsequent redirection of the same
+** type (input or output) overrides the previous one. */
 int	apply_redirections(t_redir *redir_list)
 {
 	while (redir_list)
@@ -78,6 +79,11 @@ int	apply_redirections(t_redir *redir_list)
 		if (redir_list->type == REDIRECT_IN)
 		{
 			if (redirect_input(redir_list->file) < 0)
+				return (-1);
+		}
+		else if (redir_list->type == HEREDOC)
+		{
+			if (redirect_input(redir_list->tmp_name) < 0)
 				return (-1);
 		}
 		else if (redir_list->type == REDIRECT_OUT

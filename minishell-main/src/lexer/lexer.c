@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/18 13:14:07 by erazumov          #+#    #+#             */
-/*   Updated: 2025/09/05 18:51:54 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/09/09 18:08:57 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ static int	tokenize_segment(t_token_lst *lst, char **cursor)
 }
 
 /* Iterates through the line and calls handlers for each segment. */
-static void	lexer_loop(t_token_lst *lst, char *line)
+static int	lexer_loop(t_token_lst *lst, char *line)
 {
 	char	*cursor;
 	int		ret;
@@ -43,9 +43,10 @@ static void	lexer_loop(t_token_lst *lst, char *line)
 		if (ret == -1)
 		{
 			ft_putstr_fd("minishell: malloc error during tokenization\n", 2);
-			return ;
+			return (-1);
 		}
 	}
+	return (0);
 }
 
 /* Converts the raw command line into a list of tokens. */
@@ -57,6 +58,10 @@ t_token	*lexer(char *line)
 		return (NULL);
 	lst.head = NULL;
 	lst.tail = NULL;
-	lexer_loop(&lst, line);
+	if (lexer_loop(&lst, line) == -1)
+	{
+		free_tokens(lst.head);
+		return (NULL);
+	}
 	return (lst.head);
 }

@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/10 16:07:39 by erazumov          #+#    #+#             */
-/*   Updated: 2025/08/18 10:26:07 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/09/09 20:08:56 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,11 +55,14 @@ void	print_env_sorted(t_shell *state)
 	while (env_copy[i])
 	{
 		eq_pos = ft_strchr(env_copy[i], '=');
+		printf("export ");
 		if (eq_pos)
-			printf("export %.*s=\"%s\"\n", (int)(eq_pos - env_copy[i]),
-				env_copy[i], eq_pos + 1);
+		{
+			write(1, env_copy[i], eq_pos - env_copy[i] + 1);
+			printf("\"%s\"\n", eq_pos + 1);
+		}
 		else
-			printf("export %s\n", env_copy[i]);
+			printf("%s\n", env_copy[i]);
 		i++;
 	}
 	ft_free_array(env_copy);

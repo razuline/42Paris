@@ -1,5 +1,6 @@
 {
     "files.associations": {
         "minishell.h": "c"
-    }
+	},
+	"editor.defaultFormatter": "keyhr.42-c-format"
 }

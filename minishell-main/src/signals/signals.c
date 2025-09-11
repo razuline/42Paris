@@ -1,3 +1,4 @@
+#define _POSIX_C_SOURCE 200809L
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
@@ -6,25 +7,27 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/11 11:04:24 by erazumov          #+#    #+#             */
-/*   Updated: 2025/09/05 19:11:29 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/09/09 18:36:04 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+#include <signal.h>
 
 volatile sig_atomic_t	g_exit_status = 0;
+volatile sig_atomic_t	g_signal_received = 0;
 
-/* This is the handler for interactive mode.
- * It executes when the user presses Ctrl-C at the prompt. */
+/* The handler is independent of readline.
+ * It only sets a flag and updates the global exit status. */
 void	signal_handler(int sig)
 {
 	if (sig == SIGINT)
 	{
 		g_exit_status = 130;
-		rl_done = 1;
-		rl_replace_line("", 0);
+		g_signal_received = SIGINT;
 		rl_on_new_line();
-		write(STDOUT_FILENO, "\n", 1);
+		rl_replace_line("", 0);
+		rl_redisplay();
 	}
 }
 

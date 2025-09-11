@@ -6,31 +6,18 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/21 12:55:09 by erazumov          #+#    #+#             */
-/*   Updated: 2025/09/06 15:24:25 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/09/11 18:55:12 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-/* Handles a redirection token by creating a redirection structure.
- * Expects the next token to be a WORD representing the filename. */
-int	process_redir(t_command *cmd, t_token **tok_ptr)
+/* Helper function to handle parsing errors cleanly. */
+t_command	*parser_error(t_command *cmd_head, t_shell *state)
 {
-	t_token	*token_file;
-	t_redir	*new_redir;
-
-	token_file = (*tok_ptr)->next;
-	if (!token_file || token_file->type != WORD)
-	{
-		ft_putstr_fd("minishell: syntax error near unexpected token\n", 2);
-		return (1);
-	}
-	new_redir = create_redir(token_file, (*tok_ptr)->type);
-	if (!new_redir)
-		return (1);
-	add_redir_to_cmd(cmd, new_redir);
-	*tok_ptr = token_file->next;
-	return (0);
+	state->exit_code = 2;
+	free_commands(cmd_head);
+	return (NULL);
 }
 
 /* Main parser logic. Iterates through tokens, parsing each command

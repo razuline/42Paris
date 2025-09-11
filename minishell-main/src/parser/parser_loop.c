@@ -1,74 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   parser_utils.c                                     :+:      :+:    :+:   */
+/*   parser_loop.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/09/05 18:27:14 by erazumov          #+#    #+#             */
-/*   Updated: 2025/09/06 15:30:00 by erazumov         ###   ########.fr       */
+/*   Created: 2025/09/09 17:51:32 by erazumov          #+#    #+#             */
+/*   Updated: 2025/09/09 20:20:35 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
-
-/* Frees a NULL-terminated argument vector (argv) and all its strings. */
-void	free_argv(char **argv)
-{
-	int	i;
-
-	if (!argv)
-		return ;
-	i = 0;
-	while (argv[i])
-	{
-		free(argv[i]);
-		i++;
-	}
-	free(argv);
-}
-
-/* Frees the memory of a linked list of redirections. */
-static void	free_redir(t_redir *redir_head)
-{
-	t_redir	*curr;
-	t_redir	*next;
-
-	curr = redir_head;
-	while (curr != NULL)
-	{
-		next = curr->next;
-		free(curr->file);
-		free(curr);
-		curr = next;
-	}
-}
-
-/* Frees the memory of a linked list of commands and all their content
- * (argv and redirection lists). */
-void	free_commands(t_command *cmd_head)
-{
-	t_command	*curr;
-	t_command	*next;
-
-	curr = cmd_head;
-	while (curr != NULL)
-	{
-		next = curr->next;
-		free_redir(curr->redir);
-		free_argv(curr->argv);
-		free(curr);
-		curr = next;
-	}
-}
-
-/* Helper function to handle parsing errors cleanly. */
-t_command	*parser_error(t_command *cmd_head, t_shell *state)
-{
-	state->exit_code = 2;
-	free_commands(cmd_head);
-	return (NULL);
-}
 
 /* (HELPER) First pass: counts the number of arguments (WORD tokens)
  * for a single command segment (until a pipe or the end). */
@@ -127,20 +69,23 @@ static int	handle_pipe_token(t_command **cmd, t_token **token)
 	*cmd = (*cmd)->next;
 	return (0);
 }
+
 /* Helper function containing the main parser loop's logic. */
-int	parser_loop(t_command **current_cmd, t_token **token_lst,
-	t_shell *state)
+int	parser_loop(t_command **current_cmd, t_token **token_lst, t_shell *state)
 {
 	int	argc;
 
 	(void)state;
-	argc = count_args(*token_lst);
-	if (fill_command(*current_cmd, token_lst, argc) != 0)
-		return (1);
-	if (*token_lst && (*token_lst)->type == PIPE)
+	while (*token_lst)
 	{
-		if (handle_pipe_token(current_cmd, token_lst) != 0)
+		argc = count_args(*token_lst);
+		if (fill_command(*current_cmd, token_lst, argc) != 0)
 			return (1);
+		if (*token_lst && (*token_lst)->type == PIPE)
+		{
+			if (handle_pipe_token(current_cmd, token_lst) != 0)
+				return (1);
+		}
 	}
 	return (0);
 }
