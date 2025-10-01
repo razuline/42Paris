@@ -5,102 +5,101 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/07/05 15:24:26 by erazumov          #+#    #+#             */
-/*   Updated: 2025/08/02 13:54:55 by erazumov         ###   ########.fr       */
+/*   Created: 2025/09/30 13:29:54 by erazumov          #+#    #+#             */
+/*   Updated: 2025/10/01 14:30:11 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "PhoneBook.hpp"
+#include "PhoneBook.hpp"
 
-PhoneBook::PhoneBook(void)
-{
-	this->_index = 0;
-	this->_contact_count = 0;
+void	PhoneBook::addContact(void) {
+	Contact		newContact;
+	std::string	userInput;
+
+	// _firstname
+	while (true) {
+		std::cout << "Enter your first name: ";
+		std::getline(std::cin, userInput);
+		if (newContact.setFirstname(userInput) == true)
+			break;
+		else
+			std::cout << "Error: Enter only letters." << std::endl;
+	}
+
+	// _lastname
+	while (true) {
+		
+		std::cout << "Enter your last name: ";
+		std::getline(std::cin, userInput);
+		if (newContact.setLastname(userInput) == true)
+			break;
+		else
+			std::cout << "Error: Enter only letters." << std::endl;
+	}
+
+	// _nickname
+	while (true) {
+		std::cout << "Enter your nickname: ";
+		std::getline(std::cin, userInput);
+		if (newContact.setNickname(userInput) == true)
+			break;
+		else
+			std::cout << "Error: Enter only letters." << std::endl;
+	}
+
+	// _number
+	while (true) {
+		std::cout << "Enter your phone number: ";
+		std::getline(std::cin, userInput);
+		if (newContact.setNumber(userInput) == true)
+			break;
+		else
+			std::cout << "Error: Enter only digits." << std::endl;
+	}
+
+	// _secret
+	while (true) {
+		std::cout << "Enter your darkest secret: ";
+		std::getline(std::cin, userInput);
+		if (newContact.setSecret(userInput) == true)
+			break;
+		else
+			std::cout << "Error: Enter only letters." << std::endl;
+	}
+	this->_contacts[this->_contactIndex] = newContact;
+	this->_contactIndex = (this->_contactIndex + 1) % 8;
 }
 
-void	PhoneBook::addContact()
-{
-	std::cin.ignore();
-	std::string	firstName, lastName, nickname, phoneNumber, secret;
-
-	std::cout << "Enter your name: ";
-	std::getline(std::cin, firstName);
-
-	std::cout << "Enter your last name: ";
-	std::getline(std::cin, lastName);
-
-	std::cout << "Enter your nickname: ";
-	std::getline(std::cin, nickname);
-
-	std::cout << "Enter your phone number: ";
-	std::getline(std::cin, phoneNumber);
-
-	std::cout << "Enter your darkest secret: ";
-	std::getline(std::cin, secret);
-
-	_contacts[_index].setFirstName(firstName);
-	_contacts[_index].setLastName(lastName);
-	_contacts[_index].setNickname(nickname);
-	_contacts[_index].setPhoneNumber(phoneNumber);
-	_contacts[_index].setSecret(secret);
-
-	std::cout << "Contact added !" << std::endl;
-	_index = (_index + 1) % 8;
-	if (this->_contact_count < 8)
-		this->_contact_count++;
-}
-
-void	PhoneBook::searchContact()
-{
+void	PhoneBook::searchContact(void) const {
+	// Affiche l'en-tête
+	std::cout << "|----------|----------|----------|----------|" << std::endl;
 	std::cout << "|     index|first name| last name|  nickname|" << std::endl;
+	std::cout << "|----------|----------|----------|----------|" << std::endl;
 
-	for (int i = 0; i < 8; i++)
-	{
-		// Column INDEX
-		std::cout << "|" << std::setw(10) << i << "|";
+	for (int i = 0; i < 8; i++) {
+		// Colonne Index
+		std::cout << "|" << std::setw(10) << i;
 
-		// Column FIRST NAME
-		std::string	firstName = _contacts[i].getFirstName();
-		if (firstName.length() > 10)
-			firstName = firstName.substr(0, 9) + ".";
-		std::cout << std::setw(10) << firstName << "|";
+		// Colonne First name
+		i = 0;
+		std::string	firstname = this->_contacts[i].getFirstname();
+		if (firstname.length() > 10)
+			firstname = firstname.substr(0, 9) + ".";
+		std::cout << "|" << std::setw(10) << firstname;
 
-		// Column LAST NAME
-		std::string	lastName = _contacts[i].getLastName();
-		if (lastName.length() > 10)
-			lastName = lastName.substr(0, 9) + ".";
-		std::cout << std::setw(10) << lastName << "|";
+		// Colonne Last name
+		i = 0;
+		std::string	lastname = this->_contacts[i].getLastname();
+		if (lastname.length() > 10)
+			lastname = lastname.substr(0, 9) + ".";
+		std::cout << "|" << std::setw(10) << lastname;
 
-		// Column NICKNAME
-		std::string	nickname = _contacts[i].getNickname();
+		// Colonne Nickname
+		i = 0;
+		std::string	nickname = this->_contacts[i].getNickname();
 		if (nickname.length() > 10)
 			nickname = nickname.substr(0, 9) + ".";
-		std::cout << std::setw(10) << nickname << "|";
-
-		std::cout << std::endl;
+		std::cout << "|" << std::setw(10) << nickname << "|" << std::endl;
 	}
-	// 1. Déclarer la variable
-	std::string	index_str;
-	// 2. Demander à l'utilisateur
-	std::cout << "Enter index of contact to show: ";
-	// 3. Lire l'entrée de l'utilisateur
-	std::getline(std::cin, index_str);
-
-	if (index_str.length() == 1 && index_str[0] >= '0' && index_str[0] <= '7')
-	{
-		int	index_num = index_str[0] - '0'; // Convertit le caractère '5' en entier 5
-
-		if (index_num < this->_contact_count)
-		{
-			std::cout << "First name      : " << _contacts[index_num].getFirstName() << std::endl;
-			std::cout << "Last name       : " << _contacts[index_num].getLastName() << std::endl;
-			std::cout << "Nickname        : " << _contacts[index_num].getNickname() << std::endl;
-			std::cout << "Phone number    : " << _contacts[index_num].getPhoneNumber() << std::endl;
-			std::cout << "Darkest secret  : " << _contacts[index_num].getSecret() << std::endl;
-		}
-		else
-			std::cout << "Error: This contact doesn't exist." << std::endl;
-	}
-	else
-		std::cout << "Error: Invalid index." << std::endl;
+	std::cout << "|----------|----------|----------|----------|" << std::endl;
 }

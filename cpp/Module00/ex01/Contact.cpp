@@ -5,56 +5,97 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/07/07 12:10:22 by erazumov          #+#    #+#             */
-/*   Updated: 2025/07/07 16:18:42 by erazumov         ###   ########.fr       */
+/*   Created: 2025/09/30 16:46:02 by erazumov          #+#    #+#             */
+/*   Updated: 2025/09/30 18:12:27 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Contact.hpp"
+# include "Contact.hpp"
 
-void	Contact::setFirstName(std::string str)
-{
-	this->_first_name = str;
+Contact::Contact(void) {
+	// Rien à faire ici, le constructeur est vide
 }
-void	Contact::setLastName(std::string str)
-{
-	this->_last_name = str;
+
+Contact::~Contact(void) {
+	// Rien à nettoyer, le destructeur est vide
 }
-void	Contact::setNickname(std::string str)
-{
+
+bool	Contact::_onlyAlpha(const std::string& input) {
+	for (size_t i = 0; i < input.length(); i++) {
+		if (!std::isalpha(input[i]))
+			return false;
+	}
+	return true;
+}
+
+bool	Contact::_onlyDigits(const std::string& input) {
+	for (size_t i = 0; i < input.length(); i++) {
+		if (!std::isdigit(input[i]))
+			return false;
+	}
+	return true;
+}
+
+/* -------------------------------- SETTERS --------------------------------- */
+
+bool	Contact::setFirstname(const std::string& str) {
+	if (!str.empty() && this->_onlyAlpha(str) == true) {
+	this->_firstname = str;
+	return true;
+	}
+	return false;
+}
+
+bool	Contact::setLastname(const std::string& str) {
+	if (!str.empty() && this->_onlyAlpha(str) == true) {
+	this->_lastname = str;
+	return true;
+	}
+	return false;
+}
+
+bool	Contact::setNickname(const std::string& str) {
+	if (!str.empty() && this->_onlyAlpha(str) == true) {
 	this->_nickname = str;
+	return true;
+	}
+	return false;
 }
 
-void	Contact::setPhoneNumber(std::string str)
-{
-	this->_phone_number = str;
-}
-void	Contact::setSecret(std::string str)
-{
-	this->_darkest_secret = str;
-}
-
-std::string	Contact::getFirstName(void) const
-{
-	return (this->_first_name);
+bool	Contact::setNumber(const std::string& str) {
+	if (!str.empty() && this->_onlyDigits(str) == true) {
+	this->_number = str;
+	return true;
+	}
+	return false;
 }
 
-std::string	Contact::getLastName(void) const
-{
-	return (this->_last_name);
+bool	Contact::setSecret(const std::string& str) {
+	if (!str.empty() && this->_onlyAlpha(str) == true) {
+	this->_secret = str;
+	return true;
+	}
+	return false;
 }
 
-std::string	Contact::getNickname(void) const
-{
-	return (this->_nickname);
+/* -------------------------------- GETTERS --------------------------------- */
+
+std::string	Contact::getFirstname(void) const {
+	return this->_firstname;
 }
 
-std::string	Contact::getPhoneNumber(void) const
-{
-	return (this->_phone_number);
+std::string	Contact::getLastname(void) const {
+	return this->_lastname;
 }
 
-std::string	Contact::getSecret(void) const
-{
-	return (this->_darkest_secret);
+std::string	Contact::getNickname(void) const {
+	return this->_nickname;
+}
+
+std::string	Contact::getNumber(void) const {
+	return this->_number;
+}
+
+std::string	Contact::getSecret(void) const {
+	return this->_secret;
 }
