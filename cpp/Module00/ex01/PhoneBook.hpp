@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 12:56:11 by erazumov          #+#    #+#             */
-/*   Updated: 2025/09/30 17:11:18 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/10/01 17:07:53 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,8 @@
 
 # include <iomanip>
 # include <iostream>
+# include <limits>
+# include <string>
 # include "Contact.hpp"
 
 class PhoneBook

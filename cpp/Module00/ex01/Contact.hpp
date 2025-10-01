@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 16:46:12 by erazumov          #+#    #+#             */
-/*   Updated: 2025/09/30 18:08:33 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/10/01 16:56:59 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,12 +26,14 @@ private:
 	std::string	_number;
 	std::string	_secret;
 
-	bool		_onlyAlpha(const std::string& input);
-	bool		_onlyDigits(const std::string& input);
+	bool		onlyAlpha(const std::string& input);
+	bool		onlyDigits(const std::string& input);
 
 public:
 	Contact(void);
 	~Contact(void);
+
+	bool		isEmpty(void) const;
 
 	// Setters (Prendre des références constantes pour être efficaces)
 	bool		setFirstname(const std::string& str);

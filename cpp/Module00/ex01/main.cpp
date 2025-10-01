@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/07 12:10:53 by erazumov          #+#    #+#             */
-/*   Updated: 2025/07/07 16:22:04 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/10/01 17:07:00 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,19 +14,22 @@
 
 int	main(void)
 {
-	PhoneBook	phonebook;
+	PhoneBook	myPhoneBook;
 	std::string	command;
+
+	std::cout << "Welcome to your Phone Book!" << std::endl;
 
 	while (true)
 	{
 		std::cout << "Enter a command (ADD, SEARCH, EXIT): ";
-		std::cin >> command;
-		if (command == "EXIT")
-			break ;
-		else if (command == "ADD")
-			phonebook.addContact();
+		std::getline(std::cin, command);
+		if (command == "ADD")
+			myPhoneBook.addContact();
 		else if (command == "SEARCH")
-			phonebook.searchContact();
+			myPhoneBook.searchContact();
+		else if (command == "EXIT")
+			break ;
 	}
-	return (0);
+	std::cout << "Bye!" << std::endl;
+	return 0;
 }

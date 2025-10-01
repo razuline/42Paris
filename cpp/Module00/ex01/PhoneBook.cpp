@@ -6,11 +6,20 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 13:29:54 by erazumov          #+#    #+#             */
-/*   Updated: 2025/10/01 14:30:11 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/10/01 17:19:11 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "PhoneBook.hpp"
+
+PhoneBook::PhoneBook(void) {
+	this->_contactIndex = 0;
+	std::cout << "PhoneBook is ready for use!" << std::endl;
+}
+
+PhoneBook::~PhoneBook(void) {
+	std::cout << "PhoneBook destroyed. Goodbye!" << std::endl;
+}
 
 void	PhoneBook::addContact(void) {
 	Contact		newContact;
@@ -81,25 +90,44 @@ void	PhoneBook::searchContact(void) const {
 		std::cout << "|" << std::setw(10) << i;
 
 		// Colonne First name
-		i = 0;
 		std::string	firstname = this->_contacts[i].getFirstname();
 		if (firstname.length() > 10)
 			firstname = firstname.substr(0, 9) + ".";
 		std::cout << "|" << std::setw(10) << firstname;
 
 		// Colonne Last name
-		i = 0;
 		std::string	lastname = this->_contacts[i].getLastname();
 		if (lastname.length() > 10)
 			lastname = lastname.substr(0, 9) + ".";
 		std::cout << "|" << std::setw(10) << lastname;
 
 		// Colonne Nickname
-		i = 0;
 		std::string	nickname = this->_contacts[i].getNickname();
 		if (nickname.length() > 10)
 			nickname = nickname.substr(0, 9) + ".";
 		std::cout << "|" << std::setw(10) << nickname << "|" << std::endl;
 	}
 	std::cout << "|----------|----------|----------|----------|" << std::endl;
+
+	int	index;
+	std::cout << "Enter the index of a contact to show: ";
+	std::cin >> index;
+	// Vide le buffer
+	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+	// Si l'index est bon ET que le contact n'est PAS vide
+	if (index >= 0 && index < 8 && !this->_contacts[index].isEmpty()) {
+		std::cout << "First name: " << this->_contacts[index].getFirstname()
+			<< std::endl;
+		std::cout << "Last name: " << this->_contacts[index].getLastname()
+			<< std::endl;
+		std::cout << "Nickname: " << this->_contacts[index].getNickname()
+			<< std::endl;
+		std::cout << "Phone number: " << this->_contacts[index].getNumber()
+			<< std::endl;
+		std::cout << "Darkest secret: " << this->_contacts[index].getSecret()
+			<< std::endl;
+	}
+	else
+		std::cout << "Wrong index or an empty field." << std::endl;
 }
