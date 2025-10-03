@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 13:29:54 by erazumov          #+#    #+#             */
-/*   Updated: 2025/10/01 17:19:11 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/10/03 16:48:52 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,6 @@ void	PhoneBook::addContact(void) {
 
 	// _lastname
 	while (true) {
-		
 		std::cout << "Enter your last name: ";
 		std::getline(std::cin, userInput);
 		if (newContact.setLastname(userInput) == true)
