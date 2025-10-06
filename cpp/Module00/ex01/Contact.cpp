@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 16:46:02 by erazumov          #+#    #+#             */
-/*   Updated: 2025/10/01 16:57:15 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/10/06 21:08:44 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,7 @@ bool	Contact::setNumber(const std::string& str) {
 }
 
 bool	Contact::setSecret(const std::string& str) {
-	if (!str.empty() && this->onlyAlpha(str) == true) {
+	if (!str.empty()) {
 	this->_secret = str;
 	return true;
 	}
