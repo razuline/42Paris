@@ -5,17 +5,17 @@
 #                                                     +:+ +:+         +:+      #
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2025/10/05 17:33:45 by erazumov          #+#    #+#              #
-#    Updated: 2025/10/06 15:22:33 by erazumov         ###   ########.fr        #
+#    Created: 2025/10/06 16:14:17 by erazumov          #+#    #+#              #
+#    Updated: 2025/10/06 16:15:12 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-NAME = zombie
+NAME = thisIsBrain
 
 CXX = c++
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98
 
-SRCS = Zombie.cpp newZombie.cpp randomChump.cpp main.cpp
+SRCS = main.cpp
 OBJS = $(SRCS:.cpp=.o)
 
 # Colors
@@ -35,17 +35,17 @@ all: $(NAME)
 	@printf "$(UP)$(CUT)"
 
 $(NAME): $(OBJS)
-	@echo "$(Y)🔮 Compiling object files [$(NAME)]...$(X)"
+	@echo "$(Y)📁 Compiling object files [$(NAME)]...$(X)"
 	@$(CXX) $(CXXFLAGS) $(OBJS) -o $(NAME) 
-	@echo "$(G)🧟​ Finished [$(NAME)]$(X)"
+	@echo "$(G)✅ Finished [$(NAME)]$(X)"
 
 clean:
 	@rm -f $(OBJS)
-	@echo "$(R)🪓 Object files removed [$(OBJS)]$(X)"
+	@echo "$(R)🧹 Object files removed [$(OBJS)]$(X)"
 
 fclean: clean
 	@rm -f $(NAME)
-	@echo "$(R)🪦​  Executables removed [$(NAME)]$(X)"
+	@echo "$(R)🗑️  Executables removed [$(NAME)]$(X)"
 
 re: fclean all
 

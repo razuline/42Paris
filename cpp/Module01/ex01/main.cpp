@@ -1,27 +1,29 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Zombie.cpp                                         :+:      :+:    :+:   */
+/*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/10/05 17:31:35 by erazumov          #+#    #+#             */
-/*   Updated: 2025/10/06 15:34:32 by erazumov         ###   ########.fr       */
+/*   Created: 2025/10/06 15:46:27 by erazumov          #+#    #+#             */
+/*   Updated: 2025/10/06 16:10:55 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Zombie.hpp"
 
-Zombie::Zombie(std::string name) {
-	_name = name;
-}
+int	main(void) {
+	// Choisir un nombre de zombies
+	int	N = 5;
+	// Appeler la fonction ET stocker le pointeur
+	Zombie	*horde = zombieHorde(N, "Jack");
 
-Zombie::~Zombie(void) {
-	std::cout << _name << "-zombie was destroyed!" << std::endl;
-}
+	// Vérifier la horde en faisant parler chaque zombie
+	for (int i = 0; i < N; i++) {
+		horde[i].announce();
+	}
+	// Détruire TOUTE la horde avec delete[]
+	delete[] horde;
 
-/* ------------------------------- FUNCTIONS -------------------------------- */
-
-void	Zombie::announce(void) {
-	std::cout << _name << ": BraiiiiiiinnnzzzZ..." << std::endl;
+	return 0;
 }

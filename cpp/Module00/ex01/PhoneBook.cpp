@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 13:29:54 by erazumov          #+#    #+#             */
-/*   Updated: 2025/10/03 16:48:52 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/10/06 15:44:13 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,8 @@ PhoneBook::PhoneBook(void) {
 PhoneBook::~PhoneBook(void) {
 	std::cout << "PhoneBook destroyed. Goodbye!" << std::endl;
 }
+
+/* ------------------------------- FUNCTIONS -------------------------------- */
 
 void	PhoneBook::addContact(void) {
 	Contact		newContact;

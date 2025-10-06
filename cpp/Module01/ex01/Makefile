@@ -5,17 +5,17 @@
 #                                                     +:+ +:+         +:+      #
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2025/10/05 17:33:45 by erazumov          #+#    #+#              #
-#    Updated: 2025/10/06 15:22:33 by erazumov         ###   ########.fr        #
+#    Created: 2025/10/06 15:23:48 by erazumov          #+#    #+#              #
+#    Updated: 2025/10/06 15:26:50 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-NAME = zombie
+NAME = zombieHorde
 
 CXX = c++
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98
 
-SRCS = Zombie.cpp newZombie.cpp randomChump.cpp main.cpp
+SRCS = Zombie.cpp zombieHorde.cpp main.cpp
 OBJS = $(SRCS:.cpp=.o)
 
 # Colors
