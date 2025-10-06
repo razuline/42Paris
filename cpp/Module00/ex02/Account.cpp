@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/03 16:14:37 by erazumov          #+#    #+#             */
-/*   Updated: 2025/10/04 20:12:47 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/10/06 21:35:02 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ void	Account::_displayTimestamp(void) {
 	char	buffer[20];
 
 	// Obtenir l'heure système actuelle
-	std::time_t	currTime = std::time(nullptr);
+	std::time_t	currTime = std::time(NULL);
 	// Formater l'heure dans le buffer selon le modèle demandé
 	std::strftime(buffer, sizeof(buffer), "[%Y%m%d_%H%M%S] ",
 			std::localtime(&currTime));
