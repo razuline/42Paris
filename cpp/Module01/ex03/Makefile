@@ -6,7 +6,7 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/10/06 17:02:07 by erazumov          #+#    #+#              #
-#    Updated: 2025/10/06 17:04:01 by erazumov         ###   ########.fr        #
+#    Updated: 2025/10/06 20:38:41 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,9 +16,9 @@ CXX = c++
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98
 
 SRCS = main.cpp \
-	   Weapon.hpp Weapon.cpp \
-	   HumanA.hpp HumanA.cpp \
-	   HumanB.hpp HumanB.cpp
+	   Weapon.cpp \
+	   HumanA.cpp \
+	   HumanB.cpp
 OBJS = $(SRCS:.cpp=.o)
 
 # Colors

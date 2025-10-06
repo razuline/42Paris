@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/06 17:09:42 by erazumov          #+#    #+#             */
-/*   Updated: 2025/10/06 17:24:18 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/10/06 19:25:42 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ public:
 	~Weapon(void);
 
 	// Retourner une référence constante pour lire le type
-	void	setType(const std::string &newType);
+	void				setType(const std::string &newType);
 
 	// Modifier le type de l'arme
 	const std::string	&getType(void) const;
