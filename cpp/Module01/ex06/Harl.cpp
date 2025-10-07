@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 17:04:48 by erazumov          #+#    #+#             */
-/*   Updated: 2025/10/07 19:55:08 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/10/07 20:23:47 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,4 +46,35 @@ void	Harl::warning(void) {
 void	Harl::error(void) {
 	std::cout << "This is unacceptable! I want to speak to the manager now."
 					<< std::endl;
+}
+
+void	Harl::complain(std::string level) {
+	// Type personnalisé pour simplifier la syntaxe des ptrs de fonc membre.
+	typedef void (Harl::*HarlMemberFunction)(void);
+
+	// Tableau des noms des niveaux.
+	std::string	levels[] = {
+		"DEBUG",
+		"INFO",
+		"WARNING",
+		"ERROR"
+	};
+
+	// Tableau des pointeurs vers les fonctions membres correspondantes.
+	HarlMemberFunction	functions[] = {
+		&Harl::debug,
+		&Harl::info,
+		&Harl::warning,
+		&Harl::error
+	};
+
+	// Boucle pour trouver le bon niveau.
+	for (int i = 0; i < 4; i++) {
+		// Si le niveau entré correspond à un niveau connu,...
+		if (level == levels[i]) {
+			// ...appeller la fonc correspondante de la syntaxe spéciale.
+			(this->*functions[i])();
+			return; // Trouvé, on peut quitter la fonction.
+		}
+	}
 }

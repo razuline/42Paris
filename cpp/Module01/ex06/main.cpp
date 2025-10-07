@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 17:05:57 by erazumov          #+#    #+#             */
-/*   Updated: 2025/10/07 20:09:55 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/10/07 20:31:13 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ std::string	levels[] = {
 
 int	main(int ac, char **av) {
 	if (ac != 2) {
-		std::cout << "Usage: ./harlFilter <level>." << std::endl;
+		std::cout << "Usage: ./harlFilter <level>" << std::endl;
 		return 1;
 	}
 
@@ -54,7 +54,7 @@ int	main(int ac, char **av) {
 	case 3: // Cas pour "ERROR"
 		std::cout << "[ ERROR ]" << std::endl;
 		harl.complain("ERROR");
-		// Pas de break, on continue au cas suivant
+		break;
 	default: // S'exécute si lvlIdx est resté à -1
 		std::cout << "[ Probably complaining about insignificant problems ]"
 					<< std::endl;
