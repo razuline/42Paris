@@ -6,19 +6,16 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/10/07 14:17:55 by erazumov          #+#    #+#              #
-#    Updated: 2025/10/07 14:18:10 by erazumov         ###   ########.fr        #
+#    Updated: 2025/10/07 15:59:55 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-AME = violence
+NAME = sed
 
 CXX = c++
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98
 
-SRCS = main.cpp \
-	   Weapon.cpp \
-	   HumanA.cpp \
-	   HumanB.cpp
+SRCS = main.cpp
 OBJS = $(SRCS:.cpp=.o)
 
 # Colors

@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 14:20:25 by erazumov          #+#    #+#             */
-/*   Updated: 2025/10/07 15:24:07 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/10/07 15:27:45 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,7 @@ int	main(int ac, char **av) {
 	// Écrire le contenu de la chaîne modifiée dans le fichier de sortie.
 	outputFile << content;
 
-	// Les fichiers sont automatiquement fermés par les destructeurs 
+	// Les fichiers sont automatiquement fermés par les destructeurs
 	// de inputFile et outputFile.
 	return 0;
 }
