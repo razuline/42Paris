@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 13:11:01 by erazumov          #+#    #+#             */
-/*   Updated: 2025/10/08 13:32:03 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/10/08 14:09:43 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,8 @@
 class Fixed
 {
 private:
-	int					fixed;
-	static const int	bits = 8;
+	int					_fixed;
+	static const int	_bits = 8;
 
 public:
 	Fixed(void);
