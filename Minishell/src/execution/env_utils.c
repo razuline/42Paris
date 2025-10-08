@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   env_utils.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
+/*   By: preltien <preltien@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/20 15:39:55 by preltien          #+#    #+#             */
-/*   Updated: 2025/08/17 18:13:13 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/09/10 19:59:05 by preltien         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,14 +15,12 @@
 /* Counts the number of strings in an environment array. */
 int	get_env_len(char **envp)
 {
-	int	i;
+	int	len;
 
-	i = 0;
-	if (!envp)
-		return (0);
-	while (envp[i])
-		i++;
-	return (i);
+	len = 0;
+	while (envp && envp[len])
+		len++;
+	return (len);
 }
 
 /* Creates a deep, allocated copy of the environment (envp). */
@@ -65,7 +63,8 @@ char	**find_env_var(char **envp, const char *key)
 	i = 0;
 	while (envp[i])
 	{
-		if (ft_strncmp(envp[i], key, key_len) == 0 && envp[i][key_len] == '=')
+		if (ft_strncmp(envp[i], key, key_len) == 0 && (envp[i][key_len] == '='
+			|| envp[i][key_len] == '\0'))
 			return (&envp[i]);
 		i++;
 	}

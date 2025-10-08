@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   pipeline.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
+/*   By: preltien <preltien@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/09 14:47:21 by erazumov          #+#    #+#             */
-/*   Updated: 2025/08/24 13:01:15 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/09/13 12:48:43 by preltien         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,8 @@ static void	launch_all_children(t_command *cmds, pid_t *pids, t_shell *state)
 		setup_pipe_context(&ctx, cmds, state, prev_fd);
 		pids[i] = fork_and_handle_child(&ctx);
 		close_pipe_fds(&prev_fd, ctx.pipe_fd, ctx.is_last);
+		if (cmds->redir && !ctx.is_last && cmds->next)
+			waitpid(pids[i], NULL, 0);
 		if (!ctx.is_last)
 			prev_fd = ctx.pipe_fd[0];
 		cmds = cmds->next;

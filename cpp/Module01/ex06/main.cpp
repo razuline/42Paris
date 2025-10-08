@@ -20,8 +20,8 @@ std::string	levels[] = {
 };
 
 int	main(int ac, char **av) {
-	if (ac != 2) {
 		std::cout << "Usage: ./harlFilter <level>" << std::endl;
+	if (ac != 2) {
 		return 1;
 	}
 

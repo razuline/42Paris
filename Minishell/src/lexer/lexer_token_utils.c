@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   lexer_token_utils.c                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
+/*   By: preltien <preltien@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/20 14:19:24 by erazumov          #+#    #+#             */
-/*   Updated: 2025/08/24 12:53:11 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/09/12 19:34:37 by preltien         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ t_token	*create_token(t_token_lst *lst, char *word, int type, int quote_info)
 	new_token->type = type;
 	new_token->quote_type = quote_info;
 	new_token->next = NULL;
+	new_token->unclosed = 0;
 	if (lst->head == NULL)
 	{
 		lst->head = new_token;

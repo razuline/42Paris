@@ -6,7 +6,7 @@
 #    By: preltien <preltien@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/06/11 17:31:34 by erazumov          #+#    #+#              #
-#    Updated: 2025/08/24 14:02:47 by preltien         ###   ########.fr        #
+#    Updated: 2025/09/05 15:19:18 by preltien         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -20,7 +20,7 @@ RM = rm -f
 # ============================================================================ #
 #                                   Flags                                      #
 # ============================================================================ #
-CFLAGS = -Wall -Wextra -Werror -g -MMD -MP
+CFLAGS = -Wall -Wextra -Werror -g
 
 # ============================================================================ #
 #                                 Dossiers                                     #
@@ -41,7 +41,7 @@ EXPANSION_FILES = expansion.c expansion_len_utils.c expansion_var_utils.c \
 				  expansion_append_utils.c
 EXEC_FILES = execution.c execution_utils.c pipeline.c pipeline_utils.c \
 			 process_utils.c redirections.c path.c env_utils.c env_set.c \
-			 env_unset.c heredoc.c
+			 env_unset.c heredoc.c heredoc_utils.c children.c heredoc_single.c
 SIGNALS_FILES = signals.c
 BUILTINS_FILES = builtin_cd.c builtin_echo.c builtin_env.c builtin_export.c \
 				 builtin_export_utils.c builtin_exit.c builtin_pwd.c \

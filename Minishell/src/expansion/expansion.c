@@ -6,7 +6,7 @@
 /*   By: preltien <preltien@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/26 16:25:54 by erazumov          #+#    #+#             */
-/*   Updated: 2025/08/24 14:11:09 by preltien         ###   ########.fr       */
+/*   Updated: 2025/09/10 18:52:57 by preltien         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,7 +98,9 @@ int	expand_token(t_token *head, t_shell *state)
 			orig_value = curr->value;
 			expanded_value = expand_str(orig_value, state);
 			if (!expanded_value)
+			{
 				return (1);
+			}
 			curr->value = expanded_value;
 			free(orig_value);
 		}

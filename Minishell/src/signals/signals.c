@@ -3,28 +3,33 @@
 /*                                                        :::      ::::::::   */
 /*   signals.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
+/*   By: preltien <preltien@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/11 11:04:24 by erazumov          #+#    #+#             */
-/*   Updated: 2025/08/11 12:11:02 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/09/13 12:59:20 by preltien         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-volatile sig_atomic_t	g_received_signal = 0;
+volatile sig_atomic_t	g_exit_status = 0;
 
 /* This is the handler for interactive mode.
  * It executes when the user presses Ctrl-C at the prompt. */
 void	signal_handler(int sig)
 {
-	g_received_signal = sig;
 	if (sig == SIGINT)
 	{
-		ft_putstr_fd("\n", 1);
-		rl_on_new_line();
+		g_exit_status = 130;
+		write(1, "\n", 1);
 		rl_replace_line("", 0);
+		rl_on_new_line();
 		rl_redisplay();
+	}
+	else if (sig == SIGQUIT)
+	{
+		g_exit_status = 131;
+		write(2, "Quit (core dumped)\n", 19);
 	}
 }
 
