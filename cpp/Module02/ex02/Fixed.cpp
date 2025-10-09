@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 15:09:35 by erazumov          #+#    #+#             */
-/*   Updated: 2025/10/09 14:30:33 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/10/09 19:57:18 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,31 +131,31 @@ Fixed::operator!=(const Fixed &other) const
 Fixed
 Fixed::operator+(const Fixed &other) const
 {
-	return this->_fixed + other._fixed;
+	return Fixed(this->toFloat() + other.toFloat());
 }
 
 Fixed
 Fixed::operator-(const Fixed &other) const
 {
-	return this->_fixed - other._fixed;
+	return Fixed(this->toFloat() - other.toFloat());
 }
 
 // Multiplier deux nombres décalés de 8 bits, le résultat est décalé de 16 bits.
 Fixed
 Fixed::operator*(const Fixed &other) const
 {
-	return (this->_fixed * other._fixed) >> _bits;
+	return Fixed(this->toFloat() * other.toFloat());
 }
 
 Fixed
 Fixed::operator/(const Fixed &other) const
 {
-	return (this->_fixed << _bits) / other._fixed;
+	return Fixed(this->toFloat() / other.toFloat());
 }
 
 // 3. Opérateurs d'incrémentation / décrémentation
 Fixed
-Fixed::&operator++(void)
+&Fixed::operator++(void)
 {
 	this->_fixed++;
 	return *this;
@@ -164,17 +164,22 @@ Fixed::&operator++(void)
 Fixed
 Fixed::operator++(int)
 {
-	
+	Fixed	tmp(*this);
+	this->_fixed++;
+	return tmp;
 }
 
 Fixed
-Fixed::&operator--(void)
+&Fixed::operator--(void)
 {
-	
+	this->_fixed--;
+	return *this;
 }
 
 Fixed
 Fixed::operator--(int)
 {
-	
+	Fixed	tmp(*this);
+	this->_fixed--;
+	return tmp;
 }
