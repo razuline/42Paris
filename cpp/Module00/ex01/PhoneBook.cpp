@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 13:29:54 by erazumov          #+#    #+#             */
-/*   Updated: 2025/10/03 16:48:52 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/10/04 19:43:59 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,16 +117,17 @@ void	PhoneBook::searchContact(void) const {
 	// Si l'index est bon ET que le contact n'est PAS vide
 	if (index >= 0 && index < 8 && !this->_contacts[index].isEmpty()) {
 		std::cout << "First name: " << this->_contacts[index].getFirstname()
-			<< std::endl;
+				<< std::endl;
 		std::cout << "Last name: " << this->_contacts[index].getLastname()
-			<< std::endl;
+				<< std::endl;
 		std::cout << "Nickname: " << this->_contacts[index].getNickname()
-			<< std::endl;
+				<< std::endl;
 		std::cout << "Phone number: " << this->_contacts[index].getNumber()
-			<< std::endl;
+				<< std::endl;
 		std::cout << "Darkest secret: " << this->_contacts[index].getSecret()
-			<< std::endl;
+				<< std::endl;
 	}
 	else
-		std::cout << "Wrong index or an empty field." << std::endl;
+		std::cout << "Wrong index or an empty field."
+				<< std::endl;
 }

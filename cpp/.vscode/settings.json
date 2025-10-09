@@ -57,5 +57,7 @@
 		"cinttypes": "cpp",
 		"typeinfo": "cpp",
 		"semaphore": "cpp"
-	}
+	},
+	"editor.fontSize": 14,
+	"terminal.integrated.fontSize": 14
 }

@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 16:46:02 by erazumov          #+#    #+#             */
-/*   Updated: 2025/10/01 16:57:15 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/10/04 19:45:33 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,40 +44,40 @@ bool	Contact::isEmpty(void) const {
 
 bool	Contact::setFirstname(const std::string& str) {
 	if (!str.empty() && this->onlyAlpha(str) == true) {
-	this->_firstname = str;
-	return true;
+		this->_firstname = str;
+		return true;
 	}
 	return false;
 }
 
 bool	Contact::setLastname(const std::string& str) {
 	if (!str.empty() && this->onlyAlpha(str) == true) {
-	this->_lastname = str;
-	return true;
+		this->_lastname = str;
+		return true;
 	}
 	return false;
 }
 
 bool	Contact::setNickname(const std::string& str) {
 	if (!str.empty() && this->onlyAlpha(str) == true) {
-	this->_nickname = str;
-	return true;
+		this->_nickname = str;
+		return true;
 	}
 	return false;
 }
 
 bool	Contact::setNumber(const std::string& str) {
 	if (!str.empty() && this->onlyDigits(str) == true) {
-	this->_number = str;
-	return true;
+		this->_number = str;
+		return true;
 	}
 	return false;
 }
 
 bool	Contact::setSecret(const std::string& str) {
 	if (!str.empty() && this->onlyAlpha(str) == true) {
-	this->_secret = str;
-	return true;
+		this->_secret = str;
+		return true;
 	}
 	return false;
 }
