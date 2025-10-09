@@ -5,77 +5,116 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: preltien <preltien@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/08/24 13:58:50 by preltien          #+#    #+#             */
-/*   Updated: 2025/08/24 14:37:02 by preltien         ###   ########.fr       */
+/*   Created: 2025/09/04 18:51:10 by preltien          #+#    #+#             */
+/*   Updated: 2025/09/08 17:14:46 by preltien         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+#include <fcntl.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <unistd.h>
 
-/* Reads user input for the here-document and writes it to the pipe. */
-static void	write_heredoc_line(int write_fd, char *line, t_shell *state,
-		int expand)
+int	write_heredoc_line(int fd, char *line, t_redir *redir, t_shell *state)
 {
 	char	*expanded;
 
-	if (expand)
-	{
+	if (redir->expand)
 		expanded = expand_str(line, state);
-		if (expanded)
-			write(write_fd, expanded, ft_strlen(expanded));
-		free(expanded);
-	}
 	else
-		write(write_fd, line, ft_strlen(line));
-	write(write_fd, "\n", 1);
+		expanded = ft_strdup(line);
+	if (!expanded)
+		return (-1);
+	write(fd, expanded, ft_strlen(expanded));
+	write(fd, "\n", 1);
+	free(expanded);
+	return (0);
 }
 
-void	read_heredoc_input(int write_fd, t_redir *redir, t_shell *state)
+int	handle_all_heredocs(t_redir *redir_list, t_shell *state)
 {
-	char	*line;
+	t_redir	*curr;
+	int		res;
 
+	curr = redir_list;
+	while (curr)
+	{
+		if (curr->type == HEREDOC && !curr->is_heredoc)
+		{
+			res = read_single_heredoc(curr, state);
+			if (res < 0)
+			{
+				cleanup_heredocs(redir_list);
+				return (-1);
+			}
+			curr->is_heredoc = 1;
+		}
+		curr = curr->next;
+	}
+	return (0);
+}
+
+static int	copy_heredoc_to_tmp(int fd_tmp, t_redir *redir)
+{
+	int		fd_heredoc;
+	char	buf[1024];
+	ssize_t	read_bytes;
+
+	fd_heredoc = open(redir->tmp_name, O_RDONLY);
+	if (fd_heredoc < 0)
+	{
+		perror("open heredoc");
+		return (-1);
+	}
 	while (1)
 	{
-		if (isatty(STDIN_FILENO))
-			line = readline("> ");
-		else
-			line = get_next_line(STDIN_FILENO);
-		if (!line)
-		{
-			ft_putstr_fd("minishell: warning: here-document delimited by ", 2);
-			ft_putstr_fd("end-of-file (wanted `", 2);
-			ft_putstr_fd(redir->file, 2);
-			ft_putstr_fd("`)\n", 2);
+		read_bytes = read(fd_heredoc, buf, sizeof(buf));
+		if (read_bytes <= 0)
 			break ;
-		}
-		if (ft_strcmp(line, redir->file) == 0)
-		{
-			free(line);
-			break ;
-		}
-		write_heredoc_line(write_fd, line, state, redir->expand);
-		free(line);
+		write(fd_tmp, buf, read_bytes);
 	}
+	close(fd_heredoc);
+	return (0);
 }
 
-/* Handles a here-document redirection (<<) using a pipe. */
-int	handle_heredoc(t_redir *redir, t_shell *state)
+int	apply_heredoc_redirections(t_redir *redir_list)
 {
-	int	pipefd[2];
+	t_redir	*curr;
+	int		fd_tmp;
+	char	tmp_name[32];
 
-	if (pipe(pipefd) == -1)
+	ft_strcpy(tmp_name, "/tmp/heredoc_concatXXXXXX");
+	fd_tmp = mkstemp(tmp_name);
+	if (fd_tmp < 0)
+		return (perror("mkstemp"), g_exit_status = 1, -1);
+	curr = redir_list;
+	while (curr)
 	{
-		perror("minishell: pipe");
-		return (-1);
+		if (curr->type == HEREDOC && curr->is_heredoc)
+			copy_heredoc_to_tmp(fd_tmp, curr);
+		curr = curr->next;
 	}
-	read_heredoc_input(pipefd[1], redir, state);
-	close(pipefd[1]);
-	if (dup2(pipefd[0], STDIN_FILENO) < 0)
+	if (lseek(fd_tmp, 0, SEEK_SET) < 0 || dup2(fd_tmp, STDIN_FILENO) < 0)
+		return (perror("dup2/lseek"), cleanup_tmp(fd_tmp, tmp_name));
+	close(fd_tmp);
+	unlink(tmp_name);
+	return (0);
+}
+
+int	handle_heredocs_and_redirections(t_command *cmd, t_shell *state)
+{
+	if (handle_all_heredocs(cmd->redir, state) < 0)
 	{
-		perror("minishell: dup2");
-		close(pipefd[0]);
-		return (-1);
+		return (g_exit_status);
 	}
-	close(pipefd[0]);
+	if (apply_heredoc_redirections(cmd->redir) < 0)
+	{
+		return (g_exit_status);
+	}
+	if (apply_redirections(cmd->redir) < 0)
+	{
+		return (g_exit_status);
+	}
 	return (0);
 }

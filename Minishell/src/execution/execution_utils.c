@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execution_utils.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
+/*   By: preltien <preltien@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/10 14:35:16 by erazumov          #+#    #+#             */
-/*   Updated: 2025/08/17 18:07:50 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/09/05 14:24:12 by preltien         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,33 +68,39 @@ int	execute_builtin(char **argv, t_shell *state)
 int	save_original_fds(int *stdin_save, int *stdout_save)
 {
 	*stdin_save = dup(STDIN_FILENO);
-	if (*stdin_save == -1)
+	if (*stdin_save < 0)
 	{
-		perror("minishell: dup");
-		return (-1);
+		perror("dup stdin failed");
+		*stdin_save = -1;
 	}
 	*stdout_save = dup(STDOUT_FILENO);
-	if (*stdout_save == -1)
+	if (*stdout_save < 0)
 	{
-		close(*stdin_save);
-		perror("minishell: dup");
-		return (-1);
+		perror("dup stdout failed");
+		if (*stdin_save >= 0)
+			close(*stdin_save);
+		*stdout_save = -1;
 	}
-	return (0);
+	if (*stdin_save < 0 && *stdout_save < 0)
+		return (-1);
+	else
+		return (0);
 }
 
-/* Helper to restore the saved standard file descriptors. */
 int	restore_original_fds(int stdin_save, int stdout_save)
 {
-	if (dup2(stdin_save, STDIN_FILENO) == -1
-		|| dup2(stdout_save, STDOUT_FILENO) == -1)
+	if (stdin_save >= 0)
 	{
-		perror("minishell: dup2");
-		close(stdin_save);
-		close(stdout_save);
-		return (-1);
+		if (dup2(stdin_save, STDIN_FILENO) == -1)
+			perror("minishell: dup2 stdin");
+		else
+			close(stdin_save);
 	}
-	close(stdin_save);
-	close(stdout_save);
+	if (stdout_save >= 0)
+	{
+		if (dup2(stdout_save, STDOUT_FILENO) == -1)
+			perror("minishell: dup2 stdout");
+		close(stdout_save);
+	}
 	return (0);
 }

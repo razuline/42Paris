@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/07 12:10:53 by erazumov          #+#    #+#             */
-/*   Updated: 2025/10/01 17:07:00 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/10/06 21:09:21 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,5 @@ int	main(void)
 		else if (command == "EXIT")
 			break ;
 	}
-	std::cout << "Bye!" << std::endl;
 	return 0;
 }

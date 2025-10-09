@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   lexer_handlers.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
+/*   By: preltien <preltien@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 19:43:24 by erazumov          #+#    #+#             */
-/*   Updated: 2025/08/24 12:46:08 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/09/12 19:34:29 by preltien         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,14 @@ static int	word_token(t_token_lst *lst, char *start, char *end)
 	int		len;
 	char	orig_char;
 
+	quote_type = 0;
 	len = end - start;
+	if (check_unclosed_quotes_in_word(start, len, &quote_type))
+	{
+		ft_putstr_fd("minishell: syntax error: unclosed quote\n", 2);
+		g_exit_status = 2;
+		return (1);
+	}
 	final_word = extract_and_clean_word(start, len);
 	if (!final_word)
 		return (1);
@@ -49,6 +56,8 @@ int	handle_word(t_token_lst *lst, char **c)
 		return (0);
 	}
 	result = word_token(lst, wd_start, wd_end);
+	if (result != 0)
+		return (result);
 	*c = wd_end;
 	return (result);
 }

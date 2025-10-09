@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
+/*   By: preltien <preltien@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/05 15:51:14 by preltien          #+#    #+#             */
-/*   Updated: 2025/08/24 11:59:56 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/09/12 19:30:23 by preltien         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,19 +21,20 @@ static void	parse_and_execute(t_shell *state, char *line)
 	tokens = lexer(line);
 	commands = NULL;
 	if (tokens && expand_token(tokens, state) == 0)
-		commands = parser(tokens, state);
+		commands = parser(tokens);
 	if (commands != NULL)
 	{
 		if (commands->argv && commands->argv[0] && ft_strcmp(commands->argv[0],
 				"exit") == 0)
-		{
 			execute_builtin(commands->argv, state);
-		}
 		else
 			state->exit_code = execute(commands, state);
+		g_exit_status = state->exit_code;
 	}
-	free_tokens(tokens);
-	free_commands(commands);
+	if (tokens)
+		free_tokens(tokens);
+	if (commands)
+		free_commands(commands);
 }
 
 /* Checks if a string consists only of whitespace characters. */
@@ -54,10 +55,12 @@ static int	process_line(t_shell *state)
 	char	*line;
 
 	line = read_line_input();
+	state->exit_code = g_exit_status;
 	if (line == NULL)
 	{
 		state->should_exit = true;
-		return (0);
+		state->exit_code = g_exit_status;
+		return (state->exit_code);
 	}
 	if (line[0] != '\0' && !is_whitespace(line))
 	{
@@ -65,8 +68,10 @@ static int	process_line(t_shell *state)
 			add_history(line);
 		parse_and_execute(state, line);
 	}
+	else
+		state->exit_code = g_exit_status;
 	free(line);
-	return (0);
+	return (state->exit_code);
 }
 
 /* Initialises the main shell structure (t_shell). */
@@ -106,5 +111,5 @@ int	main(int ac, char **av, char **envp)
 	}
 	ft_free_array(shell_state.envp);
 	rl_clear_history();
-	return (shell_state.exit_code);
+	return (g_exit_status);
 }

@@ -6,7 +6,7 @@
 /*   By: preltien <preltien@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/04 16:42:33 by preltien          #+#    #+#             */
-/*   Updated: 2025/08/24 14:09:30 by preltien         ###   ########.fr       */
+/*   Updated: 2025/09/10 19:58:41 by preltien         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,7 @@ static int	redirect_input(const char *file)
 
 /* Applies all redirections for a single command.
  * Iterates through the redirection list and handles each type. */
-int	apply_redirections(t_redir *redir_list, t_shell *state)
+int	apply_redirections(t_redir *redir_list)
 {
 	while (redir_list)
 	{
@@ -84,11 +84,6 @@ int	apply_redirections(t_redir *redir_list, t_shell *state)
 			|| redir_list->type == APPEND_OUT)
 		{
 			if (redirect_output(redir_list->file, redir_list->type) < 0)
-				return (-1);
-		}
-		else if (redir_list->type == HEREDOC)
-		{
-			if (handle_heredoc(redir_list, state) < 0)
 				return (-1);
 		}
 		redir_list = redir_list->next;

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   path.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
+/*   By: preltien <preltien@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/20 15:28:17 by preltien          #+#    #+#             */
-/*   Updated: 2025/08/17 18:11:45 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/09/02 16:02:06 by preltien         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,7 +79,8 @@ void	get_absolute_path(char **argv, t_shell *state)
 	if (!paths)
 		return ;
 	exec_path = find_exec_in_paths(argv[0], paths);
-	ft_free_array(paths);
+	if (paths)
+		ft_free_array(paths);
 	if (exec_path)
 	{
 		free(argv[0]);
