@@ -6,11 +6,11 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/10/08 15:08:38 by erazumov          #+#    #+#              #
-#    Updated: 2025/10/08 15:09:03 by erazumov         ###   ########.fr        #
+#    Updated: 2025/10/11 11:14:35 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-NAME = fixed
+NAME = fixed1
 
 CXX = c++
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98

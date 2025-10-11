@@ -6,16 +6,16 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/10/08 15:08:38 by erazumov          #+#    #+#              #
-#    Updated: 2025/10/11 11:14:49 by erazumov         ###   ########.fr        #
+#    Updated: 2025/10/11 11:14:12 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-NAME = fixed2
+NAME = fixed3
 
 CXX = c++
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98
 
-SRCS = main.cpp Fixed.cpp
+SRCS = main.cpp Fixed.cpp Point.cpp bsp.cpp
 OBJS = $(SRCS:.cpp=.o)
 
 # Colors
