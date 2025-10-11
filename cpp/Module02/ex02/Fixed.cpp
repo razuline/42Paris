@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 15:09:35 by erazumov          #+#    #+#             */
-/*   Updated: 2025/10/09 19:57:18 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/10/11 11:09:33 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,31 +14,27 @@
 
 Fixed::Fixed(void)
 {
-	std::cout << "Default constructor called" << std::endl;
 	this->_fixed = 0;
 }
 
 Fixed::Fixed(const int n)
 {
-	std::cout << "Int constructor called" << std::endl;
 	this->_fixed = n << _bits;
 }
 
 Fixed::Fixed(const float f)
 {
-	std::cout << "Float constructor called" << std::endl;
 	this->_fixed = roundf(f * 256);
 }
 
 Fixed::Fixed(const Fixed &copy)
 {
-	std::cout << "Copy constructor called" << std::endl;
 	this->_fixed = copy._fixed;
 }
 
 Fixed::~Fixed(void)
 {
-	std::cout << "Destructor called" << std::endl;
+	
 }
 
 /* --------------------------- SETTERS & GETTERS ---------------------------- */
@@ -182,4 +178,37 @@ Fixed::operator--(int)
 	Fixed	tmp(*this);
 	this->_fixed--;
 	return tmp;
+}
+
+// 4. Fonctions statiques min / max
+Fixed
+&Fixed::min(Fixed &a, Fixed &b)
+{
+	if (a < b)
+		return a;
+	return b;
+}
+
+const Fixed
+&Fixed::min(const Fixed &a, const Fixed &b) 
+{
+	if (a < b)
+		return a;
+	return b;
+}
+
+Fixed
+&Fixed::max(Fixed &a, Fixed &b)
+{
+	if (a > b)
+		return a;
+	return b;
+}
+
+const Fixed
+&Fixed::max(const Fixed &a, const Fixed &b)
+{
+	if (a > b)
+		return a;
+	return b;
 }
