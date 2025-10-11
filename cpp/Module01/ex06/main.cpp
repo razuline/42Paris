@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 17:05:57 by erazumov          #+#    #+#             */
-/*   Updated: 2025/10/07 20:31:13 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/10/11 15:46:37 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,8 +20,8 @@ std::string	levels[] = {
 };
 
 int	main(int ac, char **av) {
-		std::cout << "Usage: ./harlFilter <level>" << std::endl;
 	if (ac != 2) {
+		std::cout << "Usage: ./harlFilter <level>" << std::endl;
 		return 1;
 	}
 
