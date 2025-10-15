@@ -6,13 +6,13 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 15:09:35 by erazumov          #+#    #+#             */
-/*   Updated: 2025/10/11 11:34:05 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/10/15 13:54:22 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Fixed.hpp"
 
-/* ------------------------ CONSTRUCTOR & DESTRUCTOR ------------------------ */
+/* ----------------------- CONSTRUCTORS & DESTRUCTORS ----------------------- */
 
 Fixed::Fixed(void)
 {
