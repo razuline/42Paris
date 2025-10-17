@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/15 15:41:49 by erazumov          #+#    #+#             */
-/*   Updated: 2025/10/17 15:26:22 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/10/17 15:39:51 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ int	main(void)
 {
 	// --- Test 1 : Création et actions basiques ---
 	std::cout << "--- CREATING ROBOTS ---" << std::endl;
-	ScavTrap	scav("SC4V");
+	FlagTrap	scav("SC4V");
 	std::cout << std::endl;
 
 	// --- Test des valeurs initiales ---
@@ -44,14 +44,14 @@ int	main(void)
 
 	// --- Test 3 : Copie ---
 	std::cout << "\n--- TESTING COPY AND ASSIGNMENT ---" << std::endl;
-	ScavTrap sctrap("SC4V-E");
+	FlagTrap sctrap("SC4V-E");
 	
 	sctrap.attack("Skag");
 	
-	ScavTrap scav_copy(scav);
+	FlagTrap scav_copy(scav);
 	scav_copy.attack("a big Skag");
 	
-	ScavTrap scav_assign("TMP");
+	FlagTrap scav_assign("TMP");
 	scav_assign = scav;
 	scav_assign.attack("a very big Skag");
 

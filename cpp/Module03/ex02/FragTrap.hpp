@@ -1,35 +1,35 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ScavTrap.hpp                                       :+:      :+:    :+:   */
+/*   FragTrap.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/10/16 14:24:58 by erazumov          #+#    #+#             */
-/*   Updated: 2025/10/17 16:07:04 by erazumov         ###   ########.fr       */
+/*   Created: 2025/10/17 15:39:08 by erazumov          #+#    #+#             */
+/*   Updated: 2025/10/17 16:31:42 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef SCAV_TRAP_HPP
-# define SCAV_TRAP_HPP
+#ifndef FRAG_TRAP_HPP
+# define FRAG_TRAP_HPP
 
 # include <iostream>
 # include <string>
 # include "ClapTrap.hpp"
 
-class ScavTrap : public ClapTrap
+class FragTrap : public ClapTrap
 {
 public:
-	ScavTrap(std::string name); // Constructeur
-	ScavTrap(const ScavTrap &copy); // Constructeur de copie
-	ScavTrap &operator=(const ScavTrap &other); // Opérateur d'assignation
-	~ScavTrap(void); // Destructeur
+	FragTrap(std::string name); // Constructeur
+	FragTrap(const FragTrap &copy); // Constructeur de copie
+	FragTrap &operator=(const FragTrap &other); // Opérateur d'assignation
+	~FragTrap(void); // Destructeur
 
 	// --- Fonctions membres ---
 	void	attack(const std::string &target);
 	void	takeDamage(unsigned int amount);
 	void	beRepaired(unsigned int amount);
-	void	guardGate(void);
+	void	highFivesGuys(void);
 };
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/16 14:26:13 by erazumov          #+#    #+#             */
-/*   Updated: 2025/10/17 16:09:40 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/10/17 16:41:04 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,8 +68,19 @@ ScavTrap::attack(const std::string &target)
 void
 ScavTrap::takeDamage(unsigned int amount)
 {
-	std::cout << "ScavTrap " << this->_name << " takes "
-				<< amount << " points of damage!" << std::endl;
+	if (this->_hit > 0)
+	{
+		this->_hit -= amount;
+		if (this->_hit < 0)
+			this->_hit = 0;
+		std::cout << "ScavTrap " << this->_name << " takes "
+				  << amount << " points of damage!" << std::endl;
+	}
+	else
+	{
+		std::cout << "ScavTrap " << this->_name << " is already destroyed."
+				  << std::endl;
+	}
 }
 
 // Logique de réparation : vérifie l'énergie/vie, dépense 1 énergie,
@@ -80,6 +91,7 @@ ScavTrap::beRepaired(unsigned int amount)
 	if (this->_hit > 0 && this->_energy > 0)
 	{
 		_energy--;
+		this->_hit += amount;
 		std::cout << "ScavTrap " << this->_name << " repairs itself, gaining "
 					<< amount << " hit points back!"
 					<< std::endl;
