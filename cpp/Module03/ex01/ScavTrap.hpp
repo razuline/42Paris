@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/16 14:24:58 by erazumov          #+#    #+#             */
-/*   Updated: 2025/10/16 15:24:46 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/10/17 15:30:51 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,8 @@ public:
 
 	// --- Fonctions membres ---
 	void	attack(const std::string &target);
+	void	takeDamage(unsigned int amount);
+	void	beRepaired(unsigned int amount);
 	void	guardGate(void);
 };
 

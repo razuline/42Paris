@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/16 14:26:13 by erazumov          #+#    #+#             */
-/*   Updated: 2025/10/16 15:26:33 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/10/17 15:33:58 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,6 @@ ScavTrap::ScavTrap(std::string name) : ClapTrap(name)
 
 ScavTrap::ScavTrap(const ScavTrap &copy) : ClapTrap(copy)
 {
-	*this = copy;
 	std::cout << "ScavTrap " << this->_name << " has been cloned!" << std::endl;
 }
 
@@ -62,6 +61,32 @@ ScavTrap::attack(const std::string &target)
 	else
 	{
 		std::cout << "ScavTrap " << this->_name << " can't attack, not enough "
+					"energy or hit points." << std::endl;
+	}
+}
+
+void
+ScavTrap::takeDamage(unsigned int amount)
+{
+	std::cout << "ScavTrap " << this->_name << " takes "
+				<< amount << " points of damage!" << std::endl;
+}
+
+// Logique de réparation : vérifie l'énergie/vie, dépense 1 énergie,
+// regagne de la vie.
+void
+ScavTrap::beRepaired(unsigned int amount)
+{
+	if (this->_hit > 0 && this->_energy > 0)
+	{
+		_energy--;
+		std::cout << "ScavTrap " << this->_name << " repairs itself, gaining "
+					<< amount << " hit points back!"
+					<< std::endl;
+	}
+	else
+	{
+		std::cout << "ScavTrap " << this->_name << " can't repair, not enough "
 					"energy or hit points." << std::endl;
 	}
 }
