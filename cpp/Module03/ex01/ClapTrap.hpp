@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/15 13:33:27 by erazumov          #+#    #+#             */
-/*   Updated: 2025/10/16 15:01:02 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/10/17 12:00:11 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,11 @@ public:
 	ClapTrap(const ClapTrap &copy); // Constructeur de copie
 	ClapTrap &operator=(const ClapTrap &other); // Opérateur d'assignation
 	~ClapTrap(void); // Destructeur
+
+	// --- Getters ---
+	unsigned int	getHitPoints(void) const;
+	unsigned int	getEnergyPoints(void) const;
+	unsigned int	getAttackDamage(void) const;
 
 	// --- Fonctions membres ---
 	void	attack(const std::string &target);

@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/15 13:54:43 by erazumov          #+#    #+#             */
-/*   Updated: 2025/10/15 15:47:11 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/10/17 12:00:18 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,26 @@ ClapTrap::~ClapTrap(void)
 {
 	std::cout << "ClapTrap " << this->_name << " is destroyed!"
 				<< std::endl;
+}
+
+/* --------------------------- SETTERS & GETTERS ---------------------------- */
+
+unsigned int
+ClapTrap::getHitPoints(void) const
+{
+	return this->_hit;
+}
+
+unsigned int
+ClapTrap::getEnergyPoints(void) const
+{
+	return this->_energy;
+}
+
+unsigned int
+ClapTrap::getAttackDamage(void) const
+{
+	return this->_damage;
 }
 
 /* ------------------------------- FUNCTIONS -------------------------------- */

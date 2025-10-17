@@ -6,11 +6,11 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/10/15 13:32:28 by erazumov          #+#    #+#              #
-#    Updated: 2025/10/16 14:24:05 by erazumov         ###   ########.fr        #
+#    Updated: 2025/10/17 11:17:32 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-NAME = ClapTrap
+NAME = ScavTrap
 
 CXX = c++
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98

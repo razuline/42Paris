@@ -56,7 +56,8 @@
 		"thread": "cpp",
 		"cinttypes": "cpp",
 		"typeinfo": "cpp",
-		"semaphore": "cpp"
+		"semaphore": "cpp",
+		"fstream": "cpp"
 	},
 	"editor.fontSize": 14,
 	"terminal.integrated.fontSize": 14

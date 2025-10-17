@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/15 15:41:49 by erazumov          #+#    #+#             */
-/*   Updated: 2025/10/15 15:48:35 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/10/17 11:24:14 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ int	main(void)
 {
 	// --- Scénario de base ---
 	std::cout << "--- CREATING FIRST CLAPTRAP ---" << std::endl;
-	ClapTrap clap("CL4P-TP"); // Crée un ClapTrap nommé "CL4P-TP"
+	ClapTrap	clap("CL4P-TP"); // Crée un ClapTrap nommé "CL4P-TP"
 
 	std::cout << "\n--- BASIC ACTIONS TEST ---" << std::endl;
 	clap.attack("Bandit");       // Il attaque
@@ -33,14 +33,14 @@ int	main(void)
 
 	// --- Test de copie ---
 	std::cout << "\n--- TESTING COPY AND ASSIGNMENT ---" << std::endl;
-	ClapTrap trap("TR4P"); // Crée un deuxième ClapTrap
+	ClapTrap	trap("TR4P"); // Crée un deuxième ClapTrap
 	
 	trap.attack("Skag");
 	
-	ClapTrap trap_copy(trap); // Crée une copie de "TR4P"
+	ClapTrap	trap_copy(trap); // Crée une copie de "TR4P"
 	trap_copy.attack("a big Skag");
 	
-	ClapTrap trap_assign("TMP");
+	ClapTrap	trap_assign("TMP");
 	trap_assign = trap; // Assigne les valeurs de "TR4P" à "TMP"
 	trap_assign.attack("a very big Skag");
 
