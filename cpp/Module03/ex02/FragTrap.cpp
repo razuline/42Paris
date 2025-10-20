@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/17 16:03:36 by erazumov          #+#    #+#             */
-/*   Updated: 2025/10/17 16:36:16 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/10/18 14:53:52 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,17 +68,24 @@ FragTrap::attack(const std::string &target)
 void
 FragTrap::takeDamage(unsigned int amount)
 {
-	if (this->_hit > 0)
-	{
-		this->_hit -= amount;
-		if (this->_hit < 0)
-			this->_hit = 0;
-		std::cout << "FragTrap " << this->_name << " takes "
-				  << amount << " points of damage!" << std::endl;
-	}
-	else
+	if (this->_hit == 0) // Vérifier s'il est déjà mort
 	{
 		std::cout << "FragTrap " << this->_name << " is already destroyed."
+				  << std::endl;
+		return;
+	}
+	// Vérifier si les dégâts sont supérieurs aux points de vie
+	if (amount >= this->_hit)
+		this->_hit = 0; // Mettre à 0 pour éviter l'underflow
+	else
+		this->_hit -= amount; // On peut soustraire sans risque
+
+	std::cout << "FragTrap " << this->_name << " takes "
+			  << amount << " points of damage!" << std::endl;
+
+	if (this->_hit == 0) // Vérifier s'il est déjà mort
+	{
+		std::cout << "FragTrap " << this->_name << " has been destroyed!"
 				  << std::endl;
 	}
 }

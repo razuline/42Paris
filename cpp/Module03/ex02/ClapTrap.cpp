@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/15 13:54:43 by erazumov          #+#    #+#             */
-/*   Updated: 2025/10/17 12:00:18 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/10/18 15:01:49 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ ClapTrap::ClapTrap(std::string name) :
 
 ClapTrap::ClapTrap(const ClapTrap &copy)
 {
-	*this = copy;
+	(void)copy;
 	std::cout << "ClapTrap " << this->_name << " has been cloned!"
 				<< std::endl;
 }
