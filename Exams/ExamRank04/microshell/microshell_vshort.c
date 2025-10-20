@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/03 14:09:16 by erazumov          #+#    #+#             */
-/*   Updated: 2025/10/03 15:47:57 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/10/20 20:42:46 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,55 +43,68 @@ void ft_execute(char **av, int i, int tmp_fd, char **env)
 
 int	main(int ac, char **av, char **env)
 {
-	int	fd[2];
-	(void)ac;	// is needed in exam, because the exam tester compiles with -Wall -Wextra -Werror
+	(void)ac;
+	int		i = 1; // On commence à l'index 1, après le nom du programme
+	int		fd[2];
+	int		tmp_fd = dup(STDIN_FILENO); // On sauvegarde l'entrée standard
 
-	int	i = 0;
-	int	tmp_fd = dup(STDIN_FILENO);
-	while (av[i] && av[i + 1]) //check if the end is reached
+	if (ac > 1) // On vérifie qu'il y a bien des commandes à exécuter
 	{
-		av = &av[i + 1];	//the new argv start after the ; or |
-		i = 0;
-		//count until we have all informations to execute the next child;
-		while (av[i] && strcmp(av[i], ";") && strcmp(av[i], "|"))
-			i++;
-		if (strcmp(av[0], "cd") == 0) //cd
+		while (av[i]) // On boucle tant qu'il y a des arguments
 		{
-			if (i != 2)
-				ft_putstr_fd2("error: cd: bad arguments", NULL);
-			else if (chdir(av[1]) != 0)
-				ft_putstr_fd2("error: cd: cannot change directory to ", av[1]);
-		}
-		else if (i != 0 && (av[i] == NULL || strcmp(av[i], ";") == 0)) //exec in stdout
-		{
-			if (fork() == 0)
-				ft_execute(av, i, tmp_fd, env);
-			else
+			char	**cmd_start = &av[i]; // cmd_start pointe sur le début de la commande actuelle
+			int		j = 0;
+
+			// On cherche la fin de la commande (un séparateur ou la fin du tableau)
+			while (cmd_start[j] && strcmp(cmd_start[j], ";") && strcmp(cmd_start[j], "|"))
+				j++;
+
+			if (j > 0) // On vérifie que la commande n'est pas vide (ex: ";;")
 			{
-				close(tmp_fd);
-				while(waitpid(-1, NULL, WUNTRACED) != -1)
-					;
-				tmp_fd = dup(STDIN_FILENO);
+				if (strcmp(cmd_start[0], "cd") == 0)
+				{
+					if (j != 2)
+						ft_putstr_fd2("error: cd: bad arguments", NULL);
+					else if (chdir(cmd_start[1]) != 0)
+						ft_putstr_fd2("error: cd: cannot change directory to ", cmd_start[1]);
+				}
+				// Si c'est une commande simple (terminée par ; ou la fin)
+				else if (cmd_start[j] == NULL || strcmp(cmd_start[j], ";") == 0)
+				{
+					if (fork() == 0)
+						ft_execute(cmd_start, j, tmp_fd, env);
+					else
+					{
+						close(tmp_fd);
+						while(waitpid(-1, NULL, WUNTRACED) != -1);
+						tmp_fd = dup(STDIN_FILENO);
+					}
+				}
+				// Si c'est une commande pipée
+				else if (strcmp(cmd_start[j], "|") == 0)
+				{
+					pipe(fd);
+					if (fork() == 0)
+					{
+						dup2(fd[1], STDOUT_FILENO);
+						close(fd[0]);
+						close(fd[1]);
+						ft_execute(cmd_start, j, tmp_fd, env);
+					}
+					else
+					{
+						close(fd[1]);
+						close(tmp_fd);
+						tmp_fd = fd[0];
+					}
+				}
 			}
+			i += j; // On avance notre index principal `i` à la commande suivante
+			if (av[i]) // LA CORRECTION FINALE EST ICI
+				i++;
 		}
-		else if(i != 0 && strcmp(av[i], "|") == 0) //pipe
-		{
-			pipe(fd);
-			if (fork() == 0)
-			{
-				dup2(fd[1], STDOUT_FILENO);
-				close(fd[0]);
-				close(fd[1]);
-				ft_execute(av, i, tmp_fd, env);
-			}
-			else
-			{
-				close(fd[1]);
-				close(tmp_fd);
-				tmp_fd = fd[0];
-			}
-		}
+		close(tmp_fd); // Fermer le dernier descripteur
 	}
-	close(tmp_fd);
+	// On ferme le dernier descripteur de fichier avant de quitter
 	return (0);
 }
