@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/03 14:09:16 by erazumov          #+#    #+#             */
-/*   Updated: 2025/10/20 20:42:46 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/10/21 13:54:40 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,7 +76,8 @@ int	main(int ac, char **av, char **env)
 					else
 					{
 						close(tmp_fd);
-						while(waitpid(-1, NULL, WUNTRACED) != -1);
+						while (waitpid(-1, NULL, WUNTRACED) != -1)
+							;
 						tmp_fd = dup(STDIN_FILENO);
 					}
 				}
