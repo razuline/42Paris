@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/03 14:09:16 by erazumov          #+#    #+#             */
-/*   Updated: 2025/10/21 16:21:52 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/10/22 14:26:11 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,7 +101,7 @@ int	main(int ac, char **av, char **env)
 				}
 			}
 			i += j; // On avance notre index principal `i` à la commande suivante
-			if (av[i]) // LA CORRECTION FINALE EST ICI
+			if (av[i])
 				i++;
 		}
 		close(tmp_fd); // Fermer le dernier descripteur
