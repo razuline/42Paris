@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/03 14:09:16 by erazumov          #+#    #+#             */
-/*   Updated: 2025/10/22 14:26:11 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/10/22 14:51:23 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,6 @@ void ft_exec(char **av, int i, int tmp_fd, char **env)
 
 int	main(int ac, char **av, char **env)
 {
-	(void)ac;
 	int		i = 1; // On commence à l'index 1, après le nom du programme
 	int		fd[2];
 	int		tmp_fd = dup(STDIN_FILENO); // On sauvegarde l'entrée standard
