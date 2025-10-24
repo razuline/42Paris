@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/11 11:58:43 by erazumov          #+#    #+#             */
-/*   Updated: 2025/10/24 14:37:38 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/10/24 15:00:10 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ calculateSide(Point const p1, Point const p2, Point const test_point)
 
 	// Appliquer la formule mathématique en utilisant les opérateurs surchargés
 	// Formule : (x_test - x1) * (y2 - y1) - (y_test - y1) * (x2 - x1)
-	Fixed	result = (test_x - p1_x) * (p2_x - p1_y)
+	Fixed	result = (test_x - p1_x) * (p2_y - p1_y)
 					- (test_y - p1_y) * (p2_x - p1_x);
 
 	return result;
