@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 15:10:14 by erazumov          #+#    #+#             */
-/*   Updated: 2025/10/11 11:17:02 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/10/24 13:11:51 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ public:
 	Fixed(const Fixed &copy);
 	~Fixed(void);
 
+	// Getters & setters
 	int		getRawBits(void) const;
 	void	setRawBits(int const raw);
 
