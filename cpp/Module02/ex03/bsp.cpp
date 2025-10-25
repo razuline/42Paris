@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/11 11:58:43 by erazumov          #+#    #+#             */
-/*   Updated: 2025/10/24 15:00:10 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/10/25 16:09:49 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,21 +35,21 @@ bool
 bsp(Point const a, Point const b, Point const c, Point const point)
 {
 	// Calcul pour l'arête a -> b
-	Fixed	side1 = calculateSide(a, b, point);
+	Fixed	sideAB = calculateSide(a, b, point);
 	// Calcul pour l'arête b -> c
-	Fixed	side2 = calculateSide(b, c, point);
+	Fixed	sideBC = calculateSide(b, c, point);
 	// Calcul pour l'arête c -> a
-	Fixed	side3 = calculateSide(c, a, point);
+	Fixed	sideAC = calculateSide(c, a, point);
 
 	// Cas 1 : Tous les résultats sont positifs
-	bool	all_positive = (side1 > Fixed(0)
-							&& side2 > Fixed(0)
-							&& side3 > Fixed(0));
+	bool	all_positive = (sideAB > Fixed(0)
+							&& sideBC > Fixed(0)
+							&& sideAC > Fixed(0));
 
 	// Cas 2 : Tous les résultats sont négatifs
-	bool	all_negative = (side1 < Fixed(0)
-							&& side2 < Fixed(0)
-							&& side3 < Fixed(0));
+	bool	all_negative = (sideAB < Fixed(0)
+							&& sideBC < Fixed(0)
+							&& sideAC < Fixed(0));
 
 	// Si l'un des deux cas est vrai, le point est à l'intérieur
 	if (all_positive || all_negative)
