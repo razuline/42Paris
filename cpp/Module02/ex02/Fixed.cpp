@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 15:09:35 by erazumov          #+#    #+#             */
-/*   Updated: 2025/10/11 11:09:33 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/10/25 17:40:00 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -136,7 +136,7 @@ Fixed::operator-(const Fixed &other) const
 	return Fixed(this->toFloat() - other.toFloat());
 }
 
-// Multiplier deux nombres décalés de 8 bits, le résultat est décalé de 16 bits.
+// Multiplier deux nombres décalés de 8 bits, le résultat est décalé de 16 bits
 Fixed
 Fixed::operator*(const Fixed &other) const
 {
@@ -190,7 +190,7 @@ Fixed
 }
 
 const Fixed
-&Fixed::min(const Fixed &a, const Fixed &b) 
+&Fixed::min(const Fixed &a, const Fixed &b)
 {
 	if (a < b)
 		return a;
