@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/29 15:23:57 by erazumov          #+#    #+#             */
-/*   Updated: 2025/10/29 15:25:11 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/10/29 16:07:23 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,10 +15,20 @@
 
 # include <iostream>
 # include <string>
+# include "ClapTrap.hpp"
+# include "ScavTrap.hpp"
+# include "FragTrap.hpp"
 
-class DiamondTrap
+class DiamondTrap : public ScavTrap, public FragTrap
 {
-	
+private:
+	std::string		_name;
+
+public:
+	DiamondTrap(std::string name);
+	DiamondTrap(const DiamondTrap &copy);
+	DiamondTrap &operator=(const DiamondTrap &other);
+	~DiamondTrap(void);
 };
 
 #endif
