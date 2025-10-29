@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/15 15:41:49 by erazumov          #+#    #+#             */
-/*   Updated: 2025/10/17 15:39:51 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/10/29 14:53:52 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ int	main(void)
 {
 	// --- Test 1 : Création et actions basiques ---
 	std::cout << "--- CREATING ROBOTS ---" << std::endl;
-	FlagTrap	scav("SC4V");
+	ScavTrap	scav("SC4V");
 	std::cout << std::endl;
 
 	// --- Test des valeurs initiales ---
@@ -38,20 +38,20 @@ int	main(void)
 
 	 // --- Test 2 : Limites ---
 	std::cout << "\n--- TESTING NO-LIFE SCENARIO ---" << std::endl;
-	scav.takeDamage(5);          // Il subit 5 points de dégâts (il n'a plus)
-	scav.attack("another Bandit"); // Ne devrait pas pouvoir attaquer
-	scav.beRepaired(10);         // Ne devrait pas pouvoir se réparer
+	scav.takeDamage(100);          // Il subit assez de dégâts pour être à 0 HP
+	scav.attack("another Bandit"); // Il ne devrait plus pouvoir attaquer
+	scav.beRepaired(10);         // Et ne devrait plus pouvoir se réparer
 
 	// --- Test 3 : Copie ---
 	std::cout << "\n--- TESTING COPY AND ASSIGNMENT ---" << std::endl;
-	FlagTrap sctrap("SC4V-E");
+	ScavTrap sctrap("SC4V-E");
 	
 	sctrap.attack("Skag");
 	
-	FlagTrap scav_copy(scav);
+	ScavTrap scav_copy(scav);
 	scav_copy.attack("a big Skag");
 	
-	FlagTrap scav_assign("TMP");
+	ScavTrap scav_assign("TMP");
 	scav_assign = scav;
 	scav_assign.attack("a very big Skag");
 

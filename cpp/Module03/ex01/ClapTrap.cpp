@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/15 13:54:43 by erazumov          #+#    #+#             */
-/*   Updated: 2025/10/17 12:00:18 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/10/29 14:50:36 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,10 +21,11 @@ ClapTrap::ClapTrap(std::string name) :
 				<< std::endl;
 }
 
-ClapTrap::ClapTrap(const ClapTrap &copy)
+ClapTrap::ClapTrap(const ClapTrap &copy) :
+	_name(copy._name), _hit(copy._hit), _energy(copy._energy),
+	_damage(copy._damage)
 {
-	*this = copy;
-	std::cout << "ClapTrap " << this->_name << " has been cloned!"
+	std::cout << "ClapTrap " << this->_name << " copy constructor called!"
 				<< std::endl;
 }
 
@@ -70,8 +71,6 @@ ClapTrap::getAttackDamage(void) const
 
 /* ------------------------------- FUNCTIONS -------------------------------- */
 
-// Logique d'attaque : vérifie l'énergie/vie, dépense 1 énergie,
-// affiche un message.
 void
 ClapTrap::attack(const std::string &target)
 {
@@ -89,7 +88,6 @@ ClapTrap::attack(const std::string &target)
 	}
 }
 
-// Réduit les points de vie et affiche le résultat.
 void
 ClapTrap::takeDamage(unsigned int amount)
 {
@@ -97,25 +95,14 @@ ClapTrap::takeDamage(unsigned int amount)
 		this->_hit -= amount;
 	else
 		this->_hit = 0; // Pour éviter des points de vie négatifs
-	std::cout << "ClapTrap " << this->_name << " takes "
-				<< amount << " points of damage!" << std::endl;
 }
 
-// Logique de réparation : vérifie l'énergie/vie, dépense 1 énergie,
-// regagne de la vie.
 void
 ClapTrap::beRepaired(unsigned int amount)
 {
 	if (this->_hit > 0 && this->_energy > 0)
 	{
-		_energy--;
-		std::cout << "ClapTrap " << this->_name << " repairs itself, gaining "
-					<< amount << " hit points back!"
-					<< std::endl;
-	}
-	else
-	{
-		std::cout << "ClapTrap " << this->_name << " can't repair, not enough "
-					"energy or hit points." << std::endl;
+		this->_energy--;
+		this->_hit += amount;
 	}
 }

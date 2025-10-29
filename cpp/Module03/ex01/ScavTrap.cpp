@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/16 14:26:13 by erazumov          #+#    #+#             */
-/*   Updated: 2025/10/17 16:09:40 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/10/29 14:58:20 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ ScavTrap::ScavTrap(std::string name) : ClapTrap(name)
 
 ScavTrap::ScavTrap(const ScavTrap &copy) : ClapTrap(copy)
 {
-	std::cout << "ScavTrap " << this->_name << " has been cloned!" << std::endl;
+	std::cout << "A ScavTrap has been created by copy!" << std::endl;
 }
 
 ScavTrap
@@ -46,8 +46,6 @@ ScavTrap::~ScavTrap(void)
 
 /* ------------------------------- FUNCTIONS -------------------------------- */
 
-// Logique d'attaque : vérifie l'énergie/vie, dépense 1 énergie,
-// affiche un message.
 void
 ScavTrap::attack(const std::string &target)
 {
@@ -70,24 +68,24 @@ ScavTrap::takeDamage(unsigned int amount)
 {
 	std::cout << "ScavTrap " << this->_name << " takes "
 				<< amount << " points of damage!" << std::endl;
+
+	// Appeler à la méthode de la classe mère
+	ClapTrap::takeDamage(amount);
 }
 
-// Logique de réparation : vérifie l'énergie/vie, dépense 1 énergie,
-// regagne de la vie.
 void
 ScavTrap::beRepaired(unsigned int amount)
 {
 	if (this->_hit > 0 && this->_energy > 0)
 	{
-		_energy--;
-		std::cout << "ScavTrap " << this->_name << " repairs itself, gaining "
-					<< amount << " hit points back!"
+		std::cout << "ScavTrap " << this->_name << " initiates repair protocol!"
 					<< std::endl;
+		ClapTrap::beRepaired(amount);
 	}
 	else
 	{
-		std::cout << "ScavTrap " << this->_name << " can't repair, not enough "
-					"energy or hit points." << std::endl;
+		std::cout << "ScavTrap " << this->_name
+					<< " repair systems are offline." << std::endl;
 	}
 }
 
