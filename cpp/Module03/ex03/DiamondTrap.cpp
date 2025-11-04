@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/29 15:23:24 by erazumov          #+#    #+#             */
-/*   Updated: 2025/11/04 12:24:50 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/11/04 14:17:16 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,19 +39,46 @@ DiamondTrap::DiamondTrap(const DiamondTrap &copy) :
 DiamondTrap
 &DiamondTrap::operator=(const DiamondTrap &other)
 {
-	std::cout << "ClapTrap assignment operator called" << std::endl;
+	std::cout << "DiamondTrap assignment operator called" << std::endl;
 	if (this != &other) // Protection contre l'auto-assignation
 	{
+		// Appeler les opérateurs d'affectation des parents
+		ClapTrap::operator=(other);
+		// Pas besoin d'appeler ScavTrap et FragTrap car ils ne font
+		// qu'appeler ClapTrap::operator= aussi.
 		this->_name = other._name;
-		this->_hit = other._hit;
-		this->_energy = other._energy;
-		this->_damage = other._damage;
 	}
 	return *this;
 }
 
 DiamondTrap::~DiamondTrap(void)
 {
-	std::cout << "ClapTrap " << this->_name << " is destroyed!"
+	std::cout << "DiamondTrap " << this->_name << " is destroyed!" << std::endl;
+}
+
+/* ------------------------------- FUNCTIONS -------------------------------- */
+
+void
+DiamondTrap::attack(const std::string &target)
+{
+	ScavTrap::attack(target);
+}
+
+void
+DiamondTrap::takeDamage(unsigned int amount)
+{
+	FragTrap::takeDamage(amount);
+}
+void
+DiamondTrap::beRepaired(unsigned int amount)
+{
+	ScavTrap::beRepaired(amount);
+}
+
+void
+DiamondTrap::whoAmI(void)
+{
+	std::cout << "My DiamondTrap name is" << this->_name
+				<< " and my ClapTrap name is " << ClapTrap::_name
 				<< std::endl;
 }

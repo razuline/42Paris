@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/29 15:23:57 by erazumov          #+#    #+#             */
-/*   Updated: 2025/10/29 16:07:23 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/11/04 14:10:44 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,11 @@ public:
 	DiamondTrap(const DiamondTrap &copy);
 	DiamondTrap &operator=(const DiamondTrap &other);
 	~DiamondTrap(void);
+
+	void	attack(const std::string &target);
+	void	takeDamage(unsigned int amount);
+	void	beRepaired(unsigned int amount);
+	void	whoAmI(void);
 };
 
 #endif

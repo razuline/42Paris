@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/17 16:03:36 by erazumov          #+#    #+#             */
-/*   Updated: 2025/10/29 15:11:26 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/11/04 14:17:45 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,6 +108,6 @@ FragTrap::beRepaired(unsigned int amount)
 void
 FragTrap::highFivesGuys(void)
 {
-	std::cout << "FragTrap " << this->_name 
+	std::cout << "FragTrap " << this->_name
 			  << " says: 'High five, guys! Anyone?' 🙌" << std::endl;
 }

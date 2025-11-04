@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/16 14:26:13 by erazumov          #+#    #+#             */
-/*   Updated: 2025/10/29 14:58:36 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/11/04 14:17:24 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,6 +94,6 @@ ScavTrap::beRepaired(unsigned int amount)
 void
 ScavTrap::guardGate(void)
 {
-	std::cout << "ScavTrap " << this->_name << "  is now in Gate keeper mode!"
+	std::cout << "ScavTrap " << this->_name << " is now in Gate keeper mode!"
 				<< std::endl;
 }
