@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/29 15:23:24 by erazumov          #+#    #+#             */
-/*   Updated: 2025/10/29 16:22:20 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/11/04 12:24:50 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,11 +28,12 @@ DiamondTrap::DiamondTrap(std::string name) :
 }
 
 DiamondTrap::DiamondTrap(const DiamondTrap &copy) :
-	_name(copy._name), FragTrap::_hit(copy._hit), _energy(copy._energy),
-	_damage(copy._damage)
+		ClapTrap(copy), // Appelle le constructeur de copie de ClapTrap
+		ScavTrap(copy), // de ScavTrap
+		FragTrap(copy), // de FragTrap
+		_name(copy._name) // Initialise le membre propre à DiamondTrap
 {
-	std::cout << "ClapTrap " << this->_name << " copy constructor called!"
-				<< std::endl;
+	std::cout << "DiamondTrap copy constructor called!" << std::endl;
 }
 
 DiamondTrap
