@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 12:28:32 by erazumov          #+#    #+#             */
-/*   Updated: 2025/11/24 19:36:23 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/11/24 22:44:31 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,14 +14,14 @@
 
 /* ------------------------- ORTHODOX CANONICAL FORM ------------------------ */
 
-Dog::Dog(void) : Animal()
+Dog::Dog(void) : A_Animal()
 {
 	this->_type = "Dog";
 	this->_brain = new Brain();
 	std::cout << "Dog constructor called..." << std::endl;
 }
 
-Dog::Dog(const Dog &copy) : Animal(copy)
+Dog::Dog(const Dog &copy) : A_Animal(copy)
 {
 	std::cout << "Dog copy constructor called..." << std::endl;
 	this->_brain = new Brain(*copy._brain);
@@ -33,7 +33,7 @@ Dog
 	std::cout << "Dog assignment operator called..." << std::endl;
 	if (this != &other)
 	{
-		Animal::operator=(other);
+		A_Animal::operator=(other);
 		delete this->_brain;
 		this->_brain = new Brain(*other._brain);
 	}

@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 11:54:59 by erazumov          #+#    #+#             */
-/*   Updated: 2025/11/24 19:35:14 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/11/24 22:44:05 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 /* ------------------------- ORTHODOX CANONICAL FORM ------------------------ */
 
 // Default Constructor
-Cat::Cat(void) : Animal()
+Cat::Cat(void) : A_Animal()
 {
 	this->_type = "Cat";
 	this->_brain = new Brain(); // Allocate a NEW Brain for this specific Cat
@@ -23,7 +23,7 @@ Cat::Cat(void) : Animal()
 }
 
 // Copy Constructor (Deep Copy)
-Cat::Cat(const Cat &copy) : Animal(copy)
+Cat::Cat(const Cat &copy) : A_Animal(copy)
 {
 	std::cout << "Cat copy constructor called..." << std::endl;
 	// Instead of pointing to src._brain (Shallow Copy),
@@ -39,7 +39,7 @@ Cat
 	if (this != &other)
 	{
 		// 1. Copy the base class parts (type)
-		Animal::operator=(other);
+		A_Animal::operator=(other);
 		// 2. Delete the OLD brain to prevent memory leak
 		delete this->_brain;
 		// 3. Allocate a NEW brain and copy data from source

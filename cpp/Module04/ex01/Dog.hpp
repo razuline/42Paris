@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 12:26:54 by erazumov          #+#    #+#             */
-/*   Updated: 2025/11/24 22:23:53 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/11/24 22:44:37 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,10 +16,10 @@
 # include <iostream>
 # include <string>
 
-# include "Animal.hpp"
+# include "A_Animal.hpp"
 # include "Brain.hpp"
 
-class Dog : public Animal
+class Dog : public A_Animal
 {
 private:
 	Brain	*_brain;

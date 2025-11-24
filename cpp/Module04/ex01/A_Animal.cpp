@@ -1,47 +1,47 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Animal.cpp                                         :+:      :+:    :+:   */
+/*   A_Animal.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 11:12:37 by erazumov          #+#    #+#             */
-/*   Updated: 2025/11/24 19:25:54 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/11/24 22:42:18 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Animal.hpp"
+#include "A_Animal.hpp"
 
 /* ------------------------- ORTHODOX CANONICAL FORM ------------------------ */
 
-Animal::Animal(void)
+A_Animal::A_Animal(void)
 {
-	std::cout << "Animal constructor called..." << std::endl;
+	std::cout << "A_Animal constructor called..." << std::endl;
 }
 
-Animal::Animal(const Animal &copy) : _type(copy._type)
+A_Animal::A_Animal(const A_Animal &copy) : _type(copy._type)
 {
-	std::cout << "Animal copy constructor called..." << std::endl;
+	std::cout << "A_Animal copy constructor called..." << std::endl;
 }
 
-Animal
-&Animal::operator=(const Animal &other)
+A_Animal
+&A_Animal::operator=(const A_Animal &other)
 {
 	if (this != &other)
 		this->_type = other._type;
-	std::cout << "Animal assignment operator called..." << std::endl;
+	std::cout << "A_Animal assignment operator called..." << std::endl;
 	return *this;
 }
 
-Animal::~Animal(void)
+A_Animal::~A_Animal(void)
 {
-	std::cout << "Animal destructor called..." << std::endl;
+	std::cout << "A_Animal destructor called..." << std::endl;
 }
 
 /* --------------------------- SETTERS & GETTERS ---------------------------- */
 
 std::string
-Animal::getType(void) const
+A_Animal::getType(void) const
 {
 	return _type;
 }
@@ -49,7 +49,7 @@ Animal::getType(void) const
 /* ------------------------------- FUNCTIONS -------------------------------- */
 
 void
-Animal::makeSound(void) const
+A_Animal::makeSound(void) const
 {
 	std::cout << "The animals make sounds:" << std::endl;
 }
