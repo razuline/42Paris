@@ -1,36 +1,28 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Animal.hpp                                         :+:      :+:    :+:   */
+/*   WrongCat.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/11/24 10:51:36 by erazumov          #+#    #+#             */
-/*   Updated: 2025/11/24 13:19:38 by erazumov         ###   ########.fr       */
+/*   Created: 2025/11/24 13:42:06 by erazumov          #+#    #+#             */
+/*   Updated: 2025/11/24 13:43:07 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef ANIMAL_HPP
-# define ANIMAL_HPP
+#ifndef WRONGCAT_HPP
+# define WRONGCAT_HPP
 
-# include <iostream>
-# include <string>
+# include "WrongAnimal.hpp"
 
-class Animal
+class WrongCat : public WrongAnimal
 {
-protected:
-	std::string	_type;
-
 public:
-	Animal(void);
-	Animal &operator=(const Animal &other);
-	virtual ~Animal(void);
-
-	// --- Getters ---
-	std::string		getType(void) const;
+	WrongCat(void);
+	~WrongCat(void);
 
 	// --- Member Functions ---
-	virtual void	makeSound(void) const = 0; // Une méthode pure
+	void makeSound(void) const;
 };
 
 #endif

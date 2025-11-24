@@ -1,42 +1,33 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Cat.cpp                                            :+:      :+:    :+:   */
+/*   WrongCat.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/11/24 11:54:59 by erazumov          #+#    #+#             */
-/*   Updated: 2025/11/24 13:26:29 by erazumov         ###   ########.fr       */
+/*   Created: 2025/11/24 13:43:14 by erazumov          #+#    #+#             */
+/*   Updated: 2025/11/24 13:50:03 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Cat.hpp"
+#include "WrongCat.hpp"
 
 /* ------------------------- ORTHODOX CANONICAL FORM ------------------------ */
 
-Cat::Cat(void)
+WrongCat::WrongCat(void)
 {
-	std::cout << "Cat is here!" << std::endl;
+	std::cout << "WrongCat is here!" << std::endl;
 }
 
-Cat
-&Cat::operator=(const Cat &other)
+WrongCat::~WrongCat(void)
 {
-	if (this != &other)
-		Animal::operator=(other);
-	return *this;
-	std::cout << "Cat assignment operator called." << std::endl;
-}
-
-Cat::~Cat(void)
-{
-	std::cout << "Cat run out!" << std::endl;
+	std::cout << "WrongCat run out!" << std::endl;
 }
 
 /* ------------------------------- FUNCTIONS -------------------------------- */
 
 void
-Cat::makeSound(void) const
+WrongCat::makeSound(void) const
 {
-	std::cout << "The cat says : meow meow" << std::endl;
+	std::cout << "Meow??? (but wrongly)" << std::endl;
 }
