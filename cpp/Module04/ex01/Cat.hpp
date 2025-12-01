@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/24 11:23:26 by erazumov          #+#    #+#             */
-/*   Updated: 2025/11/24 22:43:48 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/12/01 13:34:00 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,10 +16,10 @@
 # include <iostream>
 # include <string>
 
-# include "A_Animal.hpp"
+# include "AAnimal.hpp"
 # include "Brain.hpp"
 
-class Cat : public A_Animal
+class Cat : public AAnimal
 {
 private:
 	// Pointer to Brain. Must be allocated with 'new' and freed with 'delete'.
