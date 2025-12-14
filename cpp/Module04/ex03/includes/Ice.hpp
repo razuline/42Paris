@@ -1,40 +1,35 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Dog.hpp                                            :+:      :+:    :+:   */
+/*   Ice.hpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/11/24 12:26:54 by erazumov          #+#    #+#             */
-/*   Updated: 2025/12/01 13:34:27 by erazumov         ###   ########.fr       */
+/*   Created: 2025/12/01 13:42:47 by erazumov          #+#    #+#             */
+/*   Updated: 2025/12/01 14:10:13 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef DOG_HPP
-# define DOG_HPP
+#ifndef ICE_HPP
+# define ICE_HPP
 
 # include <iostream>
 # include <string>
 
-# include "AAnimal.hpp"
-# include "Brain.hpp"
+# include "AMateria.hpp"
+# include "ICharacter.hpp"
 
-class Dog : public AAnimal
+class Ice : public AMateria
 {
-private:
-	Brain	*_brain;
-
 public:
-	Dog(void);
-	Dog(const Dog &copy);
-	Dog &operator=(const Dog &other);
-	virtual ~Dog(void);
+	Ice();
+	Ice(const Ice &copy);
+	Ice &operator=(const Ice &other);
+	virtual ~Ice();
 
 	// --- Member Functions ---
-	virtual void	makeSound(void) const;
-
-	// Helper to test deep copy
-	Brain	*getBrain() const { return _brain; }
+	virtual			AMateria *clone() const;
+	virtual void	use(ICharacter& target);
 };
 
 #endif

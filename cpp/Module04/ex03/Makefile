@@ -6,22 +6,27 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/11/04 16:31:43 by erazumov          #+#    #+#              #
-#    Updated: 2025/11/30 13:23:41 by erazumov         ###   ########.fr        #
+#    Updated: 2025/12/01 14:40:21 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-NAME = Polymorphism
+NAME = Interfaces
 
 CXX = c++
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98
+RM = rm -f
 
-SRCS = main.cpp \
-	   AMateria.cpp \
-	   Ice.cpp \
-	   Cure.cpp \
-	   .cpp
+SRC_DIR = srcs
+OBJ_DIR = objs
 
-OBJS = $(SRCS:.cpp=.o)
+SRC_FILES = srcs/main.cpp \
+			srcs/AMateria.cpp \
+			srcs/Ice.cpp \
+			srcs/Cure.cpp \
+			#srcs/.cpp
+
+OBJ_NAMES = $(notdir $(SRC_FILES:.c=.o))
+OBJS = $(addprefix $(OBJ_DIR)/, $(OBJ_NAMES))
 
 # Colors
 Y = \033[33m
@@ -34,22 +39,26 @@ CUT = \033[K
 
 all: $(NAME)
 
-%.o: %.cpp
-	@echo "$(Y)Compiling [$<]...$(X)"
-	@$(CXX) $(CXXFLAGS) -c $< -o $@
-	@printf "$(UP)$(CUT)"
-
 $(NAME): $(OBJS)
 	@echo "$(Y)📁 Compiling object files [$(NAME)]...$(X)"
 	@$(CXX) $(CXXFLAGS) $(OBJS) -o $(NAME) 
 	@echo "$(G)✅ Finished [$(NAME)]$(X)"
 
+$(OBJ_DIR)/%.o: %.c | $(OBJ_DIR)
+	@echo "$(Y)Compiling [$<]...$(X)"
+	@$(CXX) $(CXXFLAGS) -Iincludes -c $< -o $@
+	@printf "$(UP)$(CUT)"
+
+$(OBJ_DIR):
+	@mkdir -p $(OBJ_DIR)
+	@echo "$(B)📁 Created object directory: $(OBJ_DIR)$(X)"
+
 clean:
-	@rm -f $(OBJS)
-	@echo "$(R)🧹 Object files removed [$(OBJS)]$(X)"
+	@$(RM) -r $(OBJ_DIR)
+	@echo "$(R)🧹 Object files removed [$(OBJ_DIR)]$(X)"
 
 fclean: clean
-	@rm -f $(NAME)
+	@$(RM) $(NAME)
 	@echo "$(R)🗑️  Executables removed [$(NAME)]$(X)"
 
 re: fclean all

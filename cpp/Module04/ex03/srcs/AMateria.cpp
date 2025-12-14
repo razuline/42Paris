@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/30 13:29:25 by erazumov          #+#    #+#             */
-/*   Updated: 2025/11/30 13:30:44 by erazumov         ###   ########.fr       */
+/*   Updated: 2025/12/01 14:37:53 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,10 @@ AMateria::AMateria(const AMateria& copy) : _type(copy._type)
 AMateria
 &AMateria::operator=(const AMateria &other)
 {
-	(void)other;
+	if (this != &other)
+		// Subject says copying type doesn't really make sense,
+			// but we keep interface consistent
+		this->_type = other._type;
 	return *this;
 }
 
@@ -44,6 +47,5 @@ std::string const
 void
 AMateria::use(ICharacter& target)
 {
-	(void)target;
-	// Par défaut, ça ne fait rien. Les enfants (Ice/Cure) feront le boulot.
+	(void)target; // Default implementation does nothing
 }

@@ -1,40 +1,35 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Dog.hpp                                            :+:      :+:    :+:   */
+/*   Character.hpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/11/24 12:26:54 by erazumov          #+#    #+#             */
-/*   Updated: 2025/12/01 13:34:27 by erazumov         ###   ########.fr       */
+/*   Created: 2025/12/01 14:44:41 by erazumov          #+#    #+#             */
+/*   Updated: 2025/12/01 14:45:24 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef DOG_HPP
-# define DOG_HPP
+#ifndef CHARACTER_HPP
+# define CHARACTER_HPP
 
-# include <iostream>
-# include <string>
+# include "ICharacter.hpp"
+# include "AMateria.hpp"
 
-# include "AAnimal.hpp"
-# include "Brain.hpp"
+class AMateria; // Forward declaration
 
-class Dog : public AAnimal
+class Character : public ICharacter
 {
-private:
-	Brain	*_brain;
-
 public:
-	Dog(void);
-	Dog(const Dog &copy);
-	Dog &operator=(const Dog &other);
-	virtual ~Dog(void);
+	virtual	~ICharacter();
+
+	// --- Getters ---
+	virtual std::string const	&getName() const = 0;
 
 	// --- Member Functions ---
-	virtual void	makeSound(void) const;
-
-	// Helper to test deep copy
-	Brain	*getBrain() const { return _brain; }
+	virtual void	equip(AMateria *m) = 0;
+	virtual void	unequip(int idx) = 0;
+	virtual void	use(int idx, ICharacter &target) = 0;
 };
 
 #endif
