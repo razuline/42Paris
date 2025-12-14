@@ -4,7 +4,7 @@ var g_my_login = 0;
 var g_rand_prev;
 var g_rand_repl = [];
 var g_eval_lvls;
-
+var g_logs_open = 0;
 
 function my_console_log(str)
 {
@@ -22,7 +22,7 @@ function hash_login(login)
 	else
 	    seed += 5 * login.charCodeAt(i) * i;
     }
-//    console.log("hash login : '"+login+"' -> "+seed);
+//    console.log("hash login: '"+login+"' -> "+seed);
     return (seed);
 }
 
@@ -117,10 +117,10 @@ function show_host(root, h)
     newelem.style.position = "absolute";
     newelem.style.top = (h['y']+h['ly'])+'px';
     newelem.style.left = (h['x']+h['lx'])+'px';
-    var label = '<table><tr><td>'+h['type']+' '+h['id']+': <i>'+h['name']+'</id></td></tr>';
+    var label = '<table><tr><td style="text-align:center;"><i>'+h['type']+'</i> '+h['id']+':<br /><b>'+h['name']+'</b></td></tr>';
     var str = '';
     routes.forEach(r => {if (h['id'] == r['hid']) { str += '<tr><td>'+get_route_info(r)+'</td></tr>\n'; r['h'] = h;}});
-    if (str != '') label += '<tr><td>Routes :</td></tr>\n'+str;
+    if (str != '') label += '<tr><td>Routes:</td></tr>\n'+str;
     label += '</table>';
     newelem.innerHTML = label;
     root.appendChild(newelem);
@@ -144,7 +144,7 @@ function get_route_info(r)
     if (r['route_edit'] == 'true') route_active = ''; else route_active = 'disabled';
     if (r['gate_edit'] == 'true') gate_active = ''; else gate_active = 'disabled';
     var routestr = '<input size=15 type=text id=route_'+r['rid']+' value="'+r['route']+'" '+route_active+'> =&gt; <input size=15 type=text id=gate_'+r['rid']+' value="'+r['gate']+'" '+gate_active+'>';
-//    my_console_log("add label route : ##"+routestr);
+//    my_console_log("add label route: ##"+routestr);
     return (routestr);
 }
 
@@ -180,7 +180,7 @@ function show_ifs(root, itf)
 	newelem.style.left = (itf['h']['x']+itf['dx'])+'px';
 	if (itf['ip_edit'] == 'true') ip_active = ''; else ip_active = 'disabled';
 	if (itf['mask_edit'] == 'true') mask_active = ''; else mask_active = 'disabled';
-	newelem.innerHTML = '<table class=if_tab><tr><td colspan=3 style="text-align:center;">interface '+itf['if']+'</td></tr><tr><td>IP</td><td> : </td><td><input size=15 type=text id=ip_'+itf['if']+' value="'+itf['ip']+'" '+ip_active+'><td></tr><tr><td>Mask</td><td> : </td><td><input size=15 type=text id=mask_'+itf['if']+' value="'+itf['mask']+'" '+mask_active+'></td></tr></table>';
+	newelem.innerHTML = '<table class=if_tab><tr><td colspan=3 style="text-align:center;"><i>interface</i> '+itf['if']+'</td></tr><tr><td>IP</td><td>: </td><td><input size=15 type=text id=ip_'+itf['if']+' value="'+itf['ip']+'" '+ip_active+'><td></tr><tr><td>Mask</td><td>: </td><td><input size=15 type=text id=mask_'+itf['if']+' value="'+itf['mask']+'" '+mask_active+'></td></tr></table>';
 	root.appendChild(newelem);
     }
 }
@@ -277,18 +277,19 @@ function dl_config()
 
 function show_goals(g)
 {
-    g_sim_logs += '******* Goal ID '+g['id']+' ********\n';
+    g_sim_logs += '<br /><b><i style="color:#2020C0;">******* Goal ID '+g['id']+' ********</i></b>\n';
     var div = document.getElementById("goals_id");
-    div.innerHTML += 'Goal '+g['id']+' : ';
+    div.innerHTML += 'Goal '+g['id']+': ';
 
     var obj = sim_goal(g);
     src_txt = g['src'];
     if (g['src_type'] == 'hid')
-	src_txt = g['h1']['name'];
+		src_txt = g['h1']['name'];
     dst_txt = g['dst'];
     if (g['dst_type'] == 'hid')
-	dst_txt = g['h2']['name'];
-    div.innerHTML += '<i>'+g['src_name']+" <b>"+src_txt+'</b></i> needs to communicate with <i>'+g['dst_name']+" <b>"+dst_txt+'</b></i> - Status : '+obj.text+'<br />\n';
+		dst_txt = g['h2']['name'];
+	status = obj.text.replace("OK", "<span style='color:green;'>OK</span>").replace("KO", "<span style='color:red;'>KO</span>");
+    div.innerHTML += '<i>'+g['src_name']+"</i> <b>"+src_txt+'</b> needs to communicate with <i>'+g['dst_name']+"</i> <b>"+dst_txt+'</b> - Status: '+status+'<br />\n';
     return (obj.status);
 }
 
@@ -296,26 +297,26 @@ function show_goals(g)
 function all_goals()
 {
     if (g_my_login != '')
-	g_sim_logs = '** generated for login "'+g_my_login+'" **\n';
+		g_sim_logs = '<center><b style="font-size:110%;">--- generated for login <i>'+g_my_login+'</i> ---</b></center>';
     else
-	g_sim_logs = '** evaluation mode round '+g_eval_lvls.length+'**\n';
-    document.getElementById("goals_id").innerHTML = '<h2>Level '+level+' : </h2>\n';
+		g_sim_logs = '<center><b style="font-size:110%;">--- evaluation mode round '+g_eval_lvls.length+' ---</b></center>';
+    document.getElementById("goals_id").innerHTML = '<h2>Level '+level+': </h2>\n';
     var nb = 0;
-    goals.forEach(elem => nb += show_goals(elem));
-    document.getElementById("goals_id").innerHTML += '<input type=button value="Check again" onclick="all_goals();"> <input type=button value="Get my config" onclick="dl_config();">';
+	goals.forEach(elem => nb += show_goals(elem));
+    document.getElementById("goals_id").innerHTML += '<input type=button value="Check again" onclick="all_goals();"> &nbsp; <input type=button value="Get my config" onclick="dl_config();">';
     if (nb == goals.length)
     {
-	if (g_my_login != '')
-	{
-	    if (level < 10)
-		document.getElementById("goals_id").innerHTML += " <input type=button value='Next level' onclick='window.location=\"level"+(level+1)+".html\";'>";
-	    else
-		document.getElementById("goals_id").innerHTML += " <input type=button value='Complete !' onclick='window.location=\"end.html\";'>";
-	}
-	else
-	{   // defense case
-	    document.getElementById("goals_id").innerHTML += " <input type=button value='Next' onclick='window.location=next_eval();'>";
-	}		
+		if (g_my_login != '')
+		{
+			if (level < 10)
+				document.getElementById("goals_id").innerHTML += " &nbsp; <input type=button value='Next level' onclick='window.location=\"level"+(level+1)+".html\";'>";
+			else
+				document.getElementById("goals_id").innerHTML += " &nbsp; <input type=button value='Complete!' onclick='window.location=\"end.html\";'>";
+		}
+		else
+		{   // defense case
+			document.getElementById("goals_id").innerHTML += " &nbsp; <input type=button value='Next' onclick='window.location=next_eval();'>";
+		}		
     }
     document.getElementById("logs_id").innerHTML = g_sim_logs.replace(/\n/g, '<br />');
 }
@@ -339,6 +340,19 @@ function load_board()
 
     goals.forEach(elem => prep_goals(elem));
     all_goals();
-    // only for very first time : don't show any log
-    document.getElementById("logs_id").innerHTML = 'Logs will be displayed here';
+    // only for very first time: don't show any log
+    document.getElementById("logs_id").innerHTML = '<center>Logs will be displayed here</center>';
+	document.getElementById("logs_button_id").onclick = () => {
+		if (g_logs_open == 0)
+		{
+			document.getElementById("logs_container_id").style.height = (window.innerHeight - 30)+"px";
+			var e = document.getElementById("logs_button_id").innerHTML = "⬇";
+		}
+		else
+		{
+			document.getElementById("logs_container_id").style.height = "200px";
+			var e = document.getElementById("logs_button_id").innerHTML = "⬆";
+		}
+		g_logs_open = 1-g_logs_open;
+	}
 }

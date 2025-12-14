@@ -6,14 +6,37 @@
   </head>
 
   <body>
-    <div class='intro_div'>
-      Welcome to 42's NetPractice !<br />
-      Please enter your intranet login (the moulinette will use it to know your own configuration) : <br />
-      <input id='input_login' type=text size=8><br />
-      Or leave empty for a defense : 3 random level from 6 to 10 will be offered to be solved in 15 minutes.<br />
-      <span class='footnote'>Note: the architecture and addresses used in the following levels are fictionnous and are not connected to real configurations.</span><br />
-      <input type=button value="Start !" onclick='save_login();'>
+    <div class='intro_div fade-in'>
+      <center>
+		<h2>Welcome to 42's NetPractice!</h2>
+		<img src="img/icon.png">
+	  </center>
+	  <div class='tabs'>
+		<div id="button_0" onclick='showTab(0);'>Training</div>
+		<div id="button_1" onclick='showTab(1);'>Evaluation</div>
+	  </div>
+
+	  <div id='tab_0' class="tab">
+		Enter your intranet login:<br />
+		<input id='input_login' type=text size=15 placeholder="login"><br />
+		<span class='footnote'>Moulinette will use it to know your own configuration.</span>
+		<br /><br />
+		<input type=button value="Start!" onclick='save_login();'>
+	  </div>
+	  <div id='tab_1' class="tab">
+		In this evaluation mode, three random levels from 6 to 10 will be offered to be solved in 15 minutes.
+		<br /><span class="footnote">&nbsp;</span><br />Good luck!
+		<br /><br />
+		<input type=button value="Start!" onclick='start_eval();'>
+	  </div>
+
+	  <br />
+      <span class='footnote'>Note: the architecture and addresses used in the following levels are fictitious and are not connected to real world configurations.</span>
     </div>
-    <script>document.getElementById('input_login').value = load_login();</script>
+	
+    <script>
+	  document.getElementById('input_login').value = load_login();
+	  showTab(0);
+	</script>
   </body>
 </html>

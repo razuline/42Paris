@@ -2,9 +2,9 @@
 var level = 6;
 
 var hosts = [
-    {'id':'A', 'type':'host', 'name':'webserv.non-real.com', 'geometry':'200x220+900+800', 'img':'host.png', 'labelpos':'0,200'},
-    {'id':'R', 'type':'router', 'name':'gate.non-real.com', 'geometry':'200x200+400+500', 'img':'router.png', 'labelpos':'-150,150'},
-    {'id':'I', 'type':'internet', 'name':'Internet', 'geometry':'200x240+100+200', 'img':'internet.png', 'labelpos':'-50,200'},
+    {'id':'A', 'type':'host', 'name':'webserv.non-real.com', 'geometry':'200x220+900+800', 'img':'host.png', 'labelpos':'0,220'},
+    {'id':'R', 'type':'router', 'name':'gate.non-real.com', 'geometry':'200x200+400+500', 'img':'router.png', 'labelpos':'-50,190'},
+    {'id':'I', 'type':'internet', 'name':'Internet', 'geometry':'200x240+100+200', 'img':'internet.png', 'labelpos':'-60,200'},
     {'id':'S', 'type':'switch', 'name':'sw-1.non-real.com', 'geometry':'150x150+800+500', 'img':'switch.png', 'labelpos':'80,110'}
 ];
 
@@ -17,9 +17,9 @@ var routes = [
 
 
 var ifs = [
-    {'if':'A1', 'hid':'A', 'ip':'[a].[b].[c].227', 'mask':'255.255.255.0', 'ip_edit':'false', 'mask_edit':'true', 'type':'std', 'pos':'0,-50'},
-    {'if':'R1', 'hid':'R', 'ip':'[a].[b].[c].254', 'mask':'255.255.255.128', 'ip_edit':'true', 'mask_edit':'false', 'type':'std', 'pos':'190,10'},
-    {'if':'R2', 'hid':'R', 'ip':'163.172.250.12', 'mask':'255.255.255.240', 'ip_edit':'false', 'mask_edit':'false', 'type':'std', 'pos':'-150,0'},
+    {'if':'A1', 'hid':'A', 'ip':'[a].[b].[c].227', 'mask':'255.255.255.0', 'ip_edit':'false', 'mask_edit':'true', 'type':'std', 'pos':'20,-70'},
+    {'if':'R1', 'hid':'R', 'ip':'[a].[b].[c].254', 'mask':'255.255.255.128', 'ip_edit':'true', 'mask_edit':'false', 'type':'std', 'pos':'160,15'},
+    {'if':'R2', 'hid':'R', 'ip':'163.172.250.12', 'mask':'255.255.255.240', 'ip_edit':'false', 'mask_edit':'false', 'type':'std', 'pos':'-130,15'},
     {'if':'S1', 'hid':'S', 'ip':'0.0.0.0', 'mask':'/32', 'ip_edit':'false', 'mask_edit':'false', 'pos':'0,0', 'type':'hidden'},
     {'if':'Somewhere on the Net', 'hid':'I', 'ip':'8.8.8.8', 'mask':'/16', 'ip_edit':'false', 'mask_edit':'false', 'pos':'0,-50', 'type':'hidden'},
     {'if':'I1', 'hid':'I', 'ip':'163.172.250.1', 'mask':'/28', 'ip_edit':'false', 'mask_edit':'false', 'pos':'0,0', 'type':'hidden'}

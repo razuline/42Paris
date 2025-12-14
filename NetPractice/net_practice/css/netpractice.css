@@ -4,15 +4,33 @@
 
 
 body {
-    font-family: sans-serif;
+    font-family: "Arial", sans-serif;
     padding:0px;
     margin:0px;
-    background-image:url("../img/site42-bg.gif");
+	background:	linear-gradient(rgba(204, 204, 204, 0.9), rgba(204, 204, 204, 0.9)), url("../img/site-bg.png");
 }
 
 
-div {
+* {
     box-sizing: border-box;
+}
+
+
+
+.fade-in {
+    opacity: 0;
+    animation: fadeInUp .6s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 
@@ -20,30 +38,102 @@ div {
 /* message box in index.html */
 
 .intro_div {
-    background-color: #00AAAA;
-    border: 5px solid #00AAAA;
-    border-radius: 5px;
-    padding:10px;
-    width:50%;
+    background-color: #EEEEEE;
+    border: 1px solid #BBBBBB;
+    border-radius: 10px;
+    padding:20px;
+    width:30%;
     margin:auto;
-    margin-top: 25%;
-    text-align: center;
+    margin-top: 15%;
+    /* text-align: left; */
+    box-shadow: 5px 5px 5px gray;
+
+}
+
+.intro_div img {
+	width: 25%;
+}
+
+.intro_div .tabs {
+	margin-top: 20px;
+	display: flex;
+	flex-direction: row;
+	width: 100%;
+	align-items: center;
+	border-bottom: 1px solid black;
+	margin-bottom: 2em;
+	gap: 10px;
+	padding-left: 5px;
+	padding-right: 5px;
+}
+
+.intro_div .tabs div {
+	flex: 1;
+	text-align: center;
+	padding: 10px;
+	border-top-left-radius: 5px;
+	border-top-right-radius: 5px;
+    box-shadow: 3px 0px 5px gray;
+	border: 0px solid white;
+	cursor: pointer;
 }
 
 
+.tab {
+	display: none;
+	align-items: center;
+	flex-direction: column;
+	text-align: center;
+}
+
+
+	
+.intro_div input {
+	padding: 10px;
+	margin-top: 5px;
+	margin-bottom: 10px;
+	border-radius: 5px;
+    border: 2px solid #BBBBBB;
+	box-shadow: 5px 5px 5px gray;
+    transition: transform 0.3s ease;
+}
+
+.intro_div input:hover {
+	box-shadow: 5px 7px 5px gray;
+	transform: translate(-2px, -2px);
+}
+
 /* goals div */
 .goals_div {
-    background-color: #00AAAA;
-    width:100%;
-    border:5px solid #00AAAA;
+	margin: 5px;
+    background-color: #FFFFFF;
+    width:calc(100% - 10px);
+    border:1px solid #BBBBBB;
     border-radius:5px;
     padding: 5px;
+	box-shadow: 3px 3px 3px gray;
 }
 
 .goals_div h2 {
     margin:5px;
     font-style:italic;
 }
+
+.goals_div input {
+	padding: 10px;
+	margin-top: 5px;
+	margin-bottom: 10px;
+	border-radius: 5px;
+    border: 1px solid #BBBBBB;
+	box-shadow: 5px 5px 5px gray;
+	transition: transform 0.3s ease;
+}
+
+.goals_div input:hover {
+	box-shadow: 5px 7px 5px gray;
+	transform: translate(-2px, -2px);
+}
+
 
 
 /* SVG layer */
@@ -57,18 +147,47 @@ div {
 
 /* logs window */
 .logs_div {
-    background-color: #FFAAAA;
-    border:3px solid #FFAAAA;
-    border-radius:3px;
+    background-color: #cce6ff;
+    border:1px solid gray;
+    border-top-left-radius:3px;
+    border-bottom-left-radius:3px;
+    border-bottom-right-radius:3px;
     position:fixed;
     bottom:0px;
     right:0px;
     width:250px;
     height:200px;
     font-size:70%;
-    overflow-y: scroll;
+	margin: 4px;
+	box-shadow: 3px 3px 3px gray;
 }
 
+.logs_button {
+    background-color: #cce6ff;
+    position:absolute;
+	top:-20px;
+	width: 20px;
+	height: 20px;
+	right: 0px;
+	box-shadow: 3px 0px 3px gray;
+    border:1px solid gray;
+	border-bottom: 0px solid gray;
+	border-top-left-radius: 3px;
+	border-top-right-radius: 3px;
+	text-align: center;
+	vertical-align: middle;
+	cursor: pointer;
+}
+
+.logs_inner {
+	width: 100%;
+	height: 100%;
+    overflow-y: scroll;
+    position:absolute;
+	top: 0px;
+	left: 0px;
+	padding: 3px;
+}
 
 /* host div (image) */
 .host_div {
@@ -83,15 +202,22 @@ div {
 .host_info_div {
     min-width: 170px;
     min-height: 50px;
-    background-color:rgba(150, 150, 255, 0.9);
-    border: 3px solid rgba(150, 150, 255, 0.9);
-    border-radius: 3px;
+    background-color:rgba(170, 250, 170, 0.9);
+    /* border: 3px solid rgba(150, 150, 255, 0.9); */
+	border: 1px solid gray;
+    border-radius: 3px;	
+	box-shadow: 3px 3px 3px gray;
+	padding: 1px;
     /* will be updated by script : position, top, left */
 }
 
 .host_info_div table {
-    text-align:center;
+	width: 100%;
 }
+.host_info_div table td {
+	text-align:center;
+}
+
 
 .if_tab {
     border-collapse: collapse;
@@ -101,10 +227,20 @@ div {
 .itf_div {
     min-width: 176px;
     height: 70px;
-    background-color: rgba(150, 150, 150, 0.9);
-    border: 3px solid rgba(150, 150, 150, 0.9);
+    background-color: rgba(250, 190, 190, 0.9);
+	/* border: 3px solid rgba(150, 150, 150, 0.9); */
+	border: 1px solid gray;
     border-radius: 3px;
+	box-shadow: 3px 3px 3px gray;
+	padding: 1px;
     /* will be updated by script : position, top, left */
+}
+
+.itf_div table {
+	width:100%;
+}
+.itf_div table td {
+	text-align:center;
 }
 
 /* intro footnote */
