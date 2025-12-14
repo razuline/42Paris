@@ -2,10 +2,10 @@
 var level = 8;
 
 var hosts = [
-    {'id':'C', 'type':'host', 'name':'office.non-real.com', 'geometry':'200x220+600+900', 'img':'host.png', 'labelpos':'180,100'},
-    {'id':'D', 'type':'host', 'name':'home.non-real.com', 'geometry':'200x220+100+900', 'img':'host.png', 'labelpos':'180,100'},
-    {'id':'R1', 'type':'router', 'name':'gate.non-real.com', 'geometry':'200x200+400+200', 'img':'router.png', 'labelpos':'-270,20'},
-    {'id':'R2', 'type':'router', 'name':'transit.my-isp.org', 'geometry':'200x200+400+600', 'img':'router.png', 'labelpos':'-30,170'},
+    {'id':'C', 'type':'host', 'name':'office.non-real.com', 'geometry':'200x220+700+900', 'img':'host.png', 'labelpos':'180,120'},
+    {'id':'D', 'type':'host', 'name':'home.non-real.com', 'geometry':'200x220+100+900', 'img':'host.png', 'labelpos':'180,120'},
+    {'id':'R1', 'type':'router', 'name':'gate.non-real.com', 'geometry':'200x200+400+200', 'img':'router.png', 'labelpos':'-270,70'},
+    {'id':'R2', 'type':'router', 'name':'transit.my-isp.org', 'geometry':'200x200+400+600', 'img':'router.png', 'labelpos':'-40,180'},
     {'id':'I', 'type':'internet', 'name':'Internet', 'geometry':'200x240+900+175', 'img':'internet.png', 'labelpos':'-50,200'},
 ];
 
@@ -21,13 +21,13 @@ var routes = [
 
 
 var ifs = [
-    {'if':'C1', 'hid':'C', 'ip':'192.168.0.1', 'mask':'255.255.255.0', 'ip_edit':'true', 'mask_edit':'true', 'type':'std', 'pos':'20,-50'},
-    {'if':'D1', 'hid':'D', 'ip':'7.9.10.11', 'mask':'255.255.255.240', 'ip_edit':'true', 'mask_edit':'false', 'type':'std', 'pos':'0,-50'},
-    {'if':'R12', 'hid':'R1', 'ip':'163.[a].250.12', 'mask':'255.255.255.240', 'ip_edit':'false', 'mask_edit':'false', 'type':'std', 'pos':'190,20'},
-    {'if':'R13', 'hid':'R1', 'ip':'10.0.0.1', 'mask':'255.255.255.0', 'ip_edit':'true', 'mask_edit':'true', 'type':'std', 'pos':'20,160'},
+    {'if':'C1', 'hid':'C', 'ip':'192.168.0.1', 'mask':'255.255.255.0', 'ip_edit':'true', 'mask_edit':'true', 'type':'std', 'pos':'40,-70'},
+    {'if':'D1', 'hid':'D', 'ip':'7.9.10.11', 'mask':'255.255.255.240', 'ip_edit':'true', 'mask_edit':'false', 'type':'std', 'pos':'-20,-70'},
+    {'if':'R12', 'hid':'R1', 'ip':'163.[a].250.12', 'mask':'255.255.255.240', 'ip_edit':'false', 'mask_edit':'false', 'type':'std', 'pos':'170,20'},
+    {'if':'R13', 'hid':'R1', 'ip':'10.0.0.1', 'mask':'255.255.255.0', 'ip_edit':'true', 'mask_edit':'true', 'type':'std', 'pos':'20,180'},
     {'if':'R21', 'hid':'R2', 'ip':'10.0.0.2', 'mask':'255.255.0.0', 'ip_edit':'true', 'mask_edit':'true', 'type':'std', 'pos':'0,-50'},
-    {'if':'R22', 'hid':'R2', 'ip':'192.168.0.254', 'mask':'255.255.255.0', 'ip_edit':'true', 'mask_edit':'true', 'type':'std', 'pos':'190,90'},
-    {'if':'R23', 'hid':'R2', 'ip':'7.8.9.10', 'mask':'/18', 'ip_edit':'true', 'mask_edit':'true', 'type':'std', 'pos':'-150,90'},
+    {'if':'R22', 'hid':'R2', 'ip':'192.168.0.254', 'mask':'255.255.255.0', 'ip_edit':'true', 'mask_edit':'true', 'type':'std', 'pos':'200,90'},
+    {'if':'R23', 'hid':'R2', 'ip':'7.8.9.10', 'mask':'/18', 'ip_edit':'true', 'mask_edit':'true', 'type':'std', 'pos':'-180,90'},
     {'if':'I1', 'hid':'I', 'ip':'163.[a].250.1', 'mask':'/28', 'ip_edit':'false', 'mask_edit':'false', 'pos':'0,0', 'type':'hidden'},
     {'if':'Somewhere on the Net', 'hid':'I', 'ip':'8.8.8.8', 'mask':'/16', 'ip_edit':'false', 'mask_edit':'false', 'pos':'0,-50', 'type':'hidden'}
 ];

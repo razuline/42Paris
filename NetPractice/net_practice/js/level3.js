@@ -2,10 +2,10 @@
 var level = 3;
 
 var hosts = [
-    {'id':'A', 'type':'host', 'name':'Host A', 'geometry':'200x220+700+800', 'img':'host.png', 'labelpos':'0,200'},
-    {'id':'B', 'type':'host', 'name':'Host B', 'geometry':'200x220+600+200', 'img':'host.png', 'labelpos':'180,30'},
-    {'id':'C', 'type':'host', 'name':'Host C', 'geometry':'200x200+200+500', 'img':'host.png', 'labelpos':'-150,150'},
-    {'id':'S', 'type':'switch', 'name':'Switch-1', 'geometry':'150x150+600+500', 'img':'switch.png', 'labelpos':'80,110'}
+    {'id':'A', 'type':'host', 'name':'Host_A', 'geometry':'200x220+700+800', 'img':'host.png', 'labelpos':'-150,150'},
+    {'id':'B', 'type':'host', 'name':'Host_B', 'geometry':'200x220+600+200', 'img':'host.png', 'labelpos':'190,30'},
+    {'id':'C', 'type':'host', 'name':'Host_C', 'geometry':'200x220+200+500', 'img':'host.png', 'labelpos':'-150,150'},
+    {'id':'S', 'type':'switch', 'name':'Switch_1', 'geometry':'150x150+600+500', 'img':'switch.png', 'labelpos':'80,110'}
 ];
 
 // routes are processed in order, first match only is used => default must be last - KEEP routes before interfaces for random reference
@@ -14,8 +14,8 @@ var routes = [
 
 
 var ifs = [
-    {'if':'A1', 'hid':'A', 'ip':'104.198.[1-254]a.125', 'mask':'255.255.255.0', 'ip_edit':'false', 'mask_edit':'true', 'type':'std', 'pos':'0,-50'},
-    {'if':'B1', 'hid':'B', 'ip':'127.168.42.42', 'mask':'255.255.0.0', 'ip_edit':'true', 'mask_edit':'true', 'type':'std', 'pos':'100,200'},
+    {'if':'A1', 'hid':'A', 'ip':'104.198.[1-254]a.125', 'mask':'255.255.255.0', 'ip_edit':'false', 'mask_edit':'true', 'type':'std', 'pos':'40,-70'},
+    {'if':'B1', 'hid':'B', 'ip':'127.168.42.42', 'mask':'255.255.0.0', 'ip_edit':'true', 'mask_edit':'true', 'type':'std', 'pos':'100,220'},
     {'if':'C1', 'hid':'C', 'ip':'104.198.[a].[260-299]b', 'mask':'255.255.255.128', 'ip_edit':'true', 'mask_edit':'false', 'type':'std', 'pos':'190,10'},
     {'if':'S1', 'hid':'S', 'ip':'0.0.0.0', 'mask':'/32', 'ip_edit':'false', 'mask_edit':'false', 'pos':'0,0', 'type':'hidden'}
 ];

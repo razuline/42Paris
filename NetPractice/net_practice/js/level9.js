@@ -2,14 +2,14 @@
 var level = 9;
 
 var hosts = [
-    {'id':'A', 'type':'host', 'name':'meson', 'geometry':'200x220+100+800', 'img':'host.png', 'labelpos':'-50,200'},
-    {'id':'B', 'type':'host', 'name':'ion', 'geometry':'200x220+100+200', 'img':'host.png', 'labelpos':'180,30'},
-    {'id':'C', 'type':'host', 'name':'cation', 'geometry':'200x220+1000+800', 'img':'host.png', 'labelpos':'100,190'},
-    {'id':'D', 'type':'host', 'name':'gluon', 'geometry':'200x220+600+1300', 'img':'host.png', 'labelpos':'180,80'},
-    {'id':'R1', 'type':'router', 'name':'proton', 'geometry':'200x200+500+500', 'img':'router.png', 'labelpos':'-150,150'},
-    {'id':'R2', 'type':'router', 'name':'boson', 'geometry':'200x200+600+900', 'img':'router.png', 'labelpos':'-200,100'},
-    {'id':'I', 'type':'internet', 'name':'Internet', 'geometry':'200x240+800+200', 'img':'internet.png', 'labelpos':'100,200'},
-    {'id':'S', 'type':'switch', 'name':'neutron', 'geometry':'150x150+200+500', 'img':'switch.png', 'labelpos':'-80,110'}
+    {'id':'A', 'type':'host', 'name':'meson', 'geometry':'200x220+100+900', 'img':'host.png', 'labelpos':'-50,220'},
+    {'id':'B', 'type':'host', 'name':'ion', 'geometry':'200x220+100+300', 'img':'host.png', 'labelpos':'190,30'},
+    {'id':'C', 'type':'host', 'name':'cation', 'geometry':'200x220+1000+800', 'img':'host.png', 'labelpos':'100,220'},
+    {'id':'D', 'type':'host', 'name':'gluon', 'geometry':'200x220+600+1300', 'img':'host.png', 'labelpos':'190,80'},
+    {'id':'R1', 'type':'router', 'name':'proton', 'geometry':'200x200+600+500', 'img':'router.png', 'labelpos':'-150,180'},
+    {'id':'R2', 'type':'router', 'name':'boson', 'geometry':'200x200+600+900', 'img':'router.png', 'labelpos':'-260,100'},
+    {'id':'I', 'type':'internet', 'name':'Internet', 'geometry':'200x240+900+200', 'img':'internet.png', 'labelpos':'100,200'},
+    {'id':'S', 'type':'switch', 'name':'neutron', 'geometry':'150x150+200+600', 'img':'switch.png', 'labelpos':'-80,110'}
 ];
 
 // routes are processed in order, first match only is used => default must be last - KEEP routes before interfaces for random reference
@@ -29,15 +29,15 @@ var routes = [
 
 
 var ifs = [
-    {'if':'A1', 'hid':'A', 'ip':'192.168.[1-254]g.2', 'mask':'255.255.255.0', 'ip_edit':'true', 'mask_edit':'true', 'type':'std', 'pos':'0,-50'},
-    {'if':'B1', 'hid':'B', 'ip':'192.168.[1-254]h.42', 'mask':'255.255.0.0', 'ip_edit':'true', 'mask_edit':'true', 'type':'std', 'pos':'100,200'},
-    {'if':'C1', 'hid':'C', 'ip':'10.0.0.1', 'mask':'255.255.255.0', 'ip_edit':'true', 'mask_edit':'true', 'type':'std', 'pos':'20,-50'},
-    {'if':'D1', 'hid':'D', 'ip':'[j].[k].19.131', 'mask':'255.255.255.192', 'ip_edit':'true', 'mask_edit':'true', 'type':'std', 'pos':'0,-50'},
-    {'if':'R11', 'hid':'R1', 'ip':'192.168.[1-254]i.1', 'mask':'255.255.255.128', 'ip_edit':'true', 'mask_edit':'false', 'type':'std', 'pos':'-150,0'},
-    {'if':'R12', 'hid':'R1', 'ip':'163.172.250.12', 'mask':'255.255.255.240', 'ip_edit':'false', 'mask_edit':'false', 'type':'std', 'pos':'190,10'},
-    {'if':'R13', 'hid':'R1', 'ip':'[j].[k].17.254', 'mask':'255.255.255.0', 'ip_edit':'true', 'mask_edit':'true', 'type':'std', 'pos':'130,140'},
-    {'if':'R21', 'hid':'R2', 'ip':'[j].[k].18.253', 'mask':'255.255.255.252', 'ip_edit':'true', 'mask_edit':'false', 'type':'std', 'pos':'0,-50'},
-    {'if':'R22', 'hid':'R2', 'ip':'10.0.0.254', 'mask':'255.255.255.0', 'ip_edit':'true', 'mask_edit':'true', 'type':'std', 'pos':'190,80'},
+    {'if':'A1', 'hid':'A', 'ip':'192.168.[1-254]g.2', 'mask':'255.255.255.0', 'ip_edit':'true', 'mask_edit':'true', 'type':'std', 'pos':'0,-70'},
+    {'if':'B1', 'hid':'B', 'ip':'192.168.[1-254]h.42', 'mask':'255.255.0.0', 'ip_edit':'true', 'mask_edit':'true', 'type':'std', 'pos':'100,220'},
+    {'if':'C1', 'hid':'C', 'ip':'10.0.0.1', 'mask':'255.255.255.0', 'ip_edit':'true', 'mask_edit':'true', 'type':'std', 'pos':'20,-70'},
+    {'if':'D1', 'hid':'D', 'ip':'[j].[k].19.131', 'mask':'255.255.255.192', 'ip_edit':'true', 'mask_edit':'true', 'type':'std', 'pos':'0,-70'},
+    {'if':'R11', 'hid':'R1', 'ip':'192.168.[1-254]i.1', 'mask':'255.255.255.128', 'ip_edit':'true', 'mask_edit':'false', 'type':'std', 'pos':'-120,20'},
+    {'if':'R12', 'hid':'R1', 'ip':'163.172.250.12', 'mask':'255.255.255.240', 'ip_edit':'false', 'mask_edit':'false', 'type':'std', 'pos':'150,20'},
+    {'if':'R13', 'hid':'R1', 'ip':'[j].[k].17.254', 'mask':'255.255.255.0', 'ip_edit':'true', 'mask_edit':'true', 'type':'std', 'pos':'130,180'},
+    {'if':'R21', 'hid':'R2', 'ip':'[j].[k].18.253', 'mask':'255.255.255.252', 'ip_edit':'true', 'mask_edit':'false', 'type':'std', 'pos':'-120,20'},
+    {'if':'R22', 'hid':'R2', 'ip':'10.0.0.254', 'mask':'255.255.255.0', 'ip_edit':'true', 'mask_edit':'true', 'type':'std', 'pos':'200,80'},
     {'if':'R23', 'hid':'R2', 'ip':'8.8.8.8', 'mask':'/18', 'ip_edit':'true', 'mask_edit':'false', 'type':'std', 'pos':'30,180'},
     {'if':'S1', 'hid':'S', 'ip':'0.0.0.0', 'mask':'/32', 'ip_edit':'false', 'mask_edit':'false', 'pos':'0,0', 'type':'hidden'},
     {'if':'I1', 'hid':'I', 'ip':'163.172.250.1', 'mask':'/28', 'ip_edit':'false', 'mask_edit':'false', 'pos':'0,0', 'type':'hidden'}
