@@ -6,7 +6,7 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/11/04 16:31:43 by erazumov          #+#    #+#              #
-#    Updated: 2025/11/24 19:02:02 by erazumov         ###   ########.fr        #
+#    Updated: 2025/12/18 19:58:52 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,7 +16,7 @@ CXX = c++
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98
 
 SRCS = main.cpp \
-	   Animal.cpp \
+	   AAnimal.cpp \
 	   Cat.cpp \
 	   Dog.cpp \
 	   Brain.cpp
