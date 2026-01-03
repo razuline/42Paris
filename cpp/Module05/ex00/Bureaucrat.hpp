@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/02 13:06:18 by erazumov          #+#    #+#             */
-/*   Updated: 2026/01/02 16:54:24 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/01/03 13:47:15 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,16 @@ class Bureaucrat
 {
 	private:
 		const std::string	_name;
+		unsigned int		_grade;
+
+	public:
+		Bureaucrat(std::string name);
+		Bureaucrat(const Bureaucrat &copy);
+		Bureaucrat &operator=(const Bureaucrat &other);
+		~Bureaucrat();
+
+	// --- Fonctions membres ---
+	
 };
 
 #endif
