@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/05 17:10:56 by erazumov          #+#    #+#             */
-/*   Updated: 2026/01/05 17:37:34 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/01/05 19:17:07 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,18 +15,22 @@
 /* ------------------------- ORTHODOX CANONICAL FORM ------------------------ */
 
 Form::Form(std::string name, int gradeToSign, int gradeToExec) :
-	_name(name), _gradeToSign(gradeToSign), _gradeToExec(gradeToExec)
+	_name(name),
+	_isSigned(false),
+	_gradeToSign(gradeToSign),
+	_gradeToExec(gradeToExec)
 {
-	// Check if grade is within range 1-150
-	if (grade < 1)
-	{
-		throw Form::GradeTooHighException(); // Starts alert
-	}
-	if (grade > 150)
-	{
-		throw Form::GradeTooLowException(); // Starts alert
-	}
-	_grade = grade;
+	// Check gradeToSign limits
+	if (_gradeToSign < 1)
+		throw Form::GradeTooHighException();
+	if (_gradeToSign > 150)
+		throw Form::GradeTooLowException();
+
+	// Check gradeToExec limits
+	if (_gradeToExec < 1)
+		throw Form::GradeTooHighException();
+	if (_gradeToExec > 150)
+		throw Form::GradeTooLowException();
 	//std::cout << "Default constructor called" << std::endl;
 }
 
