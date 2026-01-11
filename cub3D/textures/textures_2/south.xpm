@@ -1,0 +1,22 @@
+static char *south_xpm[] = {
+"16 16 3 1",
+"  c #1b1b7d",
+". c #0a0a4d",
+"X c #2d2da1",
+"XXXXXXXXXXXXXXXX",
+"X              .",
+"X   XXXXXXXX   .",
+"X   X      X   .",
+"X   X      X   .",
+"X   X      X   .",
+"X   XXXXXXXX   .",
+"X              .",
+"X              .",
+"X   XXXXXXXX   .",
+"X   X      X   .",
+"X   X      X   .",
+"X   X      X   .",
+"X   XXXXXXXX   .",
+"X              .",
+"................"
+};

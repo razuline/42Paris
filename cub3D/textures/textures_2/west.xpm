@@ -1,0 +1,22 @@
+static char *west_xpm[] = {
+"16 16 3 1",
+"  c #aaaaaa",
+". c #777777",
+"X c #eeeeee",
+"XXXXXXXXXXXXXXXX",
+"X              .",
+"X  ..........  .",
+"X  .        .  .",
+"X  .  XXXX  .  .",
+"X  .  X  X  .  .",
+"X  .  X  X  .  .",
+"X  .  XXXX  .  .",
+"X  .        .  .",
+"X  .  XXXX  .  .",
+"X  .  X  X  .  .",
+"X  .  X  X  .  .",
+"X  .  XXXX  .  .",
+"X  .        .  .",
+"X  ..........  .",
+"................"
+};

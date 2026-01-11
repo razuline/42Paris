@@ -1,0 +1,22 @@
+static char *brick_xpm[] = {
+"16 16 3 1",
+"  c #7d1b1b",
+". c #4d0a0a",
+"X c #a12d2d",
+"XXXXXXXXXXXXXXXX",
+"X              .",
+"X              .",
+"X              .",
+"X              .",
+"................",
+"        .XXXXXXX",
+"        .X     .",
+"        .X     .",
+"        .X     .",
+".........X     .",
+"XXXXXXXX.X     .",
+"X      ..X     .",
+"X      ..X     .",
+"X      ..X     .",
+"XXXXXXXXXXXXXXXX"
+};
