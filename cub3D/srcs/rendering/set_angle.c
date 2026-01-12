@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/23 16:16:53 by mayoucha          #+#    #+#             */
-/*   Updated: 2026/01/06 17:07:52 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/01/12 19:29:01 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@ static void	set_ns_angle(t_player *p, char c)
 {
 	if (c == 'N')
 	{
+		p->angle = -PI / 2;
 		p->dir_x = 0.0f;
 		p->dir_y = -1.0f;
 		p->plane_x = 0.66f;
@@ -26,6 +27,7 @@ static void	set_ns_angle(t_player *p, char c)
 	}
 	else if (c == 'S')
 	{
+		p->angle = PI / 2;
 		p->dir_x = 0.0f;
 		p->dir_y = 1.0f;
 		p->plane_x = -0.66f;
@@ -40,6 +42,7 @@ static void	set_ew_angle(t_player *p, char c)
 {
 	if (c == 'E')
 	{
+		p->angle = 0.0f;
 		p->dir_x = 1.0f;
 		p->dir_y = 0.0f;
 		p->plane_x = 0.0f;
@@ -47,6 +50,7 @@ static void	set_ew_angle(t_player *p, char c)
 	}
 	else if (c == 'W')
 	{
+		p->angle = PI;
 		p->dir_x = -1.0f;
 		p->dir_y = 0.0f;
 		p->plane_x = 0.0f;
