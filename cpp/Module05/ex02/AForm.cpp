@@ -1,21 +1,21 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Form.cpp                                           :+:      :+:    :+:   */
+/*   AForm.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/05 17:10:56 by erazumov          #+#    #+#             */
-/*   Updated: 2026/01/16 18:08:24 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/01/16 18:42:43 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Bureaucrat.hpp"
-#include "Form.hpp"
+#include "AForm.hpp"
 
 /* ------------------------- ORTHODOX CANONICAL FORM ------------------------ */
 
-Form::Form(std::string name, int gradeToSign, int gradeToExec) :
+AForm::AForm(std::string name, int gradeToSign, int gradeToExec) :
 	_name(name),
 	_isSigned(false),
 	_gradeToSign(gradeToSign),
@@ -23,20 +23,20 @@ Form::Form(std::string name, int gradeToSign, int gradeToExec) :
 {
 	// Check gradeToSign limits
 	if (_gradeToSign < 1)
-		throw Form::GradeTooHighException();
+		throw AForm::GradeTooHighException();
 	if (_gradeToSign > 150)
-		throw Form::GradeTooLowException();
+		throw AForm::GradeTooLowException();
 
 	// Check gradeToExec limits
 	if (_gradeToExec < 1)
-		throw Form::GradeTooHighException();
+		throw AForm::GradeTooHighException();
 	if (_gradeToExec > 150)
-		throw Form::GradeTooLowException();
+		throw AForm::GradeTooLowException();
 
 	//std::cout << "Default constructor called" << std::endl;
 }
 
-Form::Form(const Form &src) :
+AForm::AForm(const AForm &src) :
 	_name(src._name),
 	_isSigned(src._isSigned),
 	_gradeToSign(src._gradeToSign),
@@ -45,8 +45,8 @@ Form::Form(const Form &src) :
 	//std::cout << "Copy constructor called" << std::endl;
 }
 
-Form
-&Form::operator=(const Form &other)
+AForm
+&AForm::operator=(const AForm &other)
 {
 	if (this != &other)
 	{
@@ -58,7 +58,7 @@ Form
 	//std::cout << "Copy assignment operator called" << std::endl;
 }
 
-Form::~Form()
+AForm::~AForm()
 {
 	//std::cout << "Destructor called" << std::endl;
 }
@@ -66,25 +66,25 @@ Form::~Form()
 /* --------------------------- SETTERS & GETTERS ---------------------------- */
 
 std::string const
-Form::getName() const
+AForm::getName() const
 {
 	return _name;
 }
 
 bool
-Form::getIsSigned() const
+AForm::getIsSigned() const
 {
 	return _isSigned;
 }
 
 unsigned int
-Form::getGradeToSign() const
+AForm::getGradeToSign() const
 {
 	return _gradeToSign;
 }
 
 unsigned int
-Form::getGradeToExec() const
+AForm::getGradeToExec() const
 {
 	return _gradeToExec;
 }
@@ -92,21 +92,30 @@ Form::getGradeToExec() const
 /* ------------------------------- FUNCTIONS -------------------------------- */
 
 void
-Form::beSigned(const Bureaucrat &b)
+AForm::beSigned(const Bureaucrat &b)
 {
 	// b.getGrade(): bureaucrat's grade
 	// this->getGradeToSign(): requires to this form's grade
 	if (b.getGrade() > _gradeToSign)
 	{
-		throw Form::GradeTooLowException();
+		throw AForm::GradeTooLowException();
 	}
 	_isSigned = true;
+}
+
+void
+AForm::checkExecutability(Bureaucrat const &executor) const
+{
+	if (!this->getIsSigned())
+		throw AForm::FormNotSignedException();
+	if (executor.getGrade() > this->getGradeToExec())
+		throw AForm::GradeTooLowException();
 }
 
 /* --------------------------- INSERTION OPERATOR --------------------------- */
 
 std::ostream
-&operator<<(std::ostream &out, const Form &b)
+&operator<<(std::ostream &out, const AForm &b)
 {
 	out << "Form " << b.getName()
 	  << "(signed: " << (b.getIsSigned() ? "yes" : "no")

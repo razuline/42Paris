@@ -6,16 +6,21 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/01/02 13:06:15 by erazumov          #+#    #+#              #
-#    Updated: 2026/01/16 18:19:07 by erazumov         ###   ########.fr        #
+#    Updated: 2026/01/16 18:31:47 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-NAME = Form
+NAME = AForm
 
 CXX = c++
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98
 
-SRCS = main.cpp Bureaucrat.cpp Form.cpp
+SRCS = main.cpp
+	   Bureaucrat.cpp
+	   Form.cpp
+	   ShrubberyCreationForm.cpp
+	   RobotomyRequestForm.cpp
+	   PresidentialPardonForm.cpp
 OBJS = $(SRCS:.cpp=.o)
 
 # Colors
@@ -51,4 +56,4 @@ re: fclean all
 
 .PHONY: all clean fclean re
 
-# valgrind --leak-check=full ./Form
+# valgrind --leak-check=full ./AForm

@@ -6,11 +6,12 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/02 13:06:20 by erazumov          #+#    #+#             */
-/*   Updated: 2026/01/05 15:12:19 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/01/16 18:12:09 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Bureaucrat.hpp"
+#include "Form.hpp"
 
 /* ------------------------- ORTHODOX CANONICAL FORM ------------------------ */
 
@@ -27,11 +28,13 @@ Bureaucrat::Bureaucrat(std::string name, int grade) :
 		throw Bureaucrat::GradeTooLowException(); // Starts alert
 	}
 	_grade = grade;
+
 	//std::cout << "Default constructor called" << std::endl;
 }
 
 Bureaucrat::Bureaucrat(const Bureaucrat &copy) :
-	_name(copy._name), _grade(copy._grade)
+	_name(copy._name),
+	_grade(copy._grade)
 {
 	//std::cout << "Copy constructor called" << std::endl;
 }
@@ -41,10 +44,11 @@ Bureaucrat
 {
 	if (this != &other)
 	{
-		// _name is const, so we only copy the grade
+		// _name is const, so we only copy _grade
 		this->_grade = other._grade;
 	}
 	return *this;
+
 	//std::cout << "Copy assignment operator called" << std::endl;
 }
 
@@ -87,12 +91,33 @@ Bureaucrat::decrementGrade()
 	_grade++;
 }
 
-/* ------------------------------- OPERATORS -------------------------------- */
+void
+Bureaucrat::signForm(Form &f)
+{
+	try
+	{
+		// Attempt to sign the form
+		f.beSigned(*this);
+		// Success message
+		std::cout << _name << " signed " << f.getName() << std::endl;
+	}
+	catch(const std::exception& e)
+	{
+		// Error message if grade is too low
+		std::cout << _name << " couldn't sign " << f.getName()
+				  << " because " << e.what() << std::endl;
+	}
+}
+
+/* --------------------------- INSERTION OPERATOR --------------------------- */
 
 std::ostream
-&operator<<(std::ostream &o, const Bureaucrat &i)
+&operator<<(std::ostream &out, const Bureaucrat &b)
 {
 	// Required format: <name>, bureaucrat grade <grade>
-	o << i.getName() << ", bureaucrat grade " << i.getGrade() << ".";
-	return o;
+	out << b.getName()
+		<< ", bureaucrat grade "
+		<< b.getGrade() << ".";
+
+	return out;
 }

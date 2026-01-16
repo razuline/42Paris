@@ -6,12 +6,12 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/02 13:06:12 by erazumov          #+#    #+#             */
-/*   Updated: 2026/01/16 18:18:20 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/01/16 18:28:53 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Bureaucrat.hpp"
-#include "Form.hpp"
+#include "AForm.hpp"
 
 int	main(void)
 {

@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/02 13:06:18 by erazumov          #+#    #+#             */
-/*   Updated: 2026/01/16 17:26:58 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/01/16 18:28:25 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 # include <iostream>
 # include <string>
 
-class Form;
+class AForm;
 
 class Bureaucrat
 {
@@ -38,7 +38,7 @@ public:
 	// --- Member Functions ---
 	void	incrementGrade();
 	void	decrementGrade();
-	void	signForm(Form &f);
+	void	signForm(AForm &f);
 
 	// --- Custom Exceptions ---
 	// Inherit from std::exception to be catchable

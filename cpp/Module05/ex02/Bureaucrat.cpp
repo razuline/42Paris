@@ -6,11 +6,12 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/02 13:06:20 by erazumov          #+#    #+#             */
-/*   Updated: 2026/01/16 18:13:55 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/01/16 18:28:05 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Bureaucrat.hpp"
+#include "AForm.hpp"
 
 /* ------------------------- ORTHODOX CANONICAL FORM ------------------------ */
 
@@ -43,7 +44,7 @@ Bureaucrat
 {
 	if (this != &other)
 	{
-		// _name is const, so we only copy the grade
+		// _name is const, so we only copy _grade
 		this->_grade = other._grade;
 	}
 	return *this;
@@ -88,6 +89,24 @@ Bureaucrat::decrementGrade()
 	if (_grade + 1 > 150)
 		throw Bureaucrat::GradeTooLowException();
 	_grade++;
+}
+
+void
+Bureaucrat::signForm(AForm &f)
+{
+	try
+	{
+		// Attempt to sign the form
+		f.beSigned(*this);
+		// Success message
+		std::cout << _name << " signed " << f.getName() << std::endl;
+	}
+	catch(const std::exception& e)
+	{
+		// Error message if grade is too low
+		std::cout << _name << " couldn't sign " << f.getName()
+				  << " because " << e.what() << std::endl;
+	}
 }
 
 /* --------------------------- INSERTION OPERATOR --------------------------- */
