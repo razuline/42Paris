@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/17 15:25:22 by erazumov          #+#    #+#             */
-/*   Updated: 2026/01/17 16:10:23 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/01/17 16:45:53 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,8 +24,8 @@
 class ScalarConverter
 {
 private:
-	// Private to prevent instantiation
 	// --- Orthodox Canonical Form ---
+	// Private to prevent instantiation
 	ScalarConverter();
 	ScalarConverter(const ScalarConverter &copy);
 	ScalarConverter	&operator=(const ScalarConverter &other);
