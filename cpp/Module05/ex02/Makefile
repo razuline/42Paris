@@ -6,7 +6,7 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/01/02 13:06:15 by erazumov          #+#    #+#              #
-#    Updated: 2026/01/17 13:16:31 by erazumov         ###   ########.fr        #
+#    Updated: 2026/01/17 13:32:56 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -21,6 +21,7 @@ SRCS = main.cpp \
 	   ShrubberyCreationForm.cpp \
 	   RobotomyRequestForm.cpp \
 	   PresidentialPardonForm.cpp
+
 OBJS = $(SRCS:.cpp=.o)
 
 # Colors
@@ -50,7 +51,8 @@ clean:
 
 fclean: clean
 	@rm -f $(NAME)
-	@echo "$(R)🗑️  Executables removed [$(NAME)]$(X)"
+	@rm -f *_shrubbery
+	@echo "$(R)🗑️  Executables and files removed [$(NAME)]$(X)"
 
 re: fclean all
 
