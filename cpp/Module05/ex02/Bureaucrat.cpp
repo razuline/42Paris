@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/02 13:06:20 by erazumov          #+#    #+#             */
-/*   Updated: 2026/01/16 18:28:05 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/01/17 13:28:02 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,6 +105,26 @@ Bureaucrat::signForm(AForm &f)
 	{
 		// Error message if grade is too low
 		std::cout << _name << " couldn't sign " << f.getName()
+				  << " because " << e.what() << std::endl;
+	}
+}
+
+// Attempt to execute a form and print the result.
+// If execution fails (grade too low or not signed), catch and print the error.
+void
+Bureaucrat::executeForm(AForm const &form)
+{
+	try
+	{
+		// Polymorphic call: executes the correct version based on form type
+		form.execute(*this);
+		// Success message
+		std::cout << _name << " executed " << form.getName() << std::endl;
+	}
+	catch(const std::exception& e)
+	{
+		// Friendly error reporting
+		std::cout << _name << " couldn't execute " << form.getName()
 				  << " because " << e.what() << std::endl;
 	}
 }

@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/16 18:30:22 by erazumov          #+#    #+#             */
-/*   Updated: 2026/01/16 20:50:21 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/01/17 13:26:15 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,8 @@ RobotomyRequestForm::execute(Bureaucrat const &executor) const
 
 	std::cout << "* BZZZZZZ... DRILLING NOISES... VZZZZZZ *" << std::endl;
 
-	if (std::rand() % 2 == 0)
+	// 50% success chance logic
+	if (rand() % 2 == 0)
 	{
 		std::cout << _target << " has been robotomized successfully!"
 				  << std::endl;

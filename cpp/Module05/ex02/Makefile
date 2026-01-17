@@ -6,7 +6,7 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/01/02 13:06:15 by erazumov          #+#    #+#              #
-#    Updated: 2026/01/16 18:31:47 by erazumov         ###   ########.fr        #
+#    Updated: 2026/01/17 13:16:31 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,11 +15,11 @@ NAME = AForm
 CXX = c++
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98
 
-SRCS = main.cpp
-	   Bureaucrat.cpp
-	   Form.cpp
-	   ShrubberyCreationForm.cpp
-	   RobotomyRequestForm.cpp
+SRCS = main.cpp \
+	   Bureaucrat.cpp \
+	   AForm.cpp \
+	   ShrubberyCreationForm.cpp \
+	   RobotomyRequestForm.cpp \
 	   PresidentialPardonForm.cpp
 OBJS = $(SRCS:.cpp=.o)
 

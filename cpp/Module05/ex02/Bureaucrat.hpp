@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/02 13:06:18 by erazumov          #+#    #+#             */
-/*   Updated: 2026/01/16 18:28:25 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/01/17 13:20:59 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,7 @@ public:
 	void	incrementGrade();
 	void	decrementGrade();
 	void	signForm(AForm &f);
+	void	executeForm(AForm const &form);
 
 	// --- Custom Exceptions ---
 	// Inherit from std::exception to be catchable
@@ -48,7 +49,7 @@ public:
 		// virtual what() returns the error message
 		virtual const char	*what() const throw()
 		{
-			return "Grade is too high (must be >= 1)";
+			return "Grade is too high (must be >= 1).";
 		}
 	};
 
@@ -57,7 +58,7 @@ public:
 	public:
 		virtual const char	*what() const throw()
 		{
-			return "Grade is too low (must be <= 150)";
+			return "Grade is too low (must be <= 150).";
 		}
 	};
 };

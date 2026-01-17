@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/05 17:10:50 by erazumov          #+#    #+#             */
-/*   Updated: 2026/01/16 18:39:49 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/01/17 13:23:54 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,23 +17,23 @@
 # include <iostream>
 # include <string>
 
-// Forward declaration to avoid circular dependencies
-// without needing to include Bureaucrat.hpp here
 class Bureaucrat;
 
 class AForm
 {
 private:
-	const std::string	_name; // Const name
-	bool				_isSigned; // State of the form
-	const unsigned int	_gradeToSign; // Const grade required to sign
-	const unsigned int	_gradeToExec; // Const grade required to eexecute
+	const std::string	_name;
+	bool				_isSigned;
+	const unsigned int	_gradeToSign;
+	const unsigned int	_gradeToExec;
 
 public:
 	// --- Orthodox Canonical Form ---
 	AForm(std::string name, int gradeToSign, int gradeToExec);
 	AForm(const AForm &src);
 	AForm &operator=(const AForm &other);
+	// Virtual destructor is mandatory for base classes to ensure
+	// proper cleanup of derived objects.
 	virtual ~AForm();
 
 	// --- Getters ---
@@ -46,10 +46,12 @@ public:
 	// Changes the form status to signed if bureaucrat's grade is high enough
 	void	beSigned(const Bureaucrat &b);
 
-	// Pure virtual function: makes this class abstract
+	// Pure virtual function: makes this class abstract.
+	// Every derived class MUST implement its own version of execute.
 	virtual void	execute(Bureaucrat const &executor) const = 0;
 
-	// Helper function to check if execution is possible
+	// Helper function to check if the form can be executed.
+	// Requirements: form must be signed AND executor grade must be high enough.
 	void	checkExecutability(Bureaucrat const &executor) const;
 
 	// --- Custom Exceptions ---

@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/16 18:30:10 by erazumov          #+#    #+#             */
-/*   Updated: 2026/01/16 20:44:17 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/01/17 13:17:20 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 # include "AForm.hpp"
 
+# include <cstdlib>
 # include <exception>
 # include <iostream>
 # include <string>
