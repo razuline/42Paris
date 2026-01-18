@@ -6,7 +6,17 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/17 17:10:17 by erazumov          #+#    #+#             */
-/*   Updated: 2026/01/17 17:10:18 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/01/18 14:27:02 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#ifndef C_HPP
+# define C_HPP
+
+# include "Base.hpp"
+
+class C : public Base
+{
+};
+
+#endif
