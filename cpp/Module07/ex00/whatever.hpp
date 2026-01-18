@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/18 14:44:39 by erazumov          #+#    #+#             */
-/*   Updated: 2026/01/18 16:20:48 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/01/18 17:37:19 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,6 @@
 # define WHATEVER_HPP
 
 #include <iostream>
-#include <string>
 
 // Swaps the values of two given parameters.
 // Does not return anything.
@@ -26,18 +25,18 @@ void	swap(T &a, T &b)
 	b = tmp;
 }
 
-// Compares the two values passed as parameters and returns the smallest one.
-// If they are equal, it returns the second one.
+// Compares the two values and returns the smallest one.
+// If they are equal, it returns the second one (b).
 template <typename T>
-T	min(T a, T b)
+const T	&min(const T &a, const T &b)
 {
 	return (a < b) ? a : b;
 }
 
-// Compares the two values passed as parameters and returns the greatest one.
-// If they are equal, it returns the second one.
+// Compares the two values and returns the greatest one.
+// If they are equal, it returns the second one (b).
 template <typename T>
-T	max(T a, T b)
+const T	&max(const T &a, const T &b)
 {
 	return (a > b) ? a : b;
 }
