@@ -6,11 +6,11 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/18 14:44:23 by erazumov          #+#    #+#             */
-/*   Updated: 2026/01/18 15:33:55 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/01/18 16:25:01 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Whatever.hpp"
+#include "whatever.hpp"
 
 #include <algorithm>
 #include <cstdlib>
