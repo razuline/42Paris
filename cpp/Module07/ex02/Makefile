@@ -6,16 +6,16 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/01/02 13:06:15 by erazumov          #+#    #+#              #
-#    Updated: 2026/01/17 17:08:48 by erazumov         ###   ########.fr        #
+#    Updated: 2026/01/18 18:14:23 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-NAME = Identify
+NAME = Array
 
 CXX = c++
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98
 
-SRCS = main.cpp Base.cpp
+SRCS = main.cpp Array.tpp
 OBJS = $(SRCS:.cpp=.o)
 
 # Colors
@@ -51,4 +51,4 @@ re: fclean all
 
 .PHONY: all clean fclean re
 
-# valgrind --leak-check=full ./Identify
+# valgrind --leak-check=full ./Array
