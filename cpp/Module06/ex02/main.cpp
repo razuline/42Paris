@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/17 17:10:32 by erazumov          #+#    #+#             */
-/*   Updated: 2026/01/18 14:26:37 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/01/18 18:00:21 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,7 +88,7 @@ void	identify(Base &p)
 	}
 }
 
-int	main()
+int	main(void)
 {
 	// Seed the random generator with the current time
 	std::srand(static_cast<unsigned int>(std::time(NULL)));
