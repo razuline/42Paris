@@ -6,16 +6,16 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/01/02 13:06:15 by erazumov          #+#    #+#              #
-#    Updated: 2026/01/18 18:14:23 by erazumov         ###   ########.fr        #
+#    Updated: 2026/01/19 17:48:22 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = Array
 
 CXX = c++
-CXXFLAGS = -Wall -Wextra -Werror -std=c++98
+CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -g3 -fsanitize=address
 
-SRCS = main.cpp Array.tpp
+SRCS = main.cpp
 OBJS = $(SRCS:.cpp=.o)
 
 # Colors
