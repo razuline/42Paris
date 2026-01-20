@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/20 12:31:19 by erazumov          #+#    #+#             */
-/*   Updated: 2026/01/20 12:50:00 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/01/20 12:53:35 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ int	main(void)
 		std::vector<int>::iterator	it = easyfind(v, 20);
 		std::cout << "Found: " << *it << std::endl;
 
-		// Find number isn't present
+		// Try to find a number that isn't present
 		easyfind(v, 42);
 	}
 	catch (const std::exception &e)

@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/20 11:51:13 by erazumov          #+#    #+#             */
-/*   Updated: 2026/01/20 12:30:35 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/01/20 12:54:13 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ class NoOccurenceException : public std::exception
 public:
 	virtual const char	*what() const throw()
 	{
-		return "Error: no occurrence is found in the container!";
+		return "Error: No occurrence is found in the container!";
 	}
 };
 
