@@ -1,0 +1,17 @@
+[mysqld]
+
+# The user that the service will run as
+user			= mysql
+
+# The port on which the database will listen
+port			= 3306
+
+# Path to the database files inside the container
+datadir			= /var/lib/mysql
+
+# Path to the socket file
+socket			= /run/mysqld/mysqld.sock
+
+# IMPORTANT: By default, MariaDB listens only on 127.0.0.1 (localhost).
+# Change it to 0.0.0.0 to allow connections from the WordPress container.
+blind-address	= 0.0.0.0

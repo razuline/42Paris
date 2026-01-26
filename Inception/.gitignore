@@ -1,0 +1,14 @@
+# 1. Environment variables (our secrets)
+.env
+srcs/.env
+
+# 2. Secret files directory (if you use it)
+secrets/
+
+# 3. Docker data (the files created by containers)
+# We don't want to push your database or website files to Git
+data/
+
+# 4. System files
+.DS_Store
+*.swp
