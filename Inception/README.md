@@ -1,21 +1,66 @@
+*This project has been created as part of the 42 curriculum by erazumov.*
+
 # Inception - System Administrator & Docker
 
 ## 📌 Project Overview
 This project consists of virtualising a small infrastructure using **Docker Compose**. The entire stack runs on **Debian Bullseye**, with each service isolated in its own dedicated container.
 
-The goal is to bild a secire, interconnected environmental for a WordPress site, ensuring high seciruty and proper data persistence.
+The goal is to build a secure, interconnected environmental for a WordPress site, ensuring high security and proper data persistence.
 
-### 🏗️ Architecture
+### 🏗️ Design Choices & Comparisons
+In accordance with the project requirements, here is a comparison of the technologies used:
+* **Virtual Machines vs Docker**: While VMs virtualise hardware, Docker virtualises the OS kernel. Docker is much more lightweight, faster to start, and consumes fewer resources.
+* **Secrets vs Environment Variables**: Environment variables (via `.env`) are great for general configuration. However, **Docker Secrets** are more secure for passwords because they are encrypted at rest and never stored in the image itself.
+* **Docker Network vs Host Network**: We use a private **Docker bridge network** to isolate services. Unlike the "host" network, this prevents external access to MariaDB and WordPress, allowing only NGINX to be the entry point.
+* **Docker Volumes vs Bind Mounts**: We use **Named Volumes** stored in `/home/vshchere/data`. Unlike bind mounts, named volumes are managed by Docker, providing better performance and security for persistent data.
+
+### ⚙️ Architecture
 The infrastructure follows a microservices-based approach:
-* **NGINX:** The only entry point for the infrastructure. It handles HTTPS requests via **TLSv1.2/v1.3** on port 443.
-* **WordPress + PHP-FPM:** The core application logic, listening on port 9000.
-* **MariaDB:** The database management system, listening on port 3306.
+* **NGINX:** The only entry point (Port 443, TLSv1.2/v1.3 only).
+* **WordPress + PHP-FPM:** The core application logic, (Port 9000).
+* **MariaDB:** Database engine (Port 3306).
 
-**Portable Infrastructure:** The environment is fully containerized using Docker, ensuring identical behavior across macOS, Linux, and Windows (WSL2).
+### 🔄 Service Interaction
+1. **NGINX** receives an HTTPS request from the browser.
+2. If the request is for a `.php` file, it is forwarded to **WordPress (PHP-FPM)** via the FastCGI protocol.
+3. **WordPress** processes the logic and queries **MariaDB** for content if data is needed.
+4. The result is sent back through NGINX to the user's browser as a standard HTML page.
 
 ---
 
-## 🛠️ Implementation Progress (Roadmap)
+## 🛠️ Instructions (Installation & Execution)
+To set up the environment, follow these steps:
+1. **Configure Domain**:
+	Update your `/etc/hosts` to point the domain to your local IP.
+
+	```bash
+	echo "127.0.0.1 erazumov.42.fr" | sudo tee -a /etc/hosts
+	```
+2. **Build and Run**:
+	Use the provided **Makefile** at the root of the project.
+
+	```bash
+	make        # Builds images and starts containers
+	make down   # Stops services
+	make clean  # Full cleanup of containers and data
+	```
+
+---
+
+## 📚 Resources & AI Usage
+### References
+* [Docker Documentation](https://docs.docker.com/)
+* [NGINX TLS Configuration Guide](https://nginx.org/en/docs/http/configuring_https_servers.html)
+* [MariaDB Server Administration](https://mariadb.com/kb/en/documentation/)
+
+### AI Assistance Disclosure
+* **Tool:** Gemini (AI Collaborator).
+* **Usage:** AI was used to help debug the Bash scripts and structure the `.md` files.
+* **Validation:** Every AI-generated line was manually reviewed, tested with `bash -n`, and cross-checked with official documentation to ensure full understanding and responsibility.
+
+---
+
+## 📈 Implementation Progress (Roadmap)
 
 ### Stage 1: Infrastructure & Security ✅
 - [x] Defined the project directory structure according to the subject requirements.
@@ -23,43 +68,53 @@ The infrastructure follows a microservices-based approach:
 - [x] Created a secure `.env` file to manage credentials via environment variables.
 
 ### Stage 2: NGINX & MariaDB Setup ✅
-
-#### NGINX (The Gatekeeper)
-- [x] Built the image from `debian:bullseye`.
-- [x] Generated a self-signed **SSL Certificate** using OpenSSL.
-- [x] Configured the server to support only **TLSv1.2/v1.3** protocols.
-- [x] Set up the `nginx.conf` to proxy PHP requests to the WordPress service.
-
-#### MariaDB (The Archive)
-- [x] Built the image from `debian:bullseye`.
-- [x] Modified `50-server.cnf` to allow network connections (`bind-address = 0.0.0.0`).
-- [x] Created a robust `mariadb_setup.sh` script to:
-	- Initialise the database and users on the first run.
-	- Secure the `root` account with a password from `.env`.
-	- Create a non-root user for the WordPress application.
-- [x] Ensured the service runs as the main process (`exec mysqld_safe`).
+- [x] Built NGINX with SSL/TLS 1.2/1.3 support.
+- [x] Configured MariaDB with automated initialisation via `mariadb_setup.sh`.
+- [x] Ensured database persistence using **Docker Volumes** (avoiding "goldfish memory").
 
 ### Stage 3: WordPress & PHP-FPM ✅
-- [x] Install and configure PHP-FPM for Debian.
-- [x] Implement **WP-CLI** for automated WordPress installation and setup.
-- [x] Link the WordPress container to the MariaDB service.
+- [x] Configured PHP-FPM to listen on port 9000.
+- [x] Integrated WP-CLI for automated site installation.
+- [x] Created an initialisation script to setup the site and users automatically.
 
-### Stage 4: Orchestration & Automation 📅
-- [ ] Define the network and volume mapping in `docker-compose.yml`.
-- [ ] Set up **Docker Volumes** for data persistency (avoiding "goldfish memory").
-- [ ] Write a `Makefile` to automate the build, run, and clean-up processes.
+### Stage 4: Orchestration & Automation ⚙️
+- [ ] Defined service interconnectivity in `docker-compose.yml`.
+- [ ] Created a `Makefile` for one-command deployment.
+- [ ] Final testing of data persistence and network isolation.
+
+---
+
+## How to Run
+1. Update the `/etc/hosts` file:
+
+```bash
+echo "127.0.0.1 login.42.fr" | sudo tee -a /etc/hosts
+```
+
+2. Build and launch the infrastructure:
+
+```bash
+make
+```
 
 ---
 
 ## 🔒 Security Policy
-* **No Hardcoded Secrets**: All passwords and sensitive data are stored in `.env` and are strictly excluded from version control via `.gitignore`.
-* **Network Isolation**: Only NGINX is exposed to the host machine. MariaDB and WordPress communicate through a private internal Docker network.
-* **Modern Encryption**: SSL/TLS protocols are strictly limited to secure versions to prevent vulnerabilities.
+* **No Hardcoded Secrets**: All credentials are managed via the `.env` file (excluded from Git).
+* **Network Isolation**: Only NGINX is exposed to the host. Other services communicate over a private bridge network.
+* **Modern Encryption**: SSL/TLS protocols are strictly limited to secure versions (1.2 and 1.3).
+
+---
+
+## 💻 Cross-Platform Compatibility
+The entire environment has been tested for portability:
+* **Linux**: Native performance using the host kernel.
+* **macOS**: Runs via a lightweight virtualisation layer, ensuring the same Debian-based environment as the final evaluation machine.
 
 ---
 
 ## ✏️ Check the Bash-Scripts
-For `mariadb_setup.sh`, `wp_setup.sh`
+To verify script syntax for `mariadb_setup.sh` and `wp_setup.sh`:
 
 ```bash
 bash -n srcs/requirements/mariadb/tools/mariadb_setup.sh
