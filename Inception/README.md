@@ -1,6 +1,6 @@
 # Inception - System Administrator & Docker
 
-## 📝 Project Overview
+## 📌 Project Overview
 This project consists of virtualising a small infrastructure using **Docker Compose**. The entire stack runs on **Debian Bullseye**, with each service isolated in its own dedicated container.
 
 The goal is to bild a secire, interconnected environmental for a WordPress site, ensuring high seciruty and proper data persistence.
@@ -10,6 +10,8 @@ The infrastructure follows a microservices-based approach:
 * **NGINX:** The only entry point for the infrastructure. It handles HTTPS requests via **TLSv1.2/v1.3** on port 443.
 * **WordPress + PHP-FPM:** The core application logic, listening on port 9000.
 * **MariaDB:** The database management system, listening on port 3306.
+
+**Portable Infrastructure:** The environment is fully containerized using Docker, ensuring identical behavior across macOS, Linux, and Windows (WSL2).
 
 ---
 
@@ -37,10 +39,10 @@ The infrastructure follows a microservices-based approach:
 	- Create a non-root user for the WordPress application.
 - [x] Ensured the service runs as the main process (`exec mysqld_safe`).
 
-### Stage 3: WordPress & PHP-FPM 📅
-- [ ] Install and configure PHP-FPM for Debian.
-- [ ] Implement **WP-CLI** for automated WordPress installation and setup.
-- [ ] Link the WordPress container to the MariaDB service.
+### Stage 3: WordPress & PHP-FPM ✅
+- [x] Install and configure PHP-FPM for Debian.
+- [x] Implement **WP-CLI** for automated WordPress installation and setup.
+- [x] Link the WordPress container to the MariaDB service.
 
 ### Stage 4: Orchestration & Automation 📅
 - [ ] Define the network and volume mapping in `docker-compose.yml`.
@@ -53,3 +55,13 @@ The infrastructure follows a microservices-based approach:
 * **No Hardcoded Secrets**: All passwords and sensitive data are stored in `.env` and are strictly excluded from version control via `.gitignore`.
 * **Network Isolation**: Only NGINX is exposed to the host machine. MariaDB and WordPress communicate through a private internal Docker network.
 * **Modern Encryption**: SSL/TLS protocols are strictly limited to secure versions to prevent vulnerabilities.
+
+---
+
+## ✏️ Check the Bash-Scripts
+For `mariadb_setup.sh`, `wp_setup.sh`
+
+```bash
+bash -n srcs/requirements/mariadb/tools/mariadb_setup.sh
+bash -n srcs/requirements/wordpress/tools/wp_setup.sh
+```
