@@ -6,11 +6,11 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/01/02 13:06:15 by erazumov          #+#    #+#              #
-#    Updated: 2026/01/19 17:50:04 by erazumov         ###   ########.fr        #
+#    Updated: 2026/01/27 21:31:23 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-NAME = Array
+NAME = MutantStack
 
 CXX = c++
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -g3 -fsanitize=address
@@ -51,5 +51,5 @@ re: fclean all
 
 .PHONY: all clean fclean re
 
-# valgrind --leak-check=full ./Array
-# leaks --atExit -- ./Array
+# valgrind --leak-check=full ./MutantStack
+# leaks --atExit -- ./MutantStack
