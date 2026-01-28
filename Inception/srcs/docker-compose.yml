@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+    # MariaDB Service: Dedicated container for the database
+    mariadb:
+        build:
+            context: ./requirements/mariadb
+            dockerfile: Dockerfile
+        container_name: mariadb
+        # Restart policy in case of crash
+        restart: always
+        networks:
+            - inception
+        env_file:
+            - .env
+        volumes:
+            # Named volume for persistent database storage
+            - mariadb_data:/var/lib/mysql
+
+    # WordPress Service: Contains WordPress + php_fpm
+    wordpress:
+        build:
+            context: ./requirements/wordpress
+            dockerfile: Dockerfile
+        container_name: wordpress
+        restart: always
+        # Ensure database is started before WordPress
+        depends_on:
+            - mariadb
+        networks:
+            - inception
+        env_file:
+            - .env
+        volumes:
+            # Named volume for WordPress website files
+            - wordpress_data:/var/www/html
+
+    # NGINX Service: The only entry point to the infrastructure via port 443
+    nginx:
+        build:
+            context: ./requirements/nginx
+            dockerfile: Dockerfile
+        container_name: nginx
+        restart: always
+        depends_on:
+            - wordpress
+        ports:
+            - "443:443"
+        networks:
+            - inception
+        env_file:
+            - .env
+        volumes:
+            # NGINX needs access to WP files to serve static content
+            - wordpress_data:/var/www/html
+
+# Dedicated network to establish connection between containers
+networks:
+    inception:
+        driver: bridge
+
+# Persistent storage using Named Volumes
+# These store data in /home/login/data on the host machine
+volumes:
+    mariadb_data:
+        driver: local
+        driver_opts:
+            type: none
+            device: /home/erazumov/data/mariadb
+            o: bind
+    wordpress_data:
+        driver: local
+        driver_opts:
+            type: none
+            device: /home/erazumov/data/wordpress
+            o: bind

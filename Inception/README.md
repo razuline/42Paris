@@ -12,7 +12,7 @@ In accordance with the project requirements, here is a comparison of the technol
 * **Virtual Machines vs Docker**: While VMs virtualise hardware, Docker virtualises the OS kernel. Docker is much more lightweight, faster to start, and consumes fewer resources.
 * **Secrets vs Environment Variables**: Environment variables (via `.env`) are great for general configuration. However, **Docker Secrets** are more secure for passwords because they are encrypted at rest and never stored in the image itself.
 * **Docker Network vs Host Network**: We use a private **Docker bridge network** to isolate services. Unlike the "host" network, this prevents external access to MariaDB and WordPress, allowing only NGINX to be the entry point.
-* **Docker Volumes vs Bind Mounts**: We use **Named Volumes** stored in `/home/vshchere/data`. Unlike bind mounts, named volumes are managed by Docker, providing better performance and security for persistent data.
+* **Docker Volumes vs Bind Mounts**: We use **Named Volumes** stored in `/home/erazumov/data`. Unlike bind mounts, named volumes are managed by Docker, providing better performance and security for persistent data.
 
 ### ⚙️ Architecture
 The infrastructure follows a microservices-based approach:
@@ -77,10 +77,10 @@ To set up the environment, follow these steps:
 - [x] Integrated WP-CLI for automated site installation.
 - [x] Created an initialisation script to setup the site and users automatically.
 
-### Stage 4: Orchestration & Automation ⚙️
-- [ ] Defined service interconnectivity in `docker-compose.yml`.
-- [ ] Created a `Makefile` for one-command deployment.
-- [ ] Final testing of data persistence and network isolation.
+### Stage 4: Orchestration & Automation ✅
+- [x] Defined service interconnectivity in `docker-compose.yml`.
+- [x] Created a `Makefile` for one-command deployment.
+- [x] Final testing of data persistence and network isolation.
 
 ---
 

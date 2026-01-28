@@ -12,7 +12,7 @@ FROM		debian:bullseye
 	# Generate a self-signed SSL certificate (no passwords allowed!)
 	RUN		openssl req -x509 -nodes -out /etc/nginx/ssl/inception.crt \
 			-keyout /etc/nginx/ssl/inception.key \
-			-subj "/C=FR/ST=Paris/L=Paris/O=42/OU=42/CN=vshchere.42.fr"
+			-subj "/C=FR/ST=Paris/L=Paris/O=42/OU=42/CN=erazumov.42.fr"
 
 	# Copy our custom configuration to the container
 	COPY	conf/nginx.conf /etc/nginx/conf.d/default.conf
