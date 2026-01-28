@@ -6,32 +6,43 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/01/25 21:39:21 by erazumov          #+#    #+#              #
-#    Updated: 2026/01/28 16:43:02 by erazumov         ###   ########.fr        #
+#    Updated: 2026/01/28 17:08:07 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 # Variables
-# 42 login is used for volume paths and domain configuration
-LOGIN = erazumov
-# Path where the persistent data will be stored on the host machine
-DATA_PATH = /home/$(LOGIN)/data
+# Login is used for volume paths and domain configuration
+LOGIN = razuline
+LOGIN_42 = erazumov
+
+# Detect Operating System
+UNAME_S = $(shell uname -s)
+
+# Set DATA_PATH based on the OS
+# On macOS (Darwin), use the /Users/ path
+# On Linux (Evaluation VM), use the mandatory /home/ path
+ifeq ($(UNAME_S), Darwin)
+	DATA_PATH = /Users/$(LOGIN)/data
+else
+	DATA_PATH = /home/$(LOGIN_42)/data
+endif
 
 # Colors
 GREEN = \033[0;32m
 RED = \033[0;31m
 RESET = \033[0m
 
-# Defaul rule: starts the whole infrastructure
+# Default rule: starts the whole infrastructure
 all: up
 
 # 1. Create necessary directories on the host
 # 2. Build and start the containers in detached mode
 up:
-	@echo "$(GREEN)Creating data directories...$(RESET)"
+	@echo "$(GREEN)Detected OS: $(UNAME_S)$(RESET)"
+	@echo "$(GREEN)Using DATA_PATH: $(DATA_PATH)$(RESET)"
 	@mkdir -p $(DATA_PATH)/mariadb
 	@mkdir -p $(DATA_PATH)/wordpress
-	@echo "$(GREEN)Starting containers...$(RESET)"
-	@docker-compose -f srcs/docker-compose.yml up --build -d
+	DATA_PATH=$(DATA_PATH) docker-compose -f srcs/docker-compose.yml up --build -d
 
 # Stop all running containers
 down:
