@@ -27,11 +27,11 @@ mysql -u root -e "GRANT ALL PRIVILEGES ON \`${SQL_DATABASE}\`.* TO \`${SQL_USER}
 # 5. Secure the root user (The Administrator)
 # Set a password for root and disable remote root login for security.
 mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '${SQL_ROOT_PASSWORD}';"
-mysql -u root -p${SQL_ROOT_PASSWORD} -e "FLUSH PRIVILEGES;"
+mysql -u root -p"${SQL_ROOT_PASSWORD}" -e "FLUSH PRIVILEGES;"
 
 # 6. Shut down the temporary background service
 # Need to stop it so we can restart it as the main process.
-mysqladmin -u root -p${SQL_ROOT_PASSWORD} shutdown
+mysqladmin -u root -p"${SQL_ROOT_PASSWORD}" shutdown
 
 # 7. Start MariaDB in the foreground as PID 1
 # This is mandatory: no infinite loops, no tail -f hacks.
