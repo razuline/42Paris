@@ -6,7 +6,7 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/01/25 21:39:21 by erazumov          #+#    #+#              #
-#    Updated: 2026/01/28 17:08:07 by erazumov         ###   ########.fr        #
+#    Updated: 2026/02/01 14:36:32 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -42,12 +42,12 @@ up:
 	@echo "$(GREEN)Using DATA_PATH: $(DATA_PATH)$(RESET)"
 	@mkdir -p $(DATA_PATH)/mariadb
 	@mkdir -p $(DATA_PATH)/wordpress
-	DATA_PATH=$(DATA_PATH) docker-compose -f srcs/docker-compose.yml up --build -d
+	DATA_PATH=$(DATA_PATH) docker compose -f srcs/docker-compose.yml up --build -d
 
 # Stop all running containers
 down:
 	@echo "$(RED)Stopping containers...$(RESET)"
-	@docker-compose -f srcs/docker-compose.yml down
+	@docker compose -f srcs/docker-compose.yml down
 
 # Stop and remove containers, networks, and images created by 'up'
 clean: down
@@ -66,10 +66,10 @@ re: fclean all
 
 # Utility command to view container status
 status:
-	@docker-compose -f srcs/docker-compose.yml ps
+	@docker compose -f srcs/docker-compose.yml ps
 
 # Utility command to view real-time logs
 logs:
-	@docker-compose -f srcs/docker-compose.yml logs -f
+	@docker compose -f srcs/docker-compose.yml logs -f
 
 .PHONY: all up down clean fclean re
