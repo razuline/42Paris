@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/31 23:23:26 by erazumov          #+#    #+#             */
-/*   Updated: 2026/02/07 14:53:22 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/02/07 17:19:30 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,10 +16,12 @@
 # include <iostream>
 # include <fstream>
 # include <map>
+# include <stdlib.h>
 
 class BitcoinExchange
 {
 private:
+	// This is the container where we store the DB
 	// map<key_type, value_type> map_name;
 	std::map<std::string, float>	_data;
 
@@ -31,7 +33,7 @@ public:
 	~BitcoinExchange();
 
 	/* --- Methods --- */
-	void	loadDatabase(const std::string &filename);
+	bool	loadDatabase(const std::string &filename);
 	void	processInput(const std::string &filename);
 	bool	isValidDate(const std::string &date);
 };

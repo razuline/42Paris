@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/31 23:23:29 by erazumov          #+#    #+#             */
-/*   Updated: 2026/02/07 14:54:40 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/02/07 17:19:21 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,61 +42,32 @@ BitcoinExchange::~BitcoinExchange()
 
 /* -------------------------------- METHODS --------------------------------- */
 
-void
+bool
 BitcoinExchange::loadDatabase(const std::string &filename)
 {
 	std::ifstream	file(filename.c_str());
 	if (!file.is_open())
 	{
 		std::cerr << "Error: could not open database file." << std::endl;
+		return false;
 	}
 
 	std::string	line;
-	std::getline(file, line); // Skip the header (date, exchange_rate)
+	std::getline(file, line); // Skip "date,exchange_rate"
 
 	while (std::getline(file, line))
 	{
-		size_t	commaPos = line.find('.');
+		size_t	commaPos = line.find(',');
 		if (commaPos != std::string::npos)
 		{
 			std::string	date = line.substr(0, commaPos);
 			// Convert string to float for the price
-			float	rate = static_cast<float>
-							(std::atof(line.substr(commaPos + 1).c_str()));
+			float	rate = std::atof(line.substr(commaPos + 1).c_str());
 			// Store in the map: the date is the key, the rate is the value
-			this->_data[date] = rate;
+			_data[date] = rate;
 		}
 	}
-	file.close();
-}
-
-void
-BitcoinExchange::processInput(const std::string &filename)
-{
-	std::ifstream	file(filename.c_str());
-	if (!file.is_open())
-	{
-		std::cerr << "Error: could not open database file." << std::endl;
-	}
-
-	std::string	line;
-	std::getline(file, line); // Skip the header (date | value)
-
-	while (std::getline(file, line))
-	{
-		size_t	pipePos = line.find('|');
-		if (pipePos != std::string::npos)
-		{
-			std::cerr << "Error: bad input => " << line << std::endl;
-			continue;
-		}
-
-		std::string	date = line.substr(0, pipePos - 1);
-		// Trim spaces if necessary around the pipe
-		std::string	valStr = line.substr(0, pipePos + 1);
-
-		
-	}
+	return !_data.empty();
 }
 
 bool
@@ -127,4 +98,74 @@ BitcoinExchange::isValidDate(const std::string &date)
 			return false;
 	}
 	return true;
+}
+
+void
+BitcoinExchange::processInput(const std::string &filename)
+{
+	std::ifstream	file(filename.c_str());
+	if (!file.is_open())
+	{
+		std::cerr << "Error: could not open file." << std::endl;
+	}
+
+	std::string	line;
+	std::getline(file, line); // Skip the header (date | value)
+
+	while (std::getline(file, line))
+	{
+		size_t	pipePos = line.find('|');
+		if (pipePos == std::string::npos)
+		{
+			std::cerr << "Error: bad input => " << line << std::endl;
+			continue;
+		}
+
+		std::string	date = line.substr(0, pipePos);
+		// Delete spaces at the end of the date if necessary
+		date.erase(date.find_last_not_of(" \t") + 1);
+
+		if (!isValidDate(date))
+		{
+			std::cerr << "Error: bad input => " << line << std::endl;
+			continue;
+		}
+
+		// Extract value after the date (before the pipe)
+		std::string	valStr = line.substr(pipePos + 1);
+		double	value = std::atof(valStr.c_str());
+
+		if (value < 0)
+		{
+			std::cerr << "Error: not a positive number." << std::endl;
+			continue;
+		}
+		if (value > 1000)
+		{
+			std::cerr << "Error: too large a number." << std::endl;
+			continue;
+		}
+
+		// Search in map
+		std::map<std::string, float>::iterator	it = _data.lower_bound(date);
+
+		// If not exact date, move to the previous one
+		if (it != _data.end() && it->first == date)
+		{
+			// Output format: date => value => result
+			std::cout << date << " => " << value << " = "
+					  << (value * it->second) << std::endl;
+		}
+		else if (it != _data.begin())
+		{
+			--it; // Get the most closest date
+			std::cout << date << " => " << value << " = "
+					  << (value * it->second) << std::endl;
+		}
+		else
+		{
+			std::cerr << "Error: date too old." << std::endl;
+		}
+	}
+	file.close();
 }
