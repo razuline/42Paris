@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/31 23:23:26 by erazumov          #+#    #+#             */
-/*   Updated: 2026/01/31 23:46:22 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/02/07 14:53:22 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define BITCOIN_EXCHANGE_HPP
 
 # include <iostream>
+# include <fstream>
 # include <map>
 
 class BitcoinExchange
@@ -24,7 +25,7 @@ private:
 
 public:
 	/* --- Orthodox Canonical Form --- */
-	BitcoinExchange(/* args */);
+	BitcoinExchange();
 	BitcoinExchange(const BitcoinExchange &copy);
 	BitcoinExchange	&operator=(const BitcoinExchange &other);
 	~BitcoinExchange();
@@ -32,6 +33,7 @@ public:
 	/* --- Methods --- */
 	void	loadDatabase(const std::string &filename);
 	void	processInput(const std::string &filename);
+	bool	isValidDate(const std::string &date);
 };
 
 #endif
