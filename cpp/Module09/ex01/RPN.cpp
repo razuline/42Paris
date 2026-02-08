@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/07 18:13:42 by erazumov          #+#    #+#             */
-/*   Updated: 2026/02/08 15:30:39 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/02/08 17:36:44 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ RPN::~RPN()
 	//std::cout << "Destructor called" << std::endl;
 }
 
-/* ---------------------------- INSIDE FUNCTIONS ---------------------------- */
+/* --------------------------- INTERNAL FUNCTIONS --------------------------- */
 
 bool
 RPN::isOperator(char c) const
