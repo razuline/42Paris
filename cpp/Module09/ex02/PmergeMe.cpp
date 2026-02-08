@@ -6,7 +6,16 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/08 15:39:41 by erazumov          #+#    #+#             */
-/*   Updated: 2026/02/08 15:39:42 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/02/08 17:30:44 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "PmergeMe.hpp"
+
+PmergeMe::PmergeMe(/* args */)
+{
+}
+
+PmergeMe::~PmergeMe()
+{
+}
