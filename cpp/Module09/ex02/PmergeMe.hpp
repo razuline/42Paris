@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/08 15:39:49 by erazumov          #+#    #+#             */
-/*   Updated: 2026/02/08 17:41:47 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/02/20 20:24:06 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,9 +38,11 @@ private:
 
 	/* --- Vector Algorithm Implementation --- */
 	void	sortVector();
+	void	generateJacobsthalVector(std::vector<int> &jacob, int n);
 
 	/* --- Deque Algorithm Implementation --- */
 	void	sortDeque();
+	void	generateJacobsthalDeque(std::deque<int> &jacob, int n);
 
 public:
 	/* --- Orthodox Canonical Form --- */
@@ -49,9 +51,14 @@ public:
 	PmergeMe	&operator=(const PmergeMe &other);
 	~PmergeMe();
 
-	/* --- Methods --- */
+	/* --- Core Methods --- */
+	// Parse the arguments and launch the sorting process
+	void	run(int ac, char **av);
 
-
+	// Display functions
+	void	printBefore(int ac, char **av) const;
+	void	printAfter() const;
+	void	printTime() const;
 };
 
 #endif

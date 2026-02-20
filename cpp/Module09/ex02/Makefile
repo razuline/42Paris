@@ -6,7 +6,7 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/01/31 23:23:33 by erazumov          #+#    #+#              #
-#    Updated: 2026/02/08 15:40:42 by erazumov         ###   ########.fr        #
+#    Updated: 2026/02/20 20:22:15 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -50,6 +50,8 @@ fclean: clean
 re: fclean all
 
 .PHONY: all clean fclean re
+
+# Test: ./PmergeMe `shuf -i 1-100000 -n 3000 | tr "\n" " "`
 
 # valgrind --leak-check=full ./PmergeMe
 # leaks --atExit -- ./PmergeMe
