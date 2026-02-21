@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/20 12:56:21 by erazumov          #+#    #+#             */
-/*   Updated: 2026/01/20 18:31:46 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/02/21 13:57:14 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 # include <algorithm>
 # include <exception>
 # include <vector>
+# include <stdexcept>
 
 class Span
 {
