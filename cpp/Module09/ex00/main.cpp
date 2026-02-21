@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/31 23:23:31 by erazumov          #+#    #+#             */
-/*   Updated: 2026/02/07 17:24:11 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/02/21 19:56:04 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,10 +26,7 @@ int	main(int ac, char **av)
 	BitcoinExchange	btc;
 
 	// 2. Load the database and check for success in one go
-	if (!btc.loadDatabase("data.csv"))
-	{
-		return 1;
-	}
+	btc.loadDatabase("data.csv");
 
 	// 3. Process the input file provided by the user
 	btc.processInput(av[1]);

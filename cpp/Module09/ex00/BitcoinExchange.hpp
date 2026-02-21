@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/31 23:23:26 by erazumov          #+#    #+#             */
-/*   Updated: 2026/02/07 17:19:30 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/02/21 19:35:08 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,14 +16,20 @@
 # include <iostream>
 # include <fstream>
 # include <map>
-# include <stdlib.h>
+# include <string>
+# include <sstream>
+# include <algorithm>
 
 class BitcoinExchange
 {
 private:
-	// This is the container where we store the DB
-	// map<key_type, value_type> map_name;
-	std::map<std::string, float>	_data;
+	// Container to store the database (date -> rate)
+	// std::map sorts keys automatically, which is perfect for chronological dates
+	std::map<std::string, float>	_database;
+
+	/* --- Internal helpers --- */
+	bool	isValidDate(const std::string &date) const;
+	bool	isValidValue(const std::string &valueStr, float &value) const;
 
 public:
 	/* --- Orthodox Canonical Form --- */
@@ -32,10 +38,9 @@ public:
 	BitcoinExchange	&operator=(const BitcoinExchange &other);
 	~BitcoinExchange();
 
-	/* --- Methods --- */
+	/* --- Core Methods --- */
 	bool	loadDatabase(const std::string &filename);
 	void	processInput(const std::string &filename);
-	bool	isValidDate(const std::string &date);
 };
 
 #endif
