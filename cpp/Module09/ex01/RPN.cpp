@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/07 18:13:42 by erazumov          #+#    #+#             */
-/*   Updated: 2026/02/08 17:36:44 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/02/21 19:18:14 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ RPN::RPN()
 
 RPN::RPN(const RPN &copy)
 {
-	(void)copy;
+	*this = copy;
 
 	//std::cout << "Copy constructor called" << std::endl;
 }
@@ -29,7 +29,10 @@ RPN::RPN(const RPN &copy)
 RPN
 &RPN::operator=(const RPN &other)
 {
-	(void)other;
+	if (this != &other)
+	{
+		this->_stack = other._stack;
+	}
 	return *this;
 
 	//std::cout << "Copy assignment operator called" << std::endl;
@@ -81,6 +84,12 @@ RPN::calculate(const std::string &expression)
 		// 1. If it's a digit (0-9)
 		if (std::isdigit(c))
 		{
+			// Check if the next character is also a digit
+			if (i + 1 < expression.length() && std::isdigit(expression[i + 1]))
+			{
+				std::cerr << "Error" << std::endl;
+				return;
+			}
 			// Convert char to int and push
 			_stack.push(c - '0');
 		}
