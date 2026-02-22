@@ -49,8 +49,7 @@ PmergeMe::~PmergeMe()
 
 /* --------------------------- INTERNAL FUNCTIONS --------------------------- */
 
-/* --- Validation & Parsing --- */
-
+// Checks if the input string consists only of digits
 bool
 PmergeMe::isValidInput(const std::string &str)
 {
@@ -64,208 +63,225 @@ PmergeMe::isValidInput(const std::string &str)
 	return true;
 }
 
-/* --- Vector Algorithm Implementation --- */
-
+// Generates Jacobsthal numbers (1, 3, 5, 11, 21...) for groups
 // J(n) = J(n-1) + 2 * J(n-2)
-void
-PmergeMe::generateJacobsthalVector(std::vector<int> &jacob, int n)
+std::vector<size_t>
+PmergeMe::generateJacobsthal(size_t n)
 {
-	if (n <= 0)
-		return;
+	std::vector<size_t>	jacob;
+
+	if (n == 0)
+		return jacob;
+
 	jacob.push_back(1);
 	if (n == 1)
-		return;
+		return jacob;
+
 	jacob.push_back(3);
-	while (jacob.back() < n)
-	{
-		int	next = jacob[jacob.size() - 1] + 2 * jacob[jacob.size() - 2];
-		jacob.push_back(next);
-	}
-}
 
-void
-PmergeMe::sortVector()
-{
-	if (_vector.size() <= 1)
-		return;
-
-	std::vector<int>	mainChain;
-	std::vector<int>	pend;
-	int					straggler = -1;
-	bool				hasStraggler = (_vector.size() % 2 != 0);
-
-	// 1. Handle odd number of elements (straggler)
-	if (hasStraggler)
-	{
-		straggler = _vector.back();
-		_vector.pop_back();
-	}
-
-	// 2. Create pairs and separate larger elements into Main Chain
-	for (size_t i = 0; i < _vector.size(); i += 2)
-	{
-		if (_vector[i] > _vector[i + 1])
-		{
-			mainChain.push_back(_vector[i]);
-			pend.push_back(_vector[i + 1]);
-		}
-		else
-		{
-			mainChain.push_back(_vector[i + 1]);
-			pend.push_back(_vector[i]);
-		}
-	}
-
-	// 3. Sort the Main Chain (Recursive Ford-Johnson logic simplified)
-	std::sort(mainChain.begin(), mainChain.end());
-
-	// 4. Insertion Phase starting with the first element of pend
-	mainChain.insert(mainChain.begin(), pend[0]);
-
-	std::vector<int>	jacobSeq;
-	generateJacobsthalVector(jacobSeq, pend.size());
-
-	size_t				lastInserted = 1;
-	for (size_t i = 0; i < jacobSeq.size(); i++)
-	{
-		size_t	currIdx = std::min((size_t)jacobSeq[i], pend.size());
-		// Insert elements backwards from the current Jacobsthal index
-		for (size_t j = currIdx; j > lastInserted; j--)
-		{
-			int	val = pend[j - 1];
-			// Binary search to find the correct insertion position
-			std::vector<int>::iterator	pos =
-					std::upper_bound(mainChain.begin(), mainChain.end(), val);
-			mainChain.insert(pos, val);
-		}
-		lastInserted = std::max(lastInserted, currIdx);
-	}
-
-	// 5. Insert straggler if it exists
-	if (hasStraggler)
-	{
-		std::vector<int>::iterator	pos = std::upper_bound(mainChain.begin(),
-				mainChain.end(), straggler);
-		mainChain.insert(pos, straggler);
-	}
-	_vector = mainChain;
-}
-
-/* --- Deque Algorithm Implementation --- */
-
-void
-PmergeMe::generateJacobsthalDeque(std::deque<int> &jacob, int n)
-{
-	if (n <= 0)
-		return;
-	jacob.push_back(1);
-	if (n == 1)
-		return;
-	jacob.push_back(3);
 	while (jacob.back() < n)
 	{
 		jacob.push_back(jacob[jacob.size() - 1] + 2 * jacob[jacob.size() - 2]);
 	}
+	return jacob;
 }
 
-void
-PmergeMe::sortDeque()
+/* --- Vector Algorithm Implementation --- */
+
+// The core Ford-Johnson (Merge-Insertion) algorithm
+std::vector<int>
+PmergeMe::fordJohnsonVector(std::vector<int> &cont)
 {
-	if (_deque.size() <= 1)
-		return;
+	if (cont.size() <= 1)
+		return cont;
 
-	std::deque<int>	mainChain;
-	std::deque<int>	pend;
-	int				straggler = -1;
-	bool			hasStraggler = (_deque.size() % 2 != 0);
+	// 1. Handle odd number of elements (straggler)
+	int		straggler = -1;
+	bool	hasStraggler = cont.size() % 2 != 0;
 
 	if (hasStraggler)
 	{
-		straggler = _deque.back();
-		_deque.pop_back();
+		straggler = cont.back();
+		cont.pop_back();
 	}
 
-	for (size_t i = 0; i < _deque.size(); i += 2)
+	// 2. Create pairs and sort each pair (larger element first)
+	std::vector<std::pair<int, int> >	pairs;
+
+	for (size_t i = 0; i < cont.size(); i += 2)
 	{
-		if (_deque[i] > _deque[i + 1])
-		{
-			mainChain.push_back(_deque[i]);
-			pend.push_back(_deque[i + 1]);
-		}
+		if (cont[i] < cont[i + 1])
+			pairs.push_back(std::make_pair(cont[i + 1], cont[i]));
 		else
-		{
-			mainChain.push_back(_deque[i + 1]);
-			pend.push_back(_deque[i]);
-		}
+			pairs.push_back(std::make_pair(cont[i], cont[i + 1]));
 	}
 
-	std::sort(mainChain.begin(), mainChain.end());
-	mainChain.push_front(pend[0]);
+	// 3. Recursively sort the larger elements (the "winners")
+	std::vector<int>	winners;
 
-	std::deque<int>	jacobSeq;
-	generateJacobsthalDeque(jacobSeq, pend.size());
+	for (size_t i = 0; i < pairs.size(); i++)
+		winners.push_back(pairs[i].first);
+	winners = fordJohnsonVector(winners);
 
-	size_t			lastInserted = 1;
-	for (size_t i = 0; i < jacobSeq.size(); i++)
+	// 4. Build Main Chain and Pend sequence based on sorted winners
+	std::vector<int>	mainChain = winners;
+	std::vector<int>	pend;
+
+	for (size_t i = 0; i < mainChain.size(); i++)
 	{
-		size_t	currIdx = std::min((size_t)jacobSeq[i], pend.size());
-		for (size_t j = currIdx; j > lastInserted; j--)
+		for (size_t j = 0; j < pairs.size(); j++)
 		{
-			int	val = pend[j - 1];
-			std::deque<int>::iterator pos =
-					std::upper_bound(mainChain.begin(), mainChain.end(), val);
-			mainChain.insert(pos, val);
+			if (mainChain[i] == pairs[j].first)
+			{
+				pend.push_back(pairs[j].second);
+				break;
+			}
 		}
-		lastInserted = std::max(lastInserted, currIdx);
 	}
 
+	// 5. Insert the first element of pend into mainChain (free comparison)
+	mainChain.insert(mainChain.begin(), pend[0]);
+
+	// 6. Strategic insertion using Jacobsthal groups
+	std::vector<size_t>	jacob = generateJacobsthal(pend.size());
+	size_t				lastInserted = 1;
+
+	for (size_t i = 0; i < jacob.size(); i++)
+	{
+		size_t	curr = std::min(jacob[i], (size_t)pend.size());
+
+		// Insert elements backwards from the current Jacobsthal index
+		for (size_t j = curr; j > lastInserted; j--)
+		{
+			std::vector<int>::iterator	pos
+					= std::lower_bound(mainChain.begin(), mainChain.end(),
+						pend[j - 1]);
+			mainChain.insert(pos, pend[j - 1]);
+		}
+		lastInserted = std::max(lastInserted, curr);
+	}
+
+	// 7. Finally insert the straggler if it exists
 	if (hasStraggler)
 	{
-		std::deque<int>::iterator	pos = std::upper_bound(mainChain.begin(),
-				mainChain.end(), straggler);
+		std::vector<int>::iterator	pos
+				= std::lower_bound(mainChain.begin(), mainChain.end(), straggler);
 		mainChain.insert(pos, straggler);
 	}
-	_deque = mainChain;
+	return mainChain;
+}
+
+/* --- Deque Algorithm Implementation --- */
+
+std::deque<int>
+PmergeMe::fordJohnsonDeque(std::deque<int> &cont)
+{
+	if (cont.size() <= 1)
+		return cont;
+
+	int		straggler = -1;
+	bool	hasStraggler = cont.size() % 2 != 0;
+
+	if (hasStraggler)
+	{
+		straggler = cont.back();
+		cont.pop_back();
+	}
+
+	std::deque<std::pair<int, int> >	pairs;
+
+	for (size_t i = 0; i < cont.size(); i += 2)
+	{
+		if (cont[i] < cont[i + 1])
+			pairs.push_back(std::make_pair(cont[i + 1], cont[i]));
+		else
+			pairs.push_back(std::make_pair(cont[i], cont[i + 1]));
+	}
+
+	std::deque<int>	winners;
+
+	for (size_t i = 0; i < pairs.size(); i++)
+		winners.push_back(pairs[i].first);
+	winners = fordJohnsonDeque(winners);
+
+	std::deque<int>	mainChain = winners;
+	std::deque<int>	pend;
+
+	for (size_t i = 0; i < mainChain.size(); i++)
+	{
+		for (size_t j = 0; j < pairs.size(); j++)
+		{
+			if (mainChain[i] == pairs[j].first)
+			{
+				pend.push_back(pairs[j].second);
+				break;
+			}
+		}
+	}
+	mainChain.push_front(pend[0]);
+
+	std::vector<size_t>	jacob = generateJacobsthal(pend.size());
+	size_t				lastInserted = 1;
+
+	for (size_t i = 0; i < jacob.size(); i++)
+	{
+		size_t	curr = std::min(jacob[i], (size_t)pend.size());
+
+		for (size_t j = curr; j > lastInserted; j--)
+		{
+			std::deque<int>::iterator	pos
+					= std::lower_bound(mainChain.begin(), mainChain.end(),
+						pend[j - 1]);
+			mainChain.insert(pos, pend[j - 1]);
+		}
+		lastInserted = std::max(lastInserted, curr);
+	}
+	if (hasStraggler)
+	{
+		std::deque<int>::iterator	pos
+				= std::lower_bound(mainChain.begin(), mainChain.end(), straggler);
+		mainChain.insert(pos, straggler);
+	}
+	return mainChain;
 }
 
 /* ------------------------------ CORE METHODS ------------------------------ */
-
-/* --- Execution & Display --- */
 
 void
 PmergeMe::run(int ac, char **av)
 {
 	struct timeval	start, end;
 
-	// 1. Measure and sort Vector
+	// Process and time the Vector container
 	gettimeofday(&start, NULL);
+
 	for (int i = 1; i < ac; i++)
 	{
 		if (!isValidInput(av[i]))
 			throw std::runtime_error("Error");
 		_vector.push_back(std::atoi(av[i]));
 	}
-	sortVector();
-	gettimeofday(&end, NULL);
-	_vectorTime = (end.tv_sec - start.tv_sec) * 1000000.0 +
-			(end.tv_usec - start.tv_usec);
+	_vector = fordJohnsonVector(_vector);
 
-	// 2. Measure and sort Deque
-	gettimeofday(&start, NULL);
-	for (int i = 1; i < ac; i++)
-	{
-		_deque.push_back(std::atoi(av[i]));
-	}
-	sortDeque();
 	gettimeofday(&end, NULL);
-	_dequeTime = (end.tv_sec - start.tv_sec) * 1000000.0 +
-			(end.tv_usec - start.tv_usec);
+	_vectorTime = (end.tv_sec - start.tv_sec) * 1e6 + (end.tv_usec - start.tv_usec);
+
+	// Process and time the Deque container
+	gettimeofday(&start, NULL);
+
+	for (int i = 1; i < ac; i++)
+		_deque.push_back(std::atoi(av[i]));
+	_deque = fordJohnsonDeque(_deque);
+
+	gettimeofday(&end, NULL);
+	_dequeTime = (end.tv_sec - start.tv_sec) * 1e6 + (end.tv_usec - start.tv_usec);
 }
 
 void
 PmergeMe::printBefore(int ac, char **av) const
 {
 	std::cout << "Before: ";
+
 	for (int i = 1; i < ac; i++)
 		std::cout << av[i] << " ";
 	std::cout << std::endl;
@@ -275,6 +291,7 @@ void
 PmergeMe::printAfter() const
 {
 	std::cout << "After:  ";
+
 	for (size_t i = 0; i < _vector.size(); i++)
 		std::cout << _vector[i] << " ";
 	std::cout << std::endl;
@@ -286,6 +303,7 @@ PmergeMe::printTime() const
 	std::cout << "Time to process a range of " << _vector.size()
 			  << " elements with std::vector : " << _vectorTime
 			  << " us" << std::endl;
+
 	std::cout << "Time to process a range of " << _deque.size()
 			  << " elements with std::deque  : " << _dequeTime
 			  << " us" << std::endl;

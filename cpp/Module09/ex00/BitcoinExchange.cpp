@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/31 23:23:29 by erazumov          #+#    #+#             */
-/*   Updated: 2026/02/21 19:59:53 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/02/22 15:29:06 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,6 +71,7 @@ BitcoinExchange::isValidDate(const std::string& date) const
 	// Handle month with 30 days
 	if ((month == 4 || month == 6 || month == 9 || month == 11) && day > 30)
 		return false;
+
 	return true;
 }
 
@@ -87,8 +88,7 @@ BitcoinExchange::loadDatabase(const std::string &filename)
 	}
 
 	std::string	line;
-	if (!std::getline(file, line)) // Skip header "date,exchange_rate"
-		return false;
+	std::getline(file, line); // Skip header
 
 	while (std::getline(file, line))
 	{
@@ -97,10 +97,8 @@ BitcoinExchange::loadDatabase(const std::string &filename)
 			continue;
 
 		std::string	date = line.substr(0, sep);
-		std::string	rateStr = line.substr(sep + 1);
-
 		// Convert string to float for the price
-		float	rate = static_cast<float>(std::atof(rateStr.c_str()));
+		float	rate = static_cast<float>(std::atof(line.substr(sep + 1).c_str()));
 		// Store in the map: the date is the key, the rate is the value
 		_database[date] = rate;
 	}
@@ -114,11 +112,13 @@ BitcoinExchange::processInput(const std::string &filename)
 	std::ifstream	file(filename.c_str());
 	if (!file.is_open())
 	{
+		std::cerr << "Error: could not open file." << std::endl;
 		return;
 	}
 
 	std::string	line;
-	std::getline(file, line); // Skip "date | value" header
+	if (!std::getline(file, line)) // Skip header
+		return;
 
 	while (std::getline(file, line))
 	{
@@ -130,19 +130,23 @@ BitcoinExchange::processInput(const std::string &filename)
 		}
 
 		std::string	date = line.substr(0, sep);
-		// Clean spaces
-		date.erase(std::remove(date.begin(), date.end(), ' '), date.end());
+		// Trim spaces autour de la date
+		date.erase(date.find_last_not_of(" \t") + 1);
+		date.erase(0, date.find_first_not_of(" \t"));
 
 		if (!isValidDate(date))
 		{
-			std::cerr << "Error: bad input => " << line << std::endl;
+			std::cerr << "Error: bad input => " << date << std::endl;
 			continue;
 		}
 
+
 		// Extract value after the date (before the pipe)
 		std::string	valStr = line.substr(sep + 1);
-		float	value = std::atof(valStr.c_str());
+		char		*endPtr;
+		double		value = std::strtod(valStr.c_str(), &endPtr);
 
+		// Validation of the value
 		if (value < 0)
 		{
 			std::cerr << "Error: not a positive number." << std::endl;
@@ -159,12 +163,14 @@ BitcoinExchange::processInput(const std::string &filename)
 					_database.lower_bound(date);
 
 			// If not exact date, move to the previous one
-			if (it != _database.begin() && it->first != date)
+			if (it == _database.end()
+					|| (it->first != date && it != _database.begin()))
 			{
-				--it; // Move to previous date if not exact match
+				if (it->first != date)
+					--it; // Move to previous date if not exact match
 			}
 
-			if (it->first > date && it == _database.begin())
+			if (it == _database.begin() && it->first > date)
 			{
 				 std::cerr << "Error: no data for this date." << std::endl;
 			}

@@ -18,16 +18,16 @@ int	main(int ac, char **av)
 	// As required by the constraints
 	if (ac != 2)
 	{
-		std::cerr << "Error" << std::endl;
+		std::cerr << "Usage: ./RPN \"expression\"" << std::endl;
 		return 1;
 	}
 
 	// 2. Instantiate the RPN class
-	RPN	rpn;
+	RPN	calc;
 
 	// 3. Process the expression
 	// The program must handle operations with "+ - / *" tokens
-	rpn.calculate(av[1]);
+	calc.calculate(av[1]);
 
 	return 0;
 }

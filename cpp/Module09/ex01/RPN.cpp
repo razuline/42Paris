@@ -45,14 +45,16 @@ RPN::~RPN()
 
 /* --------------------------- INTERNAL FUNCTIONS --------------------------- */
 
+// Checks if the character is one of the four allowed operators
 bool
-RPN::isOperator(char c) const
+RPN::isOperator(char c)
 {
 	return (c == '+' || c == '-' || c == '/' || c == '*');
 }
 
+// Performs the calculation based on the operator token
 int
-RPN::performOperation(int a, int b, char op) const
+RPN::applyOperation(int a, int b, char op)
 {
 	if (op == '+')
 		return a + b;
@@ -63,7 +65,7 @@ RPN::performOperation(int a, int b, char op) const
 	if (op == '/')
 	{
 		if (b == 0)
-			throw std::runtime_error("Error");
+			throw std::runtime_error("Error"); // Division by zero
 		return a / b;
 	}
 	return 0;
@@ -72,37 +74,32 @@ RPN::performOperation(int a, int b, char op) const
 /* -------------------------------- METHODS --------------------------------- */
 
 void
-RPN::calculate(const std::string &expression)
+RPN::calculate(const std::string &expr)
 {
-	for (size_t i = 0; i < expression.length(); ++i)
+	for (size_t i = 0; i < expr.length(); ++i)
 	{
-		char	c = expression[i];
-
-		// Skip spaces
-		if (c == ' ')
+		if (expr[i] == ' ')
 			continue;
-		// 1. If it's a digit (0-9)
-		if (std::isdigit(c))
+
+		// Each number must be a single digit < 10
+		if (isdigit(expr[i]))
 		{
 			// Check if the next character is also a digit
-			if (i + 1 < expression.length() && std::isdigit(expression[i + 1]))
+			if (i + 1 < expr.length() && isdigit(expr[i + 1]))
 			{
-				std::cerr << "Error" << std::endl;
+				std::cerr << "Error" << std::endl; // Invalid input
 				return;
 			}
-			// Convert char to int and push
-			_stack.push(c - '0');
+			_stack.push(expr[i] - '0');
 		}
-		// 2. If it's an operator
-		else if (isOperator(c))
+		else if (isOperator(expr[i]))
 		{
+			// Need at least two operands
 			if (_stack.size() < 2)
 			{
 				std::cerr << "Error" << std::endl;
 				return;
 			}
-			// Pop the two top values
-			// Order is important: the first pop is 'b', the second is 'a'
 			int	b = _stack.top();
 			_stack.pop();
 			int	a = _stack.top();
@@ -110,24 +107,28 @@ RPN::calculate(const std::string &expression)
 
 			try
 			{
-				_stack.push(performOperation(a, b, c));
+				_stack.push(applyOperation(a, b, expr[i]));
 			}
 			catch (const std::exception &e)
 			{
-				std::cerr << e.what() << std::endl;
+				std::cerr << "Error" << std::endl;
 				return;
 			}
 		}
 		else
 		{
-			// Invalid characters or brackets
-			std::cerr << "Error" << std::endl;
+			std::cerr << "Error" << std::endl; // Invalid character
 			return;
 		}
 	}
-	// 3. Final check: only one value should remain
+
+	// After processing, exactly one result must remain on the stack
 	if (_stack.size() != 1)
+	{
 		std::cerr << "Error" << std::endl;
+	}
 	else
+	{
 		std::cout << _stack.top() << std::endl;
+	}
 }

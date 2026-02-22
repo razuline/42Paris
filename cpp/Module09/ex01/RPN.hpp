@@ -24,8 +24,8 @@ private:
 	std::stack<int>	_stack;
 
 	/* --- Internal Functions --- */
-	bool	isOperator(char c) const;
-	int		performOperation(int a, int b, char op) const;
+	bool	isOperator(char c);
+	int		applyOperation(int a, int b, char op);
 
 public:
 	/* --- Orthodox Canonical Form --- */
@@ -35,7 +35,7 @@ public:
 	~RPN();
 
 	/* --- Methods --- */
-	void	calculate(const std::string &expression);
+	void	calculate(const std::string &expr);
 };
 
 #endif

@@ -17,9 +17,9 @@
 # include <vector>
 # include <deque>
 # include <string>
-# include <ctime>
 # include <algorithm>
 # include <sys/time.h>
+# include <cstdlib>
 
 class PmergeMe
 {
@@ -27,22 +27,24 @@ private:
 	// Containers for the two required implementations
 	std::vector<int>	_vector;
 	std::deque<int>		_deque;
-
 	// Time tracking variables
 	double	_vectorTime;
 	double	_dequeTime;
 
 	/* --- Common Logic (Internal) --- */
-	// Helper to check if the input is a valid positive integer
-	bool	isValidInput(const std::string &str);
+	// Validation
+	bool				isValidInput(const std::string &str);
 
-	/* --- Vector Algorithm Implementation --- */
-	void	sortVector();
-	void	generateJacobsthalVector(std::vector<int> &jacob, int n);
+	// Algorithm Vector
+	void				sortVector(std::vector<int> &cont);
+	std::vector<int>	fordJohnsonVector(std::vector<int> &cont);
 
-	/* --- Deque Algorithm Implementation --- */
-	void	sortDeque();
-	void	generateJacobsthalDeque(std::deque<int> &jacob, int n);
+	// Algorithm Deque
+	void				sortDeque(std::deque<int> &cont);
+	std::deque<int>		fordJohnsonDeque(std::deque<int> &cont);
+
+	// Tools
+	std::vector<size_t>	generateJacobsthal(size_t n);
 
 public:
 	/* --- Orthodox Canonical Form --- */
