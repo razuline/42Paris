@@ -25,10 +25,14 @@ int	main(int ac, char **av)
 
 	BitcoinExchange	btc;
 
-	// 2. Load the database and check for success in one go
-	btc.loadDatabase("data.csv");
+	// 2. Load the data.csv AND STOP if it fails
+	if (btc.loadDatabase("data.csv") == false)
+	{
+		std::cerr << "Error: database file missing." << std::endl;
+		return 1;
+	}
 
-	// 3. Process the input file provided by the user
+	// 3. Process the input ONLY if database is loaded
 	btc.processInput(av[1]);
 
 	return 0;
