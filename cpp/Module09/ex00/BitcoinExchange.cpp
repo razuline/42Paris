@@ -81,14 +81,16 @@ bool
 BitcoinExchange::loadDatabase(const std::string &filename)
 {
 	std::ifstream	file(filename.c_str());
+
+	// Check if the file actually exists and can be opened
 	if (!file.is_open())
 	{
-		std::cerr << "Error: could not open database." << std::endl;
+		std::cerr << "Error: could not open database file:" << std::endl;
 		return false;
 	}
 
 	std::string	line;
-	std::getline(file, line); // Skip header
+	std::getline(file, line); // Skip the header line (date,exchange_rate)
 
 	while (std::getline(file, line))
 	{
@@ -117,8 +119,16 @@ BitcoinExchange::processInput(const std::string &filename)
 	}
 
 	std::string	line;
-	if (!std::getline(file, line)) // Skip header
+	// Skip the header line of the input file
+	if (!std::getline(file, line))
 		return;
+
+	// Critical safety check: Ensure database is not empty to avoid iterator issues
+	if (_database.empty())
+	{
+		std::cerr << "Error: database is empty." << std::endl;
+		return;
+	}
 
 	while (std::getline(file, line))
 	{
@@ -129,8 +139,8 @@ BitcoinExchange::processInput(const std::string &filename)
 			continue;
 		}
 
+		// Extract and trim the date string
 		std::string	date = line.substr(0, sep);
-		// Trim spaces autour de la date
 		date.erase(date.find_last_not_of(" \t") + 1);
 		date.erase(0, date.find_first_not_of(" \t"));
 
@@ -140,46 +150,53 @@ BitcoinExchange::processInput(const std::string &filename)
 			continue;
 		}
 
-
-		// Extract value after the date (before the pipe)
+		// Extract and validate the value associated with the date
 		std::string	valStr = line.substr(sep + 1);
 		char		*endPtr;
 		double		value = std::strtod(valStr.c_str(), &endPtr);
 
-		// Validation of the value
+		if (valStr.find_first_not_of(" \t") == std::string::npos
+				|| (*endPtr != '\0' && !std::isspace(*endPtr)))
+		{
+			std::cerr << "Error: bad input => " << valStr << std::endl;
+			continue;
+		}
 		if (value < 0)
 		{
 			std::cerr << "Error: not a positive number." << std::endl;
+			continue;
 		}
-		else if (value > 1000)
+		if (value > 1000)
 		{
 			std::cerr << "Error: too large a number." << std::endl;
+			continue;
 		}
+
+		// Find the closest date using lower_bound
+		// lower_bound returns the first element NOT LESS than the date
+		std::map<std::string, float>::iterator	it = _database.lower_bound(date);
+
+		// Case 1: Exact match found or the date is within range
+		if (it != _database.end() && it->first == date)
+		{
+			std::cout << date << " => " << value << " = "
+					  << (value * it->second) << std::endl;
+		}
+		// Case 2: lower_bound returns the very first element, but it's not a match.
+		// This means the requested date is older than the oldest date in our database.
+		// Decrementing here would cause the Segfault you encountered.
+		else if (it == _database.begin())
+		{
+			std::cerr << "Error: no data for this date => " << date << std::endl;
+		}
+		// Case 3: Date not found, but we can safely move to the previous available date.
 		else
 		{
-			// Find the rate using lower_bound
-			// lower_bound returns the first element >= date
-			std::map<std::string, float>::iterator	it =
-					_database.lower_bound(date);
-
-			// If not exact date, move to the previous one
-			if (it == _database.end()
-					|| (it->first != date && it != _database.begin()))
-			{
-				if (it->first != date)
-					--it; // Move to previous date if not exact match
-			}
-
-			if (it == _database.begin() && it->first > date)
-			{
-				 std::cerr << "Error: no data for this date." << std::endl;
-			}
-			else
-			{
-				// Output format: date => value => result
-				std::cout << date << " => " << value << " = "
-						  << (value * it->second) << std::endl;
-			}
+			// If it == _database.end(), the requested date is newer than any entry.
+			// If it->first != date, the current 'it' is the first date AFTER the requested one.
+			// In both cases, the correct value is the one immediately preceding 'it'.
+			--it;
+			std::cout << date << " => " << value << " = " << (value * it->second) << std::endl;
 		}
 	}
 }
