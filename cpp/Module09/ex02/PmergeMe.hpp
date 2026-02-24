@@ -36,11 +36,9 @@ private:
 	bool				isValidInput(const std::string &str);
 
 	// Algorithm Vector
-	void				sortVector(std::vector<int> &cont);
 	std::vector<int>	fordJohnsonVector(std::vector<int> &cont);
 
 	// Algorithm Deque
-	void				sortDeque(std::deque<int> &cont);
 	std::deque<int>		fordJohnsonDeque(std::deque<int> &cont);
 
 	// Tools
