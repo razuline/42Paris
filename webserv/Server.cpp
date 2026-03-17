@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:40 by erazumov          #+#    #+#             */
-/*   Updated: 2026/03/09 17:31:35 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/03/17 17:18:05 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,45 +110,99 @@ void
 Server::run()
 {
 	struct sockaddr_in	clientAddr;
-	socklen_t			addrSize;
+	// Reset the size of the structure before each accept call
+	socklen_t			addrSize = sizeof(clientAddr);
+
+	// Initialising the server socket for polling
+	struct pollfd	serv_pfd;
+
+	serv_pfd.fd = _serv_fd;
+	serv_pfd.events = POLLIN; // Monitor for incoming connections
+	serv_pfd.revents = 0;
+	_fds.push_back(serv_pfd);
 
 	std::cout << "Server is listening on port " << _port << "..." << std::endl;
 
-	// The loop continues until a SIGINT (Ctrl+C) is received
 	while(g_stop == 0)
 	{
-		// Reset the size of the structure before each accept call
-		addrSize = sizeof(clientAddr);
-
-		// Accept a new incoming connection
-		// This call blocks execution until a client connects
-		int	client_fd = accept(_serv_fd, (struct sockaddr *)&clientAddr, &addrSize);
-
-		if (client_fd >= 0)
+		// Wait for events on any monitored file descriptor
+		// Using -1 makes poll block indefinitely until an event occurs
+		if (poll(&_fds[0], _fds.size(), -1) < 0)
 		{
-			std::cout << "Сonnection accepted!" << std::endl;
-
-			// Simple HTTP response to acknowledge the connection
-			const char	*msg =
-				"HTTP/1.1 200 OK\r\nContent-Length: 13\r\n\r\nHello World!\n";
-			send(client_fd, msg, strlen(msg), 0);
-
-			// Close the communication socket with the client
-			close(client_fd);
+			if (g_stop == 0)
+				perror("poll error");
+			continue;
 		}
-		else
+
+		// Iterate through the vector of file descriptors to check for events
+		for (size_t i = 0; i < _fds.size(); ++i)
 		{
-			// In non-blocking mode, if there's no client, accept sets errno to EAGAIN
-			if (errno != EAGAIN && errno != EWOULDBLOCK)
+			// Check if the descriptor is ready for reading
+			if (_fds[i].revents & POLLIN)
 			{
-				if (g_stop == 0)
+				if (_fds[i].fd == _serv_fd)
 				{
-					perror("Accept failed");
+					// HANDLE NEW CONNECTION: The server socket has a pending connection
+					int	new_fd = accept(_serv_fd, (struct sockaddr *)&clientAddr,
+									&addrSize);
+					if (new_fd >= 0)
+					{
+						// Set the new client socket to non-blocking mode
+						fcntl(new_fd, F_SETFL, O_NONBLOCK);
+
+						struct pollfd	client_pfd;
+						client_pfd.fd = new_fd;
+						client_pfd.events = POLLIN; // Wait for the client to send data
+						client_pfd.revents = 0;
+						_fds.push_back(client_pfd);
+						std::cout << "New client connected on fd " << new_fd
+								  << std::endl;
+					}
+				}
+				else
+				{
+					// HANDLE EXISTING CLIENT: An established connection has sent data
+					char	buff[4096];
+					std::memset(buff, 0, sizeof(buff));
+
+					// Receive data from the client socket
+					ssize_t	bytes_read = recv(_fds[i].fd, buff,
+											sizeof(buff) - 1, 0);
+
+					if (bytes_read > 0)
+					{
+						// Process the request and send a basic HTTP response
+						std::cout << "Request from fd " << _fds[i].fd << ":\n"
+								  << buff << std::endl;
+
+						const char	*response =
+							"HTTP/1.1 200 OK\r\nContent-Length: 13\r\n\r\nHello World!\n";
+						send(_fds[i].fd, response, std::strlen(response), 0);
+
+						// Note: Connection is kept open for potential further requests (Keep-Alive)
+					}
+					else if (bytes_read == 0)
+					{
+						// CLIENT DISCONNECTED: The peer has closed the connection
+						std::cout << "Client on fd " << _fds[i].fd
+								  << " disconnected." << std::endl;
+						close(_fds[i].fd);
+						_fds.erase(_fds.begin() + i);
+						--i; // Adjust index after removing element from vector
+					}
+					else
+					{
+						// RECV ERROR: Handle unexpected disconnection or read failure
+						perror("recv error");
+						close(_fds[i].fd);
+						_fds.erase(_fds.begin() + i);
+						--i;
+					}
 				}
 			}
+			// Clear revents after processing the event for this descriptor
+			_fds[i].revents = 0;
 		}
-		// Avoid 100% CPU usage
-		usleep(1000); // 1ms
 	}
 }
 
