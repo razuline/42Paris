@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:32 by erazumov          #+#    #+#             */
-/*   Updated: 2026/03/09 17:27:59 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/03/17 15:58:29 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,8 @@
 # include <fcntl.h>
 # include <sys/socket.h>
 # include <netinet/in.h>
+# include <vector>
+# include <sys/poll.h>
 # include <iostream>
 # include <unistd.h>
 
@@ -32,6 +34,8 @@ private:
 	int					_serv_fd; // Server's main listening socket descriptor
 	int					_port;    // Port number the server listens on
 	struct sockaddr_in	_addr;    // Server's address information structure
+
+	std::vector<struct pollfd>	_fds;
 
 	// Prevent copying to avoid issues with shared file descriptors
 	Server	&operator=(const Server &other);
