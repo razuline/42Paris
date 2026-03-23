@@ -1,0 +1,16 @@
+# Binaries
+webserv
+
+# Objects
+*.o
+
+# Debug and Sanitizers
+*.dSYM/
+.vscode/
+
+# OS junk
+.DS_Store
+
+# Temporary files
+*.swp
+*~
