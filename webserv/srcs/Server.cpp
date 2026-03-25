@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:40 by erazumov          #+#    #+#             */
-/*   Updated: 2026/03/25 17:06:48 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/03/25 18:38:41 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,19 +65,20 @@ void
 Server::addToPoll(int fd)
 {
 	// Initialising the server socket for polling
-	struct pollfd	serv_pfd;
+	struct pollfd	pfd;
 
-	serv_pfd.fd = _serv_fd;
-	serv_pfd.events = POLLIN; // Monitor for incoming connections
-	serv_pfd.revents = 0;
+	pfd.fd = fd;
+	pfd.events = POLLIN; // Monitor for incoming connections
+	pfd.revents = 0;
 
-	_fds.push_back(serv_pfd);
+	_fds.push_back(pfd);
 }
 
 void
 Server::acceptNewConnection()
 {
 	struct sockaddr_in	addr;
+	std::memset(&addr, 0, sizeof(addr));
 	// Reset the size of the structure before each accept call
 	socklen_t			size = sizeof(addr);
 
@@ -102,6 +103,35 @@ Server::acceptNewConnection()
 	}
 }
 
+std::string
+Server::readFile(const std::string &path)
+{
+	std::string	cleanPath = path;
+
+	// If path starts with '/', remove it (to avoid "www//index.html")
+	if (!cleanPath.empty() && cleanPath[0] == '/')
+	{
+		cleanPath.erase(0, 1);
+	}
+
+	// 1. Look into a folder named "www" (root)
+	std::string	fullPath = "www/" + cleanPath;
+
+	std::cout << "DEBUG: Trying to open: " << fullPath << std::endl;
+
+	// 2. Open the file
+	std::ifstream	file(fullPath.c_str());
+	if (!file.is_open())
+	{
+		return "";
+	}
+
+	// 3. Read everything into a string
+	std::stringstream	buff;
+	buff << file.rdbuf();
+	return buff.str();
+}
+
 void
 Server::removeClient(int idx)
 {
@@ -119,23 +149,43 @@ Server::handleClientRequest(int idx)
 	std::memset(buff, 0, sizeof(buff));
 
 	// 1. Read data from the client (using the fd at index i)
-	ssize_t	bytes_received = recv(_fds[idx].fd, buff, sizeof(buff) - 1, 0);
+	ssize_t	bytes = recv(_fds[idx].fd, buff, sizeof(buff) - 1, 0);
 
-	if (bytes_received > 0)
+	if (bytes > 0)
 	{
 		// 2. TRANSLATION: Use the Request class to understand the buffer
 		Request	req;
 		req.parse(std::string(buff));
 
-		// What the browser wants in the terminal
-		std::cout << "Client (fd " << _fds[idx].fd << ") wants: "
-				  << req.getMethod() << " " << req.getPath() << std::endl;
+		// 1. Get the file content
+		std::string path = req.getPath();
+		if (path == "/")
+			path = "/index.html"; // Default file
 
-		// 3. ANSWER: Send a simple "OK" back
-		const char	*resp = "HTTP/1.1 200 OK\r\nContent-Length: 11\r\n\r\nHello 42!\n";
-		send(_fds[idx].fd, resp, std::strlen(resp), 0);
+		std::string	content = readFile(path);
+
+		// 2. Prepare the HTTP Header
+		std::stringstream	response;
+		if (!content.empty())
+		{
+			response << "HTTP/1.1 200 OK\r\n";
+			response << "Content-Length: " << content.size() << "\r\n";
+			response << "Content-Type: text/html\r\n\r\n";
+			response << content;
+		}
+		else
+		{
+			// 3. Handle 404 Error (File not found)
+			response << "HTTP/1.1 404 Not Found\r\n";
+			response << "Content-Length: 14\r\n\r\n";
+			response << "File not found";
+		}
+
+		// 4. Send to the browser
+		std::string	res_str = response.str();
+		send(_fds[idx].fd, res_str.c_str(), res_str.size(), 0);
 	}
-	else if (bytes_received == 0)
+	else if (bytes == 0)
 	{
 		// CLIENT LEFT: The browser closed the connection
 		std::cout << "Client on fd " << _fds[idx].fd << " disconnected." << std::endl;
@@ -223,9 +273,16 @@ Server::run()
 			if (_fds[i].revents & POLLIN)
 			{
 				if (_fds[i].fd == _serv_fd)
+				{
 					acceptNewConnection();  // New guest arrived
+				}
 				else
+				{
+					size_t	before = _fds.size();
 					handleClientRequest(i); // Existing guest sent data
+					if (_fds.size() < before)
+						i--;
+				}
 			}
 		}
 	}

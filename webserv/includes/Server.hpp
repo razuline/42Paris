@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:32 by erazumov          #+#    #+#             */
-/*   Updated: 2026/03/25 16:53:43 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/03/25 18:22:54 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,8 @@
 # include <netinet/in.h>
 # include <vector>
 # include <sys/poll.h>
+# include <fstream>
+# include <sstream>
 # include <iostream>
 # include <unistd.h>
 
@@ -38,10 +40,11 @@ private:
 	std::vector<struct pollfd>	_fds;
 
 	/* --- Helper Methods --- */
-	void	addToPoll(int fd);
-	void	acceptNewConnection();
-	void	removeClient(int idx);
-	void	handleClientRequest(int idx);
+	void		addToPoll(int fd);
+	void		acceptNewConnection();
+	void		removeClient(int idx);
+	void		handleClientRequest(int idx);
+	std::string	readFile(const std::string &path);
 
 	// Prevent copying to avoid issues with shared file descriptors
 	Server	&operator=(const Server &other);

@@ -6,19 +6,24 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/03/09 15:17:52 by erazumov          #+#    #+#              #
-#    Updated: 2026/03/25 15:34:40 by erazumov         ###   ########.fr        #
+#    Updated: 2026/03/25 18:56:58 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-NAME = webserv
+NAME       = webserv
 
-CXX = c++
-CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -g3
+CC         = c++
+FLAGS      = -Wall -Wextra -Werror -std=c++98 -g3
+INC        = -I includes
 
-SRCS = main.cpp \
-	   Server.cpp \
-	   Request.cpp
-OBJS = $(SRCS:.cpp=.o)
+SRC_FILES  = main.cpp \
+			 Server.cpp \
+			 Request.cpp
+
+SRCS       = $(addprefix srcs/, $(SRC_FILES))
+
+OBJ_DIR    = objs
+OBJS       = $(addprefix $(OBJ_DIR)/, $(SRC_FILES:.cpp=.o))
 
 # Colors
 Y = \033[33m
@@ -31,23 +36,24 @@ CUT = \033[K
 
 all: $(NAME)
 
-%.o: %.cpp
-	@echo "$(Y)Compiling [$<]...$(X)"
-	@$(CXX) $(CXXFLAGS) -c $< -o $@
-	@printf "$(UP)$(CUT)"
-
 $(NAME): $(OBJS)
-	@echo "$(Y)📁 Compiling object files [$(NAME)]...$(X)"
-	@$(CXX) $(CXXFLAGS) $(OBJS) -o $(NAME)
+	@echo "$(Y)📁 Compiling object files...$(X)"
+	@$(CC) $(FLAGS) $(INC) $(OBJS) -o $(NAME)
 	@echo "$(G)✅ Finished [$(NAME)]$(X)"
 
+$(OBJ_DIR)/%.o: srcs/%.cpp
+	@mkdir -p $(OBJ_DIR)
+	@echo "$(Y)Compiling [$<]...$(X)"
+	$(CC) $(FLAGS) $(INC) -c $< -o $@
+	@printf "$(UP)$(CUT)"
+
 clean:
-	@rm -f $(OBJS)
-	@echo "$(R)🧹 Object files removed [$(OBJS)]$(X)"
+	@rm -rf $(OBJ_DIR)
+	@echo "$(R)🧹 Object files removed$(X)"
 
 fclean: clean
-	@rm -f $(NAME)
-	@echo "$(R)🗑️  Executables removed [$(NAME)]$(X)"
+	@rm -rf $(NAME)
+	@echo "$(R)🗑️  Executables removed$(X)"
 
 re: fclean all
 
