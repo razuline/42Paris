@@ -6,11 +6,12 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:40 by erazumov          #+#    #+#             */
-/*   Updated: 2026/03/17 17:18:05 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/03/25 17:06:48 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
+#include "Request.hpp"
 
 /* ------------------------- ORTHODOX CANONICAL FORM ------------------------ */
 
@@ -56,6 +57,96 @@ Server::~Server()
 	}
 
 	// std::cout << "Destructor called" << std::endl;
+}
+
+/* ----------------------------- HELPER METHODS ----------------------------- */
+
+void
+Server::addToPoll(int fd)
+{
+	// Initialising the server socket for polling
+	struct pollfd	serv_pfd;
+
+	serv_pfd.fd = _serv_fd;
+	serv_pfd.events = POLLIN; // Monitor for incoming connections
+	serv_pfd.revents = 0;
+
+	_fds.push_back(serv_pfd);
+}
+
+void
+Server::acceptNewConnection()
+{
+	struct sockaddr_in	addr;
+	// Reset the size of the structure before each accept call
+	socklen_t			size = sizeof(addr);
+
+	// 1. Accept the incoming connection from the server socket
+	int					new_fd = accept(_serv_fd, (struct sockaddr *)&addr, &size);
+
+	if (new_fd >= 0)
+	{
+		// 2. MANDATORY: Set the socket to non-blocking mode (Rule IV.2)
+		// This prevents the server from hanging during I/O operations
+		fcntl(new_fd, F_SETFL, O_NONBLOCK);
+
+		// 3. Add this new client to the list of monitored descriptors
+		addToPoll(new_fd);
+
+		std::cout << "New client connected on fd " << new_fd << std::endl;
+	}
+	else
+	{
+		// If accept fails, we just log the error
+		perror("Accept failed");
+	}
+}
+
+void
+Server::removeClient(int idx)
+{
+	std::cout << "Client on fd " << _fds[idx].fd << " disconnected." << std::endl;
+
+	// RECV ERROR: Handle unexpected disconnection or read failure
+	close(_fds[idx].fd);
+	_fds.erase(_fds.begin() + idx);
+}
+
+void
+Server::handleClientRequest(int idx)
+{
+	char	buff[4096];
+	std::memset(buff, 0, sizeof(buff));
+
+	// 1. Read data from the client (using the fd at index i)
+	ssize_t	bytes_received = recv(_fds[idx].fd, buff, sizeof(buff) - 1, 0);
+
+	if (bytes_received > 0)
+	{
+		// 2. TRANSLATION: Use the Request class to understand the buffer
+		Request	req;
+		req.parse(std::string(buff));
+
+		// What the browser wants in the terminal
+		std::cout << "Client (fd " << _fds[idx].fd << ") wants: "
+				  << req.getMethod() << " " << req.getPath() << std::endl;
+
+		// 3. ANSWER: Send a simple "OK" back
+		const char	*resp = "HTTP/1.1 200 OK\r\nContent-Length: 11\r\n\r\nHello 42!\n";
+		send(_fds[idx].fd, resp, std::strlen(resp), 0);
+	}
+	else if (bytes_received == 0)
+	{
+		// CLIENT LEFT: The browser closed the connection
+		std::cout << "Client on fd " << _fds[idx].fd << " disconnected." << std::endl;
+		removeClient(idx);
+	}
+	else
+	{
+		// ERROR: Something went wrong with the connection
+		perror("Recv failed");
+		removeClient(idx);
+	}
 }
 
 /* ------------------------------ CORE METHODS ------------------------------ */
@@ -109,23 +200,14 @@ Server::setup()
 void
 Server::run()
 {
-	struct sockaddr_in	clientAddr;
-	// Reset the size of the structure before each accept call
-	socklen_t			addrSize = sizeof(clientAddr);
-
-	// Initialising the server socket for polling
-	struct pollfd	serv_pfd;
-
-	serv_pfd.fd = _serv_fd;
-	serv_pfd.events = POLLIN; // Monitor for incoming connections
-	serv_pfd.revents = 0;
-	_fds.push_back(serv_pfd);
+	// 1. Add server socket to poll list
+	addToPoll(_serv_fd);
 
 	std::cout << "Server is listening on port " << _port << "..." << std::endl;
 
-	while(g_stop == 0)
+	while (g_stop == 0)
 	{
-		// Wait for events on any monitored file descriptor
+		// 2. Wait for activity on any socket (requirement)
 		// Using -1 makes poll block indefinitely until an event occurs
 		if (poll(&_fds[0], _fds.size(), -1) < 0)
 		{
@@ -141,67 +223,10 @@ Server::run()
 			if (_fds[i].revents & POLLIN)
 			{
 				if (_fds[i].fd == _serv_fd)
-				{
-					// HANDLE NEW CONNECTION: The server socket has a pending connection
-					int	new_fd = accept(_serv_fd, (struct sockaddr *)&clientAddr,
-									&addrSize);
-					if (new_fd >= 0)
-					{
-						// Set the new client socket to non-blocking mode
-						fcntl(new_fd, F_SETFL, O_NONBLOCK);
-
-						struct pollfd	client_pfd;
-						client_pfd.fd = new_fd;
-						client_pfd.events = POLLIN; // Wait for the client to send data
-						client_pfd.revents = 0;
-						_fds.push_back(client_pfd);
-						std::cout << "New client connected on fd " << new_fd
-								  << std::endl;
-					}
-				}
+					acceptNewConnection();  // New guest arrived
 				else
-				{
-					// HANDLE EXISTING CLIENT: An established connection has sent data
-					char	buff[4096];
-					std::memset(buff, 0, sizeof(buff));
-
-					// Receive data from the client socket
-					ssize_t	bytes_read = recv(_fds[i].fd, buff,
-											sizeof(buff) - 1, 0);
-
-					if (bytes_read > 0)
-					{
-						// Process the request and send a basic HTTP response
-						std::cout << "Request from fd " << _fds[i].fd << ":\n"
-								  << buff << std::endl;
-
-						const char	*response =
-							"HTTP/1.1 200 OK\r\nContent-Length: 13\r\n\r\nHello World!\n";
-						send(_fds[i].fd, response, std::strlen(response), 0);
-
-						// Note: Connection is kept open for potential further requests (Keep-Alive)
-					}
-					else if (bytes_read == 0)
-					{
-						// CLIENT DISCONNECTED: The peer has closed the connection
-						std::cout << "Client on fd " << _fds[i].fd
-								  << " disconnected." << std::endl;
-						close(_fds[i].fd);
-						_fds.erase(_fds.begin() + i);
-						--i; // Adjust index after removing element from vector
-					}
-					else
-					{
-						// RECV ERROR: Handle unexpected disconnection or read failure
-						perror("recv error");
-						close(_fds[i].fd);
-						_fds.erase(_fds.begin() + i);
-						--i;
-					}
-				}
+					handleClientRequest(i); // Existing guest sent data
 			}
-			// Clear revents after processing the event for this descriptor
-			_fds[i].revents = 0;
 		}
 	}
 }

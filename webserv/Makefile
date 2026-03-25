@@ -6,7 +6,7 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/03/09 15:17:52 by erazumov          #+#    #+#              #
-#    Updated: 2026/03/17 15:51:42 by erazumov         ###   ########.fr        #
+#    Updated: 2026/03/25 15:34:40 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,7 +15,9 @@ NAME = webserv
 CXX = c++
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -g3
 
-SRCS = main.cpp Server.cpp
+SRCS = main.cpp \
+	   Server.cpp \
+	   Request.cpp
 OBJS = $(SRCS:.cpp=.o)
 
 # Colors

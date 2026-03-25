@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:32 by erazumov          #+#    #+#             */
-/*   Updated: 2026/03/17 15:58:29 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/03/25 16:53:43 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,12 @@ private:
 	struct sockaddr_in	_addr;    // Server's address information structure
 
 	std::vector<struct pollfd>	_fds;
+
+	/* --- Helper Methods --- */
+	void	addToPoll(int fd);
+	void	acceptNewConnection();
+	void	removeClient(int idx);
+	void	handleClientRequest(int idx);
 
 	// Prevent copying to avoid issues with shared file descriptors
 	Server	&operator=(const Server &other);
