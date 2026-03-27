@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/25 15:33:23 by erazumov          #+#    #+#             */
-/*   Updated: 2026/03/25 16:10:36 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/03/27 17:21:49 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,7 +101,7 @@ const std::string
 }
 
 const std::string
-&Request::getHeaders(const std::string &key) const
+&Request::getHeader(const std::string &key) const
 {
 	// 1. Create a constant iterator for the map
 	std::map<std::string, std::string>::const_iterator	it = _headers.find(key);

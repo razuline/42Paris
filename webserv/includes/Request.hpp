@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/25 14:09:02 by erazumov          #+#    #+#             */
-/*   Updated: 2026/03/25 15:48:33 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/03/27 17:21:41 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ public:
 	const std::string	&getMethod() const;
 	const std::string	&getPath() const;
 	const std::string	&getVersion() const;
-	const std::string	&getHeaders(const std::string &key) const;
+	const std::string	&getHeader(const std::string &key) const;
 	const std::string	&getBody() const;
 };
 

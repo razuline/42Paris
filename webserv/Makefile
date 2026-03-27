@@ -6,7 +6,7 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/03/09 15:17:52 by erazumov          #+#    #+#              #
-#    Updated: 2026/03/25 18:56:58 by erazumov         ###   ########.fr        #
+#    Updated: 2026/03/27 17:24:37 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -18,7 +18,8 @@ INC        = -I includes
 
 SRC_FILES  = main.cpp \
 			 Server.cpp \
-			 Request.cpp
+			 Request.cpp \
+			 Response.cpp
 
 SRCS       = $(addprefix srcs/, $(SRC_FILES))
 
