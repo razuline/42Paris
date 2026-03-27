@@ -6,12 +6,14 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:40 by erazumov          #+#    #+#             */
-/*   Updated: 2026/03/25 18:38:41 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/03/27 19:24:54 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 #include "Request.hpp"
+#include "Response.hpp"
+#include "Utils.hpp"
 
 /* ------------------------- ORTHODOX CANONICAL FORM ------------------------ */
 
@@ -148,41 +150,41 @@ Server::handleClientRequest(int idx)
 	char	buff[4096];
 	std::memset(buff, 0, sizeof(buff));
 
-	// 1. Read data from the client (using the fd at index i)
+	// 1. Receive data from the client
 	ssize_t	bytes = recv(_fds[idx].fd, buff, sizeof(buff) - 1, 0);
 
 	if (bytes > 0)
 	{
-		// 2. TRANSLATION: Use the Request class to understand the buffer
+		// 2. Parse the raw string into a Request object
 		Request	req;
 		req.parse(std::string(buff));
 
-		// 1. Get the file content
+		// 3. Determine the file path (default to index.html for root "/")
 		std::string path = req.getPath();
 		if (path == "/")
 			path = "/index.html"; // Default file
 
 		std::string	content = readFile(path);
 
-		// 2. Prepare the HTTP Header
-		std::stringstream	response;
+		// 4. Initialise the Response object
+		Response	res;
+
 		if (!content.empty())
 		{
-			response << "HTTP/1.1 200 OK\r\n";
-			response << "Content-Length: " << content.size() << "\r\n";
-			response << "Content-Type: text/html\r\n\r\n";
-			response << content;
+			res.setStatus(200); // OK
+			res.setBody(content);
+			// It finds the right label for the box
+			res.setHeader("Content-Type", Utils::getMimeType(path));
 		}
 		else
 		{
-			// 3. Handle 404 Error (File not found)
-			response << "HTTP/1.1 404 Not Found\r\n";
-			response << "Content-Length: 14\r\n\r\n";
-			response << "File not found";
+			res.setStatus(404); // Not Found
+			res.setBody("<h1>404 Not Found</h1>");
+			res.setHeader("Content-Type", Utils::getMimeType(path));
 		}
 
-		// 4. Send to the browser
-		std::string	res_str = response.str();
+		// 5. Build the final HTTP string and send it back to the client
+		std::string	res_str = res.build();
 		send(_fds[idx].fd, res_str.c_str(), res_str.size(), 0);
 	}
 	else if (bytes == 0)

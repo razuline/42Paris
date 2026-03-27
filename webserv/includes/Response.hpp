@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/27 17:04:32 by erazumov          #+#    #+#             */
-/*   Updated: 2026/03/27 17:54:24 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/03/27 19:16:43 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,9 +21,12 @@
 class Response
 {
 private:
-	int									_status;
-	std::map<std::string, std::string>	_headers;
-	std::string							_body;
+	int									_status;  // HTTP Status Code
+	std::map<std::string, std::string>	_headers; // Storage for "Key: Value" headers
+	std::string							_body;    // The actual content (HTML/CSS/Image data)
+
+	/* --- Internal Helper Methods --- */
+	std::string	getReasonPhrase(int code); // Map status code to words
 
 public:
 	/* --- Orthodox Canonical Form --- */
@@ -32,16 +35,13 @@ public:
 	Response &operator=(const Response &other);
 	~Response();
 
-	/* --- Helper Methods --- */
-	std::string	getReasonPhrase(int code);
-
-	/* --- Core Methods --- */
-	std::string	build();
-
 	/* --- Setters --- */
 	void		setStatus(int code);
 	void		setHeader(std::string key, std::string value);
 	void		setBody(std::string content);
+
+	/* --- Core Methods --- */
+	std::string	build(); // Assembles the final HTTP string to be sent via send()
 };
 
 #endif

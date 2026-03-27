@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/27 17:23:49 by erazumov          #+#    #+#             */
-/*   Updated: 2026/03/27 17:40:59 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/03/27 19:20:11 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 /* ------------------------- ORTHODOX CANONICAL FORM ------------------------ */
 
 Response::Response() :
-	_status(),
+	_status(200),
 	_body("")
 {
 	// std::cout << "Default constructor called" << std::endl;
@@ -48,6 +48,7 @@ Response::~Response()
 
 /* ----------------------------- HELPER METHODS ----------------------------- */
 
+// Converts HTTP status codes into their standard English phrases
 std::string
 Response::getReasonPhrase(int code)
 {
@@ -69,6 +70,36 @@ Response::getReasonPhrase(int code)
 
 /* ------------------------------ CORE METHODS ------------------------------ */
 
+/**
+ * The "Sandwich" Builder:
+ * 1. Status Line (HTTP/1.1 200 OK)
+ * 2. Headers (Content-Type: text/html...)
+ * 3. Empty Line (\r\n)
+ * 4. Body (The file content)
+ */
+std::string
+Response::build()
+{
+	std::stringstream	ss;
+
+	// 1. Status Line (CRLF is mandatory at the end)
+	ss << "HTTP/1.1 " << _status << " " << getReasonPhrase(_status) << "\r\n";
+
+	// 2. Iterate through the map to add all headers
+	std::map<std::string, std::string>::iterator	it;
+	for (it = _headers.begin(); it != _headers.end(); ++it)
+	{
+		ss << it->first << ": " << it->second << "\r\n";
+	}
+	// 3. The Empty Line that separates headers from the body
+	ss << "\r\n";
+
+	// 4. Add the actual content
+	ss << _body;
+
+	return ss.str();
+}
+
 /* -------------------------------- SETTERS --------------------------------- */
 
 void
@@ -83,8 +114,17 @@ Response::setHeader(std::string key, std::string value)
 	_headers[key] = value;
 }
 
+/**
+ * Smart Setter:
+ * Whenever set the body, it automatically calculates the size
+ * and set the 'Content-Length' header for the user.
+ */
 void
 Response::setBody(std::string content)
 {
 	_body = content;
+
+	std::stringstream	ss;
+	ss << _body.size();
+	this->setHeader("Content-Length", ss.str());
 }
