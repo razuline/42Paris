@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/25 15:33:23 by erazumov          #+#    #+#             */
-/*   Updated: 2026/03/27 17:21:49 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/03/28 16:41:19 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,29 +55,59 @@ Request::~Request()
 void
 Request::parse(const std::string &raw_data)
 {
-	// 1. Create a stream from the raw data to read it line by line
 	std::stringstream	ss(raw_data);
 	std::string			line;
 
-	// 2. Get only the very first line (the Request line)
-	// "GET /index.html HTTP/1.1"
+	// 1. Parse the first line (Request Line)
 	if (std::getline(ss, line))
 	{
-		// Remove the '\r' at the end of the line if it exists
 		if (!line.empty() && line[line.size() - 1] == '\r')
 			line.erase(line.size() - 1);
 
-		// 3. Use another stream to split the first line by spaces
 		std::stringstream	first_line_ss(line);
-
-		// It skips spaces automatically
 		first_line_ss >> _method;  // First word goes to _method
 		first_line_ss >> _path;    // Second word to _path
 		first_line_ss >> _version; // Third word to _version
 	}
+
+	// 2. Parse all following lines (Headers)
+	while (std::getline(ss, line))
+	{
+		// Remove \r to handle CRLF properly
+		if (!line.empty() && line[line.size() - 1] == '\r')
+			line.erase(line.size() - 1);
+
+		// An empty line means the end of headers
+		if (line.empty())
+			break;
+
+		// 3. Find the colon to split Key and Value
+		size_t	colonPos = line.find(':');
+		if (colonPos != std::string::npos)
+		{
+			// Extract Key and Value
+			std::string	key = line.substr(0, colonPos);
+			std::string	value = line.substr(colonPos + 1);
+
+			// Trim them and store in the map member variable '_headers'
+			_headers[Utils::trim(key)] = Utils::trim(value);
+		}
+	}
 	// For debugging
 	std::cout << "DEBUG: Method [" << _method << "] Path [" << _path << "]"
 			  << std::endl;
+
+	// --- DEBUG: Print all recovered headers ---
+	std::cout << "--- REQUEST HEADERS ---" << std::endl;
+
+	std::map<std::string, std::string>::iterator	it;
+
+	for (it = _headers.begin(); it != _headers.end(); ++it)
+	{
+		std::cout << "[" << it->first << "]: [" << it->second << "]" << std::endl;
+	}
+
+	std::cout << "-----------------------" << std::endl;
 }
 
 /* -------------------------------- GETTERS --------------------------------- */

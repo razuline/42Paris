@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/25 14:09:02 by erazumov          #+#    #+#             */
-/*   Updated: 2026/03/27 17:21:41 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/03/28 16:39:12 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,8 @@
 # include <map>
 # include <iostream>
 # include <sstream>
+
+# include "Utils.hpp"
 
 class Request
 {

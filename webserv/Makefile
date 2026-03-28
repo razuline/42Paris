@@ -6,7 +6,7 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/03/09 15:17:52 by erazumov          #+#    #+#              #
-#    Updated: 2026/03/28 13:46:42 by erazumov         ###   ########.fr        #
+#    Updated: 2026/03/28 15:30:30 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -66,6 +66,7 @@ re: fclean all
 # leaks --atExit -- ./webserv
 
 # http://localhost:8080
+# http://localhost:4242
 # or
 # curl -v http://localhost:8080
 # or
