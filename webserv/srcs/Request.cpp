@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/25 15:33:23 by erazumov          #+#    #+#             */
-/*   Updated: 2026/03/28 16:41:19 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/03/28 20:46:16 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,9 +93,32 @@ Request::parse(const std::string &raw_data)
 			_headers[Utils::trim(key)] = Utils::trim(value);
 		}
 	}
+	// --- Body Parsing ---
+	// 1. Get the string value of Content-Length
+	std::string	lenStr = getHeader("Content-Length");
+
+	if (!lenStr.empty())
+	{
+		// 2. Convert str to int
+		size_t				len = 0;
+		std::stringstream	ss_len(lenStr);
+		ss_len >> len;
+
+		// 3. Read exactly 'len' characters from the remaining stream
+		char				c;
+		while (len > 0 && ss.get(c))
+		{
+			_body += c;
+			len--;
+		}
+	}
 	// For debugging
 	std::cout << "DEBUG: Method [" << _method << "] Path [" << _path << "]"
 			  << std::endl;
+
+	// DEBUG: Show if there is a body
+	if (!_body.empty())
+		std::cout << "DEBUG: Body received [" << _body << "]" << std::endl;
 
 	// --- DEBUG: Print all recovered headers ---
 	std::cout << "--- REQUEST HEADERS ---" << std::endl;
