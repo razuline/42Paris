@@ -6,11 +6,15 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:07:21 by erazumov          #+#    #+#             */
-/*   Updated: 2026/03/09 17:37:18 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/03/28 15:22:32 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
+#include "Config.hpp"
+#include "Request.hpp"
+#include "Response.hpp"
+#include "Utils.hpp"
 
 volatile sig_atomic_t	g_stop = 0;
 
@@ -22,11 +26,17 @@ void	handle_signal(int sig)
 	std::cout << "\nShutdown signal received. Closing server..." << std::endl;
 }
 
-int	main()
+int	main(int ac, char **av)
 {
-	Server	myServ(8080);
+	Config	config;
+
+	if (ac == 2)
+		config.parse(av[1]);
+	else
+		config.parse("default.conf");
 
 	// Initialise the server
+	Server	myServ(config);
 	myServ.setup();
 
 	// Set up Ctrl+C handling

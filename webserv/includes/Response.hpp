@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/27 17:04:32 by erazumov          #+#    #+#             */
-/*   Updated: 2026/03/27 19:16:43 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/03/28 12:52:27 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,8 @@ public:
 	void		setBody(std::string content);
 
 	/* --- Core Methods --- */
-	std::string	build(); // Assembles the final HTTP string to be sent via send()
+	std::string	build();
+	void		defaultErrorPage(int code);
 };
 
 #endif

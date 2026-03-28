@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/27 19:21:01 by erazumov          #+#    #+#             */
-/*   Updated: 2026/03/27 19:21:27 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/03/28 14:00:07 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,8 @@
 
 namespace Utils
 {
-	// Returns the correct Content-Type based on file extension
 	std::string	getMimeType(const std::string& path);
+	std::string	trim(const std::string &str);
 }
 
 #endif

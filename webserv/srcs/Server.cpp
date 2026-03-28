@@ -6,20 +6,18 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:40 by erazumov          #+#    #+#             */
-/*   Updated: 2026/03/27 19:24:54 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/03/28 15:24:46 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
-#include "Request.hpp"
-#include "Response.hpp"
-#include "Utils.hpp"
 
 /* ------------------------- ORTHODOX CANONICAL FORM ------------------------ */
 
-Server::Server(int port) :
+Server::Server(const Config &config) :
 	_serv_fd(-1),
-	_port(port)
+	_port(config.getPort()),
+	_config(config)
 {
 	// Zero out the address structure to prevent memory garbage issues
 	memset(&_addr, 0, sizeof(_addr));
@@ -117,7 +115,7 @@ Server::readFile(const std::string &path)
 	}
 
 	// 1. Look into a folder named "www" (root)
-	std::string	fullPath = "www/" + cleanPath;
+	std::string	fullPath = _config.getFolderRoot() + "/" + cleanPath;
 
 	std::cout << "DEBUG: Trying to open: " << fullPath << std::endl;
 
@@ -162,7 +160,7 @@ Server::handleClientRequest(int idx)
 		// 3. Determine the file path (default to index.html for root "/")
 		std::string path = req.getPath();
 		if (path == "/")
-			path = "/index.html"; // Default file
+			path = _config.getHomePage(); // Default file
 
 		std::string	content = readFile(path);
 
@@ -175,12 +173,14 @@ Server::handleClientRequest(int idx)
 			res.setBody(content);
 			// It finds the right label for the box
 			res.setHeader("Content-Type", Utils::getMimeType(path));
+
+			std::cout << "DEBUG: Response sent [200 OK]" << std::endl;
 		}
 		else
 		{
-			res.setStatus(404); // Not Found
-			res.setBody("<h1>404 Not Found</h1>");
-			res.setHeader("Content-Type", Utils::getMimeType(path));
+			res.defaultErrorPage(404);
+
+			std::cout << "DEBUG: Response sent [404 Not Found]" << std::endl;
 		}
 
 		// 5. Build the final HTTP string and send it back to the client

@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/27 17:23:49 by erazumov          #+#    #+#             */
-/*   Updated: 2026/03/27 19:20:11 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/03/28 12:58:44 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,6 +98,32 @@ Response::build()
 	ss << _body;
 
 	return ss.str();
+}
+
+void
+Response::defaultErrorPage(int code)
+{
+	// 1. Set the status code (e.g,, 404)
+	this->setStatus(code);
+
+	// 2. Get the word version (e.g., "Not Found")
+	std::string	msg = getReasonPhrase(code);
+
+	// 3. Create a HTML body
+	std::stringstream	ss;
+	ss << "<html><head><title>" << code << " " << msg << "</title></head>";
+	ss << "<body style='text-align:center; font-family:sans-serif; padding-top:100px;'>";
+	ss << "<h1 style='font-size: 50px; color: #333;'>" << code << "</h1>";
+	ss << "<h2>" << msg << "</h2>";
+	ss << "<hr style='width: 50%;'>";
+	ss << "<p>webserv/1.0 (42 Paris)</p>";
+	ss << "</body></html>";
+
+	// 4. Use a smart setBody to handle Content-Length automatically
+	this->setBody(ss.str());
+
+	// 5. Tell the browser it's an HTML page
+	this->setHeader("Content-Type", "text/html");
 }
 
 /* -------------------------------- SETTERS --------------------------------- */

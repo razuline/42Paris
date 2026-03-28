@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/27 19:21:54 by erazumov          #+#    #+#             */
-/*   Updated: 2026/03/27 19:23:25 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/03/28 14:10:30 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 namespace Utils
 {
+	/* Returns the correct Content-Type based on file extension */
 	std::string	getMimeType(const std::string &path)
 	{
 		// 1. Find the position of the last dot '.' in the path
@@ -40,5 +41,21 @@ namespace Utils
 
 		// 5. Default fallback for unknown files
 		return "application/octet-stream";
+	};
+
+	/* Removes whitespaces (spaces, tabs) and semicolons (;) */
+	std::string	trim(const std::string &str)
+	{
+		// 1. Find index of the first char that's NOT a space/tab/semicolon
+		size_t	first = str.find_first_not_of(" \t;");
+		// 2. If no such char is found, str is empty or only contains delimiters
+		if (first == std::string::npos)
+			return "";
+
+		// 3. Find index of the last char that's NOT a space/tab/semicolon
+		size_t	last = str.find_last_not_of(" \t;");
+
+		// 4. Extract and return the substring from 'first' to 'last'
+		return str.substr(first, (last - first + 1));
 	}
 }

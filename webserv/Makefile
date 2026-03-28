@@ -6,7 +6,7 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/03/09 15:17:52 by erazumov          #+#    #+#              #
-#    Updated: 2026/03/27 19:27:45 by erazumov         ###   ########.fr        #
+#    Updated: 2026/03/28 13:46:42 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -20,6 +20,7 @@ SRC_FILES  = main.cpp \
 			 Server.cpp \
 			 Request.cpp \
 			 Response.cpp \
+			 Config.cpp \
 			 Utils.cpp
 
 SRCS       = $(addprefix srcs/, $(SRC_FILES))

@@ -6,12 +6,17 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:32 by erazumov          #+#    #+#             */
-/*   Updated: 2026/03/25 18:22:54 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/03/28 15:12:21 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SERVER_HPP
 # define SERVER_HPP
+
+# include "Config.hpp"
+# include "Request.hpp"
+# include "Response.hpp"
+# include "Utils.hpp"
 
 # include <csignal>
 # include <cstdio>
@@ -39,6 +44,8 @@ private:
 
 	std::vector<struct pollfd>	_fds;
 
+	Config				_config;
+
 	/* --- Helper Methods --- */
 	void		addToPoll(int fd);
 	void		acceptNewConnection();
@@ -51,7 +58,7 @@ private:
 
 public:
 	/* --- Orthodox Canonical Form --- */
-	Server(int port);
+	Server(const Config &config);
 	Server(const Server &copy);
 	~Server();
 
