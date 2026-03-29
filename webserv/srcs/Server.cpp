@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:40 by erazumov          #+#    #+#             */
-/*   Updated: 2026/03/28 15:24:46 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/03/29 15:24:07 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,7 +148,7 @@ Server::handleClientRequest(int idx)
 	char	buff[4096];
 	std::memset(buff, 0, sizeof(buff));
 
-	// 1. Receive data from the client
+	// 1. Receive raw data from the client socket
 	ssize_t	bytes = recv(_fds[idx].fd, buff, sizeof(buff) - 1, 0);
 
 	if (bytes > 0)
@@ -157,30 +157,69 @@ Server::handleClientRequest(int idx)
 		Request	req;
 		req.parse(std::string(buff));
 
-		// 3. Determine the file path (default to index.html for root "/")
-		std::string path = req.getPath();
+		// Prepare the Response object and identify the request path
+		Response	res;
+		std::string	path = req.getPath();
+
+		// Handle the default home page if the path is "/"
 		if (path == "/")
 			path = _config.getHomePage(); // Default file
 
-		std::string	content = readFile(path);
+		// Build the full system path using the root directory from config
+		std::string	fullPath = _config.getFolderRoot() + "/"
+								+ (path[0] == '/' ? path.substr(1) : path);
 
-		// 4. Initialise the Response object
-		Response	res;
+/* --------------------------- HTTP METHODS LOGIC --------------------------- */
 
-		if (!content.empty())
+	// GET: Used to retrieve files
+		if (req.getMethod() == "GET")
 		{
-			res.setStatus(200); // OK
-			res.setBody(content);
-			// It finds the right label for the box
-			res.setHeader("Content-Type", Utils::getMimeType(path));
+			std::string	content = readFile(path);
 
-			std::cout << "DEBUG: Response sent [200 OK]" << std::endl;
+			if (!content.empty())
+			{
+				res.setStatus(200); // OK
+				res.setBody(content);
+				// It finds the right label for the box
+				res.setHeader("Content-Type", Utils::getMimeType(path));
+
+				std::cout << "DEBUG: Response sent [200 OK]" << std::endl;
+			}
+			else
+			{
+				res.defaultErrorPage(404);
+
+				std::cout << "DEBUG: Response sent [404 Not Found]" << std::endl;
+			}
 		}
-		else
-		{
-			res.defaultErrorPage(404);
 
-			std::cout << "DEBUG: Response sent [404 Not Found]" << std::endl;
+		// POST: Used to send data to the server
+		else if (req.getMethod() == "POST")
+		{
+			// Open a file in append mode to save the request body
+			std::ofstream	outfile("www/uploads/data.txt", std::ios::app);
+			if (outfile.is_open())
+			{
+				outfile << req.getBody() << std::endl;
+				outfile.close();
+
+				res.setStatus(201);
+				res.setBody("<html><body><h1>Post Successful!"
+							"Data saved.</h1></body></html>");
+			}
+			else
+				// Internal Server Error if file cannot be opened
+				res.defaultErrorPage(500);
+		}
+
+		// DELETE: Used to remove a resource from the server
+		else if (req.getMethod() == "DELETE")
+		{
+			// std::remove to delete a file from the disk
+			if (std::remove(fullPath.c_str()) == 0)
+				res.setStatus(204); // 204 No Content (Success with no body)
+			else
+				res.defaultErrorPage(404); // Not Found if the file doesn't exist
 		}
 
 		// 5. Build the final HTTP string and send it back to the client
@@ -189,13 +228,13 @@ Server::handleClientRequest(int idx)
 	}
 	else if (bytes == 0)
 	{
-		// CLIENT LEFT: The browser closed the connection
+		// Client closed the connection
 		std::cout << "Client on fd " << _fds[idx].fd << " disconnected." << std::endl;
 		removeClient(idx);
 	}
 	else
 	{
-		// ERROR: Something went wrong with the connection
+		// Connection error
 		perror("Recv failed");
 		removeClient(idx);
 	}
