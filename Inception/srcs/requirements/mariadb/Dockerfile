@@ -1,5 +1,5 @@
 # 1. Base image
-FROM			debian:bullseye
+FROM			debian:bookworm
 
 	# 2. Install MariaDB and clean cache to keep image small
 	RUN			apt-get update && \

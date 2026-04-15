@@ -39,4 +39,5 @@ fi
 echo "WordPress setup completed. Starting PHP-FPM..."
 
 # Start PHP-FPM in the foreground (-F). No 'tail -f' or 'sleep infinity' allowed
-exec /usr/sbin/php-fpm7.4 -F
+chown -R www-data:www-data /var/www/html
+exec /usr/sbin/php-fpm8.2 -F

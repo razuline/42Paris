@@ -3,7 +3,7 @@
 # Inception - System Administrator & Docker
 
 ## 📌 Project Overview
-This project consists of virtualising a small infrastructure using **Docker Compose**. The entire stack runs on **Debian Bullseye**, with each service isolated in its own dedicated container.
+This project consists of virtualising a small infrastructure using **Docker Compose**. The entire stack runs on **Debian Bookworm**, with each service isolated in its own dedicated container.
 
 The goal is to build a secure, interconnected environmental for a WordPress site, ensuring high security and proper data persistence.
 

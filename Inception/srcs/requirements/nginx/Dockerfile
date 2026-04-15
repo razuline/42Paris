@@ -1,5 +1,5 @@
 # Use the penultimate stable version of Debian
-FROM		debian:bullseye
+FROM		debian:bookworm
 
 	# Install NGINX and OpenSSL, then clean up to save space
 	RUN		apt-get update && \

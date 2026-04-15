@@ -1,12 +1,12 @@
 # Base image
-FROM			debian:bullseye
+FROM			debian:bookworm
 
 	# Install necessary dependencies:
 	# php-fpm (the translator), php-mysql (database bridge),
 	# curl (to download files).
 	RUN			apt-get update && apt-get install -y \
-				php7.4-fpm \
-				php7.4-mysql \
+				php8.2-fpm \
+				php8.2-mysql \
 				mariadb-client \
 				curl \
 				&& rm -rf /var/lib/apt/lists/*
@@ -22,7 +22,7 @@ FROM			debian:bullseye
 	RUN			mkdir -p /run/php
 
 	# Copy the custom PHP-FPM configuration
-	COPY		conf/www.conf /etc/php/7.4/fpm/pool.d/www.conf
+	COPY		conf/www.conf /etc/php/8.2/fpm/pool.d/www.conf
 
 	# Copy the initialisation script and set execution permission
 	COPY		tools/wp_setup.sh /usr/local/bin/wp_setup.sh
