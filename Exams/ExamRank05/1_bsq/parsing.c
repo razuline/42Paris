@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/18 13:47:10 by erazumov          #+#    #+#             */
-/*   Updated: 2026/04/18 16:02:31 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/04/18 16:58:07 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,16 @@ int	read_metadata(FILE *fp, t_map *map)
 	if (fscanf(fp, "%d %c %c %c", &map->height, &map->empty,
 					&map->obs, &map->full) != 4)
 	{
-		fprintf(stderr, "map error\n");
+		return (0);
+	}
+
+	if (map->empty < 32 ||
+		map->empty > 126 ||
+		map->obs < 32 ||
+		map->obs > 126 ||
+		map->full < 32 ||
+		map->full > 126)
+	{
 		return (0);
 	}
 
@@ -60,10 +69,22 @@ int	init_grid(FILE *fp, t_map *map)
 	// Set the width (ignoring the newline char)
 	map->width = (line[read - 1] == '\n') ? (read - 1) : read;
 
+	for (int j = 0; j < map->width; j++)
+	{
+		if (line[j] != map->empty && line[j] != map->obs)
+		{
+			free(line);
+			return (0);
+		}
+	}
+
 	// 3. Prepare memory for the whole map
 	map->grid = malloc(sizeof(char *) * map->height);
 	if (!map->grid)
+	{
+		free(line);
 		return (0);
+	}
 
 	// 4. Save this line as the very first row
 	map->grid[0] = line;
@@ -92,6 +113,14 @@ int	load_lines(FILE *fp, t_map *map)
 		{
 			free(line);
 			return (0);
+		}
+		for (int j = 0; j < map->width; j++)
+		{
+			if (line[j] != map->empty && line[j] != map->obs)
+			{
+				free(line);
+				return (0);
+			}
 		}
 		map->grid[i] = line;
 	}

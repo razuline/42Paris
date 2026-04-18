@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/18 16:00:32 by erazumov          #+#    #+#             */
-/*   Updated: 2026/04/18 16:25:18 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/04/18 16:56:25 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,8 +20,10 @@ void	process_map(FILE *fp)
 	t_map	map;
 
 	if (!parse_map(fp, &map))
+	{
+		write(2, "map error\n", 10);
 		return ;
-
+	}
 	solve_bsq(&map);
 	free_grid(&map);
 }

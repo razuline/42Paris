@@ -6,7 +6,7 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/04/18 13:40:25 by erazumov          #+#    #+#              #
-#    Updated: 2026/04/18 16:35:58 by erazumov         ###   ########.fr        #
+#    Updated: 2026/04/18 17:02:42 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -49,13 +49,17 @@ clean:
 	@rm -f $(OBJECTS)
 	@echo "$(R)🧹 Object files removed [$(OBJECTS)]$(X)"
 
-fclean: clean
+clean_tests:
+	@rm -f test*.txt error*.txt map.txt test_performance_100x100.txt
+	@echo "$(R)🗑️  Test files removed$(X)"
+
+fclean: clean clean_tests
 	@rm -f $(NAME)
 	@echo "$(R)🗑️  Executables removed [$(NAME)]$(X)"
 
 re: fclean all
 
-.PHONY: all clean fclean re
+.PHONY: all clean fclean re clean_tests
 
 # ./bsq map.txt
 # valgrind ./bsq map.txt
