@@ -6,7 +6,7 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/04/18 13:40:25 by erazumov          #+#    #+#              #
-#    Updated: 2026/04/18 13:41:08 by erazumov         ###   ########.fr        #
+#    Updated: 2026/04/18 16:35:58 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -55,7 +55,8 @@ fclean: clean
 
 re: fclean all
 
-norm:
-	@norminette $(HFILES) $(CFILES) | grep -v "OK" || true
+.PHONY: all clean fclean re
 
-.PHONY: all clean fclean re norm
+# ./bsq map.txt
+# valgrind ./bsq map.txt
+# cat map.txt | ./bsq
