@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:40 by erazumov          #+#    #+#             */
-/*   Updated: 2026/04/26 15:06:38 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/04/26 18:12:35 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@ Server::~Server()
 /* ----------------------------- HELPER METHODS ----------------------------- */
 
 void
-Server::addToPoll(int fd)
+Server::_addToPoll(int fd)
 {
 	// Initialising the server socket for polling
 	struct pollfd	pfd;
@@ -75,7 +75,7 @@ Server::addToPoll(int fd)
 }
 
 void
-Server::acceptNewConnection()
+Server::_acceptNewConnection()
 {
 	struct sockaddr_in	addr;
 	std::memset(&addr, 0, sizeof(addr));
@@ -92,7 +92,7 @@ Server::acceptNewConnection()
 		fcntl(new_fd, F_SETFL, O_NONBLOCK);
 
 		// 3. Add this new client to the list of monitored descriptors
-		addToPoll(new_fd);
+		_addToPoll(new_fd);
 
 		std::cout << "New client connected on fd " << new_fd << std::endl;
 	}
@@ -104,7 +104,7 @@ Server::acceptNewConnection()
 }
 
 std::string
-Server::readFile(const std::string &path)
+Server::_readFile(const std::string &path)
 {
 	std::string	cleanPath = path;
 
@@ -133,7 +133,7 @@ Server::readFile(const std::string &path)
 }
 
 void
-Server::removeClient(int idx)
+Server::_removeClient(int idx)
 {
 	std::cout << "Client on fd " << _fds[idx].fd << " disconnected." << std::endl;
 
@@ -143,7 +143,7 @@ Server::removeClient(int idx)
 }
 
 void
-Server::handleClientRequest(int idx)
+Server::_handleClientRequest(int idx)
 {
 	char	buff[4096];
 	std::memset(buff, 0, sizeof(buff));
@@ -153,6 +153,7 @@ Server::handleClientRequest(int idx)
 
 	if (bytes > 0)
 	{
+
 		// 2. Parse the raw string into a Request object
 		Request	req;
 		req.parse(std::string(buff));
@@ -174,7 +175,7 @@ Server::handleClientRequest(int idx)
 	// GET: Used to retrieve files
 		if (req.getMethod() == "GET")
 		{
-			std::string	content = readFile(path);
+			std::string	content = _readFile(path);
 
 			if (!content.empty())
 			{
@@ -230,13 +231,13 @@ Server::handleClientRequest(int idx)
 	{
 		// Client closed the connection
 		std::cout << "Client on fd " << _fds[idx].fd << " disconnected." << std::endl;
-		removeClient(idx);
+		_removeClient(idx);
 	}
 	else
 	{
 		// Connection error
 		perror("Recv failed");
-		removeClient(idx);
+		_removeClient(idx);
 	}
 }
 
@@ -292,7 +293,7 @@ void
 Server::run()
 {
 	// 1. Add server socket to poll list
-	addToPoll(_serv_fd);
+	_addToPoll(_serv_fd);
 
 	std::cout << "Server is listening on port " << _port << "..." << std::endl;
 
@@ -315,12 +316,12 @@ Server::run()
 			{
 				if (_fds[i].fd == _serv_fd)
 				{
-					acceptNewConnection();  // New guest arrived
+					_acceptNewConnection();  // New guest arrived
 				}
 				else
 				{
 					size_t	before = _fds.size();
-					handleClientRequest(i); // Existing guest sent data
+					_handleClientRequest(i); // Existing guest sent data
 					if (_fds.size() < before)
 						i--;
 				}

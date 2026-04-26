@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:32 by erazumov          #+#    #+#             */
-/*   Updated: 2026/04/26 15:18:44 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/04/26 18:11:22 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,12 +47,15 @@ private:
 
 	Config				_config;
 
-	/* --- Helper Methods --- */
-	void		addToPoll(int fd);
-	void		acceptNewConnection();
-	void		removeClient(int idx);
-	void		handleClientRequest(int idx);
-	std::string	readFile(const std::string &path);
+	/* --- Private Internal Helpers --- */
+	void		_addToPoll(int fd);
+	void		_acceptNewConnection();
+	void		_removeClient(int idx);
+	void		_handleClientRequest(int idx);
+	std::string	_readFile(const std::string &path);
+
+	void		_executeRequest(int fd, Request &req);
+	void		_handleDisconnection(int idx);
 
 	// Prevent copying to avoid issues with shared file descriptors
 	Server	&operator=(const Server &other);

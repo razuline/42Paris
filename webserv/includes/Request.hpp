@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/25 14:09:02 by erazumov          #+#    #+#             */
-/*   Updated: 2026/04/26 16:27:07 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/04/26 17:31:39 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,9 @@ private:
 	RequestState						_state;
 
 	/* --- Helper Methods --- */
-	bool	isComplete();
+	void	handleHeaders();
+	void	handleBody();
+	void	parseRawHeaders(const std::string &headers_part);
 
 public:
 	/* --- Orthodox Canonical Form --- */

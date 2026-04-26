@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/25 15:33:23 by erazumov          #+#    #+#             */
-/*   Updated: 2026/04/26 16:29:15 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/04/26 18:01:41 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,99 @@ Request::~Request()
 	// std::cout << "Destructor called" << std::endl;
 }
 
+/* ----------------------------- HELPER METHODS ----------------------------- */
+
+void
+Request::handleHeaders()
+{
+	// 1. Search for the end of the headers (\r\n\r\n) in the entire raw buffer
+	size_t	pos = _raw.find("\r\n\r\n");
+
+	if (pos != std::string::npos) // npos means "not found"
+	{
+		// 2. Mark the boundary where the body starts (after \r\n\r\n)
+		_headerSize = pos + 4;
+		std::string	headers_part = _raw.substr(0, pos);
+
+		// 3. Pass the str to a specialised parser:
+		// parsing AND moving to the next state
+		parseRawHeaders(headers_part);
+	}
+}
+
+void
+Request::handleBody()
+{
+	// 1. Calculate the number of body bytes received so far
+	// Formula: Total received minus the part used by headers
+	size_t	curr_body_size = _raw.size() - _headerSize;
+
+	// 2. Check if the received data matches or exceeds the expected Content-Length
+	if (curr_body_size >= _contentLen)
+	{
+		// 3. It's enough
+		// Extract the body from _raw starting at _headerSize
+		_body = _raw.substr(_headerSize, _contentLen);
+		_state = COMPLETE;
+	}
+}
+
+void
+Request::parseRawHeaders(const std::string &headers_part)
+{
+	std::stringstream	ss(headers_part);
+	std::string			line;
+
+	// --- 1. PARSE REQUEST-LINE ---
+	// Example: "POST /index.html HTTP/1.1"
+	if (std::getline(ss, line))
+	{
+		if (!line.empty() && line[line.size() - 1] == '\r')
+			line.erase(line.size() - 1);
+
+		std::stringstream	first_line_ss(line);
+		first_line_ss >> _method;  // Extract: POST
+		first_line_ss >> _path;    // Extract: /index.html
+		first_line_ss >> _version; // Extract: HTTP/1.1
+	}
+
+	// --- 2. PARSE HEADER FIELDS ---
+	// Example: "Content-Length: 42"
+	while (std::getline(ss, line) && line != "\r" && !line.empty())
+	{
+		if (line[line.size() - 1] == '\r')
+			line.erase(line.size() - 1);
+
+		// Find the colon position to split Key and Value
+		size_t	colon = line.find(':');
+		if (colon != std::string::npos)
+		{
+			// Extract Key and Value
+			std::string	key = line.substr(0, colon);
+			std::string	value = line.substr(colon + 1);
+
+			// Remove the space after the colon if it exists
+			size_t		first = value.find_first_not_of(' ');
+			if (first != std::string::npos)
+				value = value.substr(first);
+
+			_headers[key] = value;
+		}
+	}
+
+	// --- 3. GET CONTENT-LENGTH ---
+	if (_headers.count("Content-Length"))
+		_contentLen = std::atoi(_headers["Content-Length"].c_str());
+	else
+		_contentLen = 0;
+
+	// 5. Decide if to read a body is needed
+	if (_method == "POST" && _contentLen > 0)
+		_state = READING_BODY;
+	else
+		_state = COMPLETE;
+}
+
 /* ------------------------------ CORE METHODS ------------------------------ */
 
 bool
@@ -61,126 +154,16 @@ Request::isComplete()
 void
 Request::addData(std::string chunk)
 {
+	// 1. Accumulate the incoming data into the raw buffer
 	_raw += chunk;
 
+	// 2. Try to find and parse headers
 	if (_state == READING_HEADERS)
-	{
-		// 1. Search for the position of the header end in the WHOLE reservoir
-		size_t	pos = _raw.find("\r\n\r\n");
+		handleHeaders();
 
-		// 2. Check if it was found
-		if (pos != std::string::npos) // npos means "not found"
-		{
-			// 3. Extract the headers
-			_headerSize = pos + 4; // Mark the EXACT start of the body
-			std::string	headers_part = _raw.substr(0, pos);
-
-			
-
-			// Switch State
-			if (_method == "POST" && _contentLen > 0)
-				_state = READING_BODY;
-			else
-				_state = COMPLETE;
-		}
-	}
+	// 3. If the body part is ready, handle it
 	if (_state == READING_BODY)
-	{
-		// 1. Calculate how much of the body was received
-		// Formula: Total received minus the part used by headers
-		size_t	curr_body_size = _raw.size() - _headerSize;
-
-		// 2. Check if it's enough
-		if (curr_body_size >= _contentLen)
-		{
-			// 3. It's enough
-			// Extract the body from _raw starting at _headerSize
-			_body = _raw.substr(_headerSize, _contentLen);
-			_state = COMPLETE;
-		}
-	}
-}
-
-void
-Request::parse(const std::string &raw_data)
-{
-	std::stringstream	ss(raw_data);
-	std::string			line;
-
-	// 1. Parse the first line (Request Line)
-	if (std::getline(ss, line))
-	{
-		if (!line.empty() && line[line.size() - 1] == '\r')
-			line.erase(line.size() - 1);
-
-		std::stringstream	first_line_ss(line);
-		first_line_ss >> _method;  // First word goes to _method
-		first_line_ss >> _path;    // Second word to _path
-		first_line_ss >> _version; // Third word to _version
-	}
-
-	// 2. Parse all following lines (Headers)
-	while (std::getline(ss, line))
-	{
-		// Remove \r to handle CRLF properly
-		if (!line.empty() && line[line.size() - 1] == '\r')
-			line.erase(line.size() - 1);
-
-		// An empty line means the end of headers
-		if (line.empty())
-			break;
-
-		// 3. Find the colon to split Key and Value
-		size_t	colonPos = line.find(':');
-		if (colonPos != std::string::npos)
-		{
-			// Extract Key and Value
-			std::string	key = line.substr(0, colonPos);
-			std::string	value = line.substr(colonPos + 1);
-
-			// Trim them and store in the map member variable '_headers'
-			_headers[Utils::trim(key)] = Utils::trim(value);
-		}
-	}
-	// --- Body Parsing ---
-	// 1. Get the string value of Content-Length
-	std::string	lenStr = getHeader("Content-Length");
-
-	if (!lenStr.empty())
-	{
-		// 2. Convert str to int
-		size_t				len = 0;
-		std::stringstream	ss_len(lenStr);
-		ss_len >> len;
-
-		// 3. Read exactly 'len' characters from the remaining stream
-		char				c;
-		while (len > 0 && ss.get(c))
-		{
-			_body += c;
-			len--;
-		}
-	}
-
-	// For debugging
-	std::cout << "DEBUG: Method [" << _method << "] Path [" << _path << "]"
-			  << std::endl;
-
-	// DEBUG: Show if there is a body
-	if (!_body.empty())
-		std::cout << "DEBUG: Body received [" << _body << "]" << std::endl;
-
-	// --- DEBUG: Print all recovered headers ---
-	std::cout << "--- REQUEST HEADERS ---" << std::endl;
-
-	std::map<std::string, std::string>::iterator	it;
-
-	for (it = _headers.begin(); it != _headers.end(); ++it)
-	{
-		std::cout << "[" << it->first << "]: [" << it->second << "]" << std::endl;
-	}
-
-	std::cout << "-----------------------" << std::endl;
+		handleBody();
 }
 
 /* -------------------------------- GETTERS --------------------------------- */
