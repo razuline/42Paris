@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:40 by erazumov          #+#    #+#             */
-/*   Updated: 2026/03/29 15:24:07 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/04/26 15:06:38 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -169,7 +169,7 @@ Server::handleClientRequest(int idx)
 		std::string	fullPath = _config.getFolderRoot() + "/"
 								+ (path[0] == '/' ? path.substr(1) : path);
 
-/* --------------------------- HTTP METHODS LOGIC --------------------------- */
+/* --- HTTP METHODS LOGIC --- */
 
 	// GET: Used to retrieve files
 		if (req.getMethod() == "GET")

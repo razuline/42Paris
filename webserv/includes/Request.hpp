@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/25 14:09:02 by erazumov          #+#    #+#             */
-/*   Updated: 2026/03/28 16:39:12 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/04/26 16:27:07 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,12 +22,33 @@
 
 class Request
 {
+public:
+	// Definition of the different stages of HTTP request parsing
+	enum	RequestState
+	{
+		READING_HEADERS, // Searching for the end os the headers (\r\n\r\n)
+		READING_BODY,    // Headers found, waiting for the body based on Content-Length
+		COMPLETE,        // Request is fully received and parsed
+		ERROR            // An error occurred during parsing
+	};
+
 private:
-	std::string							_method;  // GET, POST, or DELETE
-	std::string							_path;    // e.g., /index.html
-	std::string							_version; // e.g., HTTP/1.1
-	std::map<std::string, std::string>	_headers; // Store all HTTP headers
-	std::string							_body;    // For POST requests
+	std::string							_method;     // GET, POST, or DELETE
+	std::string							_path;       // e.g., /index.html
+	std::string							_version;    // e.g., HTTP/1.1
+	std::map<std::string, std::string>	_headers;    // Store all HTTP headers
+	std::string							_body;       // For POST requests
+
+	size_t								_headerSize; // Store the boundary bw headers and body
+	size_t								_contentLen; // Store the expected body size
+
+	// Buffer to store raw data chunks received from the client
+	std::string							_raw;
+	// Current state of the request parsing process
+	RequestState						_state;
+
+	/* --- Helper Methods --- */
+	bool	isComplete();
 
 public:
 	/* --- Orthodox Canonical Form --- */
@@ -37,7 +58,10 @@ public:
 	~Request();
 
 	/* --- Core Methods --- */
-	void	parse(const std::string &raw_data);
+	// Checks if the request has reached the COMPLETE state
+	bool	isComplete();
+	// Adds a new chunk of data received from the socket to the internal buffer
+	void	addData(std::string chunk);
 
 	/* --- Getters --- */
 	const std::string	&getMethod() const;

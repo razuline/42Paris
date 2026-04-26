@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:32 by erazumov          #+#    #+#             */
-/*   Updated: 2026/03/28 15:12:21 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/04/26 15:18:44 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,7 @@ private:
 	struct sockaddr_in	_addr;    // Server's address information structure
 
 	std::vector<struct pollfd>	_fds;
+	std::map<int, Request>		_reqs;
 
 	Config				_config;
 
