@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:40 by erazumov          #+#    #+#             */
-/*   Updated: 2026/04/26 18:12:35 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/04/26 21:08:33 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,33 +146,37 @@ void
 Server::_handleClientRequest(int idx)
 {
 	char	buff[4096];
-	std::memset(buff, 0, sizeof(buff));
-
+	int		client_fd = _fds[idx].fd;
 	// 1. Receive raw data from the client socket
 	ssize_t	bytes = recv(_fds[idx].fd, buff, sizeof(buff) - 1, 0);
 
+	std::memset(buff, 0, sizeof(buff));
+	// --- ZONE 1: RECEPTION ---
 	if (bytes > 0)
 	{
 
-		// 2. Parse the raw string into a Request object
-		Request	req;
-		req.parse(std::string(buff));
 
-		// Prepare the Response object and identify the request path
-		Response	res;
-		std::string	path = req.getPath();
+		// 1. Get (or create) the persistent request for this client
+		_reqs[client_fd].addData(std::string(buff, bytes));
 
-		// Handle the default home page if the path is "/"
-		if (path == "/")
-			path = _config.getHomePage(); // Default file
+		// 2. Check is the request is fully received
+		if (_reqs[client_fd].isComplete())
+		{
+			// --- START OF RESPONSE PHASE ---
+			Request		&req = _reqs[client_fd]; // Use finished request
+			Response	res;
 
-		// Build the full system path using the root directory from config
-		std::string	fullPath = _config.getFolderRoot() + "/"
+			std::string	path = req.getPath();
+
+			// Handle the default home page if the path is "/"
+			if (path == "/")
+				path = _config.getHomePage(); // Default file
+
+			// Build the full system path using the root directory from config
+			std::string	fullPath = _config.getFolderRoot() + "/"
 								+ (path[0] == '/' ? path.substr(1) : path);
 
-/* --- HTTP METHODS LOGIC --- */
-
-	// GET: Used to retrieve files
+		// GET: Used to retrieve files
 		if (req.getMethod() == "GET")
 		{
 			std::string	content = _readFile(path);
@@ -226,6 +230,7 @@ Server::_handleClientRequest(int idx)
 		// 5. Build the final HTTP string and send it back to the client
 		std::string	res_str = res.build();
 		send(_fds[idx].fd, res_str.c_str(), res_str.size(), 0);
+		}
 	}
 	else if (bytes == 0)
 	{
