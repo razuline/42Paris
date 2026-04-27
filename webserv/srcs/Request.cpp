@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/25 15:33:23 by erazumov          #+#    #+#             */
-/*   Updated: 2026/04/26 18:01:41 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/04/27 16:17:43 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ Request::~Request()
 /* ----------------------------- HELPER METHODS ----------------------------- */
 
 void
-Request::handleHeaders()
+Request::_handleHeaders()
 {
 	// 1. Search for the end of the headers (\r\n\r\n) in the entire raw buffer
 	size_t	pos = _raw.find("\r\n\r\n");
@@ -66,12 +66,12 @@ Request::handleHeaders()
 
 		// 3. Pass the str to a specialised parser:
 		// parsing AND moving to the next state
-		parseRawHeaders(headers_part);
+		_parseRawHeaders(headers_part);
 	}
 }
 
 void
-Request::handleBody()
+Request::_handleBody()
 {
 	// 1. Calculate the number of body bytes received so far
 	// Formula: Total received minus the part used by headers
@@ -88,7 +88,7 @@ Request::handleBody()
 }
 
 void
-Request::parseRawHeaders(const std::string &headers_part)
+Request::_parseRawHeaders(const std::string &headers_part)
 {
 	std::stringstream	ss(headers_part);
 	std::string			line;
@@ -154,16 +154,24 @@ Request::isComplete()
 void
 Request::addData(std::string chunk)
 {
+	// SECURITY CHECK: Check if the raw buffer is getting too big
+	// _limit comes from the Config (client_max_body_size)
+	if (_raw.size() + chunk.size() > _limit)
+	{
+		_state = ERROR;
+		return;
+	}
+
 	// 1. Accumulate the incoming data into the raw buffer
 	_raw += chunk;
 
 	// 2. Try to find and parse headers
 	if (_state == READING_HEADERS)
-		handleHeaders();
+		_handleHeaders();
 
 	// 3. If the body part is ready, handle it
 	if (_state == READING_BODY)
-		handleBody();
+		_handleBody();
 }
 
 /* -------------------------------- GETTERS --------------------------------- */

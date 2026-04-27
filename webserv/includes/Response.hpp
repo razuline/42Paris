@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/27 17:04:32 by erazumov          #+#    #+#             */
-/*   Updated: 2026/03/28 12:52:27 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/04/27 16:12:44 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,8 +25,8 @@ private:
 	std::map<std::string, std::string>	_headers; // Storage for "Key: Value" headers
 	std::string							_body;    // The actual content (HTML/CSS/Image data)
 
-	/* --- Internal Helper Methods --- */
-	std::string	getReasonPhrase(int code); // Map status code to words
+	/* --- Private Internal Helpers --- */
+	std::string	_getReasonPhrase(int code); // Map status code to words
 
 public:
 	/* --- Orthodox Canonical Form --- */

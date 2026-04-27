@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:40 by erazumov          #+#    #+#             */
-/*   Updated: 2026/04/26 21:08:33 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/04/27 16:11:33 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,11 +79,12 @@ Server::_acceptNewConnection()
 {
 	struct sockaddr_in	addr;
 	std::memset(&addr, 0, sizeof(addr));
+
 	// Reset the size of the structure before each accept call
-	socklen_t			size = sizeof(addr);
+	socklen_t	size = sizeof(addr);
 
 	// 1. Accept the incoming connection from the server socket
-	int					new_fd = accept(_serv_fd, (struct sockaddr *)&addr, &size);
+	int			new_fd = accept(_serv_fd, (struct sockaddr *)&addr, &size);
 
 	if (new_fd >= 0)
 	{
@@ -104,29 +105,14 @@ Server::_acceptNewConnection()
 }
 
 std::string
-Server::_readFile(const std::string &path)
+Server::_readFile(const std::string &fullPath)
 {
-	std::string	cleanPath = path;
-
-	// If path starts with '/', remove it (to avoid "www//index.html")
-	if (!cleanPath.empty() && cleanPath[0] == '/')
-	{
-		cleanPath.erase(0, 1);
-	}
-
-	// 1. Look into a folder named "www" (root)
-	std::string	fullPath = _config.getFolderRoot() + "/" + cleanPath;
-
-	std::cout << "DEBUG: Trying to open: " << fullPath << std::endl;
-
-	// 2. Open the file
+	// 1. Open the file
 	std::ifstream	file(fullPath.c_str());
 	if (!file.is_open())
-	{
 		return "";
-	}
 
-	// 3. Read everything into a string
+	// 2. Read everything into a string
 	std::stringstream	buff;
 	buff << file.rdbuf();
 	return buff.str();
@@ -146,104 +132,106 @@ void
 Server::_handleClientRequest(int idx)
 {
 	char	buff[4096];
-	int		client_fd = _fds[idx].fd;
-	// 1. Receive raw data from the client socket
-	ssize_t	bytes = recv(_fds[idx].fd, buff, sizeof(buff) - 1, 0);
+	int		fd = _fds[idx].fd;
 
-	std::memset(buff, 0, sizeof(buff));
-	// --- ZONE 1: RECEPTION ---
+	// Receive raw data from the client socket
+	ssize_t	bytes = recv(fd, buff, sizeof(buff), 0);
+
 	if (bytes > 0)
 	{
+		// Get (or create) the persistent request for this client
+		_reqs[fd].addData(std::string(buff, bytes));
 
-
-		// 1. Get (or create) the persistent request for this client
-		_reqs[client_fd].addData(std::string(buff, bytes));
-
-		// 2. Check is the request is fully received
-		if (_reqs[client_fd].isComplete())
+		// Only process if the request is complete
+		if (_reqs[fd].isComplete())
 		{
-			// --- START OF RESPONSE PHASE ---
-			Request		&req = _reqs[client_fd]; // Use finished request
-			Response	res;
-
-			std::string	path = req.getPath();
-
-			// Handle the default home page if the path is "/"
-			if (path == "/")
-				path = _config.getHomePage(); // Default file
-
-			// Build the full system path using the root directory from config
-			std::string	fullPath = _config.getFolderRoot() + "/"
-								+ (path[0] == '/' ? path.substr(1) : path);
-
-		// GET: Used to retrieve files
-		if (req.getMethod() == "GET")
-		{
-			std::string	content = _readFile(path);
-
-			if (!content.empty())
-			{
-				res.setStatus(200); // OK
-				res.setBody(content);
-				// It finds the right label for the box
-				res.setHeader("Content-Type", Utils::getMimeType(path));
-
-				std::cout << "DEBUG: Response sent [200 OK]" << std::endl;
-			}
-			else
-			{
-				res.defaultErrorPage(404);
-
-				std::cout << "DEBUG: Response sent [404 Not Found]" << std::endl;
-			}
+			_executeRequest(fd, _reqs[fd]);
+			_reqs.erase(fd); // Clean up after processing
 		}
-
-		// POST: Used to send data to the server
-		else if (req.getMethod() == "POST")
-		{
-			// Open a file in append mode to save the request body
-			std::ofstream	outfile("www/uploads/data.txt", std::ios::app);
-			if (outfile.is_open())
-			{
-				outfile << req.getBody() << std::endl;
-				outfile.close();
-
-				res.setStatus(201);
-				res.setBody("<html><body><h1>Post Successful!"
-							"Data saved.</h1></body></html>");
-			}
-			else
-				// Internal Server Error if file cannot be opened
-				res.defaultErrorPage(500);
-		}
-
-		// DELETE: Used to remove a resource from the server
-		else if (req.getMethod() == "DELETE")
-		{
-			// std::remove to delete a file from the disk
-			if (std::remove(fullPath.c_str()) == 0)
-				res.setStatus(204); // 204 No Content (Success with no body)
-			else
-				res.defaultErrorPage(404); // Not Found if the file doesn't exist
-		}
-
-		// 5. Build the final HTTP string and send it back to the client
-		std::string	res_str = res.build();
-		send(_fds[idx].fd, res_str.c_str(), res_str.size(), 0);
-		}
-	}
-	else if (bytes == 0)
-	{
-		// Client closed the connection
-		std::cout << "Client on fd " << _fds[idx].fd << " disconnected." << std::endl;
-		_removeClient(idx);
 	}
 	else
 	{
-		// Connection error
-		perror("Recv failed");
-		_removeClient(idx);
+		_handleDisconnection(idx);
 	}
+}
+
+void
+Server::_executeRequest(int fd, Request &req)
+{
+	Response	res;
+	std::string	path = req.getPath();
+
+	// 1. Handle the default home page if the path is "/"
+	if (path == "/")
+		path = _config.getHomePage(); // Default file
+
+	// 2. Build the full system path using the root directory from config
+	std::string	fullPath = _config.getFolderRoot() + "/"
+								+ (path[0] == '/' ? path.substr(1) : path);
+
+	// GET: Used to retrieve files
+	if (req.getMethod() == "GET")
+	{
+		std::string	content = _readFile(fullPath);
+		if (!content.empty())
+		{
+			res.setStatus(200); // OK
+			res.setBody(content);
+			// It finds the right label for the box
+			res.setHeader("Content-Type", Utils::getMimeType(path));
+
+			std::cout << "DEBUG: Response sent [200 OK]" << std::endl;
+		}
+		else
+		{
+			res.defaultErrorPage(404);
+
+			std::cout << "DEBUG: Response sent [404 Not Found]" << std::endl;
+		}
+	}
+	// POST: Used to send data to the server
+	else if (req.getMethod() == "POST")
+	{
+		// Open a file in append mode to save the request body
+		std::ofstream	outfile("www/uploads/data.txt", std::ios::app);
+		if (outfile.is_open())
+		{
+			outfile << req.getBody() << std::endl;
+			outfile.close();
+
+			res.setStatus(201);
+			res.setBody("<html><body><h1>Post Successful!"
+					"Data saved.</h1></body></html>");
+		}
+		else
+			// Internal Server Error if file cannot be opened
+			res.defaultErrorPage(500);
+	}
+	// DELETE: Used to remove a resource from the server
+	else if (req.getMethod() == "DELETE")
+	{
+		// std::remove to delete a file from the disk
+		if (std::remove(fullPath.c_str()) == 0)
+			res.setStatus(204); // 204 No Content (Success with no body)
+		else
+			res.defaultErrorPage(404); // Not Found if the file doesn't exist
+	}
+
+	// 3. Build the final HTTP string and send it back to the client
+	std::string	res_str = res.build();
+	send(fd, res_str.c_str(), res_str.size(), 0);
+}
+
+void
+Server::_handleDisconnection(int idx)
+{
+	int	fd = _fds[idx].fd;
+	_reqs.erase(fd); // Always clean the map
+
+	if (fd > 0)
+		std::cout << "Log: Client on fd " << fd << " disconnected." << std::endl;
+
+	_removeClient(idx);
 }
 
 /* ------------------------------ CORE METHODS ------------------------------ */

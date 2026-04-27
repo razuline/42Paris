@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/25 14:09:02 by erazumov          #+#    #+#             */
-/*   Updated: 2026/04/26 17:31:39 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/04/27 16:12:25 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,10 +47,10 @@ private:
 	// Current state of the request parsing process
 	RequestState						_state;
 
-	/* --- Helper Methods --- */
-	void	handleHeaders();
-	void	handleBody();
-	void	parseRawHeaders(const std::string &headers_part);
+	/* --- Private Internal Helpers --- */
+	void	_handleHeaders();
+	void	_handleBody();
+	void	_parseRawHeaders(const std::string &headers_part);
 
 public:
 	/* --- Orthodox Canonical Form --- */

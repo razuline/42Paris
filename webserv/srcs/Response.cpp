@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/27 17:23:49 by erazumov          #+#    #+#             */
-/*   Updated: 2026/03/28 12:58:44 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/04/27 16:14:41 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ Response::~Response()
 
 // Converts HTTP status codes into their standard English phrases
 std::string
-Response::getReasonPhrase(int code)
+Response::_getReasonPhrase(int code)
 {
 	switch(code)
 	{
@@ -83,7 +83,7 @@ Response::build()
 	std::stringstream	ss;
 
 	// 1. Status Line (CRLF is mandatory at the end)
-	ss << "HTTP/1.1 " << _status << " " << getReasonPhrase(_status) << "\r\n";
+	ss << "HTTP/1.1 " << _status << " " << _getReasonPhrase(_status) << "\r\n";
 
 	// 2. Iterate through the map to add all headers
 	std::map<std::string, std::string>::iterator	it;
@@ -107,7 +107,7 @@ Response::defaultErrorPage(int code)
 	this->setStatus(code);
 
 	// 2. Get the word version (e.g., "Not Found")
-	std::string	msg = getReasonPhrase(code);
+	std::string	msg = _getReasonPhrase(code);
 
 	// 3. Create a HTML body
 	std::stringstream	ss;
