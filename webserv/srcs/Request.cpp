@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/25 15:33:23 by erazumov          #+#    #+#             */
-/*   Updated: 2026/04/28 18:43:15 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/04/28 20:17:47 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -156,8 +156,8 @@ Request::isComplete()
 void
 Request::addData(std::string chunk)
 {
-	// SECURITY CHECK: Check if the raw buffer is getting too big
-	// _limit comes from the Config (client_max_body_size)
+	// SECURITY CHECK: Protect the server from memory exhaustion
+	// If the new chunk exceeds the limit, the ERROR state immediately
 	if (_raw.size() + chunk.size() > _limit)
 	{
 		_state = ERROR;
@@ -167,7 +167,7 @@ Request::addData(std::string chunk)
 	// 1. Accumulate the incoming data into the raw buffer
 	_raw += chunk;
 
-	// 2. Try to find and parse headers
+	// 2. Try to find and parse the HTTP headers
 	if (_state == READING_HEADERS)
 		_handleHeaders();
 

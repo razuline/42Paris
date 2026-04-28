@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:40 by erazumov          #+#    #+#             */
-/*   Updated: 2026/04/28 18:48:14 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/04/28 20:21:48 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -184,13 +184,13 @@ Server::_executeRequest(int fd, Request &req)
 
 	// 1. Handle the default home page if the path is "/"
 	if (path == "/")
-		path = _config.getHomePage(); // Default file
+		path = _config.getHomePage(); // Redirect empty paths to the default file
 
 	// 2. Build the full system path using the root directory from config
 	std::string	fullPath = _config.getFolderRoot() + "/"
 								+ (path[0] == '/' ? path.substr(1) : path);
 
-	// GET: Used to retrieve files
+	// GET: Retrieve and send a file to the client
 	if (req.getMethod() == "GET")
 	{
 		std::string	content = _readFile(fullPath);
@@ -205,12 +205,12 @@ Server::_executeRequest(int fd, Request &req)
 		}
 		else
 		{
-			res.defaultErrorPage(404);
+			res.defaultErrorPage(404); // Not Found
 
 			std::cout << "DEBUG: Response sent [404 Not Found]" << std::endl;
 		}
 	}
-	// POST: Used to send data to the server
+	// POST: Receive and save data to a file
 	else if (req.getMethod() == "POST")
 	{
 		// Open a file in append mode to save the request body
@@ -220,22 +220,20 @@ Server::_executeRequest(int fd, Request &req)
 			outfile << req.getBody() << std::endl;
 			outfile.close();
 
-			res.setStatus(201);
+			res.setStatus(201); // Created
 			res.setBody("<html><body><h1>Post Successful!"
 					"Data saved.</h1></body></html>");
 		}
 		else
-			// Internal Server Error if file cannot be opened
-			res.defaultErrorPage(500);
+			res.defaultErrorPage(500); // Internal Server Error
 	}
-	// DELETE: Used to remove a resource from the server
+	// DELETE: Permanently remove a file from the server disk
 	else if (req.getMethod() == "DELETE")
 	{
-		// std::remove to delete a file from the disk
 		if (std::remove(fullPath.c_str()) == 0)
-			res.setStatus(204); // 204 No Content (Success with no body)
+			res.setStatus(204); // No Content (Success)
 		else
-			res.defaultErrorPage(404); // Not Found if the file doesn't exist
+			res.defaultErrorPage(404); // File not found on disk
 	}
 
 	// 3. Build the final HTTP string and send it back to the client

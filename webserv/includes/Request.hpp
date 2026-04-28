@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/25 14:09:02 by erazumov          #+#    #+#             */
-/*   Updated: 2026/04/28 18:41:28 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/04/28 20:59:21 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 # include <map>
 # include <iostream>
 # include <sstream>
+# include <cstdlib>
 
 # include "Utils.hpp"
 
