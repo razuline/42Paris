@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/28 13:46:06 by erazumov          #+#    #+#             */
-/*   Updated: 2026/03/29 14:52:44 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/04/28 18:39:46 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,8 @@ Config::Config() :
 	_port(8080),
 	_serverName(""),
 	_folderRoot(""),
-	_homePage("")
+	_homePage(""),
+	_client_max_body_size(1048576)
 {
 	// std::cout << "Default constructor called" << std::endl;
 }
@@ -39,6 +40,7 @@ Config
 		this->_serverName = other._serverName;
 		this->_folderRoot = other._folderRoot;
 		this->_homePage = other._homePage;
+		this->_client_max_body_size = other._client_max_body_size;
 	}
 	return *this;
 
@@ -103,6 +105,14 @@ Config::parse(const std::string &filename)
 		{
 			_homePage = Utils::trim(line.substr(5));
 		}
+		// "client_max_body_size"
+		else if (line.find("client_max_body_size") == 0)
+		{
+			std::string 		keyword = "client_max_body_size";
+			std::string			value = Utils::trim(line.substr(keyword.length()));
+			std::stringstream	ss(value);
+			ss >> _client_max_body_size;
+		}
 	}
 	file.close();
 }
@@ -131,4 +141,10 @@ const std::string
 Config::getHomePage() const
 {
 	return _homePage;
+}
+
+size_t
+Config::getClientMaxBodySize() const
+{
+	return _client_max_body_size;
 }

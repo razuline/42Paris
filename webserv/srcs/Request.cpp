@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/25 15:33:23 by erazumov          #+#    #+#             */
-/*   Updated: 2026/04/27 16:17:43 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/04/28 18:43:15 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,9 @@ Request::Request() :
 	_method(""),
 	_path(""),
 	_version(""),
-	_body("")
+	_body(""),
+	_state(READING_HEADERS),
+	_limit(1000000) // 1 Mb
 {
 	// std::cout << "Default constructor called" << std::endl;
 }
@@ -174,6 +176,12 @@ Request::addData(std::string chunk)
 		_handleBody();
 }
 
+void
+Request::setLimit(size_t limit)
+{
+	_limit = limit;
+}
+
 /* -------------------------------- GETTERS --------------------------------- */
 
 const std::string
@@ -217,4 +225,10 @@ const std::string
 &Request::getBody() const
 {
 	return this->_body;
+}
+
+Request::RequestState
+Request::getState() const
+{
+	return this->_state;
 }

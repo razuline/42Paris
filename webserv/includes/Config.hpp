@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/28 13:38:56 by erazumov          #+#    #+#             */
-/*   Updated: 2026/03/28 15:18:33 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/04/28 18:31:57 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@ private:
 	std::string	_serverName;
 	std::string	_folderRoot;
 	std::string	_homePage;
+	size_t		_client_max_body_size;
 
 public:
 	/* --- Orthodox Canonical Form --- */
@@ -41,6 +42,7 @@ public:
 	const std::string	getFolderRoot() const;
 	const std::string	getServerName() const;
 	const std::string	getHomePage() const;
+	size_t				getClientMaxBodySize() const;
 };
 
 #endif

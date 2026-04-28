@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:40 by erazumov          #+#    #+#             */
-/*   Updated: 2026/04/27 16:11:33 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/04/28 18:48:14 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,23 +134,44 @@ Server::_handleClientRequest(int idx)
 	char	buff[4096];
 	int		fd = _fds[idx].fd;
 
-	// Receive raw data from the client socket
+	// 1. Receive raw data from the client socket
 	ssize_t	bytes = recv(fd, buff, sizeof(buff), 0);
 
 	if (bytes > 0)
 	{
-		// Get (or create) the persistent request for this client
+		// 2. Set the body size limit from the server configuration
+		_reqs[fd].setLimit(_config.getClientMaxBodySize());
+
+		// 3. Add the received data chunk to our persistent request object
 		_reqs[fd].addData(std::string(buff, bytes));
 
-		// Only process if the request is complete
-		if (_reqs[fd].isComplete())
+		// 4. Check if the request is finished OR if a size limit error occurred
+		if (_reqs[fd].isComplete() || _reqs[fd].getState() == Request::ERROR)
 		{
-			_executeRequest(fd, _reqs[fd]);
-			_reqs.erase(fd); // Clean up after processing
+			// Case A: The request exceeded the client_max_body_size
+			if (_reqs[fd].getState() == Request::ERROR)
+			{
+				Response	res;
+				res.defaultErrorPage(413); // 413 Payload Too Large
+
+				std::string	res_str = res.build();
+				send(fd, res_str.c_str(), res_str.size(), 0);
+
+				std::cout << "DEBUG: Request too large, sent 413" << std::endl;
+			}
+			// Case B: The request is valid and fully received
+			else
+			{
+				_executeRequest(fd, _reqs[fd]);
+			}
+			// 5. IMPORTANT: Remove the request from the map after sending a response
+			// This clears the "closet" for this client's next request
+			_reqs.erase(fd);
 		}
 	}
 	else
 	{
+		// Handle client disconnection (bytes == 0) or read errors (bytes < 0)
 		_handleDisconnection(idx);
 	}
 }
