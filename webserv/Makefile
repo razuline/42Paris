@@ -6,7 +6,7 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/03/09 15:17:52 by erazumov          #+#    #+#              #
-#    Updated: 2026/03/28 15:30:30 by erazumov         ###   ########.fr        #
+#    Updated: 2026/05/01 17:17:24 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,6 +17,7 @@ FLAGS      = -Wall -Wextra -Werror -std=c++98 -g3
 INC        = -I includes
 
 SRC_FILES  = main.cpp \
+			 Cluster.cpp \
 			 Server.cpp \
 			 Request.cpp \
 			 Response.cpp \

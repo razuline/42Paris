@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:40 by erazumov          #+#    #+#             */
-/*   Updated: 2026/04/28 20:21:48 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/01 17:28:36 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -340,6 +340,14 @@ Server::run()
 			}
 		}
 	}
+}
+
+/* -------------------------------- GETTERS --------------------------------- */
+
+int
+Server::getFd() const
+{
+	return this->_serv_fd;
 }
 
 // int	setsockopt(int sockfd, int level, int optname,
