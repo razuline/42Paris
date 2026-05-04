@@ -6,7 +6,7 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/03/20 12:57:16 by erazumov          #+#    #+#              #
-#    Updated: 2026/03/20 12:58:35 by erazumov         ###   ########.fr        #
+#    Updated: 2026/05/04 15:20:14 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,7 +15,7 @@ NAME = bigint
 CXX = c++
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -g3
 
-SRCS = main.cpp Bigint.cpp
+SRCS = main.cpp bigint.cpp
 OBJS = $(SRCS:.cpp=.o)
 
 # Colors
