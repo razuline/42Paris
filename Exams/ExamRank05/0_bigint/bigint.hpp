@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/20 12:55:43 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/04 14:13:28 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/05 14:41:40 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,11 +34,11 @@ public:
 	bigint	&operator=(const bigint &other);
 	~bigint();
 
-	// Arithmetic
+	/* --- Arithmetic Operators --- */
 	bigint	operator+(const bigint &other) const;
 	bigint	&operator+=(const bigint &other);
 
-	// Increment
+	/* --- Increment --- */
 	bigint	&operator++();   // Prefix ++b
 	bigint	operator++(int); // Postfix b++
 
@@ -52,7 +52,7 @@ public:
 	bigint	operator>>(const bigint &other) const;
 	bigint	&operator>>=(const bigint &other);
 
-	// Comparison Operators
+	/* --- Comparison --- */
 	bool	operator<(const bigint &other) const;
 	bool	operator<=(const bigint &other) const;
 	bool	operator>(const bigint &other) const;
@@ -64,6 +64,7 @@ public:
 	void	print(std::ostream &os) const;
 };
 
+/* --- Output Stream --- */
 std::ostream
 &operator<<(std::ostream &os, const bigint &obj);
 

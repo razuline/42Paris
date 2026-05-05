@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/20 12:56:34 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/04 15:18:23 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/05 14:47:48 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,8 @@
 bigint::bigint()
 {
 	_digits.push_back(0);
+
+	// std::cout << "Default constructor called" << std::endl;
 }
 
 bigint::bigint(unsigned long long n)
