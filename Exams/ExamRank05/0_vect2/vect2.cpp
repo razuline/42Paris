@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/05 14:44:23 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/05 16:34:40 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/05 18:25:25 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,12 +109,6 @@ vect2 &vect2::operator*=(int scalar)
 	_y *= scalar;
 
 	return *this;
-}
-
-vect2
-operator*(int scalar, const vect2 &v)
-{
-	return v * scalar; // Reuses the operator*(int) logic
 }
 
 /* --- Increment / Decrement --- */
