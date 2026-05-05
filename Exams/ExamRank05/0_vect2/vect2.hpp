@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/05 14:34:12 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/05 14:40:43 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/05 16:45:19 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,8 +56,8 @@ public:
 	vect2	operator--(int);  // Postfix v--
 
 	/* --- Access & Comparison --- */
-	int		&operator[](int i);       // For v1[1] = 12
-	const int	&operator[](int i) const; // For const v3[1]
+	int		&operator[](int i);                   // For v1[1] = 12
+	const int	&operator[](int i) const;         // For const v3[1]
 	bool	operator==(const vect2 &other) const;
 	bool	operator!=(const vect2 &other) const;
 };
