@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/05 18:42:29 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/05 21:07:43 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/06 14:37:44 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 class set
 {
 private:
-	searchable_bag	*_bag; // Pointer to the bag inside
+	searchable_bag	*_bag; // Internal pointer to a searchable data structure
 
 public:
 	/* --- Orthodox Canonical Form --- */
@@ -28,14 +28,16 @@ public:
 	~set();
 
 	/* --- Core Methods --- */
-	void	insert(int value);
-	void	insert(int *array, int size);
-	bool	has(int value) const;
-	void	print() const;
-	void	clear();
+	// Logic: only call bag->insert() if bag->has() returns false
+	void			insert(int value);
+	void			insert(int *array, int size);
+
+	bool			has(int value) const;
+	void			print() const;
+	void			clear();
 
 	/* --- Getter --- */
-	searchable_bag	&get_bag() const; // Returns the bag reference
+	searchable_bag	&get_bag() const; // Access the internal bag
 };
 
 #endif

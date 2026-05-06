@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/05 18:41:59 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/05 20:39:32 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/06 14:36:09 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 # include "array_bag.hpp"
 # include "searchable_bag.hpp"
 
-// Inherits from the array implementation AND the searchable interface
+// This class combines array storage with search capability
 class searchable_array_bag :
 	public array_bag,
 	public searchable_bag
@@ -29,7 +29,8 @@ public:
 	virtual	~searchable_array_bag();
 
 	/* --- Core Methods --- */
-	virtual bool	has(int value) const; // Check if a value exists in the array
+	// Check if a value exists in the underlying array
+	virtual bool	has(int value) const;
 };
 
 #endif

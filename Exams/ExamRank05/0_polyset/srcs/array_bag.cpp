@@ -6,8 +6,12 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/05 19:31:16 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/05 21:17:33 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/06 15:20:47 by erazumov         ###   ########.fr       */
 /*                                                                            */
+/* ************************************************************************** */
+
+/* ************************************************************************** */
+/* **************************** EXAM ASSIGNMENTS **************************** */
 /* ************************************************************************** */
 
 #include "array_bag.hpp"
@@ -24,12 +28,11 @@ array_bag::array_bag() :
 
 array_bag::array_bag(const array_bag &copy)
 {
-	this->data = new int[copy.size];
+	size = copy.size;
+	data = new int[size];
 
-	for (int i = 0; i < copy.size; i++)
-		this->data[i] = copy.data[i];
-
-	this->size = copy.size;
+	for (int i = 0; i < size; i++)
+		data[i] = copy.data[i];
 
 	// std::cout << "Copy constructor called" << std::endl;
 }
@@ -38,11 +41,15 @@ array_bag
 &array_bag::operator=(const array_bag &other)
 {
 	this->clear();
-	this->data = new int[other.size];
+	if (other.size > 0)
+	{
+		this->data = new int[other.size];
 
-	for (int i = 0; i < other.size; i++)
-		this->data[i] = other.data[i];
-
+		for (int i = 0; i < other.size; i++)
+			this->data[i] = other.data[i];
+	}
+	else
+		this->data = 0; // Use 0
 	this->size = other.size;
 
 	return *this;
@@ -52,7 +59,11 @@ array_bag
 
 array_bag::~array_bag()
 {
-	delete [] this->data;
+	if (data != 0)
+	{
+		delete[] data;
+		data = 0;
+	}
 
 	// std::cout << "Destructor called" << std::endl;
 }
@@ -60,32 +71,45 @@ array_bag::~array_bag()
 /* ----------------------------- PUBLIC METHODS ----------------------------- */
 
 void
-array_bag::insert(int val)
+array_bag::insert(int item)
 {
-	int	*tmp = new int[size + 1];
+	int	*new_data = new int[size + 1];
 
 	for (int i = 0; i < size; i++)
-		tmp[i] = this->data[i];
+		new_data[i] = data[i];
 
-	tmp[this->size] = val;
-	delete [] this->data;
+	new_data[size] = item;
 
-	this->data = tmp;
-	this->size++;
+	if (data != 0)
+		delete[] data;
+
+	data = new_data;
+	size++;
 }
 
 void
-array_bag::insert(int *a, int s)
+array_bag::insert(int *items, int count)
 {
-	for (int i = 0; i < s; i++)
-		this->insert(a[i]);
+	int	*new_data = new int[size + count];
+
+	for (int i = 0; i < size; i++)
+		new_data[i] = data[i];
+
+	for (int i = 0; i < count; i++)
+		new_data[size + i] = items[i];
+
+	if (data != 0)
+		delete[] data;
+
+	data = new_data;
+	size += count;
 }
 
 void
 array_bag::print() const
 {
 	for (int i = 0; i < this->size; i++)
-		std::cout << this->data[i] << " ";
+		std::cout << data[i] << " ";
 
 	std::cout << std::endl;
 }
@@ -93,8 +117,10 @@ array_bag::print() const
 void
 array_bag::clear()
 {
-	delete [] this->data;
-
-	this->data = 0;
+	if (this->data != 0) // Comparison with 0
+	{
+		delete [] this->data;
+		this->data = 0;
+	}
 	this->size = 0;
 }

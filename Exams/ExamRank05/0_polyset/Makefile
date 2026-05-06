@@ -6,7 +6,7 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/03/20 12:57:16 by erazumov          #+#    #+#              #
-#    Updated: 2026/05/05 21:13:18 by erazumov         ###   ########.fr        #
+#    Updated: 2026/05/06 14:47:12 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -62,5 +62,5 @@ re: fclean all
 
 .PHONY: all clean fclean re
 
-# valgrind --leak-check=full ./polyset
-# leaks --atExit -- ./polyset
+# ./polyset 42 21 84 10
+# valgrind --leak-check=full ./polyset 42 21 84 10
