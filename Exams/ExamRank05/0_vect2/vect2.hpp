@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/05 14:34:12 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/05 18:23:14 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/06 14:03:40 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ public:
 	vect2	&operator+=(const vect2 &other); // Returns ref for: v2 += v2 += v3
 	vect2	operator-(const vect2 &other) const;
 	vect2	&operator-=(const vect2 &other);
-	vect2	operator-() const;               // For: -v2
+	vect2	operator-() const;               // For: -v2. Unary minus
 
 	/* --- Scalar Multiplication --- */
 	vect2	operator*(int scalar) const;     // For: v3 * 2
@@ -53,11 +53,10 @@ public:
 	bool		operator!=(const vect2 &other) const;
 };
 
-// To handle: scalar * vect2 (e.g., 3 * v2)
+// Global operators for scalar * vect and printing
 vect2
 operator*(int scalar, const vect2 &v);
 
-/* --- Output Stream --- */
 std::ostream
 &operator<<(std::ostream &os, const vect2 &obj);
 
