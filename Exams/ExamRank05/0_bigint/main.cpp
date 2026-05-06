@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/20 12:57:07 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/04 15:19:52 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/06 14:00:31 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,8 +34,8 @@ int	main()
 	std::cout << "(d <<= 4) = " << (d <<= 4) << std::endl;
 	std::cout << "(d >>= 2) = " << (d >>= (const bigint)2) << std::endl;
 
-	std::cout << "a =" << a << std::endl;
-	std::cout << "d =" << d << std::endl;
+	std::cout << "a = " << a << std::endl;
+	std::cout << "d = " << d << std::endl;
 
 	std::cout << "(d < a) = " << (d < a) << std::endl;
 	std::cout << "(d <= a) = " << (d <= a) << std::endl;

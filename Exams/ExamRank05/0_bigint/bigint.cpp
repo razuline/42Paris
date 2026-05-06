@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/20 12:56:34 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/05 14:47:48 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/06 13:48:40 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,6 @@
 bigint::bigint()
 {
 	_digits.push_back(0);
-
-	// std::cout << "Default constructor called" << std::endl;
 }
 
 bigint::bigint(unsigned long long n)
@@ -31,44 +29,35 @@ bigint::bigint(unsigned long long n)
 		_digits.push_back(n % 10);
 		n /= 10;
 	}
-
-	// std::cout << "Default constructor called" << std::endl;
 }
 
 bigint::bigint(const bigint &copy) :
 	_digits(copy._digits)
 {
-	// std::cout << "Copy constructor called" << std::endl;
 }
 
 bigint
 &bigint::operator=(const bigint &other)
 {
 	if (this != &other)
-		this->_digits = other._digits;
+		_digits = other._digits;
 	return *this;
-
-	// std::cout << "Copy assignment operator called" << std::endl;
 }
 
 bigint::~bigint()
 {
-	// std::cout << "Destructor called" << std::endl;
 }
 
 /* ---------------------------- PRIVATE METHODS ----------------------------- */
 
-/* Ensures the number doesn't have unnecessary zeros at the end of the vector */
 void
 bigint::_removeLeadingZeros()
 {
+	// Keep at least one digit, even if it's zero
 	while (_digits.size() > 1 && _digits.back() == 0)
-	{
 		_digits.pop_back();
-	}
 }
 
-/* Converts the bigint value to a native int (useful for shift amounts) */
 int
 bigint::_toInt() const
 {
@@ -91,15 +80,16 @@ bigint
 &bigint::operator+=(const bigint &other)
 {
 	int	carry = 0;
-	size_t	n = std::max(_digits.size(), other._digits.size());
+	size_t	maxSize = std::max(_digits.size(), other._digits.size());
 
-	for (size_t i = 0; i < n || carry; ++i)
+	for (size_t i = 0; i < maxSize || carry; ++i)
 	{
 		if (i == _digits.size())
 			_digits.push_back(0);
 
-		int	sum = _digits[i] + carry +
-					(i < other._digits.size() ? other._digits[i] : 0);
+		int	currOther = (i < other._digits.size()) ? other._digits[i] : 0;
+		int	sum = _digits[i] + currOther + carry;
+
 		_digits[i] = sum % 10;
 		carry = sum / 10;
 	}
@@ -109,10 +99,7 @@ bigint
 bigint
 bigint::operator+(const bigint &other) const
 {
-	bigint	res(*this);
-
-	res += other;
-	return res;
+	return bigint(*this) += other;
 }
 
 /* --- Increment --- */
@@ -139,21 +126,16 @@ bigint::operator++(int)
 bigint
 &bigint::operator<<=(unsigned int n)
 {
-	// Shifting 0 left results in 0
+	// Shifting 0 remains 0
 	if (n > 0 && !(_digits.size() == 1 && _digits[0] == 0))
-	{
 		_digits.insert(_digits.begin(), n, 0);
-	}
 	return *this;
 }
 
 bigint
 bigint::operator<<(unsigned int n) const
 {
-	bigint	res(*this);
-
-	res <<= n;
-	return res;
+	return bigint(*this) <<= n;
 }
 
 bigint
@@ -168,16 +150,14 @@ bigint
 	{
 		_digits.erase(_digits.begin(), _digits.begin() + n);
 	}
+	_removeLeadingZeros();
 	return *this;
 }
 
 bigint
 bigint::operator>>(unsigned int n) const
 {
-	bigint	res(*this);
-
-	res >>= n;
-	return res;
+	return bigint(*this) >>= n;
 }
 
 /* --- Overloads for bigint parameters --- */
@@ -191,22 +171,10 @@ bigint
 bigint
 bigint::operator>>(const bigint &other) const
 {
-	return *this >> other._toInt();
+	return bigint(*this) >>= other;
 }
 
 /* --- Comparison --- */
-
-bool
-bigint::operator==(const bigint &other) const
-{
-	return _digits == other._digits;
-}
-
-bool
-bigint::operator!=(const bigint &other) const
-{
-	return !(*this == other);
-}
 
 bool
 bigint::operator<(const bigint &other) const
@@ -220,6 +188,18 @@ bigint::operator<(const bigint &other) const
 			return _digits[i] < other._digits[i];
 	}
 	return false;
+}
+
+bool
+bigint::operator==(const bigint &other) const
+{
+	return _digits == other._digits;
+}
+
+bool
+bigint::operator!=(const bigint &other) const
+{
+	return !(*this == other);
 }
 
 bool
