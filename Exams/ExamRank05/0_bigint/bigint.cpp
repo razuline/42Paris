@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/20 12:56:34 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/06 13:48:40 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/07 16:11:29 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,16 +19,25 @@ bigint::bigint()
 	_digits.push_back(0);
 }
 
+/*
+ * This function "breaks" a normal number into a vector.
+ */
 bigint::bigint(unsigned long long n)
 {
+	// Handle the base case where the input is 0
 	if (n == 0)
 		_digits.push_back(0);
 
+	// Extract digits one by one using modulo and division
 	while (n > 0)
 	{
+		// n % 10 gets the last digit (e.g., 1337 % 10 = 7)
 		_digits.push_back(n % 10);
+
+		// n /= 10 removes the last digit (e.g., 1337 / 10 = 133)
 		n /= 10;
 	}
+	// Result for 1337: _digits is {7, 3, 3, 1} (reversed order)
 }
 
 bigint::bigint(const bigint &copy) :
@@ -58,14 +67,20 @@ bigint::_removeLeadingZeros()
 		_digits.pop_back();
 }
 
+/*
+ * This is a specific helper used to handle the exam main
+ * where a bigint is used as a shift parameter.
+ */
 int
 bigint::_toInt() const
 {
 	int	res = 0;
 	int	base = 1;
 
+	// Reconstruct the number by multiplying each digit by its power of 10
 	for (size_t i = 0; i < _digits.size(); ++i)
 	{
+		// Result = digit * (1, 10, 100, etc.)
 		res += _digits[i] * base;
 		base *= 10;
 	}
@@ -76,21 +91,32 @@ bigint::_toInt() const
 
 /* --- Arithmetic --- */
 
+/*
+ * The "column addition" logic.
+ */
 bigint
 &bigint::operator+=(const bigint &other)
 {
-	int	carry = 0;
+	int	carry = 0; // Stores the digit to be carried over to the next column
 	size_t	maxSize = std::max(_digits.size(), other._digits.size());
 
+	// Loop through each column or as long as there is a remaining carry
 	for (size_t i = 0; i < maxSize || carry; ++i)
 	{
+		// If curr number is shorter than the other, add a placeholder 0
 		if (i == _digits.size())
 			_digits.push_back(0);
 
+		// Get digit from the other number if it exists, otherwise use 0
 		int	currOther = (i < other._digits.size()) ? other._digits[i] : 0;
+
+		// Calculate sum of curr digits + the carry from the previous step
 		int	sum = _digits[i] + currOther + carry;
 
+		// sum % 10 keeps only the last digit (e.g., 13 % 10 = 3)
 		_digits[i] = sum % 10;
+
+		// sum / 10 calculates the new carry (e.g., 13 / 10 = 1)
 		carry = sum / 10;
 	}
 	return *this;
@@ -126,9 +152,15 @@ bigint::operator++(int)
 bigint
 &bigint::operator<<=(unsigned int n)
 {
-	// Shifting 0 remains 0
+	// Rule: Shifting 0 left by any amount is still 0
 	if (n > 0 && !(_digits.size() == 1 && _digits[0] == 0))
+	{
+		// In a reverse vector, adding zeros at the END of a number
+		// actually means inserting them at the START of the vector.
+		// e.g., 42 is {2, 4}
+		// (42 << 2) is 4200, which is {0, 0, 4, 2}
 		_digits.insert(_digits.begin(), n, 0);
+	}
 	return *this;
 }
 
@@ -141,6 +173,7 @@ bigint::operator<<(unsigned int n) const
 bigint
 &bigint::operator>>=(unsigned int n)
 {
+	// If shift amount is larger than the number of digits, the result is 0
 	if (n >= _digits.size())
 	{
 		_digits.clear();
@@ -148,8 +181,12 @@ bigint
 	}
 	else
 	{
+		// Erasing the first 'n' elements removes the lowest powers of 10
+		// e.g., 1337 is {7, 3, 3, 1}
+		// (1337 >> 2) removes {7, 3}, leaving {3, 1} (13)
 		_digits.erase(_digits.begin(), _digits.begin() + n);
 	}
+	// Clean up any zeros that were left at the high-power end (the end of vector)
 	_removeLeadingZeros();
 	return *this;
 }
@@ -162,9 +199,13 @@ bigint::operator>>(unsigned int n) const
 
 /* --- Overloads for bigint parameters --- */
 
+/*
+ * This allows the syntax: d >>= (const bigint)2.
+ */
 bigint
 &bigint::operator>>=(const bigint &other)
 {
+	// Convert the 'other' BigInt to a standard int, then shift
 	return *this >>= other._toInt();
 }
 
@@ -225,6 +266,7 @@ bigint::operator>=(const bigint &other) const
 void
 bigint::print(std::ostream &os) const
 {
+	// Start from the last index (highest power) and go down to 0
 	for (int i = _digits.size() - 1; i >= 0; --i)
 	{
 		os << _digits[i];
