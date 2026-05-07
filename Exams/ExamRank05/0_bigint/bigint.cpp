@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/20 12:56:34 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/07 16:11:29 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/07 16:43:42 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,14 +59,6 @@ bigint::~bigint()
 
 /* ---------------------------- PRIVATE METHODS ----------------------------- */
 
-void
-bigint::_removeLeadingZeros()
-{
-	// Keep at least one digit, even if it's zero
-	while (_digits.size() > 1 && _digits.back() == 0)
-		_digits.pop_back();
-}
-
 /*
  * This is a specific helper used to handle the exam main
  * where a bigint is used as a shift parameter.
@@ -85,6 +77,14 @@ bigint::_toInt() const
 		base *= 10;
 	}
 	return res;
+}
+
+void
+bigint::_removeLeadingZeros()
+{
+	// Keep at least one digit, even if it's zero
+	while (_digits.size() > 1 && _digits.back() == 0)
+		_digits.pop_back();
 }
 
 /* ----------------------------- PUBLIC METHODS ----------------------------- */
