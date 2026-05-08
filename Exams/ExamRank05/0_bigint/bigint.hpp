@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/20 12:55:43 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/07 16:43:30 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/08 14:07:17 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,30 +35,30 @@ public:
 	~bigint();
 
 	/* --- Arithmetic Operators --- */
-	bigint	operator+(const bigint &other) const;
 	bigint	&operator+=(const bigint &other);
+	bigint	operator+(const bigint &other) const;
 
 	/* --- Increment --- */
 	bigint	&operator++();   // Prefix ++b
 	bigint	operator++(int); // Postfix b++
 
 	// Digitshift (Base 10 shifting)
-	bigint	operator<<(unsigned int n) const;
 	bigint	&operator<<=(unsigned int n);
-	bigint	operator>>(unsigned int n) const;
+	bigint	operator<<(unsigned int n) const;
 	bigint	&operator>>=(unsigned int n);
+	bigint	operator>>(unsigned int n) const;
 
 	// Shift overloads to handle (d >>= (const bigint)2) from main
-	bigint	operator>>(const bigint &other) const;
 	bigint	&operator>>=(const bigint &other);
+	bigint	operator>>(const bigint &other) const;
 
 	/* --- Comparison --- */
 	bool	operator<(const bigint &other) const;
+	bool	operator==(const bigint &other) const;
+	bool	operator!=(const bigint &other) const;
 	bool	operator<=(const bigint &other) const;
 	bool	operator>(const bigint &other) const;
 	bool	operator>=(const bigint &other) const;
-	bool	operator==(const bigint &other) const;
-	bool	operator!=(const bigint &other) const;
 
 	/* --- Core Methods --- */
 	void	print(std::ostream &os) const;

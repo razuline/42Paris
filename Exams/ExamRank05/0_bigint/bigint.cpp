@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/20 12:56:34 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/07 16:43:42 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/08 14:15:25 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,29 +97,30 @@ bigint::_removeLeadingZeros()
 bigint
 &bigint::operator+=(const bigint &other)
 {
-	int	carry = 0; // Stores the digit to be carried over to the next column
+	int	carry = 0; // Stores the 1 if a column sum is >= 10
 	size_t	maxSize = std::max(_digits.size(), other._digits.size());
 
 	// Loop through each column or as long as there is a remaining carry
 	for (size_t i = 0; i < maxSize || carry; ++i)
 	{
-		// If curr number is shorter than the other, add a placeholder 0
+		// If curr number is shorter than the result needs to be,
+		// add a new digit (0) to expand it
 		if (i == _digits.size())
 			_digits.push_back(0);
 
-		// Get digit from the other number if it exists, otherwise use 0
+		// Get digit from the other number; if it's shorter, use 0
 		int	currOther = (i < other._digits.size()) ? other._digits[i] : 0;
 
-		// Calculate sum of curr digits + the carry from the previous step
+		// Calculate the total for this column
 		int	sum = _digits[i] + currOther + carry;
 
-		// sum % 10 keeps only the last digit (e.g., 13 % 10 = 3)
+		// Use modulo (%) to keep only the single digit (e.g., 13 % 10 = 3)
 		_digits[i] = sum % 10;
 
-		// sum / 10 calculates the new carry (e.g., 13 / 10 = 1)
+		// Use division (/) to find the new carry (e.g., 13 / 10 = 1)
 		carry = sum / 10;
 	}
-	return *this;
+	return *this; // Return the updated object to allow chaining
 }
 
 bigint
