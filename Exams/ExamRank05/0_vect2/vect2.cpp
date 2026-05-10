@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/05 14:44:23 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/06 14:28:14 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/10 18:45:02 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ vect2::~vect2()
 
 /* ----------------------------- PUBLIC METHODS ----------------------------- */
 
-/* --- Arithmetic (Reusing += and -=) --- */
+/* --- Arithmetic Operators --- */
 
 // Returns *this to allow chained assignments like v1 += v2 += v3
 vect2
@@ -89,30 +89,7 @@ vect2::operator-() const
 	return vect2(-_x, -_y);
 }
 
-/* --- Multiplication --- */
-
-vect2
-&vect2::operator*=(int scalar)
-{
-	_x *= scalar;
-	_y *= scalar;
-
-	return *this;
-}
-
-vect2
-vect2::operator*(int scalar) const
-{
-	return vect2(*this) *= scalar;
-}
-
-vect2
-operator*(int scalar, const vect2 &v)
-{
-	return v * scalar;
-}
-
-/* --- Increment / Decrement --- */
+/* --- Increment / Decrement Operators--- */
 
 // Prefix: increments and returns the updated object
 vect2
@@ -152,7 +129,43 @@ vect2::operator--(int)
 	return tmp;
 }
 
-/* --- Access & Comparison --- */
+/* --- Multiplication Operators --- */
+
+vect2
+&vect2::operator*=(int scalar)
+{
+	_x *= scalar;
+	_y *= scalar;
+
+	return *this;
+}
+
+vect2
+vect2::operator*(int scalar) const
+{
+	return vect2(*this) *= scalar;
+}
+
+vect2
+operator*(int scalar, const vect2 &v)
+{
+	return v * scalar;
+}
+
+/* --- Access & Comparison Operators --- */
+
+bool
+vect2::operator==(const vect2 &other) const
+{
+	return (_x == other._x &&
+			_y == other._y);
+}
+
+bool
+vect2::operator!=(const vect2 &other) const
+{
+	return !(*this == other);
+}
 
 // Returns a reference to allow modification: v[0] = 10;
 int
@@ -168,23 +181,9 @@ const int
 	return (i == 0) ? _x : _y;
 }
 
-bool
-vect2::operator==(const vect2 &other) const
-{
-	return (_x == other._x && _y == other._y);
-}
-
-bool
-vect2::operator!=(const vect2 &other) const
-{
-	return !(*this == other);
-}
-
 /* --------------------- EXTERNAL FUNCTIONS (NON-MEMBER) -------------------- */
 
-/**
- * Handles printing: std::cout << v
- */
+// Handles printing: std::cout << v
 std::ostream
 &operator<<(std::ostream &os, const vect2 &v)
 {
