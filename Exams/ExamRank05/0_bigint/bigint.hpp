@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/20 12:55:43 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/10 15:12:45 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/10 17:17:56 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,12 +55,12 @@ public:
 	bigint	operator>>(const bigint &other) const;
 
 	// 4. Comparison Operators
-	bool	operator<(const bigint &other) const;
-	bool	operator>(const bigint &other) const;
-	bool	operator<=(const bigint &other) const;
-	bool	operator>=(const bigint &other) const;
-	bool	operator==(const bigint &other) const;
-	bool	operator!=(const bigint &other) const;
+	bool	operator==(const bigint &other) const; // The base (checks if they're identical)
+	bool	operator<(const bigint &other) const; // The core (the manual loop that checks digits)
+	bool	operator!=(const bigint &other) const; // Uses ==
+	bool	operator<=(const bigint &other) const; // Uses < and ==
+	bool	operator>=(const bigint &other) const; // Uses <
+	bool	operator>(const bigint &other) const; // Uses <=
 
 	// 5. Output
 	void	print(std::ostream &os) const;
