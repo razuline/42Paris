@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/20 12:56:34 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/08 14:15:25 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/10 15:17:58 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,11 +89,9 @@ bigint::_removeLeadingZeros()
 
 /* ----------------------------- PUBLIC METHODS ----------------------------- */
 
-/* --- Arithmetic --- */
+/* --- Arithmetic Operators --- */
 
-/*
- * The "column addition" logic.
- */
+// The "column addition" logic
 bigint
 &bigint::operator+=(const bigint &other)
 {
@@ -123,15 +121,17 @@ bigint
 	return *this; // Return the updated object to allow chaining
 }
 
+// Returns a copy (value)
 bigint
 bigint::operator+(const bigint &other) const
 {
 	return bigint(*this) += other;
 }
 
-/* --- Increment --- */
+/* --- Increment Operators --- */
 
 // Prefix increment
+// ++i returns a reference (&)
 bigint
 &bigint::operator++()
 {
@@ -139,17 +139,19 @@ bigint
 }
 
 // Postfix increment
+// i++ returns a copy (the old value)
 bigint
 bigint::operator++(int)
 {
-	bigint	tmp(*this);
+	bigint	tmp(*this); // Save the old value
 
-	++(*this);
-	return tmp;
+	++(*this);          // Increment the original
+	return tmp;         // Return the old value
 }
 
-/* --- Digitshift --- */
+/* --- Digitshift Operators --- */
 
+// Left Shifts
 bigint
 &bigint::operator<<=(unsigned int n)
 {
@@ -168,8 +170,13 @@ bigint
 bigint
 bigint::operator<<(unsigned int n) const
 {
+	// 1. Create a copy: bigint(*this)
+	// 2. Shift the copy: <<= n
+	// 3. Return the shifted copy
 	return bigint(*this) <<= n;
 }
+
+// Right Shifts
 
 bigint
 &bigint::operator>>=(unsigned int n)
@@ -178,7 +185,7 @@ bigint
 	if (n >= _digits.size())
 	{
 		_digits.clear();
-		_digits.push_back(0);
+		_digits.push_back(0); // If we shift away all digits, it becomes 0
 	}
 	else
 	{
@@ -192,17 +199,7 @@ bigint
 	return *this;
 }
 
-bigint
-bigint::operator>>(unsigned int n) const
-{
-	return bigint(*this) >>= n;
-}
-
-/* --- Overloads for bigint parameters --- */
-
-/*
- * This allows the syntax: d >>= (const bigint)2.
- */
+// This allows the syntax: d >>= (const bigint)2.
 bigint
 &bigint::operator>>=(const bigint &other)
 {
@@ -211,12 +208,18 @@ bigint
 }
 
 bigint
+bigint::operator>>(unsigned int n) const
+{
+	return bigint(*this) >>= n;
+}
+
+bigint
 bigint::operator>>(const bigint &other) const
 {
 	return bigint(*this) >>= other;
 }
 
-/* --- Comparison --- */
+/* --- Comparison Operators --- */
 
 bool
 bigint::operator<(const bigint &other) const
@@ -233,6 +236,24 @@ bigint::operator<(const bigint &other) const
 }
 
 bool
+bigint::operator>(const bigint &other) const
+{
+	return !(*this <= other);
+}
+
+bool
+bigint::operator<=(const bigint &other) const
+{
+	return *this < other || *this == other;
+}
+
+bool
+bigint::operator>=(const bigint &other) const
+{
+	return !(*this < other);
+}
+
+bool
 bigint::operator==(const bigint &other) const
 {
 	return _digits == other._digits;
@@ -244,24 +265,6 @@ bigint::operator!=(const bigint &other) const
 	return !(*this == other);
 }
 
-bool
-bigint::operator<=(const bigint &other) const
-{
-	return *this < other || *this == other;
-}
-
-bool
-bigint::operator>(const bigint &other) const
-{
-	return !(*this <= other);
-}
-
-bool
-bigint::operator>=(const bigint &other) const
-{
-	return !(*this < other);
-}
-
 /* ------------------------------ CORE METHODS ------------------------------ */
 
 void
@@ -269,9 +272,7 @@ bigint::print(std::ostream &os) const
 {
 	// Start from the last index (highest power) and go down to 0
 	for (int i = _digits.size() - 1; i >= 0; --i)
-	{
 		os << _digits[i];
-	}
 }
 
 std::ostream

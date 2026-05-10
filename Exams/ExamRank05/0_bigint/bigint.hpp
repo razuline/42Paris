@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/20 12:55:43 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/08 14:07:17 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/10 15:12:45 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,43 +28,45 @@ private:
 
 public:
 	/* --- Orthodox Canonical Form --- */
-	bigint();
-	bigint(unsigned long long n);
-	bigint(const bigint &copy);
-	bigint	&operator=(const bigint &other);
-	~bigint();
+	bigint();                                 // Default
+	bigint(unsigned long long n);             // Int conversion
+	bigint(const bigint &copy);               // Copy
+	bigint	&operator=(const bigint &other);  // Assignment
+	~bigint();                                // Destructor
 
-	/* --- Arithmetic Operators --- */
+	// 1. Arithmetic Operators
 	bigint	&operator+=(const bigint &other);
 	bigint	operator+(const bigint &other) const;
 
-	/* --- Increment --- */
-	bigint	&operator++();   // Prefix ++b
-	bigint	operator++(int); // Postfix b++
+	// 2. Increment Operators
+	bigint	&operator++();    // Prefix (++i)
+	bigint	operator++(int);  // Postfix (i++)
 
-	// Digitshift (Base 10 shifting)
+	// 3. Digitshift Operators
+
+	// Left Shifts
 	bigint	&operator<<=(unsigned int n);
 	bigint	operator<<(unsigned int n) const;
-	bigint	&operator>>=(unsigned int n);
-	bigint	operator>>(unsigned int n) const;
 
-	// Shift overloads to handle (d >>= (const bigint)2) from main
+	// Right Shifts
+	bigint	&operator>>=(unsigned int n);
 	bigint	&operator>>=(const bigint &other);
+	bigint	operator>>(unsigned int n) const;
 	bigint	operator>>(const bigint &other) const;
 
-	/* --- Comparison --- */
+	// 4. Comparison Operators
 	bool	operator<(const bigint &other) const;
+	bool	operator>(const bigint &other) const;
+	bool	operator<=(const bigint &other) const;
+	bool	operator>=(const bigint &other) const;
 	bool	operator==(const bigint &other) const;
 	bool	operator!=(const bigint &other) const;
-	bool	operator<=(const bigint &other) const;
-	bool	operator>(const bigint &other) const;
-	bool	operator>=(const bigint &other) const;
 
-	/* --- Core Methods --- */
+	// 5. Output
 	void	print(std::ostream &os) const;
 };
 
-/* --- Output Stream --- */
+// 6. Global operator (for std::cout << a)
 std::ostream
 &operator<<(std::ostream &os, const bigint &obj);
 
