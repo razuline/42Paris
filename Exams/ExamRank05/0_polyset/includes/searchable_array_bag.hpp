@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/05 18:41:59 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/06 14:36:09 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/10 18:52:34 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ public:
 	searchable_array_bag();
 	searchable_array_bag(const searchable_array_bag &copy);
 	searchable_array_bag	&operator=(const searchable_array_bag &other);
-	virtual	~searchable_array_bag();
+	virtual					~searchable_array_bag();
 
 	/* --- Core Methods --- */
 	// Check if a value exists in the underlying array
