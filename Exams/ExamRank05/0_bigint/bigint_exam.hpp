@@ -13,5 +13,4 @@
 #ifndef BIGINT_EXAM_HPP
 # define BIGINT_EXAM_HPP
 
-
 #endif

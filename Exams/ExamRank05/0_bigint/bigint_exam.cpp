@@ -12,4 +12,3 @@
 
 #include "bigint_exam.hpp"
 
-
