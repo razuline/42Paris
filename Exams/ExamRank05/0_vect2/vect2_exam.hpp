@@ -1,17 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   vect2.hpp                                          :+:      :+:    :+:   */
+/*   vect2_exam.hpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/05 14:34:12 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/10 18:44:30 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/11 14:56:19 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef VECT2_HPP
-# define VECT2_HPP
+#ifndef VECT2_EXAM_HPP
+# define VECT2_EXAM_HPP
 
 # include <iostream>
 
