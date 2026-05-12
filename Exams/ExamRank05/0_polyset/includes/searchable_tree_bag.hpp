@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/05 18:42:20 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/10 18:55:05 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/12 19:02:20 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ public:
 	virtual				~searchable_tree_bag();
 
 	/* --- Core Methods --- */
-	virtual bool	has(int value) const;
+	virtual bool	has(int value_to_find) const;
 };
 
 #endif

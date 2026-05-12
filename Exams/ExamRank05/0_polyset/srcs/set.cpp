@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/05 18:42:24 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/10 18:56:45 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/12 17:52:43 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,7 @@ set::insert(int *array, int size)
 	if (this->_bag != NULL &&
 		array != NULL)
 	{
-		for (int i = 0; i < size; i++)
+		for (int i = 0; i < size; ++i)
 			this->insert(array[i]); // Reuses the single insert logic
 	}
 }
