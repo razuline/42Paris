@@ -6,11 +6,12 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/20 12:57:07 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/06 14:00:31 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/12 15:47:31 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "bigint.hpp"
+//#include "bigint_exam.hpp"
 
 int	main()
 {
