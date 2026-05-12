@@ -6,12 +6,12 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/05 16:35:31 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/12 17:19:28 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/12 17:23:44 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-//#include "vect2.hpp"
-#include "vect2_exam.hpp"
+#include "vect2.hpp"
+//#include "vect2_exam.hpp"
 
 #include <iostream>
 
