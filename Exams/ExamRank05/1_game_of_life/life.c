@@ -131,8 +131,6 @@ int	main(int ac, char **av)
 		}
 		putchar('\n');
 	}
-
-	// Cleanup
 	free(l.board);
 	free(l.next);
 	return (0);
