@@ -22,31 +22,16 @@ typedef struct s_map
 {
 	int		height;
 	int		width;
-
 	char	empty;
 	char	obs;
 	char	full;
-
 	char	**grid;
-}			t_map;
-
-/* -------------------------------- PARSING --------------------------------- */
-
-int		read_metadata(FILE *fp, t_map *map);
-int		init_grid(FILE *fp, t_map *map);
-int		load_lines(FILE *fp, t_map *map);
-void	free_grid(t_map *map);
-int		parse_map(FILE *fp, t_map *map);
-
-/* ------------------------------- ALGORITHM -------------------------------- */
+}	t_map;
 
 int		min_of_three(int a, int b, int c);
-void	free_dp(int **dp, int height);
 void	solve_bsq(t_map *map);
-void	process_map(FILE *fp);
-
-/* -------------------------------- DISPLAY --------------------------------- */
-
+int		parse_map(FILE *fp, t_map *map);
+void	free_grid(t_map *map);
 void	fill_and_print(t_map *map, int size, int row, int col);
 
 #endif

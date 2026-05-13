@@ -17,110 +17,59 @@
  */
 int	read_metadata(FILE *fp, t_map *map)
 {
-	// Read height and characters
-	if (fscanf(fp, "%d %c %c %c", &map->height, &map->empty,
-					&map->obs, &map->full) != 4)
-	{
-		return (0);
-	}
+	char	*tmp = NULL;
+	size_t	len = 0;
 
-	if (map->empty < 32 ||
-		map->empty > 126 ||
-		map->obs < 32 ||
-		map->obs > 126 ||
-		map->full < 32 ||
-		map->full > 126)
-	{
+	if (fscanf(fp, "%d %c %c %c",
+			   &map->height,
+			   &map->empty,
+			   &map->obs,
+			   &map->full) != 4)
 		return (0);
-	}
 
-	// Basic validation: positive height and unique characters
 	if (map->height <= 0 ||
 		map->empty == map->obs ||
 		map->empty == map->full ||
 		map->obs == map->full)
-	{
 		return (0);
-	}
 
-	// Consume the remaining '\n' after the header
-	char	*tmp_line = NULL;
-	size_t	len = 0;
-	getline(&tmp_line, &len, fp);
-	free(tmp_line);
+	getline(&tmp, &len, fp);
+	free(tmp);
 
 	return (1);
 }
 
 /**
- * Reads the first grid line to determine width and allocates memory
+ * Master function to parse the entire map
  */
-int	init_grid(FILE *fp, t_map *map)
+int	parse_map(FILE *fp, t_map *map)
 {
-	char	*line = NULL;
-	size_t	len = 0;
-	ssize_t	read;
+	map->grid = NULL;
+	if (!read_metadata(fp, map))
+		return (0);
 
-	// 1. Actually read the line to find the width
-	read = getline(&line, &len, fp);
+	char		*line = NULL;
+	size_t		len = 0;
+	ssize_t		read = getline(&line, &len, fp);
+
 	if (read <= 0)
-		return (0); // map error
+		return (0);
 
-	// Set the width (ignoring the newline char)
 	map->width = (line[read - 1] == '\n') ? (read - 1) : read;
 
-	for (int j = 0; j < map->width; j++)
-	{
-		if (line[j] != map->empty && line[j] != map->obs)
-		{
-			free(line);
-			return (0);
-		}
-	}
-
-	// 3. Prepare memory for the whole map
 	map->grid = malloc(sizeof(char *) * map->height);
-	if (!map->grid)
-	{
-		free(line);
-		return (0);
-	}
-
-	// 4. Save this line as the very first row
 	map->grid[0] = line;
-	return (1);
-}
 
-/**
- * Reads all remaining lines and validates their length
- */
-int	load_lines(FILE *fp, t_map *map)
-{
-	char	*line;
-	size_t	len;
-	ssize_t	read;
-
-	for (int i = 1; i < map->height; i++)
+	for (int i = 1; i < map->height; ++i)
 	{
 		line = NULL;
 		len = 0;
 		read = getline(&line, &len, fp);
 
-		// Check if line length matches map->width
-		int	curr_width = (read > 0 && line[read - 1] == '\n') ? (read - 1) : read;
-
-		if (read <= 0 || curr_width != map->width)
+		if (read <= 0 ||
+		   ((read - 1 == '\n' ? read - 1 : read) != map->width))
 		{
-			free(line);
-			return (0);
-		}
-		for (int j = 0; j < map->width; j++)
-		{
-			if (line[j] != map->empty && line[j] != map->obs)
-			{
-				free(line);
-				return (0);
-			}
+			free(line); return (0);
 		}
 		map->grid[i] = line;
 	}
@@ -132,47 +81,10 @@ int	load_lines(FILE *fp, t_map *map)
  */
 void	free_grid(t_map *map)
 {
-	int	i;
-
-	// 1. Check if the grid actually exists
-	if (map->grid == NULL)
+	if (!map->grid)
 		return ;
 
-	// 2. Free each individual line
-	for (i = 0; i < map->height; i++)
-	{
-		if (map->grid[i] != NULL)
-		{
-			free(map->grid[i]);
-			map->grid[i] = NULL; // Good practice: prevent dangling pointers
-		}
-	}
-
-	// 3. Free the array of pointers itself
+	for (int i = 0; i < map->height; ++i)
+		free(map->grid[i]);
 	free(map->grid);
-	map->grid = NULL;
-}
-
-/**
- * Master function to parse the entire map
- */
-int	parse_map(FILE *fp, t_map *map)
-{
-	// Initialise grid to NULL so free_grid knows where to start
-	map->grid = NULL;
-
-	if (!read_metadata(fp, map))
-		return (0);
-
-	if (!init_grid(fp, map))
-		return (0); // No grid allocated yet, or allocation failed
-
-	if (!load_lines(fp, map))
-	{
-		// Smth went wrong while reading lines - CLEAN UP!
-		free_grid(map);
-		return (0);
-	}
-
-	return (1);
 }

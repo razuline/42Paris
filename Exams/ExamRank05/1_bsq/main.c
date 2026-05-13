@@ -13,6 +13,21 @@
 #include "bsq.h"
 
 /**
+ * Fills the found square with the 'full' character and prints the map
+ * The square is defined by its bottom-right corner (row, col) and its size
+ */
+void	fill_and_print(t_map *map, int size, int row, int col)
+{
+	for (int i = row - size + 1; i <= row; i++)
+	{
+		for (int j = col - size + 1; j <= col; j++)
+			map->grid[i][j] = map->full;
+	}
+	for (int i = 0; i < map->height; i++)
+		fputs(map->grid[i], stdout);
+}
+
+/**
  * Core logic for processing a single map source
  */
 void	process_map(FILE *fp)
@@ -33,34 +48,22 @@ int	main(int ac, char **av)
 	int		i;
 	FILE	*fp;
 
-	// Case 1: Standard Input
 	if (ac == 1)
-	{
 		process_map(stdin);
-	}
-	// Case 2: Multiple Files
 	else
 	{
-		for (i = 1; i < ac; i++)
+		for (i = 1; i < ac; ++i)
 		{
 			fp = fopen(av[i], "r");
 			if (fp == NULL)
-			{
 				fprintf(stderr, "map error\n");
-			}
 			else
 			{
 				process_map(fp);
 				fclose(fp);
 			}
-
-			/* * IMPORTANT: Add a newline between maps.
-			 * Prints it only if it's NOT the last file.
-			 */
 			if (i < ac - 1)
-			{
 				printf("\n");
-			}
 		}
 	}
 	return (0);
