@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/05 14:34:12 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/10 18:44:30 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/13 18:18:02 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,6 @@ vect2
 operator*(int scalar, const vect2 &v);
 
 std::ostream
-&operator<<(std::ostream &os, const vect2 &obj);
+&operator<<(std::ostream &os, const vect2 &v);
 
 #endif
