@@ -13,27 +13,34 @@
 #include "bsq.h"
 
 /**
- * Fills the found square with the 'full' character and prints the map
- * The square is defined by its bottom-right corner (row, col) and its size
+ * Fills the identified biggest square and prints the result.
+ * @param map  Structure containing map data
+ * @param size Side length of the biggest square
+ * @param row  Bottom-right Y coordinate
+ * @param col  Bottom-right X coordinate
  */
 void	fill_and_print(t_map *map, int size, int row, int col)
 {
+	// Iterate through the square area to replace 'empty' with 'full' chars
 	for (int i = row - size + 1; i <= row; i++)
 	{
 		for (int j = col - size + 1; j <= col; j++)
 			map->grid[i][j] = map->full;
 	}
+	// Print the final grid to standard output line by line
 	for (int i = 0; i < map->height; i++)
 		fputs(map->grid[i], stdout);
 }
 
 /**
- * Core logic for processing a single map source
+ * Handles the execution flow for a single map source.
+ * @param fp File pointer (either a file or stdin)
  */
 void	process_map(FILE *fp)
 {
 	t_map	map;
 
+	// Attempt to parse and validate the map metadata and grid
 	if (!parse_map(fp, &map))
 	{
 		write(2, "map error\n", 10);
