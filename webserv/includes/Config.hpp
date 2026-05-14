@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/28 13:38:56 by erazumov          #+#    #+#             */
-/*   Updated: 2026/03/28 15:18:33 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/14 11:00:35 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ public:
 	/* --- Orthodox Canonical Form --- */
 	Config();
 	Config(const Config &copy);
-	Config &operator=(const Config &other);
+	Config	&operator=(const Config &other);
 	~Config();
 
 	/* --- Core Methods --- */
