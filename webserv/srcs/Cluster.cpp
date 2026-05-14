@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 17:16:00 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/01 17:44:40 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/14 15:22:06 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,12 @@ Cluster::~Cluster()
 
 /* ------------------------- PRIVATE INTERNAL HELPERS ----------------------- */
 
+void
+Cluster::_addNewConnection(int serv_fd)
+{
+	
+}
+
 /* ------------------------------ CORE METHODS ------------------------------ */
 
 void
@@ -75,7 +81,68 @@ Cluster::setup(std::vector<Config> configs)
 		pfd.revents = 0;
 		_pollfds.push_back(pfd);
 
+		_fd_to_server[servFd] = newServ;
+
 		std::cout << "[Cluster] Server ready on port "
 					<< configs[i].getPort() << std::endl;
+	}
+}
+
+void
+Server::run()
+{
+	// 1. Add server socket to poll list
+	_addToPoll(_serv_fd);
+
+	std::cout << "Server is listening on port " << _port << "..." << std::endl;
+
+	while (g_stop == 0)
+	{
+
+		// Iterate through the vector of file descriptors to check for events
+		for (size_t i = 0; i < _fds.size(); ++i)
+		{
+			// Check if the descriptor is ready for reading
+			if (_fds[i].revents & POLLIN)
+			{
+				if (_fds[i].fd == _serv_fd)
+				{
+					_addNewConnection();  // New guest arrived
+				}
+				else
+				{
+					size_t	before = _fds.size();
+					_handleClientRequest(i); // Existing guest sent data
+					if (_fds.size() < before)
+						i--;
+				}
+			}
+		}
+	}
+}
+
+void
+Cluster::run()
+{
+	while (g_stop == 0)
+	{
+		// 2. Wait for activity on any socket (requirement)
+		// Using -1 makes poll block indefinitely until an event occurs
+		if (poll(&_pollfds[0], _pollfds.size(), -1) < 0)
+		{
+			if (g_stop == 0)
+				perror("poll error");
+			continue;
+		}
+
+		// Iterate through the vector of file descriptors to check for events
+		for (size_t i = 0; i < _pollfds.size(); ++i)
+		{
+			// Check if the descriptor is ready for reading
+			if (_pollfds[i].revents & POLLIN)
+			{
+
+			}
+		}
 	}
 }
