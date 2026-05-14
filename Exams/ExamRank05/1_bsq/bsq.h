@@ -6,32 +6,29 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/18 13:35:16 by erazumov          #+#    #+#             */
-/*   Updated: 2026/04/18 16:29:32 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/14 17:10:15 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef BSQ_H
 # define BSQ_H
 
-# include <stdlib.h>
 # include <stdio.h>
+# include <stdlib.h>
 # include <unistd.h>
-# include <errno.h>
 
 typedef struct s_map
 {
-	int		height;
-	int		width;
+	int		rows;
+	int		cols;
 	char	empty;
 	char	obs;
 	char	full;
-	char	**grid;
 }	t_map;
 
-int		min_of_three(int a, int b, int c);
-void	solve_bsq(t_map *map);
-int		parse_map(FILE *fp, t_map *map);
-void	free_grid(t_map *map);
-void	fill_and_print(t_map *map, int size, int row, int col);
+int		min_val(int a, int b, int c);
+int		valid_line(char *line, t_map *m);
+void	free_memory(char **map, int **dp, int rows);
+void	solve_bsq(FILE *stream);
 
 #endif

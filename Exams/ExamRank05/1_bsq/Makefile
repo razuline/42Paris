@@ -6,7 +6,7 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/04/18 13:40:25 by erazumov          #+#    #+#              #
-#    Updated: 2026/04/18 17:02:42 by erazumov         ###   ########.fr        #
+#    Updated: 2026/05/14 17:01:09 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,9 +17,7 @@ INCLUDE = -I
 
 HFILES = bsq.h
 
-CFILES = main.c \
-		 parsing.c \
-		 algo.c
+CFILES = bsq.c
 
 OBJECTS = $(CFILES:.c=.o)
 
