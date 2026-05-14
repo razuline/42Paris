@@ -6,17 +6,29 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/03/20 12:57:16 by erazumov          #+#    #+#              #
-#    Updated: 2026/05/04 15:20:14 by erazumov         ###   ########.fr        #
+#    Updated: 2026/05/10 18:51:50 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-NAME = bigint
+NAME = polyset
 
 CXX = c++
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -g3
 
-SRCS = main.cpp bigint.cpp
-OBJS = $(SRCS:.cpp=.o)
+INC = -I includes/ \
+	  -I includes/exam_subject/
+
+SRC_FILES = exam_subject/main.cpp \
+			exam_subject/array_bag.cpp \
+			exam_subject/tree_bag.cpp \
+			searchable_array_bag.cpp \
+			searchable_tree_bag.cpp \
+			set.cpp
+
+SRCS = $(addprefix srcs/, $(SRC_FILES))
+
+OBJ_DIR = objs
+OBJS = $(addprefix $(OBJ_DIR)/, $(SRC_FILES:.cpp=.o))
 
 # Colors
 Y = \033[33m
@@ -29,27 +41,28 @@ CUT = \033[K
 
 all: $(NAME)
 
-%.o: %.cpp
+$(OBJ_DIR)/%.o: srcs/%.cpp
+	@mkdir -p $(dir $@)
 	@echo "$(Y)Compiling [$<]...$(X)"
-	@$(CXX) $(CXXFLAGS) -c $< -o $@
+	@$(CXX) $(CXXFLAGS) $(INC) -c $< -o $@
 	@printf "$(UP)$(CUT)"
 
 $(NAME): $(OBJS)
 	@echo "$(Y)📁 Compiling object files [$(NAME)]...$(X)"
-	@$(CXX) $(CXXFLAGS) $(OBJS) -o $(NAME)
+	@$(CXX) $(CXXFLAGS) $(INC) $(OBJS) -o $(NAME)
 	@echo "$(G)✅ Finished [$(NAME)]$(X)"
 
 clean:
-	@rm -f $(OBJS)
-	@echo "$(R)🧹 Object files removed [$(OBJS)]$(X)"
+	@rm -rf $(OBJ_DIR)
+	@echo "$(R)🧹 Object files removed$(X)"
 
 fclean: clean
 	@rm -f $(NAME)
-	@echo "$(R)🗑️  Executables removed [$(NAME)]$(X)"
+	@echo "$(R)🗑️  Executables removed$(X)"
 
 re: fclean all
 
 .PHONY: all clean fclean re
 
-# valgrind --leak-check=full ./bigint
-# leaks --atExit -- ./bigint
+# ./polyset 42 21 84 10
+# valgrind --leak-check=full ./polyset 42 21 84 10

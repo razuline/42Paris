@@ -6,16 +6,16 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/03/20 12:57:16 by erazumov          #+#    #+#              #
-#    Updated: 2026/05/04 15:20:14 by erazumov         ###   ########.fr        #
+#    Updated: 2026/05/05 14:33:42 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-NAME = bigint
+NAME = vect2
 
 CXX = c++
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -g3
 
-SRCS = main.cpp bigint.cpp
+SRCS = main.cpp vect2.cpp
 OBJS = $(SRCS:.cpp=.o)
 
 # Colors
@@ -51,5 +51,5 @@ re: fclean all
 
 .PHONY: all clean fclean re
 
-# valgrind --leak-check=full ./bigint
-# leaks --atExit -- ./bigint
+# valgrind --leak-check=full ./vect2
+# leaks --atExit -- ./vect2

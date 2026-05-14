@@ -17,9 +17,8 @@
  */
 int	min_of_three(int a, int b, int c)
 {
-	int	min;
+	int	min = a;
 
-	min = a;
 	if (b < min)
 		min = b;
 	if (c < min)
@@ -28,54 +27,44 @@ int	min_of_three(int a, int b, int c)
 }
 
 /**
- * Frees the memory of the integer DP table
- */
-void	free_dp(int **dp, int height)
-{
-	for (int i = 0; i < height; i++)
-		free(dp[i]);
-	free(dp);
-}
-
-/**
  * Dynamic Programming algorithm to find the biggest square
  */
 void	solve_bsq(t_map *map)
 {
-	int	**dp;
+	int	*dp = calloc(map->width, sizeof(int));
+	int	prev_diag;
+	int	tmp;
 	int	max_size = 0;
 	int	max_x = 0;
 	int	max_y = 0;
 
-	// 1. Allocate DP table (array of int)
-	dp = malloc(sizeof(int) * map->height);
-	for (int i = 0; i < map->height; i++)
-	{
-		dp[i] = malloc(sizeof(int) * map->width);
-		for (int j = 0; j < map->width; j++)
-		{
-			// 2. Base case: if obstacle, value is 0
-			if (map->grid[i][j] == map->obs)
-				dp[i][j] = 0;
-			// 3. Base case: 1st row or 1st column
-			else if (i == 0 || j == 0)
-				dp[i][j] = 1;
-			// 4. DP step: look at 3 neighbors
-			else
-				dp[i][j] = min_of_three(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]) + 1;
+	if (!dp)
+		return ;
 
-			// 5. Track the global max
-			if (dp[i][j] > max_size)
+	for (int i = 0; i < map->height; ++i)
+	{
+		prev_diag = 0;
+		for (int j = 0; j < map->width; ++j)
+		{
+			tmp = dp[j];
+			if (map->grid[i][j] == map->obs)
+				dp[j] = 0;
+			else
 			{
-				max_size = dp[i][j];
-				max_y = i;
-				max_x = j;
+				int	left = (j > 0) ? dp[j - 1] : 0;
+
+				dp[j] = min_of_three(left, dp[j], prev_diag) + 1;
+
+				if (dp[j] > max_size)
+				{
+					max_size = dp[j];
+					max_x = j;
+					max_y = i;
+				}
 			}
+			prev_diag = tmp;
 		}
 	}
-	// 6. Draw and show results
 	fill_and_print(map, max_size, max_y, max_x);
-
-	// 7. Clean up the calculation table
-	free_dp(dp, map->height);
+	free(dp);
 }

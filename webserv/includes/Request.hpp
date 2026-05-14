@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/25 14:09:02 by erazumov          #+#    #+#             */
-/*   Updated: 2026/04/27 16:12:25 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/04/28 20:59:21 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 # include <map>
 # include <iostream>
 # include <sstream>
+# include <cstdlib>
 
 # include "Utils.hpp"
 
@@ -46,6 +47,7 @@ private:
 	std::string							_raw;
 	// Current state of the request parsing process
 	RequestState						_state;
+	size_t								_limit;
 
 	/* --- Private Internal Helpers --- */
 	void	_handleHeaders();
@@ -64,6 +66,7 @@ public:
 	bool	isComplete();
 	// Adds a new chunk of data received from the socket to the internal buffer
 	void	addData(std::string chunk);
+	void	setLimit(size_t limit);
 
 	/* --- Getters --- */
 	const std::string	&getMethod() const;
@@ -71,6 +74,7 @@ public:
 	const std::string	&getVersion() const;
 	const std::string	&getHeader(const std::string &key) const;
 	const std::string	&getBody() const;
+	RequestState		getState() const;
 };
 
 #endif

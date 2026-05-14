@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:40 by erazumov          #+#    #+#             */
-/*   Updated: 2026/04/27 16:11:33 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/01 17:28:36 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,23 +134,44 @@ Server::_handleClientRequest(int idx)
 	char	buff[4096];
 	int		fd = _fds[idx].fd;
 
-	// Receive raw data from the client socket
+	// 1. Receive raw data from the client socket
 	ssize_t	bytes = recv(fd, buff, sizeof(buff), 0);
 
 	if (bytes > 0)
 	{
-		// Get (or create) the persistent request for this client
+		// 2. Set the body size limit from the server configuration
+		_reqs[fd].setLimit(_config.getClientMaxBodySize());
+
+		// 3. Add the received data chunk to our persistent request object
 		_reqs[fd].addData(std::string(buff, bytes));
 
-		// Only process if the request is complete
-		if (_reqs[fd].isComplete())
+		// 4. Check if the request is finished OR if a size limit error occurred
+		if (_reqs[fd].isComplete() || _reqs[fd].getState() == Request::ERROR)
 		{
-			_executeRequest(fd, _reqs[fd]);
-			_reqs.erase(fd); // Clean up after processing
+			// Case A: The request exceeded the client_max_body_size
+			if (_reqs[fd].getState() == Request::ERROR)
+			{
+				Response	res;
+				res.defaultErrorPage(413); // 413 Payload Too Large
+
+				std::string	res_str = res.build();
+				send(fd, res_str.c_str(), res_str.size(), 0);
+
+				std::cout << "DEBUG: Request too large, sent 413" << std::endl;
+			}
+			// Case B: The request is valid and fully received
+			else
+			{
+				_executeRequest(fd, _reqs[fd]);
+			}
+			// 5. IMPORTANT: Remove the request from the map after sending a response
+			// This clears the "closet" for this client's next request
+			_reqs.erase(fd);
 		}
 	}
 	else
 	{
+		// Handle client disconnection (bytes == 0) or read errors (bytes < 0)
 		_handleDisconnection(idx);
 	}
 }
@@ -163,13 +184,13 @@ Server::_executeRequest(int fd, Request &req)
 
 	// 1. Handle the default home page if the path is "/"
 	if (path == "/")
-		path = _config.getHomePage(); // Default file
+		path = _config.getHomePage(); // Redirect empty paths to the default file
 
 	// 2. Build the full system path using the root directory from config
 	std::string	fullPath = _config.getFolderRoot() + "/"
 								+ (path[0] == '/' ? path.substr(1) : path);
 
-	// GET: Used to retrieve files
+	// GET: Retrieve and send a file to the client
 	if (req.getMethod() == "GET")
 	{
 		std::string	content = _readFile(fullPath);
@@ -184,12 +205,12 @@ Server::_executeRequest(int fd, Request &req)
 		}
 		else
 		{
-			res.defaultErrorPage(404);
+			res.defaultErrorPage(404); // Not Found
 
 			std::cout << "DEBUG: Response sent [404 Not Found]" << std::endl;
 		}
 	}
-	// POST: Used to send data to the server
+	// POST: Receive and save data to a file
 	else if (req.getMethod() == "POST")
 	{
 		// Open a file in append mode to save the request body
@@ -199,22 +220,20 @@ Server::_executeRequest(int fd, Request &req)
 			outfile << req.getBody() << std::endl;
 			outfile.close();
 
-			res.setStatus(201);
+			res.setStatus(201); // Created
 			res.setBody("<html><body><h1>Post Successful!"
 					"Data saved.</h1></body></html>");
 		}
 		else
-			// Internal Server Error if file cannot be opened
-			res.defaultErrorPage(500);
+			res.defaultErrorPage(500); // Internal Server Error
 	}
-	// DELETE: Used to remove a resource from the server
+	// DELETE: Permanently remove a file from the server disk
 	else if (req.getMethod() == "DELETE")
 	{
-		// std::remove to delete a file from the disk
 		if (std::remove(fullPath.c_str()) == 0)
-			res.setStatus(204); // 204 No Content (Success with no body)
+			res.setStatus(204); // No Content (Success)
 		else
-			res.defaultErrorPage(404); // Not Found if the file doesn't exist
+			res.defaultErrorPage(404); // File not found on disk
 	}
 
 	// 3. Build the final HTTP string and send it back to the client
@@ -321,6 +340,14 @@ Server::run()
 			}
 		}
 	}
+}
+
+/* -------------------------------- GETTERS --------------------------------- */
+
+int
+Server::getFd() const
+{
+	return this->_serv_fd;
 }
 
 // int	setsockopt(int sockfd, int level, int optname,

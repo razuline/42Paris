@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:32 by erazumov          #+#    #+#             */
-/*   Updated: 2026/04/26 18:11:22 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/01 17:29:05 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,6 +69,9 @@ public:
 	/* --- Core Methods --- */
 	void	setup(); // Initialises socket, bind, and listen
 	void	run();   // Main execution loop to accept connections
+
+	/* --- Getters --- */
+	int		getFd() const; // Returns the server's main listening socket
 };
 
 // Signal handler prototype

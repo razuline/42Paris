@@ -19,8 +19,7 @@ HFILES = bsq.h
 
 CFILES = main.c \
 		 parsing.c \
-		 algo.c \
-		 display.c
+		 algo.c
 
 OBJECTS = $(CFILES:.c=.o)
 

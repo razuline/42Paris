@@ -1,39 +1,36 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Bigint.hpp                                         :+:      :+:    :+:   */
+/*   searchable_tree_bag.hpp                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/03/20 12:55:43 by erazumov          #+#    #+#             */
-/*   Updated: 2026/03/20 13:29:22 by erazumov         ###   ########.fr       */
+/*   Created: 2026/05/05 18:42:20 by erazumov          #+#    #+#             */
+/*   Updated: 2026/05/12 19:02:20 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef BIGINT_HPP
-# define BIGINT_HPP
+#ifndef SEARCHABLE_TREE_BAG_HPP
+# define SEARCHABLE_TREE_BAG_HPP
+
+# include "tree_bag.hpp"
+# include "searchable_bag.hpp"
 
 # include <iostream>
-# include <vector>
-# include <algorithm>
 
-class Bigint
+class searchable_tree_bag :
+	public tree_bag,
+	public searchable_bag
 {
-private:
-	std::vector<int>	_v;
-
 public:
 	/* --- Orthodox Canonical Form --- */
-	Bigint(unsigned long long n = 0);
-	Bigint	&operator=(const Bigint &other);
-	Bigint(const Bigint &copy);
-	~Bigint();
+	searchable_tree_bag();
+	searchable_tree_bag(const searchable_tree_bag &copy);
+	searchable_tree_bag	&operator=(const searchable_tree_bag &other);
+	virtual				~searchable_tree_bag();
 
 	/* --- Core Methods --- */
-	void	print(std::ostream &os) const;
+	virtual bool	has(int value_to_find) const;
 };
-
-std::ostream
-&operator<<(std::ostream &os, const Bigint &obj);
 
 #endif

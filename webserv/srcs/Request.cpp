@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/25 15:33:23 by erazumov          #+#    #+#             */
-/*   Updated: 2026/04/27 16:17:43 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/04/28 20:17:47 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,9 @@ Request::Request() :
 	_method(""),
 	_path(""),
 	_version(""),
-	_body("")
+	_body(""),
+	_state(READING_HEADERS),
+	_limit(1000000) // 1 Mb
 {
 	// std::cout << "Default constructor called" << std::endl;
 }
@@ -154,8 +156,8 @@ Request::isComplete()
 void
 Request::addData(std::string chunk)
 {
-	// SECURITY CHECK: Check if the raw buffer is getting too big
-	// _limit comes from the Config (client_max_body_size)
+	// SECURITY CHECK: Protect the server from memory exhaustion
+	// If the new chunk exceeds the limit, the ERROR state immediately
 	if (_raw.size() + chunk.size() > _limit)
 	{
 		_state = ERROR;
@@ -165,13 +167,19 @@ Request::addData(std::string chunk)
 	// 1. Accumulate the incoming data into the raw buffer
 	_raw += chunk;
 
-	// 2. Try to find and parse headers
+	// 2. Try to find and parse the HTTP headers
 	if (_state == READING_HEADERS)
 		_handleHeaders();
 
 	// 3. If the body part is ready, handle it
 	if (_state == READING_BODY)
 		_handleBody();
+}
+
+void
+Request::setLimit(size_t limit)
+{
+	_limit = limit;
 }
 
 /* -------------------------------- GETTERS --------------------------------- */
@@ -217,4 +225,10 @@ const std::string
 &Request::getBody() const
 {
 	return this->_body;
+}
+
+Request::RequestState
+Request::getState() const
+{
+	return this->_state;
 }

@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/27 17:23:49 by erazumov          #+#    #+#             */
-/*   Updated: 2026/04/27 16:14:41 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/04/28 20:28:02 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,7 @@ Response::_getReasonPhrase(int code)
 		case 403: return "Forbidden";
 		case 404: return "Not Found";
 		case 405: return "Method Not Allowed";
+		case 413: return "Payload Too Large";
 		case 500: return "Internal Server Error";
 		case 505: return "HTTP Version Not Supported";
 
@@ -71,35 +72,40 @@ Response::_getReasonPhrase(int code)
 /* ------------------------------ CORE METHODS ------------------------------ */
 
 /**
- * The "Sandwich" Builder:
- * 1. Status Line (HTTP/1.1 200 OK)
- * 2. Headers (Content-Type: text/html...)
- * 3. Empty Line (\r\n)
- * 4. Body (The file content)
+ * THE SANDWICH BUILDER:
+ * 1. Status Line (Protocol - Code - Message)
+ * 2. Headers (Key: Value)
+ * 3. Mandatory Empty Line (\r\n)
+ * 4. Content (Body)
  */
 std::string
 Response::build()
 {
 	std::stringstream	ss;
 
-	// 1. Status Line (CRLF is mandatory at the end)
+	// 1. STATUS LINE: Must end with CRLF (\r\n)
 	ss << "HTTP/1.1 " << _status << " " << _getReasonPhrase(_status) << "\r\n";
 
-	// 2. Iterate through the map to add all headers
+	// 2. HEADERS: Loop through the map to add all metadata
 	std::map<std::string, std::string>::iterator	it;
 	for (it = _headers.begin(); it != _headers.end(); ++it)
 	{
 		ss << it->first << ": " << it->second << "\r\n";
 	}
-	// 3. The Empty Line that separates headers from the body
+
+	// 3. THE GAP: A single empty line is required to separate headers from body
 	ss << "\r\n";
 
-	// 4. Add the actual content
+	// 4. BODY: The actual content (HTML, Image, or Data)
 	ss << _body;
 
 	return ss.str();
 }
 
+/**
+ * AUTOMATIC ERROR PAGE GENERATOR:
+ * Creates a visually clean HTML page for errors like 404 or 413.
+ */
 void
 Response::defaultErrorPage(int code)
 {
@@ -141,9 +147,8 @@ Response::setHeader(std::string key, std::string value)
 }
 
 /**
- * Smart Setter:
- * Whenever set the body, it automatically calculates the size
- * and set the 'Content-Length' header for the user.
+ * SMART BODY SETTER:
+ * Automatically calculates 'Content-Length' to prevent malformed responses
  */
 void
 Response::setBody(std::string content)
