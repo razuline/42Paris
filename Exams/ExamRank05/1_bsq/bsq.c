@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/14 16:28:36 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/14 17:20:21 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/16 17:06:20 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -155,7 +155,7 @@ void	solve_bsq(FILE *stream)
 	}
 
 	for (int r = 0; r < m.rows; ++r)
-		printf("%s\n", map[r]);
+		fprintf(stdout, "%s\n", map[r]);
 
 	free_memory(map, dp, m.rows);
 	free(line);
@@ -180,7 +180,7 @@ int	main(int ac, char **av)
 			fclose(fp);
 
 			if (i < ac - 1)
-				printf("\n");
+				fprintf(stdout, "\n");
 		}
 	}
 	return (0);
