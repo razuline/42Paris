@@ -62,12 +62,12 @@ void	solve_bsq(FILE *stream)
 	char	*line = NULL;
 	size_t	len = 0;
 
-	// 1. Header Parsing
+	// 1. Header Parsing & Validation
 	if (fscanf(stream, "%d %c %c %c\n",
-		&m.rows,
-		&m.empty,
-		&m.obs,
-		&m.full) != 4)
+			   &m.rows,
+			   &m.empty,
+			   &m.obs,
+			   &m.full) != 4)
 	{
 		fprintf(stderr, "map error\n");
 		return ;
@@ -82,7 +82,7 @@ void	solve_bsq(FILE *stream)
 		return ;
 	}
 
-	// 2. Get Width from first line
+	// 2. Get Width from the First Line
 	if (getline(&line, &len, stream) == -1)
 	{
 		fprintf(stderr, "map error\n");
@@ -93,14 +93,14 @@ void	solve_bsq(FILE *stream)
 	while (line[m.cols] && line[m.cols] != '\n')
 		m.cols++;
 
-	// 3. Allocate Memory
+	// 3. Allocate Memory & Trackers
 	char	**map = malloc(sizeof(char *) * m.rows);
 	int		**dp = malloc(sizeof(int *) * m.rows);
 	int		max_size = 0;
 	int		max_r = 0;
 	int		max_c = 0;
 
-	// 4. Processing Loop
+	// 4. The Main Processing Loop (The Core Logic)
 	for (int r = 0; r < m.rows; ++r)
 	{
 		if (r > 0 && getline(&line, &len, stream) == -1)
@@ -147,7 +147,7 @@ void	solve_bsq(FILE *stream)
 		map[r][m.cols] = '\0';
 	}
 
-	// 5. Drawing & Output
+	// 5. Drawing, Output & Cleanup
 	for (int r = max_r - max_size + 1; r <= max_r; ++r)
 	{
 		for (int c = max_c - max_size + 1; c <= max_c; ++c)
