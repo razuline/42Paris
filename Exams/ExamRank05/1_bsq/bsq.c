@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/14 16:28:36 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/16 17:06:20 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/17 15:14:07 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,29 +28,30 @@ int	valid_line(char *line, t_map *m)
 {
 	int	i = 0;
 
-	// 1. Check characters and calculate length
+	// 1. Loop through characters until the end of the line
 	while (line[i] && line[i] != '\n')
 	{
-		// If the character is NOT 'empty' and NOT 'obstacle', it's an error
+		// Check: Is this character illegal?
 		if (line[i] != m->empty && line[i] != m->obs)
-			return (0);
+			return (0); // Found a weird character -> Instant Fail!
 		i++;
 	}
-	// 2. Check if the length matches the very first line (m->cols)
+	// 2. Check the size of the row
 	if (i != m->cols)
-		return (0);
+		return (0); // The line is too short or too long -> Fail!
 
-	return (1); // Line is valid
+	return (1); // Clean line -> Pass!
 }
 
 void	free_memory(char **map, int **dp, int rows)
 {
+	// 1. Walk through every single row
 	for (int i = 0; i < rows; ++i)
 	{
 		if (map)
-			free(map[i]);
+			free(map[i]); // Free the character hallway at floor 'i'
 		if (dp)
-			free(dp[i]);
+			free(dp[i]); // Free the integer hallway at floor 'i'
 	}
 	free(map);
 	free(dp);
