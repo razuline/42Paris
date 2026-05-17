@@ -6,13 +6,12 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/20 12:55:43 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/13 14:51:37 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/17 14:11:46 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef BIGINT_EXAM_HPP
 # define BIGINT_EXAM_HPP
-
 
 
 #endif
