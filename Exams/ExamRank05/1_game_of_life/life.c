@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/21 17:53:06 by erazumov          #+#    #+#             */
-/*   Updated: 2026/04/21 18:09:20 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/17 13:21:45 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,36 +14,28 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct s_life
-{
-	int		width;
-	int		height;
-	int		iter;
-	char	*board;
-	char	*next;
-}	t_life;
-
 /**
  * Counts alive neighbors for a specific cell at (x, y)
  * Cells outside the board are considered dead (0)
  */
-int	count_neighbors(t_life *l, int x, int y)
+int	count_neighbors(char *board, int w, int h, int x, int y)
 {
 	int	count = 0;
 
-	for (int i = -1; i <= 1; i++)
+	for (int i = -1; i <= 1; ++i)
 	{
-		for (int j = -1; j <= 1; j++)
+		for (int j = -1; j <= 1; ++j)
 		{
 			if (i == 0 && j == 0)
-				continue;
+				continue ;
 
 			int	nx = x + j;
 			int	ny = y + i;
 
-			if (nx >= 0 && nx < l->width && ny >= 0 && ny < l->height)
+			if (nx >= 0 && nx < w &&
+				ny >= 0 && ny < h &&
+				board[ny * w + nx])
 			{
-				if (l->board[ny * l->width + nx])
 					count++;
 			}
 		}
@@ -51,27 +43,25 @@ int	count_neighbors(t_life *l, int x, int y)
 	return (count);
 }
 
-/**
- * Executes one iteration of Conway's Game of Life rules
- */
-void	step(t_life *l)
+// 2. SIMULATE ONE STEP
+void	step(char *board, char *next, int w, int h)
 {
-	for (int y = 0; y < l->height; y++)
+	for (int y = 0; y < h; ++y)
 	{
-		for (int x = 0; x < l->width; x++)
+		for (int x = 0; x < w; ++x)
 		{
-			int	neighbors = count_neighbors(l, x, y);
-			int	idx = y * l->width + x;
+			int	neighbors = count_neighbors(board, w, h, x, y);
+			int	idx = y * w + x;
 
-			if (l->board[idx])
-				l->next[idx] = (neighbors == 2 || neighbors == 3);
+			if (board[idx])
+				next[idx] = (neighbors == 2 || neighbors == 3);
 			else
-				l->next[idx] = (neighbors == 3);
+				next[idx] = (neighbors == 3);
 		}
 	}
-	// Copy the next state back to the current board
-	for (int i = 0; i < l->width * l->height; i++)
-		l->board[i] = l->next[i];
+	// Copy the next state back to current board
+	for (int i = 0; i < w * h; ++i)
+		board[i] = next[i];
 }
 
 int	main(int ac, char **av)
@@ -79,59 +69,59 @@ int	main(int ac, char **av)
 	if (ac != 4)
 		return (1);
 
-	t_life	l;
-	l.width = atoi(av[1]);
-	l.height = atoi(av[2]);
-	l.iter = atoi(av[3]);
+	int		w = atoi(av[1]);
+	int		h = atoi(av[2]);
+	int		iter = atoi(av[3]);
 
-	// Initialise boards with 0 (dead cells)
-	l.board = calloc(l.width * l.height, sizeof(char));
-	l.next = calloc(l.width * l.height, sizeof(char));
-	if (!l.board || !l.next)
+	char	*board = calloc(w * h, 1);
+	char	*next = calloc(w * h, 1);
+
+	if (!board || !next)
 		return (1);
 
 	// Initial pen position and state
 	int		px = 0;
 	int		py = 0;
-	int		pen_down = 0;
+	int		pen = 0;
 	char	cmd;
 
-	// Process drawing commands from standard input
+	// Process input commands
 	while (read(0, &cmd, 1) > 0)
 	{
 		if (cmd == 'w' && py > 0)
 			py--;
-		else if (cmd == 's' && py < l.height - 1)
+		if (cmd == 's' && py < h - 1)
 			py++;
-		else if (cmd == 'a' && px > 0)
+		if (cmd == 'a' && px > 0)
 			px--;
-		else if (cmd == 'd' && px < l.width - 1)
+		if (cmd == 'd' && px < w - 1)
 			px++;
-		else if (cmd == 'x')
-			pen_down = !pen_down;
+		if (cmd == 'x')
+			pen = !pen;
 
-		// If the pen is lowered, mark the cell as alive
-		if (pen_down)
-			l.board[py * l.width + px] = 1;
+		if (pen)
+			board[py * w + px] = 1;
 	}
 
-	// Run the simulation for the specified number of iterations
-	for (int i = 0; i < l.iter; i++)
-		step(&l);
+	// Run generations
+	for (int i = 0; i < iter; ++i)
+		step(board, next, w, h);
 
-	// Output the final board state
-	for (int y = 0; y < l.height; y++)
+	// Print final board
+	for (int y = 0; y < h; ++y)
 	{
-		for (int x = 0; x < l.width; x++)
+		for (int x = 0; x < w; ++x)
 		{
-			if (l.board[y * l.width + x])
-				putchar('0');
+			if (board[y * w + x])
+				putchar('0'); // Alive cell
 			else
-				putchar(' ');
+				putchar(' '); // Dead cell
 		}
 		putchar('\n');
 	}
-	free(l.board);
-	free(l.next);
+
+	free(board);
+	free(next);
+
 	return (0);
 }
