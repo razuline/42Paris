@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 16:51:10 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/01 17:42:55 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/23 22:47:45 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 
 # include <vector>
 # include <map>
-# include <poll.h>
+# include <sys/poll.h>
 # include <unistd.h>
 # include <fcntl.h>
 # include <iostream>
@@ -25,25 +25,28 @@
 class Cluster
 {
 private:
-	std::map<int, Server *>		_servers;
-	std::map<int, Server *>		_fd_to_server;
-	std::vector<struct pollfd>	_pollfds;
+	std::map<int, Server *>		_servers; // serv_fd -> Server*
+	std::map<int, Server *>		_clients; // client_fd -> Server*
+	std::vector<struct pollfd>	_fds;     // poll array
+
+	/* --- Copy Blockade --- */
+	Cluster(const Cluster &copy);
+	Cluster	&operator=(const Cluster &other);
 
 	/* --- Private Internal Helpers --- */
-	void	_addNewConnection(int serv_fd);
-	void	_handleClient(int fd, Server &server);
-	void	_closeConnection(int fd);
+	void	_addNewConnection(int serv_fd);             // accept()
+	void	_handleClientRead(int fd, Server &server);  // recv()
+	void	_handleClientWrite(int fd, Server &server); // send()
+	void	_closeConnection(int fd);                   // close() & clear
 
 public:
 	/* --- Orthodox Canonical Form --- */
 	Cluster();
-	Cluster(const Cluster &copy);
-	Cluster &operator=(const Cluster &other);
 	~Cluster();
 
 	/* --- Core Methods --- */
-	void	setup(std::vector<Config> configs); // Initialise all virtual servers
-	void	run(); // The main infinite loop
+	void	setup(std::vector<Config> configs);
+	void	run();
 };
 
 #endif
