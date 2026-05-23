@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 17:16:00 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/23 17:21:57 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/23 18:19:09 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,7 +101,6 @@ Cluster::run()
 				perror("poll error");
 			continue;
 		}
-
 		// Iterate through the vector of file descriptors to check for events
 		for (size_t i = 0; i < _pollfds.size(); ++i)
 		{
