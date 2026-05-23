@@ -6,11 +6,11 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:07:21 by erazumov          #+#    #+#             */
-/*   Updated: 2026/04/28 20:57:49 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/23 17:06:34 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Server.hpp"
+#include "Cluster.hpp"
 #include <csignal>
 #include <iostream>
 
@@ -36,8 +36,8 @@ int	main(int ac, char **av)
 
 	// 2. CONFIGURATION: Load the rules from the .conf file
 	// If no file is provided, use a default path
-	std::string	configPath = (ac == 2) ? av[1] : "configs/default.conf";
-	Config		config;
+	std::string			configPath = (ac == 2) ? av[1] : "configs/default.conf";
+	std::vector<Config>	configs = configParser.getConfigs();
 
 	std::cout << "Loading configuration: " << configPath << std::endl;
 	config.parse(configPath);
@@ -51,7 +51,7 @@ int	main(int ac, char **av)
 	signal(SIGQUIT, handle_signal);
 
 	// 5. LAUNCH: Setup the sockets and start the polling loop
-	server.setup();
+	Cluster.setup(configs);
 	server.run();
 
 	// 6. EXIT: Once run() finishes (when g_stop == 1), the program ends here

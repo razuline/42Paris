@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 17:16:00 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/14 15:22:06 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/23 17:21:57 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,7 @@ Cluster::~Cluster()
 void
 Cluster::_addNewConnection(int serv_fd)
 {
-	
+
 }
 
 /* ------------------------------ CORE METHODS ------------------------------ */
@@ -89,39 +89,6 @@ Cluster::setup(std::vector<Config> configs)
 }
 
 void
-Server::run()
-{
-	// 1. Add server socket to poll list
-	_addToPoll(_serv_fd);
-
-	std::cout << "Server is listening on port " << _port << "..." << std::endl;
-
-	while (g_stop == 0)
-	{
-
-		// Iterate through the vector of file descriptors to check for events
-		for (size_t i = 0; i < _fds.size(); ++i)
-		{
-			// Check if the descriptor is ready for reading
-			if (_fds[i].revents & POLLIN)
-			{
-				if (_fds[i].fd == _serv_fd)
-				{
-					_addNewConnection();  // New guest arrived
-				}
-				else
-				{
-					size_t	before = _fds.size();
-					_handleClientRequest(i); // Existing guest sent data
-					if (_fds.size() < before)
-						i--;
-				}
-			}
-		}
-	}
-}
-
-void
 Cluster::run()
 {
 	while (g_stop == 0)
@@ -138,10 +105,22 @@ Cluster::run()
 		// Iterate through the vector of file descriptors to check for events
 		for (size_t i = 0; i < _pollfds.size(); ++i)
 		{
-			// Check if the descriptor is ready for reading
 			if (_pollfds[i].revents & POLLIN)
 			{
+				int	curr_fd = _pollfds[i].fd;
 
+				if (_servers.find(curr_fd) != _servers.end())
+					_addNewConnection(curr_fd);
+				else
+				{
+					size_t	before = _pollfds.size();
+					Server	*client_serv = _fd_to_server[curr_fd];
+
+					_handleClient(curr_fd, *client_serv);
+
+					if (_pollfds.size() < before)
+						i--;
+				}
 			}
 		}
 	}
