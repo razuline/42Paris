@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 17:16:00 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/23 23:33:26 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/24 14:41:40 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,9 +80,6 @@ void
 Cluster::_handleClientRead(int fd, Server &server)
 {
 	// Delegate reading to the server
-	// Expected return: <= 0 for error/disconnect,
-	//                  1 for partial data,
-	//                  2 for request complete
 	int	status = server.handleRead(fd);
 
 	if (status <= 0)
@@ -95,6 +92,28 @@ Cluster::_handleClientRead(int fd, Server &server)
 			if (_fds[i].fd == fd)
 			{
 				_fds[i].events = POLLOUT;
+				break;
+			}
+		}
+	}
+}
+
+void
+Cluster::_handleClientWrite(int fd, Server &server)
+{
+	// Delegate sending to the server
+	int	status = server.handleWrite(fd);
+
+	if (status <= 0)
+		_closeConnection(fd);
+	else if (status == 2)
+	{
+		// Response sent. Switch back to POLLIN to wait for the next request (Keep-Alive)
+		for (size_t i = 0; i < _fds.size(); ++i)
+		{
+			if (_fds[i].fd == fd)
+			{
+				_fds[i].events = POLLIN;
 				break;
 			}
 		}
@@ -126,23 +145,19 @@ Cluster::setup(std::vector<Config> configs)
 {
 	for (size_t i = 0; i < configs.size(); ++i)
 	{
-		Server	*newServ = new Server(configs[i]);
-		newServ->setup(); // Opens the socket, binds and listens
+		Server	*server = new Server(configs[i]);
+		server->setup(); // Opens, binds, and listens the server socket
 
-		int	servFd = newServ->getFd();
-		_servers[servFd] = newServ;
+		int	serv_fd = server->getFd();
+		_servers[serv_fd] = server;
 
-		// Add the server listening socket to our monitoring list
 		struct pollfd	pfd;
-		pfd.fd = servFd;
-		pfd.events = POLLIN; // Look for new incoming connections
+		pfd.fd = serv_fd;
+		pfd.events = POLLIN; // Monitor incoming connections
 		pfd.revents = 0;
-		_pollfds.push_back(pfd);
+		_fds.push_back(pfd);
 
-		_fd_to_server[servFd] = newServ;
-
-		std::cout << "[Cluster] Server ready on port "
-					<< configs[i].getPort() << std::endl;
+		std::cout << "[Cluster] Server listening on port " << configs[i].getPort() << std::endl;
 	}
 }
 
@@ -151,34 +166,31 @@ Cluster::run()
 {
 	while (g_stop == 0)
 	{
-		// 2. Wait for activity on any socket (requirement)
-		// Using -1 makes poll block indefinitely until an event occurs
-		if (poll(&_pollfds[0], _pollfds.size(), -1) < 0)
+		if (poll(&_fds[0], _fds.size(), -1) < 0)
 		{
 			if (g_stop == 0)
 				perror("poll error");
 			continue;
 		}
-		// Iterate through the vector of file descriptors to check for events
-		for (size_t i = 0; i < _pollfds.size(); ++i)
+		for (size_t i = 0; i < _fds.size(); ++i)
 		{
-			if (_pollfds[i].revents & POLLIN)
+			// Handle reading and new connections
+			if (_fds[i].revents & POLLIN)
 			{
-				int	curr_fd = _pollfds[i].fd;
-
-				if (_servers.find(curr_fd) != _servers.end())
-					_addNewConnection(curr_fd);
-				else
-				{
-					size_t	before = _pollfds.size();
-					Server	*client_serv = _fd_to_server[curr_fd];
-
-					_handleClient(curr_fd, *client_serv);
-
-					if (_pollfds.size() < before)
-						i--;
-				}
+				if (_servers.count(_fds[i].fd))
+					_addNewConnection(_fds[i].fd);
+				else if (_clients.count(_fds[i].fd))
+					_handleClientRead(_fds[i].fd, *_clients[_fds[i].fd]);
 			}
+			// Handle writing responses
+			else if (_fds[i].revents & POLLOUT)
+			{
+				if (_clients.count(_fds[i].fd))
+					_handleClientWrite(_fds[i].fd, *_clients[_fds[i].fd]);
+			}
+			// Handle errors or sudden disconnections
+			else if (_fds[i].revents & (POLLERR | POLLHUP | POLLNVAL))
+				_closeConnection(_fds[i].fd);
 		}
 	}
 }

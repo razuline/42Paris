@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:40 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/14 15:13:06 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/24 14:50:44 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -299,6 +299,55 @@ Server::setup()
 		perror("Listen failed");
 		return;
 	}
+}
+
+int
+Server::handleRead(int client_fd)
+{
+	char	buf[4096];
+
+	// 1. Read raw bytes from the client socket
+	int		bytes_read = recv(client_fd, buf, sizeof(buf) - 1, 0);
+	if (bytes_read <= 0)
+	{
+		_reqs.erase(client_fd); // Clear request object on disconnect
+		return bytes_read;
+	}
+	buf[bytes_read] = '\0';
+
+	// 2. Feed the chunk into the Request parser
+	_reqs[client_fd].addData(buf);
+
+	// 3. Check if HTTP headers and body are fully collected
+	if (_reqs[client_fd].isComplete())
+	{
+		Response	response;
+
+		_resps[client_fd] = response;
+		return 2; // Ready to switch to POLLOUT
+	}
+
+	return 1; // Incomplete, keep reading on POLLIN
+}
+
+int
+Server::handleWrite(int client_fd)
+{
+	// 1. Retrieve the fully built HTTP response string
+	std::string	res_str = _resps[client_fd].build();
+	int			bytes_sent = send(client_fd, res_str.c_str(), res_str.size(), 0);
+
+	if (bytes_sent <= 0)
+	{
+		_reqs.erase(client_fd);
+		_resps.erase(client_fd);
+		return bytes_sent;
+	}
+	// 2. Clear the client data from maps since the transaction is finished
+	_reqs.erase(client_fd);
+	_resps.erase(client_fd);
+
+	return 2; // Signal Cluster that sending is complete
 }
 
 /* -------------------------------- GETTERS --------------------------------- */

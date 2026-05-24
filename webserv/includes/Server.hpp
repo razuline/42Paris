@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:32 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/14 15:00:10 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/24 14:48:15 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,8 @@ private:
 	struct sockaddr_in	_addr;    // Server's address information structure
 
 	std::vector<struct pollfd>	_fds;
-	std::map<int, Request>		_reqs;
+	std::map<int, Request>		_reqs;  // client_fd -> Request
+	std::map<int, Response>		_resps; // client_fd -> Response
 
 	Config				_config;
 
@@ -58,7 +59,7 @@ private:
 	void		_handleDisconnection(int idx);
 
 	// Prevent copying to avoid issues with shared file descriptors
-	Server	&operator=(const Server &other);
+	Server		&operator=(const Server &other);
 
 public:
 	/* --- Orthodox Canonical Form --- */
@@ -68,6 +69,10 @@ public:
 
 	/* --- Core Methods --- */
 	void	setup(); // Initialises socket, bind, and listen
+
+	// returns: <=0 error/disconn, 1 partial, 2 complete
+	int		handleRead(int client_fd);
+	int		handleWrite(int client_fd);
 
 	/* --- Getters --- */
 	int		getFd() const; // Returns the server's main listening socket
