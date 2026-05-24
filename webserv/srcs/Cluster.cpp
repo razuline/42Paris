@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 17:16:00 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/24 14:41:40 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/24 16:58:00 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,37 +43,37 @@ Cluster::~Cluster()
 void
 Cluster::_addNewConnection(int serv_fd)
 {
-	struct sockaddr_in	client_addr;
-	socklen_t			addr_len = sizeof(client_addr);
+	struct sockaddr_in	cli_addr;
+	socklen_t			addr_len = sizeof(cli_addr);
 
 	// 1. Accept the incoming connection
-	int		client_fd = accept(serv_fd, (struct sockaddr *)&client_addr, &addr_len);
+	int		cli_fd = accept(serv_fd, (struct sockaddr *)&cli_addr, &addr_len);
 
-	if (client_fd < 0)
+	if (cli_fd < 0)
 	{
 		perror("accept failed");
 		return;
 	}
 
 	// 2. Make the client socket non-blocking
-	if (fcntl(client_fd, F_SETFL, O_NONBLOCK) < 0)
+	if (fcntl(cli_fd, F_SETFL, O_NONBLOCK) < 0)
 	{
 		perror("fctnl O_NONBLOCK failed");
-		close(client_fd);
+		close(cli_fd);
 		return;
 	}
 
 	// 3. Add client to the master poll list to monitor reading (POLLIN)
 	struct pollfd	pfd;
-	pfd.fd = client_fd;
+	pfd.fd = cli_fd;
 	pfd.events = POLLIN;
 	pfd.revents = 0;
 	_fds.push_back(pfd);
 
 	// 4. Route this client to the specific virtual server that accepted it
-	_clients[client_fd] = _servers[serv_fd];
+	_clients[cli_fd] = _servers[serv_fd];
 
-	std::cout << "[Cluster] New connection accepted on fd " << client_fd << std::endl;
+	std::cout << "[Cluster] New connection accepted on fd " << cli_fd << std::endl;
 }
 
 void
