@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/24 16:54:31 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/25 11:45:29 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/25 13:40:46 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,8 @@
 # include <string>
 # include <vector>
 # include <map>
+# include <cstring>
+# include <cstdlib>
 # include <unistd.h>
 
 # include "Request.hpp"
