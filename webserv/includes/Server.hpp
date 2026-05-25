@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:32 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/24 17:33:27 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/25 17:13:38 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,23 +32,24 @@
 # include <sstream>
 # include <iostream>
 # include <unistd.h>
+# include <map>
 
-// Global flag to control the server's main loop
-// 'extern' means it's defined in another file (main.cpp)
 extern volatile sig_atomic_t	g_stop;
 
 class Server
 {
 private:
-	int					_serv_fd; // Server's main listening socket descriptor
-	int					_port;    // Port number the server listens on
-	struct sockaddr_in	_addr;    // Server's address information structure
+	int							_serv_fd; // Main listening socket
+	int							_port;    // Port number from config
+	struct sockaddr_in			_addr;    // Address structure
+	Config						_config;  // Configuration instance
 
+	// Multiplexing data structures mapping client sockets to their HTTP state
 	std::vector<struct pollfd>	_fds;
 	std::map<int, Request>		_reqs;  // client_fd -> Request
 	std::map<int, Response>		_resps; // client_fd -> Response
 
-	Config				_config;
+
 
 	/* --- Private Internal Helpers --- */
 	void		_addToPoll(int fd);
