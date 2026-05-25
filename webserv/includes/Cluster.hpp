@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 16:51:10 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/23 22:47:45 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/25 18:20:42 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,9 +25,9 @@
 class Cluster
 {
 private:
-	std::map<int, Server *>		_servers; // serv_fd -> Server*
-	std::map<int, Server *>		_clients; // client_fd -> Server*
-	std::vector<struct pollfd>	_fds;     // poll array
+	std::map<int, Server *>		_servers;               // serv_fd -> Server*
+	std::map<int, Server *>		_clients;               // client_fd -> Server*
+	std::vector<struct pollfd>	_fds;                   // poll array
 
 	/* --- Copy Blockade --- */
 	Cluster(const Cluster &copy);

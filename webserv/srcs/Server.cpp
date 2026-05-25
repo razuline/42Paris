@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:40 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/24 14:50:44 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/25 19:06:02 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,20 +19,15 @@ Server::Server(const Config &config) :
 	_port(config.getPort()),
 	_config(config)
 {
-	// Zero out the address structure to prevent memory garbage issues
 	memset(&_addr, 0, sizeof(_addr));
-
-	// std::cout << "Default constructor called" << std::endl;
 }
 
 Server::Server(const Server &copy) :
 	_serv_fd(-1),
-	_port(copy._port)
+	_port(copy._port),
+	_config(copy._config)
 {
-	// Copy the address structure and port, but don't share the socket FD
 	memset(&_addr, 0, sizeof(_addr));
-
-	// std::cout << "Copy constructor called" << std::endl;
 }
 
 // Private
@@ -41,224 +36,57 @@ Server
 {
 	if (this != &other)
 	{
-		this->_port = other._port;
+		_port = other._port;
+		_config = other._config;
 	}
 	return *this;
-
-	// std::cout << "Copy assignment operator called" << std::endl;
 }
 
 Server::~Server()
 {
-	// Ensure the socket is closed when the object is destroyed
+	// Close main listening socket if open
 	if (_serv_fd != -1)
-	{
 		close(_serv_fd);
-	}
 
-	// std::cout << "Destructor called" << std::endl;
+	// Clean up any remaining active clients
+	std::map<int, Request>::iterator	it = _reqs.begin();
+	while (it != _reqs.end())
+	{
+		close(it->first);
+		_clearClientState(it->first);
+		_reqs.erase(it++);
+	}
 }
 
-/* ----------------------------- HELPER METHODS ----------------------------- */
+/* ------------------------- PRIVATE INTERNAL HELPERS ----------------------- */
 
 void
-Server::_addToPoll(int fd)
+Server::_clearClientState(int client_fd)
 {
-	// Initialising the server socket for polling
-	struct pollfd	pfd;
-
-	pfd.fd = fd;
-	pfd.events = POLLIN; // Monitor for incoming connections
-	pfd.revents = 0;
-
-	_fds.push_back(pfd);
-}
-
-void
-Server::_acceptNewConnection()
-{
-	struct sockaddr_in	addr;
-	std::memset(&addr, 0, sizeof(addr));
-
-	// Reset the size of the structure before each accept call
-	socklen_t	size = sizeof(addr);
-
-	// 1. Accept the incoming connection from the server socket
-	int			new_fd = accept(_serv_fd, (struct sockaddr *)&addr, &size);
-
-	if (new_fd >= 0)
-	{
-		// 2. MANDATORY: Set the socket to non-blocking mode (Rule IV.2)
-		// This prevents the server from hanging during I/O operations
-		fcntl(new_fd, F_SETFL, O_NONBLOCK);
-
-		// 3. Add this new client to the list of monitored descriptors
-		_addToPoll(new_fd);
-
-		std::cout << "New client connected on fd " << new_fd << std::endl;
-	}
-	else
-	{
-		// If accept fails, we just log the error
-		perror("Accept failed");
-	}
+	// Erase data structures mapped to this client to prevent memory/state leaks
+	_reqs.erase(client_fd);
+	_resps.erase(client_fd);
+	_cgis.erase(client_fd);
 }
 
 std::string
-Server::_readFile(const std::string &fullPath)
+Server::_readFile(const std::string &path)
 {
-	// 1. Open the file
-	std::ifstream	file(fullPath.c_str());
+	std::ifstream		file(path.c_str());
+	std::stringstream	buff;
+
 	if (!file.is_open())
 		return "";
-
-	// 2. Read everything into a string
-	std::stringstream	buff;
 	buff << file.rdbuf();
 	return buff.str();
 }
 
-void
-Server::_removeClient(int idx)
-{
-	std::cout << "Client on fd " << _fds[idx].fd << " disconnected." << std::endl;
-
-	// RECV ERROR: Handle unexpected disconnection or read failure
-	close(_fds[idx].fd);
-	_fds.erase(_fds.begin() + idx);
-}
-
-void
-Server::_handleClientRequest(int idx)
-{
-	char	buff[4096];
-	int		fd = _fds[idx].fd;
-
-	// 1. Receive raw data from the client socket
-	ssize_t	bytes = recv(fd, buff, sizeof(buff), 0);
-
-	if (bytes > 0)
-	{
-		// 2. Set the body size limit from the server configuration
-		_reqs[fd].setLimit(_config.getClientMaxBodySize());
-
-		// 3. Add the received data chunk to our persistent request object
-		_reqs[fd].addData(std::string(buff, bytes));
-
-		// 4. Check if the request is finished OR if a size limit error occurred
-		if (_reqs[fd].isComplete() || _reqs[fd].getState() == Request::ERROR)
-		{
-			// Case A: The request exceeded the client_max_body_size
-			if (_reqs[fd].getState() == Request::ERROR)
-			{
-				Response	res;
-				res.defaultErrorPage(413); // 413 Payload Too Large
-
-				std::string	res_str = res.build();
-				send(fd, res_str.c_str(), res_str.size(), 0);
-
-				std::cout << "DEBUG: Request too large, sent 413" << std::endl;
-			}
-			// Case B: The request is valid and fully received
-			else
-			{
-				_executeRequest(fd, _reqs[fd]);
-			}
-			// 5. IMPORTANT: Remove the request from the map after sending a response
-			// This clears the "closet" for this client's next request
-			_reqs.erase(fd);
-		}
-	}
-	else
-	{
-		// Handle client disconnection (bytes == 0) or read errors (bytes < 0)
-		_handleDisconnection(idx);
-	}
-}
-
-void
-Server::_executeRequest(int fd, Request &req)
-{
-	Response	res;
-	std::string	path = req.getPath();
-
-	// 1. Handle the default home page if the path is "/"
-	if (path == "/")
-		path = _config.getHomePage(); // Redirect empty paths to the default file
-
-	// 2. Build the full system path using the root directory from config
-	std::string	fullPath = _config.getFolderRoot() + "/"
-								+ (path[0] == '/' ? path.substr(1) : path);
-
-	// GET: Retrieve and send a file to the client
-	if (req.getMethod() == "GET")
-	{
-		std::string	content = _readFile(fullPath);
-		if (!content.empty())
-		{
-			res.setStatus(200); // OK
-			res.setBody(content);
-			// It finds the right label for the box
-			res.setHeader("Content-Type", Utils::getMimeType(path));
-
-			std::cout << "DEBUG: Response sent [200 OK]" << std::endl;
-		}
-		else
-		{
-			res.defaultErrorPage(404); // Not Found
-
-			std::cout << "DEBUG: Response sent [404 Not Found]" << std::endl;
-		}
-	}
-	// POST: Receive and save data to a file
-	else if (req.getMethod() == "POST")
-	{
-		// Open a file in append mode to save the request body
-		std::ofstream	outfile("www/uploads/data.txt", std::ios::app);
-		if (outfile.is_open())
-		{
-			outfile << req.getBody() << std::endl;
-			outfile.close();
-
-			res.setStatus(201); // Created
-			res.setBody("<html><body><h1>Post Successful!"
-					"Data saved.</h1></body></html>");
-		}
-		else
-			res.defaultErrorPage(500); // Internal Server Error
-	}
-	// DELETE: Permanently remove a file from the server disk
-	else if (req.getMethod() == "DELETE")
-	{
-		if (std::remove(fullPath.c_str()) == 0)
-			res.setStatus(204); // No Content (Success)
-		else
-			res.defaultErrorPage(404); // File not found on disk
-	}
-
-	// 3. Build the final HTTP string and send it back to the client
-	std::string	res_str = res.build();
-	send(fd, res_str.c_str(), res_str.size(), 0);
-}
-
-void
-Server::_handleDisconnection(int idx)
-{
-	int	fd = _fds[idx].fd;
-	_reqs.erase(fd); // Always clean the map
-
-	if (fd > 0)
-		std::cout << "Log: Client on fd " << fd << " disconnected." << std::endl;
-
-	_removeClient(idx);
-}
-
-/* ------------------------------ CORE METHODS ------------------------------ */
+/* --------------------------- CORE SOCKET METHODS -------------------------- */
 
 void
 Server::setup()
 {
-	// 1. Create the master socket (IPv4, TCP protocol)
+	// 1. Create IPv4 TCP Socket
 	_serv_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (_serv_fd < 0)
 	{
@@ -266,34 +94,35 @@ Server::setup()
 		return;
 	}
 
-	// Set the socket to non-blocking mode
-	if (fcntl(_serv_fd, F_SETFL, O_NONBLOCK) < 0)
-	{
-		perror("fcntl failed");
-	}
-
-	// 2. Set socket options to allow immediate port reuse after restart
+	// 2. Allow immediate local port reuse
+	//    Prevents "Address already in use" errors
 	int	opt = 1;
 	if (setsockopt(_serv_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
 	{
-		perror("Setsockopt failed");
-		// We can continue, but port might be busy for a while after restart
-	}
-
-	// 3. Configure the server's address structure
-	_addr.sin_family = AF_INET;         // IPv4 addresses
-	_addr.sin_addr.s_addr = INADDR_ANY; // Listen on all available network interfaces
-	_addr.sin_port = htons(_port);      // Convert port to network byte order (Big-Endian)
-
-	// 4. Bind the socket to the port and address
-	if (bind(_serv_fd, (struct sockaddr *)&_addr, sizeof(_addr)) < 0)
-	{
-		perror("Bind failed (port might be in use)");
+		perror("Setsockopt REUSEADDR failed");
 		return;
 	}
 
-	// 5. Put the socket into listening mode to wait for incoming connections
-	// 128 is the max number of connections waiting in the queue
+	// 3. Configure Socket Address Structure
+	_addr.sin_family = AF_INET;         // IPv4 addresses
+	_addr.sin_addr.s_addr = INADDR_ANY; // Listen on all network interfaces
+	_addr.sin_port = htons(_port);      // Convert port to Network Byte Order
+
+	// 4. Bind socket to the specified port
+	if (bind(_serv_fd, (struct sockaddr *)&_addr, sizeof(_addr)) < 0)
+	{
+		perror("Bind failed");
+		return;
+	}
+
+	// 5. Switch listening socket to non-blocking mode
+	if (fcntl(_serv_fd, F_SETFL, O_NONBLOCK) < 0)
+	{
+		perror("Fcntl non-block failed");
+		return;
+	}
+
+	// 6. Start listening with a standard connection backlog queue
 	if (listen(_serv_fd, 128) < 0)
 	{
 		perror("Listen failed");
@@ -302,60 +131,77 @@ Server::setup()
 }
 
 int
+Server::getServerFd() const
+{
+	return _serv_fd;
+}
+
+/* ----------------------- NON-BLOCKING I/O HANDLERS ------------------------ */
+
+int
 Server::handleRead(int client_fd)
 {
-	char	buf[4096];
+	char	buff[4096];
 
-	// 1. Read raw bytes from the client socket
-	int		bytes_read = recv(client_fd, buf, sizeof(buf) - 1, 0);
+	// 1. Read raw bytes from the client socket without blocking
+	int		bytes_read = recv(client_fd, buff, sizeof(buff) - 1, 0);
 	if (bytes_read <= 0)
 	{
-		_reqs.erase(client_fd); // Clear request object on disconnect
+		_reqs.erase(client_fd); // Connection dropped or error occurred
 		return bytes_read;
 	}
-	buf[bytes_read] = '\0';
+	buff[bytes_read] = '\0';
 
-	// 2. Feed the chunk into the Request parser
-	_reqs[client_fd].addData(buf);
+	// 2. Push network data chunk into the client's dedicated Request state machine
+	_reqs[client_fd].addData(buff);
 
-	// 3. Check if HTTP headers and body are fully collected
+	// 3. Monitor if the HTTP parsing framework reached the COMPLETE stage
 	if (_reqs[client_fd].isComplete())
 	{
+		// Extract the requested script path or URI from the completed Request
+		std::string	path = _reqs[client_fd].getPath();
+
+		// Simple check: does the URI target a CGI script? (e.g., ends with ".py")
+		if (path.size() >= 3 && path.substr(path.size() - 3) == ".py")
+		{
+			int		cgi_status = _cgis[client_fd].execute(_reqs[client_fd], path);
+
+			if (cgi_status == 500)
+			{
+				return 2; // Switch to POLLOUT to send the error page
+			}
+			return 3; // CUSTOM SIGNAL: Tell Cluster to monitor CGI pipes now
+		}
+	}
+	else
+	{
+		// Standard Static Request (HTML, CSS, Images, etc.)
 		Response	response;
 
 		_resps[client_fd] = response;
-		return 2; // Ready to switch to POLLOUT
-	}
 
-	return 1; // Incomplete, keep reading on POLLIN
+		return 2; // Standard Signal: Switch client from POLLIN to POLLOUT
+	}
+	return 1; // Incomplete, keep reading data on POLLIN
 }
 
 int
 Server::handleWrite(int client_fd)
 {
-	// 1. Retrieve the fully built HTTP response string
+	// 1. Fetch the completely rendered HTTP response raw string
 	std::string	res_str = _resps[client_fd].build();
+
+	// 2. Transmit the chunk through the client socket without blocking
 	int			bytes_sent = send(client_fd, res_str.c_str(), res_str.size(), 0);
 
 	if (bytes_sent <= 0)
 	{
-		_reqs.erase(client_fd);
-		_resps.erase(client_fd);
+		_clearClientState(client_fd);
 		return bytes_sent;
 	}
-	// 2. Clear the client data from maps since the transaction is finished
-	_reqs.erase(client_fd);
-	_resps.erase(client_fd);
+	_clearClientState(client_fd);
 
 	return 2; // Signal Cluster that sending is complete
-}
-
-/* -------------------------------- GETTERS --------------------------------- */
-
-int
-Server::getFd() const
-{
-	return this->_serv_fd;
 }
 
 // int	setsockopt(int sockfd, int level, int optname,
