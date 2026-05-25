@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:32 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/25 19:06:05 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/25 20:09:25 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,19 +41,19 @@ class Server
 private:
 	int							_serv_fd; // Main listening socket
 	int							_port;    // Port number from config
-	struct sockaddr_in			_addr;    // Address structure
-	Config						_config;  // Configuration instance
+	struct sockaddr_in			_addr;    // Socket address structure
+	Config						_config;  // Configuration module
 
-	// Multiplexing data structures mapping client sockets to their HTTP state
-	std::map<int, Request>		_reqs;    // client_fd -> Request obj
-	std::map<int, Response>		_resps;   // client_fd -> Response obj
-	std::map<int, CGI>			_cgis;    // client_fd -> CGI tracker
+	// Multiplexing data structures mapping client sockets to HTTP states
+	std::map<int, Request>		_reqs;    // client_fd -> Request state machine
+	std::map<int, Response>		_resps;   // client_fd -> Response frame
+	std::map<int, CGI *>			_cgis;    // client_fd -> Active CGI trackers
 
 	/* --- Private Internal Helpers --- */
 	std::string	_readFile(const std::string &path);
 	void		_clearClientState(int client_fd);
 
-	// Disallow assignment operator
+	// Hidden assignment operator
 	Server		&operator=(const Server &other);
 
 public:
@@ -64,12 +64,16 @@ public:
 
 	/* --- Core Socket Methods --- */
 	void	setup();
-	int		getServerFd() const;
 
 	/* --- Non-blocking I/O Handlers --- */
 	// returns: <=0 error/disconn, 1 partial, 2 complete
 	int		handleRead(int client_fd);
 	int		handleWrite(int client_fd);
+
+	/* --- Getters --- */
+	int		getServerFd() const;
+	int		getReadFd(int client_fd);  // To read from Python
+	int		getWriteFd(int client_fd); // To write to Python
 };
 
 #endif

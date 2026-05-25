@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 17:16:00 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/24 17:06:46 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/25 20:06:22 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,6 @@
 
 Cluster::Cluster()
 {
-	// std::cout << "Default constructor called" << std::endl;
 }
 
 Cluster::~Cluster()
@@ -34,8 +33,6 @@ Cluster::~Cluster()
 	{
 		delete it_serv->second;
 	}
-
-	// std::cout << "Destructor called" << std::endl;
 }
 
 /* ------------------------- PRIVATE INTERNAL HELPERS ----------------------- */
@@ -86,7 +83,7 @@ Cluster::_handleClientRead(int fd, Server &server)
 		_closeConnection(fd);
 	else if (status == 2)
 	{
-		// Request's complete. Switch from POLLIN to POLLOUT to look for write readiness
+		// Static file ready: Switch client from POLLIN to POLLOUT
 		for (size_t i = 0; i < _fds.size(); ++i)
 		{
 			if (_fds[i].fd == fd)
@@ -95,6 +92,32 @@ Cluster::_handleClientRead(int fd, Server &server)
 				break;
 			}
 		}
+	}
+	else if (status == 3)
+	{
+		std::cout << "[Cluster] CGI mode activated for client fd " << fd << std::endl;
+
+		// 1. Get the pipe fds from the server's CGI instance
+		int				cgi_write_fd = server.getWriteFd(fd);
+		int				cgi_read_fd = server.getReadFd(fd);
+
+		// 2. Add the CGI write pipe to the main poll array
+		struct pollfd	pfd_write;
+		pfd_write.fd = cgi_write_fd;
+		pfd_write.events = POLLOUT;
+		pfd_write.revents = 0;
+		_fds.push_back(pfd_write);
+
+		// 3. Add the CGI read pipe to the main poll array
+		struct pollfd	pfd_read;
+		pfd_read.fd = cgi_read_fd;
+		pfd_read.events = POLLIN;
+		pfd_read.revents = 0;
+		_fds.push_back(pfd_read);
+
+		// 4. Link new FDs to the right server in maps so Cluster knows who they belong to
+		_clients[cgi_write_fd] = &server;
+		_clients[cgi_read_fd] = &server;
 	}
 }
 
@@ -135,6 +158,7 @@ Cluster::_closeConnection(int fd)
 			break;
 		}
 	}
+	_clients.erase(fd);
 	std::cout << "[Cluster] Connection closed on fd " << fd << std::endl;
 }
 
@@ -148,7 +172,7 @@ Cluster::setup(std::vector<Config> configs)
 		Server	*server = new Server(configs[i]);
 		server->setup(); // Opens, binds, and listens the server socket
 
-		int	serv_fd = server->getFd();
+		int	serv_fd = server->getServerFd();
 		_servers[serv_fd] = server;
 
 		struct pollfd	pfd;
@@ -172,7 +196,8 @@ Cluster::run()
 				perror("poll error");
 			continue;
 		}
-		for (size_t i = 0; i < _fds.size(); ++i)
+		size_t	curr_size = _fds.size();
+		for (size_t i = 0; i < curr_size; ++i)
 		{
 			// Handle reading and new connections
 			if (_fds[i].revents & POLLIN)
