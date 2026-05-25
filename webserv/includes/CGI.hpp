@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/24 16:54:31 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/25 13:40:46 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/25 16:47:59 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,8 @@
 # include <cstring>
 # include <cstdlib>
 # include <unistd.h>
+# include <fcntl.h>
+# include <sys/types.h>
 
 # include "Request.hpp"
 
@@ -42,8 +44,9 @@ public:
 	~CGI();
 
 	// Executes the script and returns status code (e.g., 200 or 500)
-	int		exec(const Request &req, const std::string &script_path);
+	int		execute(const Request &req, const std::string &script_path);
 
+	// Getters
 	pid_t	getPid() const;
 	int		getReadFd() const;
 	int		getWriteFd() const;
