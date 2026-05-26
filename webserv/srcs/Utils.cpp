@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/27 19:21:54 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/26 17:50:37 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/26 17:51:46 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,7 @@ namespace Utils
 			if (name == ".")
 				continue;
 
-			// Add trailing slash for directories if your OS support entry type flags
+			// Add trailing slash for directories if OS support entry type flags
 			if (entry->d_type == DT_DIR)
 				name += "/";
 
