@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/24 16:53:12 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/25 12:13:17 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/26 17:42:19 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,6 @@ Location::Location() :
 	_methods(),
 	_autoindex(false)
 {
-	// std::cout << "Default constructor called" << std::endl;
 }
 
 Location::Location(const Location &copy) :
@@ -35,7 +34,6 @@ Location::Location(const Location &copy) :
 	_methods(copy._methods),
 	_autoindex(copy._autoindex)
 {
-	// std::cout << "Copy constructor called" << std::endl;
 }
 
 Location
@@ -52,13 +50,10 @@ Location
 		_autoindex = other._autoindex;
 	}
 	return *this;
-
-	// std::cout << "Copy assignment operator called" << std::endl;
 }
 
 Location::~Location()
 {
-	// std::cout << "Destructor called" << std::endl;
 }
 
 /* -------------------------------- SETTERS --------------------------------- */

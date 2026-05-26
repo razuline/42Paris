@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/28 13:38:56 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/14 14:32:36 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/26 17:34:16 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,11 +21,11 @@
 class Config
 {
 private:
-	int			_port;
-	std::string	_serverName;
-	std::string	_folderRoot;
-	std::string	_homePage;
-	size_t		_client_max_body_size;
+	int				_port;
+	std::string		_serverName;
+	std::string		_folderRoot;
+	std::string		_homePage;
+	size_t			_clientMaxBodySize;
 
 public:
 	/* --- Orthodox Canonical Form --- */
@@ -39,9 +39,9 @@ public:
 
 	/* --- Getters --- */
 	int					getPort() const;
-	const std::string	getFolderRoot() const;
-	const std::string	getServerName() const;
-	const std::string	getHomePage() const;
+	const std::string	&getFolderRoot() const;
+	const std::string	&getServerName() const;
+	const std::string	&getHomePage() const;
 	size_t				getClientMaxBodySize() const;
 };
 

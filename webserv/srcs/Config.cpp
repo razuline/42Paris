@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/28 13:46:06 by erazumov          #+#    #+#             */
-/*   Updated: 2026/04/28 18:39:46 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/26 17:39:08 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,15 +20,17 @@ Config::Config() :
 	_serverName(""),
 	_folderRoot(""),
 	_homePage(""),
-	_client_max_body_size(1048576)
+	_clientMaxBodySize(1048576)
 {
-	// std::cout << "Default constructor called" << std::endl;
 }
 
-Config::Config(const Config &copy)
+Config::Config(const Config &copy) :
+	_port(copy._port),
+	_serverName(copy._serverName),
+	_folderRoot(copy._folderRoot),
+	_homePage(copy._homePage),
+	_clientMaxBodySize(copy._clientMaxBodySize)
 {
-	*this = copy;
-	// std::cout << "Copy constructor called" << std::endl;
 }
 
 Config
@@ -40,16 +42,13 @@ Config
 		this->_serverName = other._serverName;
 		this->_folderRoot = other._folderRoot;
 		this->_homePage = other._homePage;
-		this->_client_max_body_size = other._client_max_body_size;
+		this->_clientMaxBodySize= other._clientMaxBodySize;
 	}
 	return *this;
-
-	// std::cout << "Copy assignment operator called" << std::endl;
 }
 
 Config::~Config()
 {
-	// std::cout << "Destructor called" << std::endl;
 }
 
 /* ------------------------------ CORE METHODS ------------------------------ */
@@ -64,7 +63,7 @@ Config::parse(const std::string &filename)
 	// 2. Check if the STREAM is open
 	if (!file.is_open())
 	{
-		std::cerr << "Error: Could not open config file: " << filename << std::endl;
+		std::cerr << "[Config] Error: Cannot open config file " << filename << std::endl;
 		return;
 	}
 
@@ -77,13 +76,10 @@ Config::parse(const std::string &filename)
 
 		// 2. Trim the line with only spaces and tabs
 		line = Utils::trim(line);
-
-		// 3. Skip the empty line
 		if (line.empty())
 			continue;
 
-		// 4. If NOT empty, look for keywords
-		// "listen"
+		// 3. If NOT empty, look for keywords "listen"
 		if (line.find("listen") == 0)
 		{
 			std::string			value = Utils::trim(line.substr(6));
@@ -92,26 +88,19 @@ Config::parse(const std::string &filename)
 		}
 		// "root"
 		else if (line.find("root") == 0)
-		{
 			_folderRoot = Utils::trim(line.substr(4));
-		}
 		// "server_name"
 		else if (line.find("server_name") == 0)
-		{
 			_serverName = Utils::trim(line.substr(11));
-		}
 		// "index"
 		else if (line.find("index") == 0)
-		{
 			_homePage = Utils::trim(line.substr(5));
-		}
 		// "client_max_body_size"
 		else if (line.find("client_max_body_size") == 0)
 		{
-			std::string 		keyword = "client_max_body_size";
-			std::string			value = Utils::trim(line.substr(keyword.length()));
+			std::string			value = Utils::trim(line.substr(20));
 			std::stringstream	ss(value);
-			ss >> _client_max_body_size;
+			ss >> _clientMaxBodySize;
 		}
 	}
 	file.close();
@@ -126,19 +115,19 @@ Config::getPort() const
 }
 
 const std::string
-Config::getFolderRoot() const
+&Config::getFolderRoot() const
 {
 	return _folderRoot;
 }
 
 const std::string
-Config::getServerName() const
+&Config::getServerName() const
 {
 	return _serverName;
 }
 
 const std::string
-Config::getHomePage() const
+&Config::getHomePage() const
 {
 	return _homePage;
 }
@@ -146,5 +135,5 @@ Config::getHomePage() const
 size_t
 Config::getClientMaxBodySize() const
 {
-	return _client_max_body_size;
+	return _clientMaxBodySize;
 }

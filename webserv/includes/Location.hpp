@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/24 16:52:55 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/24 17:54:11 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/26 17:41:17 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,13 +19,13 @@
 class Location
 {
 private:
-	std::string					_path;         // e.g., "/images"
-	std::string					_root;         // Root directory on disk
-	std::string					_index;        // Default file
-	std::string					_redirect;     // HTTP redirection URL
-	std::string					_uploadStore;  // Directory for uploaded files
-	std::vector<std::string>	_methods;      // Allowed HTTP methods
-	bool						_autoindex;    // Directory listing switch
+	std::string					_path;
+	std::string					_root;
+	std::string					_index;
+	std::string					_redirect;
+	std::string					_uploadStore;
+	std::vector<std::string>	_methods;
+	bool						_autoindex;
 
 public:
 	/* --- Orthodox Canonical Form --- */
