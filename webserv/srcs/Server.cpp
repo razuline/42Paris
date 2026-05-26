@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:40 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/26 19:37:08 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/26 20:10:43 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -245,21 +245,19 @@ Server::handleRead(int client_fd)
 			// --- HANDLE POST METHOD (File Upload) ---
 			else if (method == "POST")
 			{
-				// 1. Open a binary output stream to create or overwrite the file at 'fullPath'
 				std::ofstream	outFile(fullPath.c_str(), std::ios::binary);
 
 				if (!outFile.is_open())
 					response.defaultErrorPage(500);
 				else
 				{
-					// 2. Get the raw payload body received from the client
+					// Get the raw payload body received from the client
 					std::string	body = _reqs[client_fd].getBody();
 
-					// 3. Write the exact bytes into the file
+					// Write the exact bytes into the file
 					outFile.write(body.c_str(), body.size());
 					outFile.close();
 
-					// 4. Respond with 211 Created status code
 					response.setStatus(201);
 					response.setBody("<html><body><h1>201 Created</h1><p>File uploaded successfully.</p></body></html>");
 					response.setHeader("Content-Type", "text/html");
@@ -274,14 +272,13 @@ Server::handleRead(int client_fd)
 					response.defaultErrorPage(404);
 				else
 				{
-					fileCheck.close(); // Close the stream before unlinking
+					fileCheck.close();
 
 					// 2. Execute the system call to erase the file from the disk
 					if (unlink(fullPath.c_str()) == -1)
-						response.defaultErrorPage(403); // Forbidden
+						response.defaultErrorPage(403);
 					else
 					{
-						// 3. Successful deletion can return 200 OK with a message, or 204 No Content
 						response.setStatus(200);
 						response.setBody("<html><body><h1>200 OK</h1><p>File deleted successfully.</p></body></html>");
 						response.setHeader("Content-Type", "text/html");
@@ -290,10 +287,10 @@ Server::handleRead(int client_fd)
 			}
 			// --- HANDLE UNKNOWN/UNSUPPORTED METHOD ---
 			else
-				response.defaultErrorPage(405); // Method Not Allowed
+				response.defaultErrorPage(405);
 
 			_resps[client_fd] = response;
-			return 2; // Switch client from POLLIN to POLLOUT to transmit the response
+			return 2; // Switch client from POLLIN to POLLOUT
 		}
 	}
 	return 1; // Incomplete, keep reading data on POLLIN
