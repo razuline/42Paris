@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/27 17:04:32 by erazumov          #+#    #+#             */
-/*   Updated: 2026/04/27 16:12:44 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/26 16:25:10 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,23 +26,23 @@ private:
 	std::string							_body;    // The actual content (HTML/CSS/Image data)
 
 	/* --- Private Internal Helpers --- */
-	std::string	_getReasonPhrase(int code); // Map status code to words
+	std::string	_getReasonPhrase(int code);
 
 public:
 	/* --- Orthodox Canonical Form --- */
 	Response();
 	Response(const Response &copy);
-	Response &operator=(const Response &other);
+	Response	&operator=(const Response &other);
 	~Response();
-
-	/* --- Setters --- */
-	void		setStatus(int code);
-	void		setHeader(std::string key, std::string value);
-	void		setBody(std::string content);
 
 	/* --- Core Methods --- */
 	std::string	build();
 	void		defaultErrorPage(int code);
+
+	/* --- Setters --- */
+	void		setStatus(int code);
+	void		setHeader(std::string key, std::string value);
+	void		setBody(std::string body);
 };
 
 #endif

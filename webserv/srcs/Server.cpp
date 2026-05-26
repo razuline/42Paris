@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:40 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/25 20:14:09 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/26 16:26:40 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ Server::~Server()
 		it++;
 
 		close(client_fd);
-		_clearClientState(it->first);
+		_clearClientState(client_fd);
 	}
 }
 
@@ -91,7 +91,7 @@ Server::_readFile(const std::string &path)
 	return buff.str();
 }
 
-/* --------------------------- CORE SOCKET METHODS -------------------------- */
+/* ------------------------------ CORE METHODS ------------------------------ */
 
 void
 Server::setup()
@@ -134,8 +134,6 @@ Server::setup()
 	}
 }
 
-/* ----------------------- NON-BLOCKING I/O HANDLERS ------------------------ */
-
 int
 Server::handleRead(int client_fd)
 {
@@ -154,7 +152,7 @@ Server::handleRead(int client_fd)
 	_reqs[client_fd].setLimit(_config.getClientMaxBodySize());
 	_reqs[client_fd].addData(std::string(buff, bytes_read));
 
-	if (_reqs[client_fd].getState() == Request::ERROR)
+	if (_reqs[client_fd].getState() == ERROR)
 	{
 		Response	res;
 		res.defaultErrorPage(413); // Payload Too Large
@@ -193,10 +191,77 @@ Server::handleRead(int client_fd)
 		else
 		{
 			Response	response;
-			// Use fullPath to read static files later
-			_resps[client_fd] = response;
+			std::string	method = _reqs[client_fd].getMethod();
 
-			return 2; // Standard Signal: Switch client from POLLIN to POLLOUT
+			// --- HANDLE GET METHOD ---
+			if (method == "GET")
+			{
+				std::string	content = _readFile(fullPath);
+				if (content.empty())
+					response.defaultErrorPage(404);
+				else
+				{
+					response.setStatus(200);
+					response.setBody(content);
+
+					if (path.size() >= 4 && path.substr(path.size() - 4) == ".css")
+						response.setHeader("Content-Type", "text/css");
+					else
+						response.setHeader("Content-Type", "text/html");
+				}
+			}
+			// --- HANDLE POST METHOD (File Upload) ---
+			else if (method == "POST")
+			{
+				// 1. Open a binary output stream to create or overwrite the file at 'fullPath'
+				std::ofstream	outFile(fullPath.c_str(), std::ios::binary);
+
+				if (!outFile.is_open())
+					response.defaultErrorPage(500);
+				else
+				{
+					// 2. Get the raw payload body received from the client
+					std::string	body = _reqs[client_fd].getBody();
+
+					// 3. Write the exact bytes into the file
+					outFile.write(body.c_str(), body.size());
+					outFile.close();
+
+					// 4. Respond with 211 Created status code
+					response.setStatus(201);
+					response.setBody("<html><body><h1>201 Created</h1><p>File uploaded successfully.</p></body></html>");
+					response.setHeader("Content-Type", "text/html");
+				}
+			}
+			// --- HANDLE DELETE METHOD (File Removal) ---
+			else if (method == "DELETE")
+			{
+				// 1. Check if the file actually exists before trying to delete it
+				std::ifstream	fileCheck(fullPath.c_str());
+				if (!fileCheck.good())
+					response.defaultErrorPage(404);
+				else
+				{
+					fileCheck.close(); // Close the stream before unlinking
+
+					// 2. Execute the system call to erase the file from the disk
+					if (unlink(fullPath.c_str()) == -1)
+						response.defaultErrorPage(403); // Forbidden
+					else
+					{
+						// 3. Successful deletion can return 200 OK with a message, or 204 No Content
+						response.setStatus(200);
+						response.setBody("<html><body><h1>200 OK</h1><p>File deleted successfully.</p></body></html>");
+						response.setHeader("Content-Type", "text/html");
+					}
+				}
+			}
+			// --- HANDLE UNKNOWN/UNSUPPORTED METHOD ---
+			else
+				response.defaultErrorPage(405); // Method Not Allowed
+
+			_resps[client_fd] = response;
+			return 2; // Switch client from POLLIN to POLLOUT to transmit the response
 		}
 	}
 	return 1; // Incomplete, keep reading data on POLLIN

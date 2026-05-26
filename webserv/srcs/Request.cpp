@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/25 15:33:23 by erazumov          #+#    #+#             */
-/*   Updated: 2026/04/28 20:17:47 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/26 16:34:40 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,16 +19,26 @@ Request::Request() :
 	_path(""),
 	_version(""),
 	_body(""),
+	_headerSize(0),
+	_contentLength(0),
+	_raw(""),
 	_state(READING_HEADERS),
 	_limit(1000000) // 1 Mb
 {
-	// std::cout << "Default constructor called" << std::endl;
 }
 
-Request::Request(const Request &copy)
+Request::Request(const Request &copy) :
+	_method(copy._method),
+	_path(copy._path),
+	_version(copy._version),
+	_headers(copy._headers),
+	_body(copy._body),
+	_headerSize(copy._headerSize),
+	_contentLength(copy._contentLength),
+	_raw(copy._raw),
+	_state(copy._state),
+	_limit(copy._limit)
 {
-	*this = copy;
-	// std::cout << "Copy constructor called" << std::endl;
 }
 
 Request
@@ -36,38 +46,36 @@ Request
 {
 	if (this != &other)
 	{
-		this->_method = other._method;
-		this->_path = other._path;
-		this->_version = other._version;
-		this->_headers = other._headers;
-		this->_body = other._body;
+		_method = other._method;
+		_path = other._path;
+		_version = other._version;
+		_headers = other._headers;
+		_body = other._body;
+		_headerSize = other._headerSize;
+		_contentLength = other._contentLength;
+		_raw = other._raw;
+		_state = other._state;
+		_limit = other._limit;
 	}
 	return *this;
-
-	// std::cout << "Copy assignment operator called" << std::endl;
 }
 
 Request::~Request()
 {
-	// std::cout << "Destructor called" << std::endl;
 }
 
-/* ----------------------------- HELPER METHODS ----------------------------- */
+/* ------------------------- PRIVATE INTERNAL HELPERS ----------------------- */
 
 void
 Request::_handleHeaders()
 {
-	// 1. Search for the end of the headers (\r\n\r\n) in the entire raw buffer
 	size_t	pos = _raw.find("\r\n\r\n");
 
-	if (pos != std::string::npos) // npos means "not found"
+	if (pos != std::string::npos)
 	{
-		// 2. Mark the boundary where the body starts (after \r\n\r\n)
 		_headerSize = pos + 4;
 		std::string	headers_part = _raw.substr(0, pos);
 
-		// 3. Pass the str to a specialised parser:
-		// parsing AND moving to the next state
 		_parseRawHeaders(headers_part);
 	}
 }
@@ -75,16 +83,11 @@ Request::_handleHeaders()
 void
 Request::_handleBody()
 {
-	// 1. Calculate the number of body bytes received so far
-	// Formula: Total received minus the part used by headers
 	size_t	curr_body_size = _raw.size() - _headerSize;
 
-	// 2. Check if the received data matches or exceeds the expected Content-Length
-	if (curr_body_size >= _contentLen)
+	if (curr_body_size >= _contentLength)
 	{
-		// 3. It's enough
-		// Extract the body from _raw starting at _headerSize
-		_body = _raw.substr(_headerSize, _contentLen);
+		_body = _raw.substr(_headerSize, _contentLength);
 		_state = COMPLETE;
 	}
 }
@@ -92,8 +95,8 @@ Request::_handleBody()
 void
 Request::_parseRawHeaders(const std::string &headers_part)
 {
-	std::stringstream	ss(headers_part);
-	std::string			line;
+	std::stringstream		ss(headers_part);
+	std::string				line;
 
 	// --- 1. PARSE REQUEST-LINE ---
 	// Example: "POST /index.html HTTP/1.1"
@@ -134,12 +137,12 @@ Request::_parseRawHeaders(const std::string &headers_part)
 
 	// --- 3. GET CONTENT-LENGTH ---
 	if (_headers.count("Content-Length"))
-		_contentLen = std::atoi(_headers["Content-Length"].c_str());
+		_contentLength = std::atoi(_headers["Content-Length"].c_str());
 	else
-		_contentLen = 0;
+		_contentLength = 0;
 
-	// 5. Decide if to read a body is needed
-	if (_method == "POST" && _contentLen > 0)
+	// Decide if to read a body is needed
+	if (_method == "POST" && _contentLength > 0)
 		_state = READING_BODY;
 	else
 		_state = COMPLETE;
@@ -156,22 +159,17 @@ Request::isComplete()
 void
 Request::addData(std::string chunk)
 {
-	// SECURITY CHECK: Protect the server from memory exhaustion
-	// If the new chunk exceeds the limit, the ERROR state immediately
 	if (_raw.size() + chunk.size() > _limit)
 	{
 		_state = ERROR;
 		return;
 	}
 
-	// 1. Accumulate the incoming data into the raw buffer
 	_raw += chunk;
 
-	// 2. Try to find and parse the HTTP headers
 	if (_state == READING_HEADERS)
 		_handleHeaders();
 
-	// 3. If the body part is ready, handle it
 	if (_state == READING_BODY)
 		_handleBody();
 }
@@ -187,48 +185,41 @@ Request::setLimit(size_t limit)
 const std::string
 &Request::getMethod() const
 {
-	return this->_method;
+	return _method;
 }
 
 const std::string
 &Request::getPath() const
 {
-	return this->_path;
+	return _path;
 }
 
 const std::string
 &Request::getVersion() const
 {
-	return this->_version;
+	return _version;
 }
 
 const std::string
 &Request::getHeader(const std::string &key) const
 {
-	// 1. Create a constant iterator for the map
 	std::map<std::string, std::string>::const_iterator	it = _headers.find(key);
 
-	// 2. Check if the key actually exists in the map
 	if (it != _headers.end())
-	{
-		// If found, return the value associated with the key
 		return it->second;
-	}
-	// 3. If not found, we must return an empty string reference
-	// Static variable to avoid returning a reference to a tmp object
-	static std::string	empty = "";
 
+	static std::string	empty = "";
 	return empty;
 }
 
 const std::string
 &Request::getBody() const
 {
-	return this->_body;
+	return _body;
 }
 
-Request::RequestState
+RequestState
 Request::getState() const
 {
-	return this->_state;
+	return _state;
 }

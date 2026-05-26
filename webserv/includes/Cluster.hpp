@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 16:51:10 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/25 18:20:42 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/26 14:14:39 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,8 @@ private:
 	void	_handleClientRead(int fd, Server &server);  // recv()
 	void	_handleClientWrite(int fd, Server &server); // send()
 	void	_closeConnection(int fd);                   // close() & clear
+	void	_handleCGIWrite(int pipe_write_fd, Server &server);
+	void	_handleCGIRead(int pipe_read_fd, Server &server);
 
 public:
 	/* --- Orthodox Canonical Form --- */

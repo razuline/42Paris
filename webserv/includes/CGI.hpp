@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/24 16:54:31 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/25 16:47:59 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/26 16:22:29 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,17 +36,19 @@ private:
 	CGI(const CGI &copy);
 	CGI		&operator=(const CGI &other);
 
+	/* --- Private Internal Helpers --- */
 	void	_initEnv(const Request &req, const std::string &script_path);
 	void	_clearEnv();
 
 public:
+	/* --- Orthodox Canonical Form --- */
 	CGI();
 	~CGI();
 
-	// Executes the script and returns status code (e.g., 200 or 500)
+	/* --- Core Methods --- */
 	int		execute(const Request &req, const std::string &script_path);
 
-	// Getters
+	/* --- Getters --- */
 	pid_t	getPid() const;
 	int		getReadFd() const;
 	int		getWriteFd() const;

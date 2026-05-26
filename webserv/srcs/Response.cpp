@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/27 17:23:49 by erazumov          #+#    #+#             */
-/*   Updated: 2026/04/28 20:28:02 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/26 16:24:53 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,13 +18,14 @@ Response::Response() :
 	_status(200),
 	_body("")
 {
-	// std::cout << "Default constructor called" << std::endl;
+	setHeader("Server", "webserv/1.0 (42 Paris)");
 }
 
-Response::Response(const Response &copy)
+Response::Response(const Response &copy) :
+	_status(copy._status),
+	_headers(copy._headers),
+	_body(copy._body)
 {
-	*this = copy;
-	// std::cout << "Copy constructor called" << std::endl;
 }
 
 Response
@@ -37,18 +38,14 @@ Response
 		this->_body = other._body;
 	}
 	return *this;
-
-	// std::cout << "Copy assignment operator called" << std::endl;
 }
 
 Response::~Response()
 {
-	// std::cout << "Destructor called" << std::endl;
 }
 
-/* ----------------------------- HELPER METHODS ----------------------------- */
+/* ------------------------- PRIVATE INTERNAL HELPERS ----------------------- */
 
-// Converts HTTP status codes into their standard English phrases
 std::string
 Response::_getReasonPhrase(int code)
 {
@@ -56,13 +53,18 @@ Response::_getReasonPhrase(int code)
 	{
 		case 200: return "OK";
 		case 201: return "Created";
+		case 202: return "Accepted";
 		case 204: return "No Content";
+		case 301: return "Moved Permanently";
 		case 400: return "Bad Request";
+		case 401: return "Unauthorized";
 		case 403: return "Forbidden";
 		case 404: return "Not Found";
 		case 405: return "Method Not Allowed";
 		case 413: return "Payload Too Large";
 		case 500: return "Internal Server Error";
+		case 502: return "Bad Gateway";
+		case 503: return "Service Unavailable";
 		case 505: return "HTTP Version Not Supported";
 
 		default: return "Unknown Status";
@@ -71,46 +73,35 @@ Response::_getReasonPhrase(int code)
 
 /* ------------------------------ CORE METHODS ------------------------------ */
 
-/**
- * THE SANDWICH BUILDER:
- * 1. Status Line (Protocol - Code - Message)
- * 2. Headers (Key: Value)
- * 3. Mandatory Empty Line (\r\n)
- * 4. Content (Body)
- */
 std::string
 Response::build()
 {
 	std::stringstream	ss;
 
-	// 1. STATUS LINE: Must end with CRLF (\r\n)
+	// 1. HTTP Status Line (e.g., HTTP/1.1 200 OK\r\n)
 	ss << "HTTP/1.1 " << _status << " " << _getReasonPhrase(_status) << "\r\n";
 
-	// 2. HEADERS: Loop through the map to add all metadata
+	// 2. Loop through map and append all HTTP Headers
 	std::map<std::string, std::string>::iterator	it;
 	for (it = _headers.begin(); it != _headers.end(); ++it)
 	{
 		ss << it->first << ": " << it->second << "\r\n";
 	}
 
-	// 3. THE GAP: A single empty line is required to separate headers from body
+	// 3. Empty line separator between headers and body
 	ss << "\r\n";
 
-	// 4. BODY: The actual content (HTML, Image, or Data)
+	// 4. Append the payload body data
 	ss << _body;
 
 	return ss.str();
 }
 
-/**
- * AUTOMATIC ERROR PAGE GENERATOR:
- * Creates a visually clean HTML page for errors like 404 or 413.
- */
 void
 Response::defaultErrorPage(int code)
 {
 	// 1. Set the status code (e.g,, 404)
-	this->setStatus(code);
+	setStatus(code);
 
 	// 2. Get the word version (e.g., "Not Found")
 	std::string	msg = _getReasonPhrase(code);
@@ -125,10 +116,7 @@ Response::defaultErrorPage(int code)
 	ss << "<p>webserv/1.0 (42 Paris)</p>";
 	ss << "</body></html>";
 
-	// 4. Use a smart setBody to handle Content-Length automatically
-	this->setBody(ss.str());
-
-	// 5. Tell the browser it's an HTML page
+	this->setBody(ss.str()); // Content-Length auto-updated here
 	this->setHeader("Content-Type", "text/html");
 }
 
@@ -151,11 +139,11 @@ Response::setHeader(std::string key, std::string value)
  * Automatically calculates 'Content-Length' to prevent malformed responses
  */
 void
-Response::setBody(std::string content)
+Response::setBody(std::string body)
 {
-	_body = content;
+	_body = body;
 
 	std::stringstream	ss;
 	ss << _body.size();
-	this->setHeader("Content-Length", ss.str());
+	setHeader("Content-Length", ss.str());
 }

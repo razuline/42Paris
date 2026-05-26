@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/25 14:09:02 by erazumov          #+#    #+#             */
-/*   Updated: 2026/04/28 20:59:21 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/26 16:32:35 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,31 +21,27 @@
 
 # include "Utils.hpp"
 
+enum RequestState
+{
+	READING_HEADERS,
+	READING_BODY,
+	COMPLETE,
+	ERROR
+};
+
 class Request
 {
-public:
-	// Definition of the different stages of HTTP request parsing
-	enum	RequestState
-	{
-		READING_HEADERS, // Searching for the end os the headers (\r\n\r\n)
-		READING_BODY,    // Headers found, waiting for the body based on Content-Length
-		COMPLETE,        // Request is fully received and parsed
-		ERROR            // An error occurred during parsing
-	};
-
 private:
-	std::string							_method;     // GET, POST, or DELETE
-	std::string							_path;       // e.g., /index.html
-	std::string							_version;    // e.g., HTTP/1.1
-	std::map<std::string, std::string>	_headers;    // Store all HTTP headers
-	std::string							_body;       // For POST requests
+	std::string							_method;
+	std::string							_path;
+	std::string							_version;
+	std::map<std::string, std::string>	_headers;
+	std::string							_body;
 
-	size_t								_headerSize; // Store the boundary bw headers and body
-	size_t								_contentLen; // Store the expected body size
+	size_t								_headerSize;
+	size_t								_contentLength;
 
-	// Buffer to store raw data chunks received from the client
 	std::string							_raw;
-	// Current state of the request parsing process
 	RequestState						_state;
 	size_t								_limit;
 
@@ -58,13 +54,11 @@ public:
 	/* --- Orthodox Canonical Form --- */
 	Request();
 	Request(const Request &copy);
-	Request &operator=(const Request &other);
+	Request	&operator=(const Request &other);
 	~Request();
 
 	/* --- Core Methods --- */
-	// Checks if the request has reached the COMPLETE state
 	bool	isComplete();
-	// Adds a new chunk of data received from the socket to the internal buffer
 	void	addData(std::string chunk);
 	void	setLimit(size_t limit);
 

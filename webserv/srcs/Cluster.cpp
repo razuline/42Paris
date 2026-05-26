@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 17:16:00 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/25 20:06:22 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/26 14:22:50 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,6 +162,61 @@ Cluster::_closeConnection(int fd)
 	std::cout << "[Cluster] Connection closed on fd " << fd << std::endl;
 }
 
+void
+Cluster::_handleCGIWrite(int pipe_write_fd, Server &server)
+{
+	std::cout << "[Cluster] Sending data to CGI input pipe " << pipe_write_fd << std::endl;
+
+	std::string	body = "";
+
+	if (!body.empty())
+		write(pipe_write_fd, body.c_str(), body.size());
+
+	// 1. Close the write pipe so Python gets EOF and executes
+	close(pipe_write_fd);
+
+	// 2. Remove ONLY this write pipe from the poll array so we stop monitoring it
+	for (std::vector<struct pollfd>::iterator it = _fds.begin(); it != _fds.end(); ++it)
+	{
+		if (it->fd == pipe_write_fd)
+		{
+			_fds.erase(it);
+			break;
+		}
+	}
+	// Remove the mapping for this specific pipe descriptor
+	_clients.erase(pipe_write_fd);
+}
+
+void
+Cluster::_handleCGIRead(int pipe_read_fd, Server &server)
+{
+	std::cout << "[Cluster] Getting output from CGI pipe " << pipe_read_fd << std::endl;
+
+	char	buff[4096];
+	int		bytes_read = read(pipe_read_fd, buff, sizeof(buff) - 1);
+
+	if (bytes_read > 0)
+	{
+		buff[bytes_read] = '\0';
+		std::string cgi_output(buff, bytes_read);
+
+		// Later: append this chunk to the final customer Response layout.
+	}
+	else if (bytes_read == 0)
+	{
+		// Python script finished writing everything and closed its STDOUT!
+		_closeConnection(pipe_read_fd);
+
+		// Clean up the subprocess so it doesn't turn into an unkillable Zombie!
+		// waitpid(-1, NULL, WNOHANG);
+	}
+	else
+	{
+		_closeConnection(pipe_read_fd);
+	}
+}
+
 /* ------------------------------ CORE METHODS ------------------------------ */
 
 void
@@ -196,26 +251,40 @@ Cluster::run()
 				perror("poll error");
 			continue;
 		}
-		size_t	curr_size = _fds.size();
+		size_t	curr_size = _fds.size(); // Protected from iteration shift
 		for (size_t i = 0; i < curr_size; ++i)
 		{
+			int	fd = _fds[i].fd;
+
 			// Handle reading and new connections
 			if (_fds[i].revents & POLLIN)
 			{
-				if (_servers.count(_fds[i].fd))
-					_addNewConnection(_fds[i].fd);
-				else if (_clients.count(_fds[i].fd))
-					_handleClientRead(_fds[i].fd, *_clients[_fds[i].fd]);
+				if (_servers.count(fd))
+					_addNewConnection(fd);
+				else if (_clients.count(fd))
+				{
+					// Check if this fd is actually the CGI read pipe
+					if (fd == _clients[fd]->getReadFd(fd))
+						_handleCGIRead(fd, *_clients[fd]);
+					else
+						_handleClientRead(fd, *_clients[fd]);
+				}
 			}
 			// Handle writing responses
 			else if (_fds[i].revents & POLLOUT)
 			{
-				if (_clients.count(_fds[i].fd))
-					_handleClientWrite(_fds[i].fd, *_clients[_fds[i].fd]);
+				if (_clients.count(fd))
+				{
+					// Check if this fd is actually the CGI write pipe
+					if (fd == _clients[fd]->getWriteFd(fd))
+						_handleCGIWrite(fd, *_clients[fd]);
+					else
+						_handleClientWrite(fd, *_clients[fd]);
+				}
 			}
 			// Handle errors or sudden disconnections
 			else if (_fds[i].revents & (POLLERR | POLLHUP | POLLNVAL))
-				_closeConnection(_fds[i].fd);
+				_closeConnection(fd);
 		}
 	}
 }
