@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/27 19:21:01 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/26 17:58:19 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/26 19:18:16 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,8 +20,7 @@ namespace Utils
 {
 	std::string	getMimeType(const std::string& path);
 	std::string	trim(const std::string &str);
-	std::string	generateAutoindex(const std::string &dirPath,
-								  const std::string &reqPath);
+	std::string	generateAutoindex(const std::string &dirPath, const std::string &reqPath);
 }
 
 #endif

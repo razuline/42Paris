@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:40 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/26 16:26:40 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/26 19:37:08 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -164,12 +164,14 @@ Server::handleRead(int client_fd)
 	if (_reqs[client_fd].isComplete())
 	{
 		std::string	path = _reqs[client_fd].getPath();
+		std::string	rawPath = path;
+
 		if (path == "/")
 			path = _config.getHomePage();
 
 		std::string	fullPath = _config.getFolderRoot() + "/" + (path[0] == '/' ? path.substr(1) : path);
 
-		// CASE A: Check if target file requires CGI processing (e.g., Python script)
+		// CASE A: CGI Processing
 		if (path.size() >= 3 && path.substr(path.size() - 3) == ".py")
 		{
 			_cgis[client_fd] = new CGI();
@@ -187,12 +189,45 @@ Server::handleRead(int client_fd)
 			}
 			return 3; // Tell Cluster to monitor CGI pipes instead of client socket
 		}
-		// CASE B: Standard static resource management (HTML, CSS, Images, etc.)
+		// CASE B: Static Resources & Autoindex
 		else
 		{
 			Response	response;
 			std::string	method = _reqs[client_fd].getMethod();
 
+			// --- AUTOINDEX LOGIC FOR DIRECTORIES ---
+			// Check if requested path is a directory (ends with '/' or matching logic)
+			if (!rawPath.empty() && rawPath[rawPath.size() - 1] == '/')
+			{
+				std::string			indexFile = fullPath;
+				std::ifstream		indexCheck(indexFile.c_str());
+
+				// If index.html doesn't exist, execute Autoindex
+				if (!indexCheck.good())
+				{
+					indexCheck.close();
+					bool			isAutoindexEnabled = true;
+
+					if (isAutoindexEnabled)
+					{
+						std::string	autoindexHtml =
+							Utils::generateAutoindex(_config.getFolderRoot() +
+								rawPath, rawPath);
+						if (!autoindexHtml.empty())
+						{
+							response.setStatus(200);
+							response.setBody(autoindexHtml);
+							response.setHeader("Content-Type", "text/html");
+							_resps[client_fd] = response;
+							return 2;
+						}
+					}
+					response.defaultErrorPage(403);
+					_resps[client_fd] = response;
+					return 2;
+				}
+				indexCheck.close();
+			}
 			// --- HANDLE GET METHOD ---
 			if (method == "GET")
 			{
@@ -203,11 +238,8 @@ Server::handleRead(int client_fd)
 				{
 					response.setStatus(200);
 					response.setBody(content);
-
-					if (path.size() >= 4 && path.substr(path.size() - 4) == ".css")
-						response.setHeader("Content-Type", "text/css");
-					else
-						response.setHeader("Content-Type", "text/html");
+					// Dynamic MIME type detection using your Utils module
+					response.setHeader("Content-Type", Utils::getMimeType(fullPath));
 				}
 			}
 			// --- HANDLE POST METHOD (File Upload) ---
