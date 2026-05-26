@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/27 19:21:54 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/26 17:51:46 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/26 17:58:29 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ namespace Utils
 	}
 
 	std::string
-	generateAutoindex(const std::string &dirPath, const std::string &requestPath)
+	generateAutoindex(const std::string &dirPath, const std::string &reqPath)
 	{
 		DIR				*dir = opendir(dirPath.c_str());
 		struct dirent	*entry;
@@ -63,12 +63,12 @@ namespace Utils
 			return "";
 
 		// Ensure the request path ends with a slash for clean relative links
-		std::string		basePath = requestPath;
+		std::string		basePath = reqPath;
 		if (basePath.empty() || basePath[basePath.size() - 1] != '/')
 			basePath += "/";
 
-		html = "<html>\n<head><title>Index of " + requestPath + "</title></head>\n";
-		html += "<body>\n<h1>Index of " + requestPath + "</h1>\n<hr>\n<ul>\n";
+		html = "<html>\n<head><title>Index of " + reqPath + "</title></head>\n";
+		html += "<body>\n<h1>Index of " + reqPath + "</h1>\n<hr>\n<ul>\n";
 
 		while ((entry = readdir(dir)) != NULL)
 		{
