@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 16:51:10 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/26 14:14:39 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/27 20:34:39 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 # include <iostream>
 
 # include "Server.hpp"
+# include "Config.hpp"
 
 class Cluster
 {
@@ -28,6 +29,10 @@ private:
 	std::map<int, Server *>		_servers;               // serv_fd -> Server*
 	std::map<int, Server *>		_clients;               // client_fd -> Server*
 	std::vector<struct pollfd>	_fds;                   // poll array
+
+	/* --- Asynchronous CGI Trackers --- */
+	std::map<int, int>			_pipeToClientMap;       // Maps pipe_read_fd -> client_fd
+	std::map<int, std::string>	_cgiBuffs;              // Maps client_fd -> accumulated response
 
 	/* --- Copy Blockade --- */
 	Cluster(const Cluster &copy);
@@ -40,6 +45,7 @@ private:
 	void	_closeConnection(int fd);                   // close() & clear
 	void	_handleCGIWrite(int pipe_write_fd, Server &server);
 	void	_handleCGIRead(int pipe_read_fd, Server &server);
+	void	_removePipeFromPoll(int pipe_fd);
 
 public:
 	/* --- Orthodox Canonical Form --- */

@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 # 1. HTML Header & The obligatory Empty line
-print("Content-Type: text/html\r\n\r\n", end="")
+print("Content-Type: text/html; charset=utf-8\r\n\r\n", end="")
 
 # 2. The content of the page
 print("<html>")

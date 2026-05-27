@@ -6,15 +6,22 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 17:16:00 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/27 18:28:16 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/27 21:20:29 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Cluster.hpp"
 
+extern volatile sig_atomic_t	g_stop;
+
 /* ------------------------- ORTHODOX CANONICAL FORM ------------------------ */
 
-Cluster::Cluster()
+Cluster::Cluster() :
+	_servers(),
+	_clients(),
+	_fds(),
+	_pipeToClientMap(),
+	_cgiBuffs()
 {
 }
 
@@ -115,6 +122,9 @@ Cluster::_handleClientRead(int fd, Server &server)
 		pfd_read.revents = 0;
 		_fds.push_back(pfd_read);
 
+		_pipeToClientMap[cgi_write_fd] = fd;
+		_pipeToClientMap[cgi_read_fd] = fd;
+
 		// 4. Link new FDs to the right server in maps so Cluster knows who they belong to
 		_clients[cgi_write_fd] = &server;
 		_clients[cgi_read_fd] = &server;
@@ -146,36 +156,28 @@ Cluster::_handleClientWrite(int fd, Server &server)
 void
 Cluster::_closeConnection(int fd)
 {
-	// 1. Close the system file descriptor
 	close(fd);
-
-	// 2. Remove from the global poll array
-	for (std::vector<struct pollfd>::iterator it = _fds.begin(); it != _fds.end(); ++it)
-	{
-		if (it->fd == fd)
-		{
-			_fds.erase(it);
-			break;
-		}
-	}
+	_removePipeFromPoll(fd);
 	_clients.erase(fd);
+	_cgiBuffs.erase(fd);
+
 	std::cout << "[Cluster] Connection closed on fd " << fd << std::endl;
 }
 
 void
 Cluster::_handleCGIWrite(int pipe_write_fd, Server &server)
 {
+	int			client_fd = _pipeToClientMap[pipe_write_fd];
+
 	std::cout << "[Cluster] Sending data to CGI input pipe " << pipe_write_fd << std::endl;
 
-	std::string	body = "";
+	std::string	body = server.getRequestBody(client_fd);
 
 	if (!body.empty())
 		write(pipe_write_fd, body.c_str(), body.size());
 
-	// 1. Close the write pipe so Python gets EOF and executes
 	close(pipe_write_fd);
 
-	// 2. Remove ONLY this write pipe from the poll array so we stop monitoring it
 	for (std::vector<struct pollfd>::iterator it = _fds.begin(); it != _fds.end(); ++it)
 	{
 		if (it->fd == pipe_write_fd)
@@ -184,8 +186,8 @@ Cluster::_handleCGIWrite(int pipe_write_fd, Server &server)
 			break;
 		}
 	}
-	// Remove the mapping for this specific pipe descriptor
 	_clients.erase(pipe_write_fd);
+	_pipeToClientMap.erase(pipe_write_fd);
 }
 
 void
@@ -194,24 +196,31 @@ Cluster::_handleCGIRead(int pipe_read_fd, Server &server)
 	std::cout << "[Cluster] Getting output from CGI pipe " << pipe_read_fd << std::endl;
 
 	char	buff[4096];
-	int		client_fd = _pipeToClientMap[pipe_fd]; // Map linking CGI pipe to client socket
-	int		bytes_read = read(pipe_fd, buff, sizeof(buff) - 1);
+	int		client_fd = _pipeToClientMap[pipe_read_fd];
+	int		bytes_read = read(pipe_read_fd, buff, sizeof(buff) - 1);
 
 	if (bytes_read > 0)
 	{
 		buff[bytes_read] = '\0';
-		_cgiBuffers[client_fd] += std::string(buff, bytes_read); // Accumulate raw script output
+		_cgiBuffs[client_fd] += std::string(buff, bytes_read); // Accumulate raw script output
 	}
 	else
 	{
 		// bytes_read <= 0 means the CGI script has finished execution and closed its pipe
-		std::string	cgiOutput = _cgiBuffers[client_fd];
-		_cgiBuffers.erase(client_fd);
+		std::string	cgiOutput = _cgiBuffs[client_fd];
+		_cgiBuffs.erase(client_fd);
 
 		// Clean up the CGI tracking infrastructure
-		_removePipeFromPoll(pipe_fd);
-		delete _cgis[client_fd];
-		_cgis.erase(client_fd);
+		for (std::vector<struct pollfd>::iterator it = _fds.begin(); it != _fds.end(); ++it)
+		{
+			if (it->fd == pipe_read_fd)
+			{
+				_fds.erase(it);
+				break;
+			}
+		}
+		_clients.erase(pipe_read_fd);
+		_pipeToClientMap.erase(pipe_read_fd);
 
 		// Parse the script output to extract potential headers and body
 		Response	response;
@@ -243,10 +252,29 @@ Cluster::_handleCGIRead(int pipe_read_fd, Server &server)
 			response.setBody(cgiOutput);
 			response.setHeader("Content-Type", "text/html");
 		}
+		server.setCgiResponse(client_fd, response);
 
-		// Save response and switch client socket state to POLLOUT (Write state = 2)
-		_resps[client_fd] = response;
-		_clientStates[client_fd] = 2;
+		for (size_t i = 0; i < _fds.size(); ++i)
+		{
+			if (_fds[i].fd == client_fd)
+			{
+				_fds[i].events = POLLOUT;
+				break;
+			}
+		}
+	}
+}
+
+void
+Cluster::_removePipeFromPoll(int pipe_fd)
+{
+	for (std::vector<struct pollfd>::iterator it = _fds.begin(); it != _fds.end(); ++it)
+	{
+		if (it->fd == pipe_fd)
+		{
+			_fds.erase(it);
+			break;
+		}
 	}
 }
 
@@ -284,20 +312,22 @@ Cluster::run()
 				perror("poll error");
 			continue;
 		}
-		size_t	curr_size = _fds.size(); // Protected from iteration shift
-		for (size_t i = 0; i < curr_size; ++i)
+		for (size_t i = 0; i < _fds.size(); )
 		{
 			int	fd = _fds[i].fd;
 
 			// Handle reading and new connections
-			if (_fds[i].revents & POLLIN)
+			if ((_fds[i].revents & POLLIN) ||
+			   ((_fds[i].revents & POLLHUP) &&
+			   _pipeToClientMap.count(fd) &&
+			   _fds[i].events == POLLIN))
 			{
 				if (_servers.count(fd))
 					_addNewConnection(fd);
 				else if (_clients.count(fd))
 				{
 					// Check if this fd is actually the CGI read pipe
-					if (fd == _clients[fd]->getReadFd(fd))
+					if (_pipeToClientMap.count(fd))
 						_handleCGIRead(fd, *_clients[fd]);
 					else
 						_handleClientRead(fd, *_clients[fd]);
@@ -309,7 +339,7 @@ Cluster::run()
 				if (_clients.count(fd))
 				{
 					// Check if this fd is actually the CGI write pipe
-					if (fd == _clients[fd]->getWriteFd(fd))
+					if (_pipeToClientMap.count(fd))
 						_handleCGIWrite(fd, *_clients[fd]);
 					else
 						_handleClientWrite(fd, *_clients[fd]);
@@ -318,6 +348,9 @@ Cluster::run()
 			// Handle errors or sudden disconnections
 			else if (_fds[i].revents & (POLLERR | POLLHUP | POLLNVAL))
 				_closeConnection(fd);
+
+			if (i < _fds.size() && _fds[i].fd == fd)
+				++i;
 		}
 	}
 }

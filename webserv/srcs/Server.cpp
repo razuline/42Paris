@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:40 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/27 18:26:19 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/27 20:52:40 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -374,9 +374,16 @@ Server::handleWrite(int client_fd)
 		_clearClientState(client_fd);
 		return bytes_sent;
 	}
-	_clearClientState(client_fd);
+	if (static_cast<size_t>(bytes_sent) >= res_str.size())
+	{
+		_clearClientState(client_fd);
+		return 0;
+	}
 
-	return 0; // Complete transaction closure
+	std::string	remaining = res_str.substr(bytes_sent);
+	_resps[client_fd].setBody(remaining);
+
+	return 1;
 }
 
 /* -------------------------------- GETTERS --------------------------------- */
@@ -397,4 +404,16 @@ int
 Server::getWriteFd(int client_fd)
 {
 	return _cgis[client_fd]->getWriteFd();
+}
+
+std::string
+Server::getRequestBody(int client_fd)
+{
+	return _reqs[client_fd].getBody();
+}
+
+void
+Server::setCgiResponse(int client_fd, const Response &res)
+{
+	_resps[client_fd] = res;
 }

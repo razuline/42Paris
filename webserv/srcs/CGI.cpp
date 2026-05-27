@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/24 16:54:54 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/26 16:22:58 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/27 21:16:43 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,8 @@ CGI::~CGI()
 void
 CGI::_initEnv(const Request &req, const std::string &script_path)
 {
+	(void)script_path;
+
 	// Format HTTP request metadata into standard KEY=VALUE strings
 	std::string	line1 = "REQUEST_METHOD=" + req.getMethod();
 	std::string	line2 = "CONTENT_LENGTH=" + req.getHeader("Content-Length");
@@ -126,9 +128,19 @@ CGI::execute(const Request &req, const std::string &script_path)
 		close(_pipe_out[0]);
 		close(_pipe_out[1]);
 
+		std::string		target_script = script_path;
+		size_t			last_slash = script_path.find_last_of('/');
+
+		if (last_slash != std::string::npos)
+		{
+			std::string	dir = script_path.substr(0, last_slash);
+			chdir(dir.c_str());
+			target_script = script_path.substr(last_slash + 1);
+		}
+
 		char	*args[3];
 		args[0] = (char *)"/usr/bin/python3";   // Path to the interpreter
-		args[1] = (char *)script_path.c_str();  // Path to the script target
+		args[1] = (char *)target_script.c_str();  // Path to the script target
 		args[2] = NULL;                         // Array must be NULL-terminated
 
 		// This replaces the child process memory space entirely

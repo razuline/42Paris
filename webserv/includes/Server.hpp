@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:32 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/27 16:39:06 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/27 20:51:00 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,13 +68,15 @@ public:
 
 	/* --- Non-blocking I/O Handlers --- */
 	// returns: <=0 error/disconn, 1 partial, 2 complete
-	int		handleRead(int client_fd);
-	int		handleWrite(int client_fd);
+	int			handleRead(int client_fd);
+	int			handleWrite(int client_fd);
 
 	/* --- Getters --- */
-	int		getServerFd() const;
-	int		getReadFd(int client_fd);  // To read from Python
-	int		getWriteFd(int client_fd); // To write to Python
+	int			getServerFd() const;
+	int			getReadFd(int client_fd);  // To read from Python
+	int			getWriteFd(int client_fd); // To write to Python
+	std::string	getRequestBody(int client_fd);
+	void		setCgiResponse(int client_fd, const Response &res);
 };
 
 #endif
