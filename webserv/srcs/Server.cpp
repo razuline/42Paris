@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:40 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/27 16:47:10 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/27 18:26:19 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -179,7 +179,7 @@ Server::handleRead(int client_fd)
 	if (_reqs[client_fd].getState() == ERROR)
 	{
 		Response	res;
-		res.defaultErrorPage(413); // Payload Too Large
+		res.defaultErrorPage(413);
 		_resps[client_fd] = res;
 		return 2; // Switch to write out error
 	}
@@ -188,55 +188,91 @@ Server::handleRead(int client_fd)
 	if (_reqs[client_fd].isComplete())
 	{
 		std::string	path = _reqs[client_fd].getPath();
-		std::string	rawPath = path;
+		std::string	method = _reqs[client_fd].getMethod();
+		Response	response;
 
-		if (path == "/")
-			path = _config.getHomePage();
+		// Dynamic Location Routing Match
+		const Location	*loc = _matchLocation(path);
 
-		std::string	fullPath = _config.getFolderRoot() + "/" + (path[0] == '/' ? path.substr(1) : path);
+		// Check allowed HTTP methods
+		if (loc && !loc->getMethods().empty())
+		{
+			const std::vector<std::string>	&allowed = loc->getMethods();
+			bool							methodSupported = false;
+
+			for (size_t i = 0; i < allowed.size(); ++i)
+			{
+				if (allowed[i] == method)
+				{
+					methodSupported = true;
+					break;
+				}
+			}
+			if (!methodSupported)
+			{
+				response.defaultErrorPage(405); // Method Not Allowed
+				_resps[client_fd] = response;
+				return 2;
+			}
+		}
+
+		// Check HTTP Redirection (301)
+		if (loc && !loc->getRedirect().empty())
+		{
+			response.setStatus(301);
+			response.setHeader("Location", loc->getRedirect());
+			_resps[client_fd] = response;
+			return 2;
+		}
+
+		// Determine Local Root Folder Override
+		std::string	activeRoot = (loc && !loc->getRoot().empty())
+								  ? loc->getRoot() : _config.getFolderRoot();
+
+		// Fallback home page setup if path hits base directory
+		std::string	activePath = path;
+		if (activePath == "/")
+			activePath = (loc && !loc->getRoot().empty())
+						  ? loc->getIndex() : _config.getHomePage();
+
+		std::string	fullPath = activeRoot + "/" + (activePath[0] == '/'
+							   ? activePath.substr(1) : activePath);
 
 		// CASE A: CGI Processing
-		if (path.size() >= 3 && path.substr(path.size() - 3) == ".py")
+		if (activePath.size() >= 3 && activePath.substr(activePath.size() - 3) == ".py")
 		{
 			_cgis[client_fd] = new CGI();
+
 			int	cgi_status = _cgis[client_fd]->execute(_reqs[client_fd], fullPath);
 
 			if (cgi_status == 500)
 			{
 				delete _cgis[client_fd];
 				_cgis.erase(client_fd);
-
-				Response	res;
-				res.defaultErrorPage(500);
-				_resps[client_fd] = res;
+				response.defaultErrorPage(500);
+				_resps[client_fd] = response;
 				return 2; // Switch to POLLOUT to send the error page
 			}
 			return 3; // Tell Cluster to monitor CGI pipes instead of client socket
 		}
-		// CASE B: Static Resources & Autoindex
+		// CASE B: Static Resources & Location-specific Autoindex
 		else
 		{
-			Response	response;
-			std::string	method = _reqs[client_fd].getMethod();
-
-			// --- AUTOINDEX LOGIC FOR DIRECTORIES ---
-			// Check if requested path is a directory (ends with '/' or matching logic)
-			if (!rawPath.empty() && rawPath[rawPath.size() - 1] == '/')
+			// Handle dynamic directory checks
+			if (!path.empty() && path[path.size() - 1] == '/')
 			{
-				std::string			indexFile = fullPath;
-				std::ifstream		indexCheck(indexFile.c_str());
+				std::ifstream	indexCheck(fullPath.c_str());
 
 				// If index.html doesn't exist, execute Autoindex
 				if (!indexCheck.good())
 				{
 					indexCheck.close();
-					bool			isAutoindexEnabled = true;
+					bool		autoindexSwitch = loc ? loc->getAutoindex() : false;
 
-					if (isAutoindexEnabled)
+					if (autoindexSwitch)
 					{
 						std::string	autoindexHtml =
-							Utils::generateAutoindex(_config.getFolderRoot() +
-								rawPath, rawPath);
+							Utils::generateAutoindex(activeRoot + path, path);
 						if (!autoindexHtml.empty())
 						{
 							response.setStatus(200);
@@ -246,7 +282,7 @@ Server::handleRead(int client_fd)
 							return 2;
 						}
 					}
-					response.defaultErrorPage(403);
+					response.defaultErrorPage(403); // Forbidden
 					_resps[client_fd] = response;
 					return 2;
 				}
@@ -269,21 +305,29 @@ Server::handleRead(int client_fd)
 			// --- HANDLE POST METHOD (File Upload) ---
 			else if (method == "POST")
 			{
-				std::ofstream	outFile(fullPath.c_str(), std::ios::binary);
+				std::string	targetUploadPath = fullPath;
 
+				// If location specifies an explicit upload_store directory,
+				// reroute destination file there
+				if (loc && !loc->getUploadStore().empty())
+				{
+					size_t		lastSlash = path.find_last_of('/');
+					std::string	fileName = (lastSlash != std::string::npos)
+											? path.substr(lastSlash + 1) : "uploaded_file";
+					targetUploadPath = loc->getUploadStore() + "/" + fileName;
+				}
+
+				std::ofstream	outFile(targetUploadPath.c_str(), std::ios::binary);
 				if (!outFile.is_open())
 					response.defaultErrorPage(500);
 				else
 				{
-					// Get the raw payload body received from the client
 					std::string	body = _reqs[client_fd].getBody();
-
-					// Write the exact bytes into the file
 					outFile.write(body.c_str(), body.size());
 					outFile.close();
 
 					response.setStatus(201);
-					response.setBody("<html><body><h1>201 Created</h1><p>File uploaded successfully.</p></body></html>");
+					response.setBody("<html><body><h1>201 Created</h1><p>File written successfully.</p></body></html>");
 					response.setHeader("Content-Type", "text/html");
 				}
 			}
@@ -309,10 +353,6 @@ Server::handleRead(int client_fd)
 					}
 				}
 			}
-			// --- HANDLE UNKNOWN/UNSUPPORTED METHOD ---
-			else
-				response.defaultErrorPage(405);
-
 			_resps[client_fd] = response;
 			return 2; // Switch client from POLLIN to POLLOUT
 		}
