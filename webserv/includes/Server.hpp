@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:32 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/26 16:23:31 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/27 16:39:06 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,14 +47,15 @@ private:
 	// Multiplexing data structures mapping client sockets to HTTP states
 	std::map<int, Request>		_reqs;    // client_fd -> Request state machine
 	std::map<int, Response>		_resps;   // client_fd -> Response frame
-	std::map<int, CGI *>			_cgis;    // client_fd -> Active CGI trackers
+	std::map<int, CGI *>		_cgis;    // client_fd -> Active CGI trackers
 
 	/* --- Private Internal Helpers --- */
-	std::string	_readFile(const std::string &path);
-	void		_clearClientState(int client_fd);
+	std::string		_readFile(const std::string &path);
+	void			_clearClientState(int client_fd);
+	const Location	*_matchLocation(const std::string &path) const;
 
 	// Hidden assignment operator
-	Server		&operator=(const Server &other);
+	Server			&operator=(const Server &other);
 
 public:
 	/* --- Orthodox Canonical Form --- */

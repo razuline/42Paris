@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:40 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/26 20:10:43 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/05/27 16:47:10 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,6 +89,30 @@ Server::_readFile(const std::string &path)
 	std::stringstream	buff;
 	buff << file.rdbuf();
 	return buff.str();
+}
+
+const Location
+*Server::_matchLocation(const std::string &path) const
+{
+	const std::vector<Location>	&locs = _config.getLocations();
+	const Location				*bestMatch = NULL;
+	size_t						longestMatchLen = 0;
+
+	for (size_t i = 0;i < locs.size(); ++i)
+	{
+		const std::string	&locPath = locs[i].getPath();
+
+		// Check if the request URI path starts with tho location prefix rule
+		if (path.find(locPath) == 0)
+		{
+			if (locPath.size() > longestMatchLen)
+			{
+				longestMatchLen = locPath.size();
+				bestMatch = &locs[i];
+			}
+		}
+	}
+	return bestMatch;
 }
 
 /* ------------------------------ CORE METHODS ------------------------------ */
