@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 16:51:10 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/28 16:14:41 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/01 17:51:44 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ private:
 	/* --- Asynchronous CGI Trackers --- */
 	std::map<int, int>			_pipeToClientMap;       // Maps pipe_read_fd -> client_fd
 	std::map<int, std::string>	_cgiBuffs;              // Maps client_fd -> accumulated response
+	std::map<int, size_t>		_cgiBytesWritten;
 
 	/* --- Copy Blockade --- */
 	Cluster(const Cluster &copy);

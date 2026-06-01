@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/24 16:54:31 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/26 16:22:29 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/01 18:15:46 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,8 @@
 # include <unistd.h>
 # include <fcntl.h>
 # include <sys/types.h>
+# include <sys/wait.h>
+# include <signal.h>
 
 # include "Request.hpp"
 

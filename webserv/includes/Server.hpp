@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:32 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/27 20:51:00 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/01 18:04:58 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,15 +39,16 @@ extern volatile sig_atomic_t	g_stop;
 class Server
 {
 private:
-	int							_serv_fd; // Main listening socket
-	int							_port;    // Port number from config
-	struct sockaddr_in			_addr;    // Socket address structure
-	Config						_config;  // Configuration module
+	int							_serv_fd;    // Main listening socket
+	int							_port;       // Port number from config
+	struct sockaddr_in			_addr;       // Socket address structure
+	Config						_config;     // Configuration module
 
 	// Multiplexing data structures mapping client sockets to HTTP states
-	std::map<int, Request>		_reqs;    // client_fd -> Request state machine
-	std::map<int, Response>		_resps;   // client_fd -> Response frame
-	std::map<int, CGI *>		_cgis;    // client_fd -> Active CGI trackers
+	std::map<int, Request>		_reqs;       // client_fd -> Request state machine
+	std::map<int, Response>		_resps;      // client_fd -> Response frame
+	std::map<int, CGI *>		_cgis;       // client_fd -> Active CGI trackers
+	std::map<int, std::string>	_writeBuffs; // client_fd -> Raw unsent response bytes
 
 	/* --- Private Internal Helpers --- */
 	std::string		_readFile(const std::string &path);

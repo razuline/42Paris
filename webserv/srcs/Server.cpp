@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:40 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/27 20:52:40 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/01 18:07:32 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,6 +69,7 @@ Server::_clearClientState(int client_fd)
 	// Erase data structures mapped to this client to prevent memory/state leaks
 	_reqs.erase(client_fd);
 	_resps.erase(client_fd);
+	_writeBuffs.erase(client_fd);
 
 	// If a CGI instance was dynamically allocated for this client, delete it safely
 	std::map<int, CGI*>::iterator	it = _cgis.find(client_fd);
@@ -363,25 +364,30 @@ Server::handleRead(int client_fd)
 int
 Server::handleWrite(int client_fd)
 {
-	// 1. Fetch the completely rendered HTTP response raw string
-	std::string	res_str = _resps[client_fd].build();
+	if (_writeBuffs.count(client_fd) == 0)
+		_writeBuffs[client_fd] = _resps[client_fd].build();
 
-	// 2. Transmit the chunk through the client socket without blocking
-	int			bytes_sent = send(client_fd, res_str.c_str(), res_str.size(), 0);
+	const std::string	&res_str = _writeBuffs[client_fd];
 
+	// Transmit the chunk through the client socket without blocking
+	int					bytes_sent = send(client_fd, res_str.c_str(), res_str.size(), 0);
+
+	// Error handling: connection dropped or network failure
 	if (bytes_sent <= 0)
 	{
 		_clearClientState(client_fd);
 		return bytes_sent;
 	}
+
+	// If the entire response was completely transmitted
 	if (static_cast<size_t>(bytes_sent) >= res_str.size())
 	{
-		_clearClientState(client_fd);
-		return 0;
+		_clearClientState(client_fd); // Clears requests, responses, and writeBuffers
+		return 2;
 	}
 
-	std::string	remaining = res_str.substr(bytes_sent);
-	_resps[client_fd].setBody(remaining);
+	// 5. PARTIAL WRITE HANDLING: Slice the cached string to keep only the remaining unsent bytes
+	_writeBuffs[client_fd] = res_str.substr(bytes_sent);
 
 	return 1;
 }

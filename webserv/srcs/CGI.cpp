@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/24 16:54:54 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/27 21:16:43 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/01 18:18:04 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,8 +23,6 @@ CGI::CGI() :
 	_pipe_in[1] = -1;
 	_pipe_out[0] = -1;
 	_pipe_out[1] = -1;
-
-	// std::cout << "Default constructor called" << std::endl;
 }
 
 CGI::~CGI()
@@ -40,10 +38,15 @@ CGI::~CGI()
 	if (_pipe_out[1] != -1)
 		close(_pipe_out[1]);
 
+	// Reap the child process to prevent zombie process leaks
+	if (_pid > 0)
+	{
+		kill(_pid, SIGKILL);
+		waitpid(_pid, NULL, 0);
+	}
+
 	// Free dynamically allocated memory inside the environment matrix
 	_clearEnv();
-
-	// std::cout << "Destructor called" << std::endl;
 }
 
 /* ------------------------- PRIVATE INTERNAL HELPERS ----------------------- */
@@ -56,10 +59,14 @@ CGI::_initEnv(const Request &req, const std::string &script_path)
 	// Format HTTP request metadata into standard KEY=VALUE strings
 	std::string	line1 = "REQUEST_METHOD=" + req.getMethod();
 	std::string	line2 = "CONTENT_LENGTH=" + req.getHeader("Content-Length");
+	std::string	line3 = "SERVER_PROTOCOL=HTTP/1.1";
+	std::string	line4 = "GATEWAY_INTERFACE=CGI/1.1";
 
 	// Duplicate strings onto the Heap usong strdup for compatibility with execve
 	_env.push_back(strdup(line1.c_str()));
 	_env.push_back(strdup(line2.c_str()));
+	_env.push_back(strdup(line3.c_str()));
+	_env.push_back(strdup(line4.c_str()));
 
 	// The env array must be NULL-terminated for execve
 	_env.push_back(NULL);
