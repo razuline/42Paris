@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 17:16:00 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/01 18:17:21 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/02 19:17:48 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,11 +84,11 @@ void
 Cluster::_handleClientRead(int fd, Server &server)
 {
 	// Delegate reading to the server
-	int	status = server.handleRead(fd);
+	ReadStatus	status = server.handleRead(fd);
 
-	if (status <= 0)
+	if (status <= CLIENT_READ_ERROR)
 		_closeConnection(fd);
-	else if (status == 2)
+	else if (status == CLIENT_STATIC_READY)
 	{
 		// Static file ready: Switch client from POLLIN to POLLOUT
 		for (size_t i = 0; i < _fds.size(); ++i)
@@ -100,7 +100,7 @@ Cluster::_handleClientRead(int fd, Server &server)
 			}
 		}
 	}
-	else if (status == 3)
+	else if (status == CGI_PROCESS_READY)
 	{
 		std::cout << "[Cluster] CGI mode activated for client fd " << fd << std::endl;
 
@@ -124,10 +124,6 @@ Cluster::_handleClientRead(int fd, Server &server)
 
 		_pipeToClientMap[cgi_write_fd] = fd;
 		_pipeToClientMap[cgi_read_fd] = fd;
-
-		// 4. Link new FDs to the right server in maps so Cluster knows who they belong to
-		_clients[cgi_write_fd] = &server;
-		_clients[cgi_read_fd] = &server;
 	}
 }
 
@@ -201,7 +197,6 @@ Cluster::_handleCGIWrite(int pipe_write_fd, Server &server)
 				break;
 			}
 		}
-		_clients.erase(pipe_write_fd);
 		_pipeToClientMap.erase(pipe_write_fd);
 		_cgiBytesWritten.erase(pipe_write_fd);
 		return;
@@ -238,7 +233,6 @@ Cluster::_handleCGIWrite(int pipe_write_fd, Server &server)
 				break;
 			}
 		}
-		_clients.erase(pipe_write_fd);
 		_pipeToClientMap.erase(pipe_write_fd);
 		_cgiBytesWritten.erase(pipe_write_fd);
 	}
@@ -392,31 +386,30 @@ Cluster::run()
 			{
 				if (_servers.count(fd))
 					_addNewConnection(fd);
-				else if (_clients.count(fd))
+				else if (_pipeToClientMap.count(fd)) // 1. CGI internal read pipe
 				{
-					// Check if this fd is actually the CGI read pipe
-					if (_pipeToClientMap.count(fd))
-						_handleCGIRead(fd, *_clients[fd]);
-					else
-						_handleClientRead(fd, *_clients[fd]);
+					int	client_fd = _pipeToClientMap[fd];
+					_handleCGIRead(fd, *_clients[client_fd]);
 				}
+				else if (_clients.count(fd))         // 2. True external client socket
+					_handleClientRead(fd, *_clients[fd]);
 			}
-			// Handle writing responses
+			// Handle outgoing data transmission
 			else if (_fds[i].revents & POLLOUT)
 			{
-				if (_clients.count(fd))
+				if (_pipeToClientMap.count(fd))      // 1. CGI internal write pipe
 				{
-					// Check if this fd is actually the CGI write pipe
-					if (_pipeToClientMap.count(fd))
-						_handleCGIWrite(fd, *_clients[fd]);
-					else
-						_handleClientWrite(fd, *_clients[fd]);
+					int	client_fd = _pipeToClientMap[fd];
+					_handleCGIWrite(fd, *_clients[client_fd]);
 				}
+				else if (_clients.count(fd))         // 2. True external client socket
+					_handleClientWrite(fd, *_clients[fd]);
 			}
 			// Handle errors or sudden disconnections
 			else if (_fds[i].revents & (POLLERR | POLLHUP | POLLNVAL))
 				_closeConnection(fd);
 
+			// Safely increment index if the current file descriptor wasn't erased
 			if (i < _fds.size() && _fds[i].fd == fd)
 				++i;
 		}

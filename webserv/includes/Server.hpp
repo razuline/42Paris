@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:32 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/01 18:04:58 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/02 19:14:42 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,14 @@
 
 extern volatile sig_atomic_t	g_stop;
 
+enum ReadStatus
+{
+	CLIENT_READ_ERROR = 0,                   // Error or disconnect (<= 0)
+	CLIENT_READ_INCOMPLETE = 1,              // Incompete request, keep reading
+	CLIENT_STATIC_READY = 2,                 // Static file ready for POLLOUT
+	CGI_PROCESS_READY = 3                    // CGI script ready to execute
+};
+
 class Server
 {
 private:
@@ -51,12 +59,12 @@ private:
 	std::map<int, std::string>	_writeBuffs; // client_fd -> Raw unsent response bytes
 
 	/* --- Private Internal Helpers --- */
-	std::string		_readFile(const std::string &path);
-	void			_clearClientState(int client_fd);
-	const Location	*_matchLocation(const std::string &path) const;
+	std::string			_readFile(const std::string &path);
+	void				_clearClientState(int client_fd);
+	const Location		*_matchLocation(const std::string &path) const;
 
 	// Hidden assignment operator
-	Server			&operator=(const Server &other);
+	Server				&operator=(const Server &other);
 
 public:
 	/* --- Orthodox Canonical Form --- */
@@ -65,19 +73,19 @@ public:
 	~Server();
 
 	/* --- Core Socket Methods --- */
-	void	setup();
+	void				setup();
 
 	/* --- Non-blocking I/O Handlers --- */
 	// returns: <=0 error/disconn, 1 partial, 2 complete
-	int			handleRead(int client_fd);
-	int			handleWrite(int client_fd);
+	ReadStatus			handleRead(int client_fd);
+	int					handleWrite(int client_fd);
 
 	/* --- Getters --- */
-	int			getServerFd() const;
-	int			getReadFd(int client_fd);  // To read from Python
-	int			getWriteFd(int client_fd); // To write to Python
-	std::string	getRequestBody(int client_fd);
-	void		setCgiResponse(int client_fd, const Response &res);
+	int					getServerFd() const;
+	int					getReadFd(int client_fd);  // To read from Python
+	int					getWriteFd(int client_fd); // To write to Python
+	std::string			getRequestBody(int client_fd);
+	void				setCgiResponse(int client_fd, const Response &res);
 };
 
 #endif

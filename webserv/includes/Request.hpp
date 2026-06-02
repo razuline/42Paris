@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/25 14:09:02 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/26 16:32:35 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/02 20:33:18 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@ private:
 	std::string							_raw;
 	RequestState						_state;
 	size_t								_limit;
+	int									_errCode;
 
 	/* --- Private Internal Helpers --- */
 	void	_handleHeaders();
@@ -69,6 +70,9 @@ public:
 	const std::string	&getHeader(const std::string &key) const;
 	const std::string	&getBody() const;
 	RequestState		getState() const;
+	int					getErrCode() const;
+
+	static const size_t					HEADERS_SIZE;
 };
 
 #endif

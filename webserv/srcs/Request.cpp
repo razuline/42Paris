@@ -6,11 +6,14 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/25 15:33:23 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/26 16:34:40 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/02 20:37:58 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
+
+//const size_t	Request::HEADERS_SIZE = 8192;
+const size_t	Request::HEADERS_SIZE = 1024;
 
 /* ------------------------- ORTHODOX CANONICAL FORM ------------------------ */
 
@@ -85,7 +88,19 @@ Request::_handleBody()
 {
 	size_t	curr_body_size = _raw.size() - _headerSize;
 
-	if (curr_body_size >= _contentLength)
+	if (curr_body_size > _limit) {
+		_state = ERROR;
+		_errCode = 413;
+		return;
+	}
+
+	if (curr_body_size > _contentLength) {
+		_state = ERROR;
+		_errCode = 400;
+		return;
+	}
+
+	if (curr_body_size == _contentLength)
 	{
 		_body = _raw.substr(_headerSize, _contentLength);
 		_state = COMPLETE;
@@ -159,9 +174,11 @@ Request::isComplete()
 void
 Request::addData(std::string chunk)
 {
-	if (_raw.size() + chunk.size() > _limit)
+
+	if (_raw.size() + chunk.size() > Request::HEADERS_SIZE)
 	{
 		_state = ERROR;
+		_errCode = 431;
 		return;
 	}
 
@@ -222,4 +239,10 @@ RequestState
 Request::getState() const
 {
 	return _state;
+}
+
+int
+Request::getErrCode() const
+{
+	return _errCode;
 }

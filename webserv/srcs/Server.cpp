@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:40 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/01 18:07:32 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/02 20:21:54 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -159,7 +159,7 @@ Server::setup()
 	}
 }
 
-int
+ReadStatus
 Server::handleRead(int client_fd)
 {
 	char	buff[4096];
@@ -169,20 +169,23 @@ Server::handleRead(int client_fd)
 	if (bytes_read <= 0)
 	{
 		_clearClientState(client_fd); // Connection dropped or error occurred
-		return bytes_read;
+		return CLIENT_READ_ERROR;
 	}
 	buff[bytes_read] = '\0';
 
 	// 2. Push network data chunk into the client's dedicated Request state machine
-	_reqs[client_fd].setLimit(_config.getClientMaxBodySize());
-	_reqs[client_fd].addData(std::string(buff, bytes_read));
+
+	Request	&curr = _reqs[client_fd];
+
+	curr.setLimit(_config.getClientMaxBodySize());
+	curr.addData(std::string(buff, bytes_read));
 
 	if (_reqs[client_fd].getState() == ERROR)
 	{
 		Response	res;
-		res.defaultErrorPage(413);
+		res.defaultErrorPage(curr.getErrCode());
 		_resps[client_fd] = res;
-		return 2; // Switch to write out error
+		return CLIENT_STATIC_READY; // Switch to write out error
 	}
 
 	// 3. Monitor if the HTTP parsing framework reached the COMPLETE stage
@@ -213,7 +216,7 @@ Server::handleRead(int client_fd)
 			{
 				response.defaultErrorPage(405); // Method Not Allowed
 				_resps[client_fd] = response;
-				return 2;
+				return CLIENT_STATIC_READY;
 			}
 		}
 
@@ -223,7 +226,7 @@ Server::handleRead(int client_fd)
 			response.setStatus(301);
 			response.setHeader("Location", loc->getRedirect());
 			_resps[client_fd] = response;
-			return 2;
+			return CLIENT_STATIC_READY;
 		}
 
 		// Determine Local Root Folder Override
@@ -252,9 +255,9 @@ Server::handleRead(int client_fd)
 				_cgis.erase(client_fd);
 				response.defaultErrorPage(500);
 				_resps[client_fd] = response;
-				return 2; // Switch to POLLOUT to send the error page
+				return CLIENT_STATIC_READY; // Switch to POLLOUT to send the error page
 			}
-			return 3; // Tell Cluster to monitor CGI pipes instead of client socket
+			return CGI_PROCESS_READY; // Tell Cluster to monitor CGI pipes instead of client socket
 		}
 		// CASE B: Static Resources & Location-specific Autoindex
 		else
@@ -280,12 +283,12 @@ Server::handleRead(int client_fd)
 							response.setBody(autoindexHtml);
 							response.setHeader("Content-Type", "text/html");
 							_resps[client_fd] = response;
-							return 2;
+							return CLIENT_STATIC_READY;
 						}
 					}
 					response.defaultErrorPage(403); // Forbidden
 					_resps[client_fd] = response;
-					return 2;
+					return CLIENT_STATIC_READY;
 				}
 				indexCheck.close();
 			}
@@ -355,10 +358,10 @@ Server::handleRead(int client_fd)
 				}
 			}
 			_resps[client_fd] = response;
-			return 2; // Switch client from POLLIN to POLLOUT
+			return CLIENT_STATIC_READY; // Switch client from POLLIN to POLLOUT
 		}
 	}
-	return 1; // Incomplete, keep reading data on POLLIN
+	return CLIENT_READ_INCOMPLETE; // Incomplete, keep reading data on POLLIN
 }
 
 int
@@ -383,13 +386,13 @@ Server::handleWrite(int client_fd)
 	if (static_cast<size_t>(bytes_sent) >= res_str.size())
 	{
 		_clearClientState(client_fd); // Clears requests, responses, and writeBuffers
-		return 2;
+		return CLIENT_STATIC_READY;
 	}
 
 	// 5. PARTIAL WRITE HANDLING: Slice the cached string to keep only the remaining unsent bytes
 	_writeBuffs[client_fd] = res_str.substr(bytes_sent);
 
-	return 1;
+	return CLIENT_READ_INCOMPLETE;
 }
 
 /* -------------------------------- GETTERS --------------------------------- */
