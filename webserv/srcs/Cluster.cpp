@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 17:16:00 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/02 19:17:48 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/02 21:01:08 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,18 +104,15 @@ Cluster::_handleClientRead(int fd, Server &server)
 	{
 		std::cout << "[Cluster] CGI mode activated for client fd " << fd << std::endl;
 
-		// 1. Get the pipe fds from the server's CGI instance
 		int				cgi_write_fd = server.getWriteFd(fd);
 		int				cgi_read_fd = server.getReadFd(fd);
 
-		// 2. Add the CGI write pipe to the main poll array
 		struct pollfd	pfd_write;
 		pfd_write.fd = cgi_write_fd;
 		pfd_write.events = POLLOUT;
 		pfd_write.revents = 0;
 		_fds.push_back(pfd_write);
 
-		// 3. Add the CGI read pipe to the main poll array
 		struct pollfd	pfd_read;
 		pfd_read.fd = cgi_read_fd;
 		pfd_read.events = POLLIN;
@@ -160,7 +157,6 @@ Cluster::_closeConnection(int fd)
 			int		pipe_fd = it->first;
 			close(pipe_fd);
 			_removePipeFromPoll(pipe_fd);
-			_clients.erase(pipe_fd);
 			_cgiBytesWritten.erase(pipe_fd);
 
 			// Safe post-increment erase for map iteration
@@ -255,15 +251,25 @@ Cluster::_handleCGIRead(int pipe_read_fd, Server &server)
 	}
 	if (bytes_read < 0)
 	{
-		std::cerr << "[Cluster] CGI read error on fd " << pipe_read_fd << std::endl;
+		std::cerr << "[Cluster] CGI read error (process killed)" << std::endl;
 
-		_closeConnection(client_fd);
+		Response	err_res;
+		err_res.defaultErrorPage(503);
+		server.setCgiResponse(client_fd, err_res);
 
 		close(pipe_read_fd);
 		_removePipeFromPoll(pipe_read_fd);
-		_clients.erase(pipe_read_fd);
 		_pipeToClientMap.erase(pipe_read_fd);
 		_cgiBuffs.erase(client_fd);
+
+		for (size_t i = 0; i < _fds.size(); ++i)
+		{
+			if (_fds[i].fd == client_fd)
+			{
+				_fds[i].events = POLLOUT;
+				break;
+			}
+		}
 		return;
 	}
 
@@ -282,7 +288,6 @@ Cluster::_handleCGIRead(int pipe_read_fd, Server &server)
 			break;
 		}
 	}
-	_clients.erase(pipe_read_fd);
 	_pipeToClientMap.erase(pipe_read_fd);
 
 	// Parse the script output to extract potential headers and body

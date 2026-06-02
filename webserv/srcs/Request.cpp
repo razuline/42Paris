@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/25 15:33:23 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/02 20:37:58 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/02 20:57:32 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,8 @@ Request::Request() :
 	_contentLength(0),
 	_raw(""),
 	_state(READING_HEADERS),
-	_limit(1000000) // 1 Mb
+	_limit(1000000), // 1 Mb
+	_errCode(200)
 {
 }
 
@@ -174,11 +175,11 @@ Request::isComplete()
 void
 Request::addData(std::string chunk)
 {
-
-	if (_raw.size() + chunk.size() > Request::HEADERS_SIZE)
+	if (_state == READING_HEADERS &&
+	   (_raw.size() + chunk.size() > Request::HEADERS_SIZE))
 	{
 		_state = ERROR;
-		_errCode = 431;
+		_errCode = 431; // Request Header Fields Too Large
 		return;
 	}
 
