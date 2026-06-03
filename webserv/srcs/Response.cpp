@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/27 17:23:49 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/02 18:18:52 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/03 14:24:06 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 /* ------------------------- ORTHODOX CANONICAL FORM ------------------------ */
 
 Response::Response() :
-	_status(200),
+	_status(SC_200),
 	_body("")
 {
 	setHeader("Server", "webserv/1.0 (42 Paris)");
@@ -51,24 +51,25 @@ Response::_getReasonPhrase(int code)
 {
 	switch(code)
 	{
-		case 200: return "OK";
-		case 201: return "Created";
-		case 202: return "Accepted";
-		case 204: return "No Content";
-		case 301: return "Moved Permanently";
-		case 400: return "Bad Request";
-		case 401: return "Unauthorized";
-		case 403: return "Forbidden";
-		case 404: return "Not Found";
-		case 405: return "Method Not Allowed";
-		case 413: return "Payload Too Large";
-		case 431: return "Request Header Fields Too Large";
-		case 500: return "Internal Server Error";
-		case 502: return "Bad Gateway";
-		case 503: return "Service Unavailable";
-		case 505: return "HTTP Version Not Supported";
+		case SC_200: return "OK";
+		case SC_201: return "Created";
+		case SC_202: return "Accepted";
+		case SC_204: return "No Content";
+		case SC_301: return "Moved Permanently";
+		case SC_302: return "Found";
+		case SC_400: return "Bad Request";
+		case SC_401: return "Unauthorized";
+		case SC_403: return "Forbidden";
+		case SC_404: return "Not Found";
+		case SC_405: return "Method Not Allowed";
+		case SC_413: return "Payload Too Large";
+		case SC_431: return "Request Header Fields Too Large";
+		case SC_500: return "Internal Server Error";
+		case SC_502: return "Bad Gateway";
+		case SC_503: return "Service Unavailable";
+		case SC_505: return "HTTP Version Not Supported";
 
-		default: return "Unknown Status";
+		default:     return "Unknown Status";
 	}
 }
 

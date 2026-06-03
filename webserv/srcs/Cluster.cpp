@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 17:16:00 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/02 21:01:08 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/03 14:43:43 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,18 +27,95 @@ Cluster::Cluster() :
 
 Cluster::~Cluster()
 {
-	// Close active clients
+	// Close active clients sockets safely
 	std::map<int, Server *>::iterator	it_cli;
 	for (it_cli = _clients.begin(); it_cli != _clients.end(); ++it_cli)
 	{
 		close(it_cli->first);
 	}
 
-	// Free allocated servers
+	// Free dynamically allocated virtual servers
 	std::map<int, Server *>::iterator	it_serv;
 	for (it_serv = _servers.begin(); it_serv != _servers.end(); ++it_serv)
 	{
 		delete it_serv->second;
+	}
+}
+
+/* ------------------------------ CORE METHODS ------------------------------ */
+
+void
+Cluster::setup(std::vector<Config> configs)
+{
+	for (size_t i = 0; i < configs.size(); ++i)
+	{
+		Server	*server = new Server(configs[i]);
+		server->setup(); // Opens, binds, and listens the server socket
+
+		int	serv_fd = server->getServerFd();
+		_servers[serv_fd] = server;
+
+		struct pollfd	pfd;
+		pfd.fd = serv_fd;
+		pfd.events = POLLIN; // Monitor incoming connections
+		pfd.revents = 0;
+		_fds.push_back(pfd);
+
+		std::cout << "[Cluster] Server virtual host listening on port ["
+				  << configs[i].getPort() << "]" << std::endl;
+	}
+}
+
+void
+Cluster::run()
+{
+	while (g_stop == 0)
+	{
+		if (poll(&_fds[0], _fds.size(), -1) < 0)
+		{
+			if (g_stop == 0)
+				perror("poll error");
+			continue;
+		}
+		for (size_t i = 0; i < _fds.size(); )
+		{
+			int	fd = _fds[i].fd;
+
+			// A. Handle incoming data multiplexing
+			if ((_fds[i].revents & POLLIN) ||
+			   ((_fds[i].revents & POLLHUP) &&
+			   _pipeToClientMap.count(fd) &&
+			   _fds[i].events == POLLIN))
+			{
+				if (_servers.count(fd))
+					_addNewConnection(fd);
+				else if (_pipeToClientMap.count(fd)) // 1. CGI internal read pipe
+				{
+					int	client_fd = _pipeToClientMap[fd];
+					_handleCGIRead(fd, *_clients[client_fd]);
+				}
+				else if (_clients.count(fd))         // 2. True external client socket
+					_handleClientRead(fd, *_clients[fd]);
+			}
+			// B. Handle outgoing data transmission multiplexing
+			else if (_fds[i].revents & POLLOUT)
+			{
+				if (_pipeToClientMap.count(fd))      // 1. CGI internal write pipe
+				{
+					int	client_fd = _pipeToClientMap[fd];
+					_handleCGIWrite(fd, *_clients[client_fd]);
+				}
+				else if (_clients.count(fd))         // 2. True external client socket
+					_handleClientWrite(fd, *_clients[fd]);
+			}
+			// C. Handle network errors or unexpected hang-ups
+			else if (_fds[i].revents & (POLLERR | POLLHUP | POLLNVAL))
+				_closeConnection(fd);
+
+			// Safely skip index increment if current file descriptor was erased from vector
+			if (i < _fds.size() && _fds[i].fd == fd)
+				++i;
+		}
 	}
 }
 
@@ -50,7 +127,7 @@ Cluster::_addNewConnection(int serv_fd)
 	struct sockaddr_in	client_addr;
 	socklen_t			addr_len = sizeof(client_addr);
 
-	// 1. Accept the incoming connection
+	// 1. Accept the incoming TCP connection
 	int		client_fd = accept(serv_fd, (struct sockaddr *)&client_addr, &addr_len);
 
 	if (client_fd < 0)
@@ -59,7 +136,7 @@ Cluster::_addNewConnection(int serv_fd)
 		return;
 	}
 
-	// 2. Make the client socket non-blocking
+	// 2. Prevent socket operations from blocking the main loop
 	if (fcntl(client_fd, F_SETFL, O_NONBLOCK) < 0)
 	{
 		perror("fctnl O_NONBLOCK failed");
@@ -67,30 +144,33 @@ Cluster::_addNewConnection(int serv_fd)
 		return;
 	}
 
-	// 3. Add client to the master poll list to monitor reading (POLLIN)
+	// 3. Register client socket to monitor reading events (POLLIN)
 	struct pollfd	pfd;
 	pfd.fd = client_fd;
 	pfd.events = POLLIN;
 	pfd.revents = 0;
 	_fds.push_back(pfd);
 
-	// 4. Route this client to the specific virtual server that accepted it
+	// 4. Bind client socket descriptor to its respective virtual server
 	_clients[client_fd] = _servers[serv_fd];
 
-	std::cout << "[Cluster] New connection accepted on fd " << client_fd << std::endl;
+	std::cout << "[Cluster] Connection accepted on client fd [" << client_fd << "]" << std::endl;
 }
 
 void
 Cluster::_handleClientRead(int fd, Server &server)
 {
-	// Delegate reading to the server
+	// Process non-blocking request reading stream
 	ReadStatus	status = server.handleRead(fd);
+
+	std::cout << "[Cluster] handleRead on fd [" << fd << "] status code: "
+			  << static_cast<int>(status) << std::endl;
 
 	if (status <= CLIENT_READ_ERROR)
 		_closeConnection(fd);
 	else if (status == CLIENT_STATIC_READY)
 	{
-		// Static file ready: Switch client from POLLIN to POLLOUT
+		// Parsing complete: Toggle poll event from POLLIN to POLLOUT to transmit response
 		for (size_t i = 0; i < _fds.size(); ++i)
 		{
 			if (_fds[i].fd == fd)
@@ -102,7 +182,8 @@ Cluster::_handleClientRead(int fd, Server &server)
 	}
 	else if (status == CGI_PROCESS_READY)
 	{
-		std::cout << "[Cluster] CGI mode activated for client fd " << fd << std::endl;
+		std::cout << "[Cluster] CGI pipe pooling activated for client fd ["
+		          << fd << "]" << std::endl;
 
 		int				cgi_write_fd = server.getWriteFd(fd);
 		int				cgi_read_fd = server.getReadFd(fd);
@@ -127,14 +208,14 @@ Cluster::_handleClientRead(int fd, Server &server)
 void
 Cluster::_handleClientWrite(int fd, Server &server)
 {
-	// Delegate sending to the server
+	// Process non-blocking data transmission stream
 	int	status = server.handleWrite(fd);
 
-	if (status <= 0)
+	if (status <= WRITE_ERROR)
 		_closeConnection(fd);
-	else if (status == 2)
+	else if (status == WRITE_COMPLETE)
 	{
-		// Response sent. Switch back to POLLIN to wait for the next request (Keep-Alive)
+		// HTTP Keep-Alive: Reset target poll event back to POLLIN to await next request
 		for (size_t i = 0; i < _fds.size(); ++i)
 		{
 			if (_fds[i].fd == fd)
@@ -149,6 +230,7 @@ Cluster::_handleClientWrite(int fd, Server &server)
 void
 Cluster::_closeConnection(int fd)
 {
+	// Purge remaining orphaned CGI pipes mapped to this specific client
 	std::map<int, int>::iterator	it = _pipeToClientMap.begin();
 	while (it != _pipeToClientMap.end())
 	{
@@ -158,8 +240,6 @@ Cluster::_closeConnection(int fd)
 			close(pipe_fd);
 			_removePipeFromPoll(pipe_fd);
 			_cgiBytesWritten.erase(pipe_fd);
-
-			// Safe post-increment erase for map iteration
 			_pipeToClientMap.erase(it++);
 		}
 		else
@@ -170,42 +250,32 @@ Cluster::_closeConnection(int fd)
 	_clients.erase(fd);
 	_cgiBuffs.erase(fd);
 
-	std::cout << "[Cluster] Connection closed on fd " << fd << std::endl;
+	std::cout << "[Cluster] Connection securely closed on fd [" << fd << "]" << std::endl;
 }
 
 void
 Cluster::_handleCGIWrite(int pipe_write_fd, Server &server)
 {
 	int			client_fd = _pipeToClientMap[pipe_write_fd];
-
-	std::cout << "[Cluster] Sending data to CGI input pipe " << pipe_write_fd << std::endl;
-
 	std::string	body = server.getRequestBody(client_fd);
-	// Handle Edge Case: If the request body is empty, execute immediate pipe closure
+
+	// Clean up and exit immediately if there's no body payload to transmit
 	if (body.empty())
 	{
 		close(pipe_write_fd);
-		for (std::vector<struct pollfd>::iterator it = _fds.begin(); it != _fds.end(); ++it)
-		{
-			if (it->fd == pipe_write_fd)
-			{
-				_fds.erase(it);
-				break;
-			}
-		}
+		_removePipeFromPoll(pipe_write_fd);
 		_pipeToClientMap.erase(pipe_write_fd);
 		_cgiBytesWritten.erase(pipe_write_fd);
 		return;
 	}
 
+	// Transmit the payload chunk over the non-blocking pipe
 	size_t		already_written = _cgiBytesWritten[pipe_write_fd];
-
-	std::cout << "[Cluster] Sending data chunk to CGI input pipe " << pipe_write_fd
-			  << " (" << already_written << "/" << body.size() << " bytes)" << std::endl;
 
 	int			ret = write(pipe_write_fd, body.c_str() + already_written,
 							body.size() - already_written);
-	// Error Handling: If write returns an error or pipe is broken, clean up the client connection
+
+	// Error Handling: Drop the client connection if the write pipe breaks
 	if (ret <= 0)
 	{
 		_closeConnection(client_fd);
@@ -216,19 +286,14 @@ Cluster::_handleCGIWrite(int pipe_write_fd, Server &server)
 
 	_cgiBytesWritten[pipe_write_fd] += ret;
 
+	// Close write end of the pipe once the entire request payload is transmitted
 	if (_cgiBytesWritten[pipe_write_fd] == body.size())
 	{
-		std::cout << "[Cluster] All data sent successfully to CGI pipe " << pipe_write_fd << std::endl;
+		std::cout << "[Cluster] Body chunk successfully pushed to CGI pipe ["
+				  << pipe_write_fd << "]" << std::endl;
 
 		close(pipe_write_fd);
-		for (std::vector<struct pollfd>::iterator it = _fds.begin(); it != _fds.end(); ++it)
-		{
-			if (it->fd == pipe_write_fd)
-			{
-				_fds.erase(it);
-				break;
-			}
-		}
+		_removePipeFromPoll(pipe_write_fd);
 		_pipeToClientMap.erase(pipe_write_fd);
 		_cgiBytesWritten.erase(pipe_write_fd);
 	}
@@ -243,18 +308,20 @@ Cluster::_handleCGIRead(int pipe_read_fd, Server &server)
 	int		client_fd = _pipeToClientMap[pipe_read_fd];
 	int		bytes_read = read(pipe_read_fd, buff, sizeof(buff) - 1);
 
+	// Accumulate incoming script execution stream bytes
 	if (bytes_read > 0)
 	{
 		buff[bytes_read] = '\0';
 		_cgiBuffs[client_fd] += std::string(buff, bytes_read); // Accumulate raw script output
 		return;
 	}
+	// Fault Tolerance: Script crashed or was killed (Returns SC_503 Service Unavailable)
 	if (bytes_read < 0)
 	{
-		std::cerr << "[Cluster] CGI read error (process killed)" << std::endl;
+		std::cerr << "[Cluster] CGI pipe crash detected. Sending HTTP [503]" << std::endl;
 
 		Response	err_res;
-		err_res.defaultErrorPage(503);
+		err_res.defaultErrorPage(SC_503);
 		server.setCgiResponse(client_fd, err_res);
 
 		close(pipe_read_fd);
@@ -262,6 +329,7 @@ Cluster::_handleCGIRead(int pipe_read_fd, Server &server)
 		_pipeToClientMap.erase(pipe_read_fd);
 		_cgiBuffs.erase(client_fd);
 
+		// Switch client event monitor to POLLOUT to transmit the error page
 		for (size_t i = 0; i < _fds.size(); ++i)
 		{
 			if (_fds[i].fd == client_fd)
@@ -273,55 +341,82 @@ Cluster::_handleCGIRead(int pipe_read_fd, Server &server)
 		return;
 	}
 
-	// bytes_read <= 0 means the CGI script has finished execution and closed its pipe
+	// Python script closed its write end: execution finished successfully
 	std::string	cgiOutput = _cgiBuffs[client_fd];
 	_cgiBuffs.erase(client_fd);
 
 	close(pipe_read_fd);
-
-	// Clean up the CGI tracking infrastructure
-	for (std::vector<struct pollfd>::iterator it = _fds.begin(); it != _fds.end(); ++it)
-	{
-		if (it->fd == pipe_read_fd)
-		{
-			_fds.erase(it);
-			break;
-		}
-	}
+	_removePipeFromPoll(pipe_read_fd);
 	_pipeToClientMap.erase(pipe_read_fd);
 
-	// Parse the script output to extract potential headers and body
-	Response	response;
-	size_t		headerEnd = cgiOutput.find("\r\n\r\n");
+	// Parse the script output stream to extract headers and payload
+	Response				response;
+	size_t					headerEnd = cgiOutput.find("\r\n\r\n");
 
 	if (headerEnd != std::string::npos)
 	{
-		std::string	headersPart = cgiOutput.substr(0, headerEnd);
-		std::string	bodyPart = cgiOutput.substr(headerEnd + 4);
+		std::string			headersPart = cgiOutput.substr(0, headerEnd);
+		std::string			bodyPart = cgiOutput.substr(headerEnd + 4);
 
-		response.setStatus(200);
 		response.setBody(bodyPart);
 
-		// Simple parser to extract Content-Type header generated by Python
-		size_t	ctPos = headersPart.find("Content-Type:");
-		if (ctPos != std::string::npos)
+		int					cgi_status_code = SC_200;
+		bool				has_content_type = false;
+		bool				has_location = false;
+
+		std::stringstream	header_ss(headersPart);
+		std::string			line;
+
+		// Extract custom gateway headers line by line
+		while (std::getline(header_ss, line))
 		{
-			size_t	lineEnd = headersPart.find("\r\n", ctPos);
-			std::string	ctValue = headersPart.substr(ctPos + 13, lineEnd - (ctPos + 13));
-			response.setHeader("Content-Type", Utils::trim(ctValue));
+			if (!line.empty() && line[line.size() - 1] == '\r')
+				line.erase(line.size() - 1);
+			if (line.empty())
+				continue;
+
+			size_t	colon = line.find(':');
+			if (colon != std::string::npos)
+			{
+				std::string	key = Utils::trim(line.substr(0, colon));
+				std::string	value = Utils::trim(line.substr(colon + 1));
+
+				if (key == "Status")
+				{
+					std::stringstream	status_ss(value);
+					status_ss >> cgi_status_code;
+				}
+				else
+				{
+					if (key == "Content-Type")
+						has_content_type = true;
+					if (key == "Location")
+						has_location = true;
+					response.setHeader(key, value); // Forward location, cookies, etc.
+				}
+			}
 		}
-		else
+		// CGI RFC Specification: Force 302 Redirect if Location header is present without Status
+		if (cgi_status_code == SC_200 && has_location)
+			cgi_status_code = SC_302;
+
+		response.setStatus(cgi_status_code);
+
+		// Fallback content-type metadata to safeguard browsers rendering
+		if (!has_content_type)
 			response.setHeader("Content-Type", "text/html");
 	}
 	else
 	{
-		// Fallback if script output lacks clean HTTP headers
-		response.setStatus(200);
+		// Raw script execution fallback if no headers are provided
+		response.setStatus(SC_200);
 		response.setBody(cgiOutput);
 		response.setHeader("Content-Type", "text/html");
 	}
+
 	server.setCgiResponse(client_fd, response);
 
+	// Set target client socket back to POLLOUT to transmit data back to the client
 	for (size_t i = 0; i < _fds.size(); ++i)
 	{
 		if (_fds[i].fd == client_fd)
@@ -341,82 +436,6 @@ Cluster::_removePipeFromPoll(int pipe_fd)
 		{
 			_fds.erase(it);
 			break;
-		}
-	}
-}
-
-/* ------------------------------ CORE METHODS ------------------------------ */
-
-void
-Cluster::setup(std::vector<Config> configs)
-{
-	for (size_t i = 0; i < configs.size(); ++i)
-	{
-		Server	*server = new Server(configs[i]);
-		server->setup(); // Opens, binds, and listens the server socket
-
-		int	serv_fd = server->getServerFd();
-		_servers[serv_fd] = server;
-
-		struct pollfd	pfd;
-		pfd.fd = serv_fd;
-		pfd.events = POLLIN; // Monitor incoming connections
-		pfd.revents = 0;
-		_fds.push_back(pfd);
-
-		std::cout << "[Cluster] Server listening on port " << configs[i].getPort() << std::endl;
-	}
-}
-
-void
-Cluster::run()
-{
-	while (g_stop == 0)
-	{
-		if (poll(&_fds[0], _fds.size(), -1) < 0)
-		{
-			if (g_stop == 0)
-				perror("poll error");
-			continue;
-		}
-		for (size_t i = 0; i < _fds.size(); )
-		{
-			int	fd = _fds[i].fd;
-
-			// Handle reading and new connections
-			if ((_fds[i].revents & POLLIN) ||
-			   ((_fds[i].revents & POLLHUP) &&
-			   _pipeToClientMap.count(fd) &&
-			   _fds[i].events == POLLIN))
-			{
-				if (_servers.count(fd))
-					_addNewConnection(fd);
-				else if (_pipeToClientMap.count(fd)) // 1. CGI internal read pipe
-				{
-					int	client_fd = _pipeToClientMap[fd];
-					_handleCGIRead(fd, *_clients[client_fd]);
-				}
-				else if (_clients.count(fd))         // 2. True external client socket
-					_handleClientRead(fd, *_clients[fd]);
-			}
-			// Handle outgoing data transmission
-			else if (_fds[i].revents & POLLOUT)
-			{
-				if (_pipeToClientMap.count(fd))      // 1. CGI internal write pipe
-				{
-					int	client_fd = _pipeToClientMap[fd];
-					_handleCGIWrite(fd, *_clients[client_fd]);
-				}
-				else if (_clients.count(fd))         // 2. True external client socket
-					_handleClientWrite(fd, *_clients[fd]);
-			}
-			// Handle errors or sudden disconnections
-			else if (_fds[i].revents & (POLLERR | POLLHUP | POLLNVAL))
-				_closeConnection(fd);
-
-			// Safely increment index if the current file descriptor wasn't erased
-			if (i < _fds.size() && _fds[i].fd == fd)
-				++i;
 		}
 	}
 }

@@ -6,14 +6,13 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/25 15:33:23 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/02 20:57:32 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/03 14:26:56 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
 
-//const size_t	Request::HEADERS_SIZE = 8192;
-const size_t	Request::HEADERS_SIZE = 1024;
+const size_t	Request::HEADERS_SIZE = 8192; // 8 Kb
 
 /* ------------------------- ORTHODOX CANONICAL FORM ------------------------ */
 
@@ -27,7 +26,7 @@ Request::Request() :
 	_raw(""),
 	_state(READING_HEADERS),
 	_limit(1000000), // 1 Mb
-	_errCode(200)
+	_errCode(SC_200)
 {
 }
 
@@ -89,15 +88,17 @@ Request::_handleBody()
 {
 	size_t	curr_body_size = _raw.size() - _headerSize;
 
-	if (curr_body_size > _limit) {
+	if (curr_body_size > _limit)
+	{
 		_state = ERROR;
-		_errCode = 413;
+		_errCode = SC_413;
 		return;
 	}
 
-	if (curr_body_size > _contentLength) {
+	if (curr_body_size > _contentLength)
+	{
 		_state = ERROR;
-		_errCode = 400;
+		_errCode = SC_400;
 		return;
 	}
 
@@ -179,7 +180,7 @@ Request::addData(std::string chunk)
 	   (_raw.size() + chunk.size() > Request::HEADERS_SIZE))
 	{
 		_state = ERROR;
-		_errCode = 431; // Request Header Fields Too Large
+		_errCode = SC_431; // Request Header Fields Too Large
 		return;
 	}
 

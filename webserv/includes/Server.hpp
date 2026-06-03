@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:32 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/02 19:14:42 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/03 14:21:12 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 # include "Location.hpp"
 # include "CGI.hpp"
 # include "Utils.hpp"
+# include "StatusCode.hpp"
 
 # include <csignal>
 # include <cstdio>
@@ -42,6 +43,13 @@ enum ReadStatus
 	CLIENT_READ_INCOMPLETE = 1,              // Incompete request, keep reading
 	CLIENT_STATIC_READY = 2,                 // Static file ready for POLLOUT
 	CGI_PROCESS_READY = 3                    // CGI script ready to execute
+};
+
+enum WriteStatus
+{
+	WRITE_ERROR = 0,
+	WRITE_INCOMPLETE = 1,
+	WRITE_COMPLETE = 2
 };
 
 class Server
@@ -78,7 +86,7 @@ public:
 	/* --- Non-blocking I/O Handlers --- */
 	// returns: <=0 error/disconn, 1 partial, 2 complete
 	ReadStatus			handleRead(int client_fd);
-	int					handleWrite(int client_fd);
+	WriteStatus			handleWrite(int client_fd);
 
 	/* --- Getters --- */
 	int					getServerFd() const;

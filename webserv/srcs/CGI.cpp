@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/24 16:54:54 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/02 19:16:34 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/03 14:44:38 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,7 +106,7 @@ CGI::execute(const Request &req, const std::string &script_path)
 		close(_pipe_in[1]);
 
 		_clearEnv();
-		return 500;
+		return SC_500;
 	}
 
 	// 4. Duplicate the current process
@@ -120,7 +120,7 @@ CGI::execute(const Request &req, const std::string &script_path)
 		close(_pipe_out[1]);
 
 		_clearEnv();
-		return 500;
+		return SC_500;
 	}
 	if (_pid == 0) // CHILD PROCESS
 	{
@@ -146,9 +146,9 @@ CGI::execute(const Request &req, const std::string &script_path)
 		}
 
 		char	*args[3];
-		args[0] = (char *)"/usr/bin/python3";   // Path to the interpreter
+		args[0] = (char *)"/usr/bin/python3";     // Path to the interpreter
 		args[1] = (char *)target_script.c_str();  // Path to the script target
-		args[2] = NULL;                         // Array must be NULL-terminated
+		args[2] = NULL;                           // Array must be NULL-terminated
 
 		// This replaces the child process memory space entirely
 		execve(args[0], args, &_env[0]);
@@ -165,7 +165,7 @@ CGI::execute(const Request &req, const std::string &script_path)
 		fcntl(_pipe_out[0], F_SETFL, O_NONBLOCK);
 
 		_clearEnv();
-		return 200;
+		return SC_200;
 	}
 }
 

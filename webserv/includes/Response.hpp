@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/27 17:04:32 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/26 16:25:10 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/03 14:08:13 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,8 @@
 # include <map>
 # include <iostream>
 # include <sstream>
+
+# include "StatusCode.hpp"
 
 class Response
 {

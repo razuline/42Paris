@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:40 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/02 20:21:54 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/03 14:18:57 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -214,7 +214,7 @@ Server::handleRead(int client_fd)
 			}
 			if (!methodSupported)
 			{
-				response.defaultErrorPage(405); // Method Not Allowed
+				response.defaultErrorPage(SC_405); // Method Not Allowed
 				_resps[client_fd] = response;
 				return CLIENT_STATIC_READY;
 			}
@@ -223,7 +223,7 @@ Server::handleRead(int client_fd)
 		// Check HTTP Redirection (301)
 		if (loc && !loc->getRedirect().empty())
 		{
-			response.setStatus(301);
+			response.setStatus(SC_301);
 			response.setHeader("Location", loc->getRedirect());
 			_resps[client_fd] = response;
 			return CLIENT_STATIC_READY;
@@ -249,11 +249,11 @@ Server::handleRead(int client_fd)
 
 			int	cgi_status = _cgis[client_fd]->execute(_reqs[client_fd], fullPath);
 
-			if (cgi_status == 500)
+			if (cgi_status == SC_500)
 			{
 				delete _cgis[client_fd];
 				_cgis.erase(client_fd);
-				response.defaultErrorPage(500);
+				response.defaultErrorPage(SC_500);
 				_resps[client_fd] = response;
 				return CLIENT_STATIC_READY; // Switch to POLLOUT to send the error page
 			}
@@ -279,14 +279,14 @@ Server::handleRead(int client_fd)
 							Utils::generateAutoindex(activeRoot + path, path);
 						if (!autoindexHtml.empty())
 						{
-							response.setStatus(200);
+							response.setStatus(SC_200);
 							response.setBody(autoindexHtml);
 							response.setHeader("Content-Type", "text/html");
 							_resps[client_fd] = response;
 							return CLIENT_STATIC_READY;
 						}
 					}
-					response.defaultErrorPage(403); // Forbidden
+					response.defaultErrorPage(SC_403); // Forbidden
 					_resps[client_fd] = response;
 					return CLIENT_STATIC_READY;
 				}
@@ -297,10 +297,10 @@ Server::handleRead(int client_fd)
 			{
 				std::string	content = _readFile(fullPath);
 				if (content.empty())
-					response.defaultErrorPage(404);
+					response.defaultErrorPage(SC_404);
 				else
 				{
-					response.setStatus(200);
+					response.setStatus(SC_200);
 					response.setBody(content);
 					// Dynamic MIME type detection using your Utils module
 					response.setHeader("Content-Type", Utils::getMimeType(fullPath));
@@ -323,14 +323,14 @@ Server::handleRead(int client_fd)
 
 				std::ofstream	outFile(targetUploadPath.c_str(), std::ios::binary);
 				if (!outFile.is_open())
-					response.defaultErrorPage(500);
+					response.defaultErrorPage(SC_500);
 				else
 				{
 					std::string	body = _reqs[client_fd].getBody();
 					outFile.write(body.c_str(), body.size());
 					outFile.close();
 
-					response.setStatus(201);
+					response.setStatus(SC_201);
 					response.setBody("<html><body><h1>201 Created</h1><p>File written successfully.</p></body></html>");
 					response.setHeader("Content-Type", "text/html");
 				}
@@ -341,17 +341,17 @@ Server::handleRead(int client_fd)
 				// 1. Check if the file actually exists before trying to delete it
 				std::ifstream	fileCheck(fullPath.c_str());
 				if (!fileCheck.good())
-					response.defaultErrorPage(404);
+					response.defaultErrorPage(SC_404);
 				else
 				{
 					fileCheck.close();
 
 					// 2. Execute the system call to erase the file from the disk
 					if (unlink(fullPath.c_str()) == -1)
-						response.defaultErrorPage(403);
+						response.defaultErrorPage(SC_403);
 					else
 					{
-						response.setStatus(200);
+						response.setStatus(SC_200);
 						response.setBody("<html><body><h1>200 OK</h1><p>File deleted successfully.</p></body></html>");
 						response.setHeader("Content-Type", "text/html");
 					}
@@ -364,7 +364,7 @@ Server::handleRead(int client_fd)
 	return CLIENT_READ_INCOMPLETE; // Incomplete, keep reading data on POLLIN
 }
 
-int
+WriteStatus
 Server::handleWrite(int client_fd)
 {
 	if (_writeBuffs.count(client_fd) == 0)
@@ -379,20 +379,20 @@ Server::handleWrite(int client_fd)
 	if (bytes_sent <= 0)
 	{
 		_clearClientState(client_fd);
-		return bytes_sent;
+		return WRITE_ERROR;
 	}
 
 	// If the entire response was completely transmitted
 	if (static_cast<size_t>(bytes_sent) >= res_str.size())
 	{
 		_clearClientState(client_fd); // Clears requests, responses, and writeBuffers
-		return CLIENT_STATIC_READY;
+		return WRITE_COMPLETE;
 	}
 
 	// 5. PARTIAL WRITE HANDLING: Slice the cached string to keep only the remaining unsent bytes
 	_writeBuffs[client_fd] = res_str.substr(bytes_sent);
 
-	return CLIENT_READ_INCOMPLETE;
+	return WRITE_INCOMPLETE;
 }
 
 /* -------------------------------- GETTERS --------------------------------- */
