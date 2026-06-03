@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:32 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/03 14:21:12 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/03 22:41:57 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 # include "Location.hpp"
 # include "CGI.hpp"
 # include "Utils.hpp"
-# include "StatusCode.hpp"
+# include "HttpStatus.hpp"
 
 # include <csignal>
 # include <cstdio>

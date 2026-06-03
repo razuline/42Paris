@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/27 17:23:49 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/03 16:00:34 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/03 23:32:08 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 /* ------------------------- ORTHODOX CANONICAL FORM ------------------------ */
 
 Response::Response() :
-	_status(SC_200),
+	_status(Http::OK),
 	_body("")
 {
 	setHeader("Server", "webserv/1.0 (42 Paris)");
@@ -51,25 +51,33 @@ Response::_getReasonPhrase(int code)
 {
 	switch(code)
 	{
-		case SC_200: return "OK";
-		case SC_201: return "Created";
-		case SC_202: return "Accepted";
-		case SC_204: return "No Content";
-		case SC_301: return "Moved Permanently";
-		case SC_302: return "Found";
-		case SC_400: return "Bad Request";
-		case SC_401: return "Unauthorized";
-		case SC_403: return "Forbidden";
-		case SC_404: return "Not Found";
-		case SC_405: return "Method Not Allowed";
-		case SC_413: return "Payload Too Large";
-		case SC_431: return "Request Header Fields Too Large";
-		case SC_500: return "Internal Server Error";
-		case SC_502: return "Bad Gateway";
-		case SC_503: return "Service Unavailable";
-		case SC_505: return "HTTP Version Not Supported";
+		// 1xx & 2xx Codes
+		case Http::OK:                         return "OK";                              // 200
+		case Http::CREATED:                    return "Created";                         // 201
+		case Http::ACCEPTED:                   return "Accepted";                        // 202
+		case Http::NO_CONTENT:                 return "No Content";                      // 204
 
-		default:     return "Unknown Status";
+		// 3xx Codes
+		case Http::MOVED_PERMANENTLY:          return "Moved Permanently";               // 301
+		case Http::FOUND:                      return "Found";                           // 302
+
+		// 4xx Codes
+		case Http::BAD_REQUEST:                return "Bad Request";                     // 400
+		case Http::UNAUTHORIZED:               return "Unauthorized";                    // 401
+		case Http::FORBIDDEN:                  return "Forbidden";                       // 403
+		case Http::NOT_FOUND:                  return "Not Found";                       // 404
+		case Http::METHOD_NOT_ALLOWED:         return "Method Not Allowed";              // 405
+		case Http::PAYLOAD_TOO_LARGE:          return "Payload Too Large";               // 413
+		case Http::IM_A_TEAPOT:                return "I'm a teapot";                    // 418 🫖
+		case Http::HEADER_FIELDS_TOO_LARGE:    return "Request Header Fields Too Large"; // 431
+
+		// 5xx Codes
+		case Http::INTERNAL_SERVER_ERROR:      return "Internal Server Error";           // 500
+		case Http::BAD_GATEWAY:                return "Bad Gateway";                     // 502
+		case Http::SERVICE_UNAVAILABLE:        return "Service Unavailable";             // 503
+		case Http::HTTP_VERSION_NOT_SUPPORTED: return "HTTP Version Not Supported";      // 505
+
+		default:                               return "Unknown Status";
 	}
 }
 

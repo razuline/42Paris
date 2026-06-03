@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 16:51:10 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/03 14:21:58 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/03 23:01:50 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@
 
 # include "Server.hpp"
 # include "Config.hpp"
+# include "HttpStatus.hpp"
 
 class Cluster
 {

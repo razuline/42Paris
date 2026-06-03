@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:40 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/03 15:42:43 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/03 23:37:42 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -165,7 +165,7 @@ Server::handleRead(int client_fd)
 			}
 			if (!methodSupported)
 			{
-				response.defaultErrorPage(SC_405);
+				response.defaultErrorPage(Http::METHOD_NOT_ALLOWED);
 				_resps[client_fd] = response;
 				return CLIENT_STATIC_READY;
 			}
@@ -174,7 +174,7 @@ Server::handleRead(int client_fd)
 		// Check HTTP Redirection (301)
 		if (loc && !loc->getRedirect().empty())
 		{
-			response.setStatus(SC_301);
+			response.setStatus(Http::MOVED_PERMANENTLY);
 			response.setHeader("Location", loc->getRedirect());
 			_resps[client_fd] = response;
 			return CLIENT_STATIC_READY;
@@ -194,7 +194,14 @@ Server::handleRead(int client_fd)
 							   ? activePath.substr(1) : activePath);
 
 		// CASE A: CGI Processing
+		bool	isCgi = false;
+
 		if (activePath.size() >= 3 && activePath.substr(activePath.size() - 3) == ".py")
+			isCgi = true;
+		else if (activePath.size() >= 4 && activePath.substr(activePath.size() - 4) == ".php")
+			isCgi = true;
+
+		if (isCgi)
 		{
 			std::cout << "[Server] Executing CGI python gateway script for fd ["
 					  << client_fd << "]" << std::endl;
@@ -202,11 +209,11 @@ Server::handleRead(int client_fd)
 
 			int	cgi_status = _cgis[client_fd]->execute(curr, fullPath);
 
-			if (cgi_status == SC_500)
+			if (cgi_status == Http::INTERNAL_SERVER_ERROR)
 			{
 				delete _cgis[client_fd];
 				_cgis.erase(client_fd);
-				response.defaultErrorPage(SC_500);
+				response.defaultErrorPage(Http::INTERNAL_SERVER_ERROR);
 				_resps[client_fd] = response;
 				return CLIENT_STATIC_READY;
 			}
@@ -231,14 +238,14 @@ Server::handleRead(int client_fd)
 						std::string	autoindexHtml = Utils::generateAutoindex(activeRoot + path, path);
 						if (!autoindexHtml.empty())
 						{
-							response.setStatus(SC_200);
+							response.setStatus(Http::OK);
 							response.setBody(autoindexHtml);
 							response.setHeader("Content-Type", "text/html");
 							_resps[client_fd] = response;
 							return CLIENT_STATIC_READY;
 						}
 					}
-					response.defaultErrorPage(SC_403);
+					response.defaultErrorPage(Http::FORBIDDEN);
 					_resps[client_fd] = response;
 					return CLIENT_STATIC_READY;
 				}
@@ -249,10 +256,10 @@ Server::handleRead(int client_fd)
 			{
 				std::string		content = _readFile(fullPath);
 				if (content.empty())
-					response.defaultErrorPage(SC_404);
+					response.defaultErrorPage(Http::NOT_FOUND);
 				else
 				{
-					response.setStatus(SC_200);
+					response.setStatus(Http::OK);
 					response.setBody(content);
 					response.setHeader("Content-Type", Utils::getMimeType(fullPath));
 				}
@@ -272,14 +279,14 @@ Server::handleRead(int client_fd)
 
 				std::ofstream	outFile(targetUploadPath.c_str(), std::ios::binary);
 				if (!outFile.is_open())
-					response.defaultErrorPage(SC_500);
+					response.defaultErrorPage(Http::INTERNAL_SERVER_ERROR);
 				else
 				{
 					std::string	body = curr.getBody();
 					outFile.write(body.c_str(), body.size());
 					outFile.close();
 
-					response.setStatus(SC_201);
+					response.setStatus(Http::CREATED);
 					response.setBody("<html><body><h1>201 Created</h1><p>File written successfully.</p></body></html>");
 					response.setHeader("Content-Type", "text/html");
 				}
@@ -289,16 +296,16 @@ Server::handleRead(int client_fd)
 			{
 				std::ifstream	fileCheck(fullPath.c_str());
 				if (!fileCheck.good())
-					response.defaultErrorPage(SC_404);
+					response.defaultErrorPage(Http::NOT_FOUND);
 				else
 				{
 					fileCheck.close();
 
 					if (unlink(fullPath.c_str()) == -1)
-						response.defaultErrorPage(SC_403);
+						response.defaultErrorPage(Http::FORBIDDEN);
 					else
 					{
-						response.setStatus(SC_200);
+						response.setStatus(Http::OK);
 						response.setBody("<html><body><h1>200 OK</h1><p>File deleted successfully.</p></body></html>");
 						response.setHeader("Content-Type", "text/html");
 					}

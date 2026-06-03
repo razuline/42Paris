@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 17:16:00 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/03 14:43:43 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/03 23:18:41 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -154,7 +154,8 @@ Cluster::_addNewConnection(int serv_fd)
 	// 4. Bind client socket descriptor to its respective virtual server
 	_clients[client_fd] = _servers[serv_fd];
 
-	std::cout << "[Cluster] Connection accepted on client fd [" << client_fd << "]" << std::endl;
+	std::cout << "[Cluster] Connection accepted on client fd [" << client_fd
+			  << "]" << std::endl;
 }
 
 void
@@ -321,7 +322,7 @@ Cluster::_handleCGIRead(int pipe_read_fd, Server &server)
 		std::cerr << "[Cluster] CGI pipe crash detected. Sending HTTP [503]" << std::endl;
 
 		Response	err_res;
-		err_res.defaultErrorPage(SC_503);
+		err_res.defaultErrorPage(Http::OK);
 		server.setCgiResponse(client_fd, err_res);
 
 		close(pipe_read_fd);
@@ -360,7 +361,7 @@ Cluster::_handleCGIRead(int pipe_read_fd, Server &server)
 
 		response.setBody(bodyPart);
 
-		int					cgi_status_code = SC_200;
+		int					cgi_status_code = Http::OK;
 		bool				has_content_type = false;
 		bool				has_location = false;
 
@@ -397,8 +398,8 @@ Cluster::_handleCGIRead(int pipe_read_fd, Server &server)
 			}
 		}
 		// CGI RFC Specification: Force 302 Redirect if Location header is present without Status
-		if (cgi_status_code == SC_200 && has_location)
-			cgi_status_code = SC_302;
+		if (cgi_status_code == Http::OK && has_location)
+			cgi_status_code = Http::FOUND;
 
 		response.setStatus(cgi_status_code);
 
@@ -409,7 +410,7 @@ Cluster::_handleCGIRead(int pipe_read_fd, Server &server)
 	else
 	{
 		// Raw script execution fallback if no headers are provided
-		response.setStatus(SC_200);
+		response.setStatus(Http::OK);
 		response.setBody(cgiOutput);
 		response.setHeader("Content-Type", "text/html");
 	}

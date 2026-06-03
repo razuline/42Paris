@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/24 16:54:54 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/03 14:44:38 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/03 23:12:33 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,42 +49,6 @@ CGI::~CGI()
 	_clearEnv();
 }
 
-/* ------------------------- PRIVATE INTERNAL HELPERS ----------------------- */
-
-void
-CGI::_initEnv(const Request &req, const std::string &script_path)
-{
-	(void)script_path;
-
-	// Format HTTP request metadata into standard KEY=VALUE strings
-	std::string	line1 = "REQUEST_METHOD=" + req.getMethod();
-	std::string	line2 = "CONTENT_LENGTH=" + req.getHeader("Content-Length");
-	std::string	line3 = "SERVER_PROTOCOL=HTTP/1.1";
-	std::string	line4 = "GATEWAY_INTERFACE=CGI/1.1";
-
-	// Duplicate strings onto the Heap usong strdup for compatibility with execve
-	_env.push_back(strdup(line1.c_str()));
-	_env.push_back(strdup(line2.c_str()));
-	_env.push_back(strdup(line3.c_str()));
-	_env.push_back(strdup(line4.c_str()));
-
-	// The env array must be NULL-terminated for execve
-	_env.push_back(NULL);
-}
-
-void
-CGI::_clearEnv()
-{
-	// Loop through the matrix and free each individual str allocated by strdup
-	for (size_t i = 0; i < _env.size(); ++i)
-	{
-		if (_env[i] != NULL)
-			free(_env[i]);
-	}
-	// Clear the vector container to reset its size back to 0
-	_env.clear();
-}
-
 /* ------------------------------ CORE METHODS ------------------------------ */
 
 int
@@ -97,7 +61,7 @@ CGI::execute(const Request &req, const std::string &script_path)
 	if (pipe(_pipe_in) == -1)
 	{
 		_clearEnv();
-		return 500;
+		return Http::INTERNAL_SERVER_ERROR;
 	}
 	// 3. Create the output pipe (CGI script writes output -> Server reads it)
 	if (pipe(_pipe_out) == -1)
@@ -106,7 +70,7 @@ CGI::execute(const Request &req, const std::string &script_path)
 		close(_pipe_in[1]);
 
 		_clearEnv();
-		return SC_500;
+		return Http::INTERNAL_SERVER_ERROR;
 	}
 
 	// 4. Duplicate the current process
@@ -120,7 +84,7 @@ CGI::execute(const Request &req, const std::string &script_path)
 		close(_pipe_out[1]);
 
 		_clearEnv();
-		return SC_500;
+		return Http::INTERNAL_SERVER_ERROR;
 	}
 	if (_pid == 0) // CHILD PROCESS
 	{
@@ -145,14 +109,17 @@ CGI::execute(const Request &req, const std::string &script_path)
 			target_script = script_path.substr(last_slash + 1);
 		}
 
-		char	*args[3];
-		args[0] = (char *)"/usr/bin/python3";     // Path to the interpreter
-		args[1] = (char *)target_script.c_str();  // Path to the script target
-		args[2] = NULL;                           // Array must be NULL-terminated
+		// NATIVE SHEBANG EXECUTION
+		// Construct the execution path relative to the new working directory
+		std::string		exec_path = "./" + target_script;
 
-		// This replaces the child process memory space entirely
+		char	*args[2];
+		args[0] = (char *)exec_path.c_str(); // The OS kernel will parse the shebang line natively
+		args[1] = NULL; // Array must be NULL-terminated
+
+		// Execute the script directly
 		execve(args[0], args, &_env[0]);
-		exit(1);
+		exit(1); // If execve fails (e.g., script is not executable or shebang is malformed)
 	}
 	else // PARENT PROCESS
 	{
@@ -165,8 +132,60 @@ CGI::execute(const Request &req, const std::string &script_path)
 		fcntl(_pipe_out[0], F_SETFL, O_NONBLOCK);
 
 		_clearEnv();
-		return SC_200;
+		return Http::INTERNAL_SERVER_ERROR;
 	}
+}
+
+/* ------------------------- PRIVATE INTERNAL HELPERS ----------------------- */
+
+void
+CGI::_initEnv(const Request &req, const std::string &script_path)
+{
+	// Core CGI/1.1 variables required by both Python and especially PHP
+	std::string	line1 = "REQUEST_METHOD=" + req.getMethod();
+	std::string	line2 = "CONTENT_LENGTH=" + req.getHeader("Content-Length");
+
+	std::string	line3 = "CONTENT_TYPE=" + req.getHeader("Content-Type");
+
+	std::string	line4 = "SERVER_PROTOCOL=HTTP/1.1";
+	std::string	line5 = "GATEWAY_INTERFACE=CGI/1.1";
+	std::string	line6 = "SCRIPT_FILENAME=" + script_path; // Absolute path to target script
+	std::string	line7 = "SCRIPT_NAME=" + req.getPath();
+	// PHP-cgi strictly requires this variable to security-check the execution
+	std::string	line8 = "REDIRECT_STATUS=200";
+
+	// Duplicate strings onto the Heap usong strdup for compatibility with execve
+	_env.push_back(strdup(line1.c_str()));
+	_env.push_back(strdup(line2.c_str()));
+	_env.push_back(strdup(line3.c_str()));
+	_env.push_back(strdup(line4.c_str()));
+	_env.push_back(strdup(line5.c_str()));
+	_env.push_back(strdup(line6.c_str()));
+	_env.push_back(strdup(line7.c_str()));
+	_env.push_back(strdup(line8.c_str()));
+
+	// Forward Cookies if they exist in request
+	if (!req.getHeader("Cookie").empty())
+	{
+		std::string	cookie_line = "HTTP_COOKIE=" + req.getHeader("Cookie");
+		_env.push_back(strdup(cookie_line.c_str()));
+	}
+
+	// The env array must be NULL-terminated for execve
+	_env.push_back(NULL);
+}
+
+void
+CGI::_clearEnv()
+{
+	// Loop through the matrix and free each individual str allocated by strdup
+	for (size_t i = 0; i < _env.size(); ++i)
+	{
+		if (_env[i] != NULL)
+			free(_env[i]);
+	}
+	// Clear the vector container to reset its size back to 0
+	_env.clear();
 }
 
 /* -------------------------------- GETTERS --------------------------------- */

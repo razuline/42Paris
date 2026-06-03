@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/25 15:33:23 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/03 15:54:28 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/03 23:33:39 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ Request::Request() :
 	_raw(""),
 	_state(READING_HEADERS),
 	_limit(1000000), // Default 1 Mb fallback
-	_errCode(SC_200)
+	_errCode(Http::OK)
 {
 }
 
@@ -84,7 +84,7 @@ Request::addData(std::string chunk)
 	   (_raw.size() + chunk.size() > Request::HEADERS_SIZE))
 	{
 		_state = ERROR;
-		_errCode = SC_431; // Request Header Fields Too Large
+		_errCode = Http::HEADER_FIELDS_TOO_LARGE;
 		return;
 	}
 
@@ -129,7 +129,7 @@ Request::_handleBody()
 	if (curr_body_size > _limit)
 	{
 		_state = ERROR;
-		_errCode = SC_413; // Payload Too Large
+		_errCode = Http::PAYLOAD_TOO_LARGE;
 		return;
 	}
 
@@ -137,7 +137,7 @@ Request::_handleBody()
 	if (curr_body_size > _contentLength)
 	{
 		_state = ERROR;
-		_errCode = SC_400; // Bad Request
+		_errCode = Http::BAD_REQUEST;
 		return;
 	}
 

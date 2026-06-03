@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/25 14:09:02 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/03 14:23:12 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/03 22:42:12 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 # include <sstream>
 # include <cstdlib>
 
-# include "StatusCode.hpp"
+# include "HttpStatus.hpp"
 # include "Utils.hpp"
 
 enum RequestState
