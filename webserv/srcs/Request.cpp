@@ -6,13 +6,14 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/25 15:33:23 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/03 14:26:56 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/03 15:54:28 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
 
-const size_t	Request::HEADERS_SIZE = 8192; // 8 Kb
+// Standard 8 KB maximum limit for HTTP Request Headers fields
+const size_t	Request::HEADERS_SIZE = 8192;
 
 /* ------------------------- ORTHODOX CANONICAL FORM ------------------------ */
 
@@ -25,7 +26,7 @@ Request::Request() :
 	_contentLength(0),
 	_raw(""),
 	_state(READING_HEADERS),
-	_limit(1000000), // 1 Mb
+	_limit(1000000), // Default 1 Mb fallback
 	_errCode(SC_200)
 {
 }
@@ -67,104 +68,6 @@ Request::~Request()
 {
 }
 
-/* ------------------------- PRIVATE INTERNAL HELPERS ----------------------- */
-
-void
-Request::_handleHeaders()
-{
-	size_t	pos = _raw.find("\r\n\r\n");
-
-	if (pos != std::string::npos)
-	{
-		_headerSize = pos + 4;
-		std::string	headers_part = _raw.substr(0, pos);
-
-		_parseRawHeaders(headers_part);
-	}
-}
-
-void
-Request::_handleBody()
-{
-	size_t	curr_body_size = _raw.size() - _headerSize;
-
-	if (curr_body_size > _limit)
-	{
-		_state = ERROR;
-		_errCode = SC_413;
-		return;
-	}
-
-	if (curr_body_size > _contentLength)
-	{
-		_state = ERROR;
-		_errCode = SC_400;
-		return;
-	}
-
-	if (curr_body_size == _contentLength)
-	{
-		_body = _raw.substr(_headerSize, _contentLength);
-		_state = COMPLETE;
-	}
-}
-
-void
-Request::_parseRawHeaders(const std::string &headers_part)
-{
-	std::stringstream		ss(headers_part);
-	std::string				line;
-
-	// --- 1. PARSE REQUEST-LINE ---
-	// Example: "POST /index.html HTTP/1.1"
-	if (std::getline(ss, line))
-	{
-		if (!line.empty() && line[line.size() - 1] == '\r')
-			line.erase(line.size() - 1);
-
-		std::stringstream	first_line_ss(line);
-		first_line_ss >> _method;  // Extract: POST
-		first_line_ss >> _path;    // Extract: /index.html
-		first_line_ss >> _version; // Extract: HTTP/1.1
-	}
-
-	// --- 2. PARSE HEADER FIELDS ---
-	// Example: "Content-Length: 42"
-	while (std::getline(ss, line) && line != "\r" && !line.empty())
-	{
-		if (line[line.size() - 1] == '\r')
-			line.erase(line.size() - 1);
-
-		// Find the colon position to split Key and Value
-		size_t	colon = line.find(':');
-		if (colon != std::string::npos)
-		{
-			// Extract Key and Value
-			std::string	key = line.substr(0, colon);
-			std::string	value = line.substr(colon + 1);
-
-			// Remove the space after the colon if it exists
-			size_t		first = value.find_first_not_of(' ');
-			if (first != std::string::npos)
-				value = value.substr(first);
-
-			_headers[key] = value;
-		}
-	}
-
-	// --- 3. GET CONTENT-LENGTH ---
-	if (_headers.count("Content-Length"))
-		_contentLength = std::atoi(_headers["Content-Length"].c_str());
-	else
-		_contentLength = 0;
-
-	// Decide if to read a body is needed
-	if (_method == "POST" && _contentLength > 0)
-		_state = READING_BODY;
-	else
-		_state = COMPLETE;
-}
-
 /* ------------------------------ CORE METHODS ------------------------------ */
 
 bool
@@ -176,6 +79,7 @@ Request::isComplete()
 void
 Request::addData(std::string chunk)
 {
+	// Safeguard against malicious or malformed heavy header payload attacks
 	if (_state == READING_HEADERS &&
 	   (_raw.size() + chunk.size() > Request::HEADERS_SIZE))
 	{
@@ -197,6 +101,106 @@ void
 Request::setLimit(size_t limit)
 {
 	_limit = limit;
+}
+
+/* ------------------------- PRIVATE INTERNAL HELPERS ----------------------- */
+
+void
+Request::_handleHeaders()
+{
+	// Look for the standard HTTP header/body boundary delimiter
+	size_t	pos = _raw.find("\r\n\r\n");
+
+	if (pos != std::string::npos)
+	{
+		_headerSize = pos + 4;
+		std::string	headers_part = _raw.substr(0, pos);
+
+		_parseRawHeaders(headers_part);
+	}
+}
+
+void
+Request::_handleBody()
+{
+	size_t	curr_body_size = _raw.size() - _headerSize;
+
+	// Check if the current payload exceeds the server configuration limits
+	if (curr_body_size > _limit)
+	{
+		_state = ERROR;
+		_errCode = SC_413; // Payload Too Large
+		return;
+	}
+
+	// Safety check to ensure the payload chunk doesn't overflow Content-Length
+	if (curr_body_size > _contentLength)
+	{
+		_state = ERROR;
+		_errCode = SC_400; // Bad Request
+		return;
+	}
+
+	// Transition state once the complete expected body bytes are received
+	if (curr_body_size == _contentLength)
+	{
+		_body = _raw.substr(_headerSize, _contentLength);
+		_state = COMPLETE;
+	}
+}
+
+void
+Request::_parseRawHeaders(const std::string &headers_part)
+{
+	std::stringstream		ss(headers_part);
+	std::string				line;
+
+	// --- 1. PARSE REQUEST-LINE (e.g., "GET /index.html HTTP/1.1") ---
+	if (std::getline(ss, line))
+	{
+		if (!line.empty() && line[line.size() - 1] == '\r')
+			line.erase(line.size() - 1);
+
+		std::stringstream	first_line_ss(line);
+		first_line_ss >> _method;  // Extract: POST
+		first_line_ss >> _path;    // Extract: /index.html
+		first_line_ss >> _version; // Extract: HTTP/1.1
+	}
+
+	// --- 2. PARSE HTTP HEADER FIELDS (e.g., "Host: localhost") ---
+	while (std::getline(ss, line) && line != "\r" && !line.empty())
+	{
+		if (line[line.size() - 1] == '\r')
+			line.erase(line.size() - 1);
+
+		// Find the colon position to split Key and Value
+		size_t	colon = line.find(':');
+		if (colon != std::string::npos)
+		{
+			// Extract Key and Value
+			std::string	key = line.substr(0, colon);
+			std::string	value = line.substr(colon + 1);
+
+			// Strip leading spaces from the header field value data
+			size_t		first = value.find_first_not_of(' ');
+			if (first != std::string::npos)
+				value = value.substr(first);
+
+			_headers[key] = value;
+		}
+	}
+
+	// --- 3. EXTRACT CONTENT-LENGTH METADATA ---
+	if (_headers.count("Content-Length"))
+		_contentLength = std::atoi(_headers["Content-Length"].c_str());
+	else
+		_contentLength = 0;
+
+	// Decide if to read a body is needed based on method type and payload markers
+	if (_method == "POST" && _contentLength > 0)
+		_state = READING_BODY;
+	else
+		_state = COMPLETE;
 }
 
 /* -------------------------------- GETTERS --------------------------------- */

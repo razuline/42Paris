@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/27 17:23:49 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/03 14:24:06 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/03 16:00:34 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,20 +80,20 @@ Response::build()
 {
 	std::stringstream	ss;
 
-	// 1. HTTP Status Line (e.g., HTTP/1.1 200 OK\r\n)
+	// 1. Build HTTP Protocol Status Line (e.g., HTTP/1.1 200 OK\r\n)
 	ss << "HTTP/1.1 " << _status << " " << _getReasonPhrase(_status) << "\r\n";
 
-	// 2. Loop through map and append all HTTP Headers
+	// 2. Append all custom standard map-mapped headers to the stream
 	std::map<std::string, std::string>::iterator	it;
 	for (it = _headers.begin(); it != _headers.end(); ++it)
 	{
 		ss << it->first << ": " << it->second << "\r\n";
 	}
 
-	// 3. Empty line separator between headers and body
+	// 3. Inject mandatory empty boundary line separating headers and payload body data
 	ss << "\r\n";
 
-	// 4. Append the payload body data
+	// 4. Append the final payload body data
 	ss << _body;
 
 	return ss.str();
@@ -102,13 +102,10 @@ Response::build()
 void
 Response::defaultErrorPage(int code)
 {
-	// 1. Set the status code (e.g,, 404)
 	setStatus(code);
+	std::string			msg = _getReasonPhrase(code);
 
-	// 2. Get the word version (e.g., "Not Found")
-	std::string	msg = _getReasonPhrase(code);
-
-	// 3. Create a HTML body
+	// Create a beautifully aligned boilerplate error document stringstream
 	std::stringstream	ss;
 	ss << "<html><head><title>" << code << " " << msg << "</title></head>";
 	ss << "<body style='text-align:center; font-family:sans-serif; padding-top:100px;'>";
@@ -118,7 +115,8 @@ Response::defaultErrorPage(int code)
 	ss << "<p>webserv/1.0 (42 Paris)</p>";
 	ss << "</body></html>";
 
-	this->setBody(ss.str()); // Content-Length auto-updated here
+	// Commits the structure (Content-Length metadata auto-injects inside setBody)
+	this->setBody(ss.str());
 	this->setHeader("Content-Type", "text/html");
 }
 
@@ -136,15 +134,12 @@ Response::setHeader(std::string key, std::string value)
 	_headers[key] = value;
 }
 
-/**
- * SMART BODY SETTER:
- * Automatically calculates 'Content-Length' to prevent malformed responses
- */
 void
 Response::setBody(std::string body)
 {
 	_body = body;
 
+	// SMART ENCAPSULATION: Automatically tracks and sets Content-Length metadata
 	std::stringstream	ss;
 	ss << _body.size();
 	setHeader("Content-Length", ss.str());
