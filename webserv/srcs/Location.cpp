@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/24 16:53:12 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/26 17:42:19 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/04 17:35:44 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,9 @@ Location::Location() :
 	_redirect(""),
 	_uploadStore(""),
 	_methods(),
-	_autoindex(false)
+	_autoindex(false),
+	_clientMaxBodySize(0),
+	_cgiPath("")
 {
 }
 
@@ -32,7 +34,9 @@ Location::Location(const Location &copy) :
 	_redirect(copy._redirect),
 	_uploadStore(copy._uploadStore),
 	_methods(copy._methods),
-	_autoindex(copy._autoindex)
+	_autoindex(copy._autoindex),
+	_clientMaxBodySize(copy._clientMaxBodySize),
+	_cgiPath(copy._cgiPath)
 {
 }
 
@@ -48,6 +52,8 @@ Location
 		_uploadStore = other._uploadStore;
 		_methods = other._methods;
 		_autoindex = other._autoindex;
+		_clientMaxBodySize = other._clientMaxBodySize;
+		_cgiPath = other._cgiPath;
 	}
 	return *this;
 }
@@ -100,6 +106,18 @@ Location::setAutoindex(bool autoindex)
 	_autoindex = autoindex;
 }
 
+void
+Location::setClientMaxBodySize(size_t size)
+{
+	_clientMaxBodySize = size;
+}
+
+void
+Location::setCgiPath(const std::string &path)
+{
+	_cgiPath = path;
+}
+
 /* -------------------------------- GETTERS --------------------------------- */
 
 const std::string
@@ -142,4 +160,16 @@ bool
 Location::getAutoindex() const
 {
 	return _autoindex;
+}
+
+size_t
+Location::getClientMaxBodySize() const
+{
+	return _clientMaxBodySize;
+}
+
+const std::string
+&Location::getCgiPath() const
+{
+	return _cgiPath;
 }

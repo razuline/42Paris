@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 17:16:00 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/04 15:02:02 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/04 16:46:40 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,7 +110,12 @@ Cluster::run()
 			}
 			// C. Handle network errors or unexpected hang-ups
 			else if (_fds[i].revents & (POLLERR | POLLHUP | POLLNVAL))
-				_closeConnection(fd);
+			{
+				if (_pipeToClientMap.count(fd))
+					_closeConnection(_pipeToClientMap[fd]);
+				else
+					_closeConnection(fd);
+			}
 
 			// Safely skip index increment if current file descriptor was erased from vector
 			if (i < _fds.size() && _fds[i].fd == fd)
@@ -246,6 +251,9 @@ Cluster::_closeConnection(int fd)
 		else
 			++it;
 	}
+	if (_clients.count(fd))
+		_clients[fd]->clearClientState(fd);
+
 	close(fd);
 	_removePipeFromPoll(fd);
 	_clients.erase(fd);

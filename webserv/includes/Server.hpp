@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:32 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/04 13:41:37 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/04 16:46:30 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,6 +92,8 @@ public:
 	// returns: <=0 error/disconn, 1 partial, 2 complete
 	ReadStatus			handleRead(int client_fd);
 	WriteStatus			handleWrite(int client_fd);
+
+	void				clearClientState(int client_fd);
 
 	/* --- Getters --- */
 	int					getServerFd() const;

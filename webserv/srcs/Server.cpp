@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:40 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/04 16:02:09 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/04 17:41:54 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -239,11 +239,11 @@ Server::handleRead(int client_fd)
 		// CASE A: CGI Processing
 		bool	isCgi = false;
 
-		if (fullPath.size() >= 3 && fullPath.substr(fullPath.size() - 3) == ".py")
+		if (loc && !loc->getCgiPath().empty())
+			isCgi = true;
+		else if (fullPath.size() >= 3 && fullPath.substr(fullPath.size() - 3) == ".py")
 			isCgi = true;
 		else if (fullPath.size() >= 4 && fullPath.substr(fullPath.size() - 4) == ".php")
-			isCgi = true;
-		else if (fullPath.size() >= 4 && fullPath.substr(fullPath.size() - 4) == ".bla")
 			isCgi = true;
 
 		if (isCgi)
@@ -299,11 +299,11 @@ Server::handleRead(int client_fd)
 			// --- HANDLE GET METHOD ---
 			if (method == "GET")
 			{
-				std::string		content = _readFile(fullPath);
-				if (content.empty())
+				if (access(fullPath.c_str(), R_OK) != 0)
 					response.defaultErrorPage(Http::NOT_FOUND);
 				else
 				{
+					std::string	content = _readFile(fullPath);
 					response.setStatus(Http::OK);
 					response.setBody(content);
 					response.setHeader("Content-Type", Utils::getMimeType(fullPath));
@@ -396,6 +396,21 @@ Server::handleWrite(int client_fd)
 	return WRITE_INCOMPLETE;
 }
 
+void
+Server::clearClientState(int client_fd)
+{
+	_reqs.erase(client_fd);
+	_resps.erase(client_fd);
+	_writeBuffs.erase(client_fd);
+
+	std::map<int, CGI*>::iterator	it = _cgis.find(client_fd);
+	if (it != _cgis.end())
+	{
+		delete it->second;
+		_cgis.erase(it);
+	}
+}
+
 /* ------------------------- PRIVATE INTERNAL HELPERS ----------------------- */
 
 void
@@ -434,12 +449,20 @@ const Location
 	const Location				*bestMatch = NULL;
 	size_t						longestMatchLen = 0;
 
-	for (size_t i = 0;i < locs.size(); ++i)
+	for (size_t i = 0; i < locs.size(); ++i)
 	{
 		const std::string	&locPath = locs[i].getPath();
+		if (locPath[0] == '.' && path.size() >= locPath.size())
+		{
+			if (path.substr(path.size() - locPath.size()) == locPath)
+				return &locs[i];
+		}
 
 		// Check if the request URI path matches the location prefix rule
-		if (path.find(locPath) == 0)
+		for (size_t i = 0; i < locs.size(); ++i)
+	{
+		const std::string	&locPath = locs[i].getPath();
+		if (locPath[0] != '.' && path.find(locPath) == 0)
 		{
 			if (locPath.size() > longestMatchLen)
 			{
@@ -447,6 +470,7 @@ const Location
 				bestMatch = &locs[i];
 			}
 		}
+	}
 	}
 	return bestMatch;
 }

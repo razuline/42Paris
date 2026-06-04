@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/24 16:54:54 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/04 16:33:52 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/04 17:47:00 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,12 +146,13 @@ CGI::execute(const Request &req, const std::string &script_path)
 void
 CGI::_initEnv(const Request &req, const std::string &script_path)
 {
+	std::stringstream	ss;
+	ss << req.getBody().size();
+
 	// Core CGI/1.1 variables required by both Python and especially PHP
 	std::string	line1 = "REQUEST_METHOD=" + req.getMethod();
-	std::string	line2 = "CONTENT_LENGTH=" + req.getHeader("Content-Length");
-
+	std::string line2 = "CONTENT_LENGTH=" + ss.str();
 	std::string	line3 = "CONTENT_TYPE=" + req.getHeader("Content-Type");
-
 	std::string	line4 = "SERVER_PROTOCOL=HTTP/1.1";
 	std::string	line5 = "GATEWAY_INTERFACE=CGI/1.1";
 	std::string	line6 = "SCRIPT_FILENAME=" + script_path; // Absolute path to target script
@@ -169,11 +170,25 @@ CGI::_initEnv(const Request &req, const std::string &script_path)
 	_env.push_back(strdup(line7.c_str()));
 	_env.push_back(strdup(line8.c_str()));
 
-	// Forward Cookies if they exist in request
 	if (!req.getHeader("Cookie").empty())
 	{
 		std::string	cookie_line = "HTTP_COOKIE=" + req.getHeader("Cookie");
 		_env.push_back(strdup(cookie_line.c_str()));
+	}
+
+	// Tester 42
+	if (!req.getHeader("X-Secret-Header-For-Test").empty())
+	{
+		std::string	secret = "HTTP_X_SECRET_HEADER_FOR_TEST=" +
+								req.getHeader("X-Secret-Header-For-Test");
+		_env.push_back(strdup(secret.c_str()));
+	}
+	// Forward Cookies if they exist in request
+	if (!req.getHeader("X-Secret-Header-For-Test").empty())
+	{
+		std::string	secret = "HTTP_X_SECRET_HEADER_FOR_TEST=" +
+								req.getHeader("X-Secret-Header-For-Test");
+		_env.push_back(strdup(secret.c_str()));
 	}
 
 	// The env array must be NULL-terminated for execve
