@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/25 14:09:02 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/03 22:42:12 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/04 15:05:24 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,16 +22,19 @@
 # include "HttpStatus.hpp"
 # include "Utils.hpp"
 
-enum RequestState
-{
-	READING_HEADERS,
-	READING_BODY,
-	COMPLETE,
-	ERROR
-};
+
 
 class Request
 {
+public:
+	enum State
+	{
+		READING_HEADERS,
+		READING_BODY,
+		COMPLETE,
+		ERROR
+	};
+
 private:
 	std::string							_method;
 	std::string							_path;
@@ -43,7 +46,7 @@ private:
 	size_t								_contentLength;
 
 	std::string							_raw;
-	RequestState						_state;
+	State								_state;
 	size_t								_limit;
 	int									_errCode;
 
@@ -70,7 +73,7 @@ public:
 	const std::string	&getVersion() const;
 	const std::string	&getHeader(const std::string &key) const;
 	const std::string	&getBody() const;
-	RequestState		getState() const;
+	State				getState() const;
 	int					getErrCode() const;
 
 	static const size_t					HEADERS_SIZE;

@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/25 15:33:23 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/03 23:33:39 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/04 15:05:43 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -241,7 +241,7 @@ const std::string
 	return _body;
 }
 
-RequestState
+Request::State
 Request::getState() const
 {
 	return _state;

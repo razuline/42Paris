@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/27 17:23:49 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/03 23:32:08 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/04 15:11:27 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,55 @@ Response
 
 Response::~Response()
 {
+}
+
+/* ------------------------------ CORE METHODS ------------------------------ */
+
+std::string
+Response::build()
+{
+	std::stringstream	ss;
+
+	// 1. Build HTTP Protocol Status Line (e.g., HTTP/1.1 200 OK\r\n)
+	ss << "HTTP/1.1 " << _status << " " << _getReasonPhrase(_status) << "\r\n";
+
+	// 2. Append all custom standard map-mapped headers to the stream
+	std::map<std::string, std::string>::iterator	it;
+	for (it = _headers.begin(); it != _headers.end(); ++it)
+	{
+		ss << it->first << ": " << it->second << "\r\n";
+	}
+
+	// 3. Inject mandatory empty boundary line separating headers and payload body data
+	ss << "\r\n";
+
+	// 4. Append the final payload body data
+	ss << _body;
+
+	return ss.str();
+}
+
+void
+Response::defaultErrorPage(int code)
+{
+	setStatus(code);
+	setHeader("Content-Type", "text/html");
+
+	std::string			phrase = _getReasonPhrase(code);
+	std::stringstream	ss;
+	ss << code;
+	std::string			codeStr = ss.str();
+
+	_body =
+		"<html><head><title>" + codeStr + " " + phrase + "</title></head>"
+		"<body style='background-color: #0f172a; color: #f8fafc; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;'>"
+		"<div style='text-align: center;'>"
+		"<h1 style='font-size: 80px; margin: 0; color: #38bdf8; font-weight: 800; letter-spacing: -2px;'>" + codeStr + "</h1>"
+		"<p style='font-size: 20px; color: #94a3b8; margin: 10px 0 0 0; text-transform: uppercase; letter-spacing: 1px;'>" + phrase + "</p>"
+		"<hr style='border: 0; border-top: 1px solid #334155; width: 50px; margin: 30px auto;'>"
+		"<p style='font-size: 12px; color: #475569;'>webserv/1.0 (42 Paris)</p>"
+		"</div>"
+		"</body></html>";
 }
 
 /* ------------------------- PRIVATE INTERNAL HELPERS ----------------------- */
@@ -81,52 +130,7 @@ Response::_getReasonPhrase(int code)
 	}
 }
 
-/* ------------------------------ CORE METHODS ------------------------------ */
 
-std::string
-Response::build()
-{
-	std::stringstream	ss;
-
-	// 1. Build HTTP Protocol Status Line (e.g., HTTP/1.1 200 OK\r\n)
-	ss << "HTTP/1.1 " << _status << " " << _getReasonPhrase(_status) << "\r\n";
-
-	// 2. Append all custom standard map-mapped headers to the stream
-	std::map<std::string, std::string>::iterator	it;
-	for (it = _headers.begin(); it != _headers.end(); ++it)
-	{
-		ss << it->first << ": " << it->second << "\r\n";
-	}
-
-	// 3. Inject mandatory empty boundary line separating headers and payload body data
-	ss << "\r\n";
-
-	// 4. Append the final payload body data
-	ss << _body;
-
-	return ss.str();
-}
-
-void
-Response::defaultErrorPage(int code)
-{
-	setStatus(code);
-	std::string			msg = _getReasonPhrase(code);
-
-	// Create a beautifully aligned boilerplate error document stringstream
-	std::stringstream	ss;
-	ss << "<html><head><title>" << code << " " << msg << "</title></head>";
-	ss << "<body style='text-align:center; font-family:sans-serif; padding-top:100px;'>";
-	ss << "<h1 style='font-size: 50px; color: #333;'>" << code << "</h1>";
-	ss << "<h2>" << msg << "</h2>";
-	ss << "<hr style='width: 50%;'>";
-	ss << "<p>webserv/1.0 (42 Paris)</p>";
-	ss << "</body></html>";
-
-	// Commits the structure (Content-Length metadata auto-injects inside setBody)
-	this->setBody(ss.str());
-	this->setHeader("Content-Type", "text/html");
-}
 
 /* -------------------------------- SETTERS --------------------------------- */
 

@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:32 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/03 22:41:57 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/04 13:41:37 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,23 +37,28 @@
 
 extern volatile sig_atomic_t	g_stop;
 
-enum ReadStatus
-{
-	CLIENT_READ_ERROR = 0,                   // Error or disconnect (<= 0)
-	CLIENT_READ_INCOMPLETE = 1,              // Incompete request, keep reading
-	CLIENT_STATIC_READY = 2,                 // Static file ready for POLLOUT
-	CGI_PROCESS_READY = 3                    // CGI script ready to execute
-};
 
-enum WriteStatus
-{
-	WRITE_ERROR = 0,
-	WRITE_INCOMPLETE = 1,
-	WRITE_COMPLETE = 2
-};
+
+
 
 class Server
 {
+public:
+	enum ReadStatus
+	{
+		READ_ERROR = 0,                       // Error or disconnect (<= 0)
+		READ_INCOMPLETE = 1,                  // Incompete request, keep reading
+		STATIC_READY = 2,                     // Static file ready for POLLOUT
+		CGI_READY = 3                         // CGI script ready to execute
+	};
+
+	enum WriteStatus
+	{
+		WRITE_ERROR = 0,
+		WRITE_INCOMPLETE = 1,
+		WRITE_COMPLETE = 2
+	};
+
 private:
 	int							_serv_fd;    // Main listening socket
 	int							_port;       // Port number from config

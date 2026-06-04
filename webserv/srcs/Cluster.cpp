@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 17:16:00 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/03 23:18:41 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/04 15:02:02 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,14 +162,14 @@ void
 Cluster::_handleClientRead(int fd, Server &server)
 {
 	// Process non-blocking request reading stream
-	ReadStatus	status = server.handleRead(fd);
+	Server::ReadStatus	status = server.handleRead(fd);
 
 	std::cout << "[Cluster] handleRead on fd [" << fd << "] status code: "
 			  << static_cast<int>(status) << std::endl;
 
-	if (status <= CLIENT_READ_ERROR)
+	if (status <= Server::READ_ERROR)
 		_closeConnection(fd);
-	else if (status == CLIENT_STATIC_READY)
+	else if (status == Server::STATIC_READY)
 	{
 		// Parsing complete: Toggle poll event from POLLIN to POLLOUT to transmit response
 		for (size_t i = 0; i < _fds.size(); ++i)
@@ -181,7 +181,7 @@ Cluster::_handleClientRead(int fd, Server &server)
 			}
 		}
 	}
-	else if (status == CGI_PROCESS_READY)
+	else if (status == Server::CGI_READY)
 	{
 		std::cout << "[Cluster] CGI pipe pooling activated for client fd ["
 		          << fd << "]" << std::endl;
@@ -212,9 +212,9 @@ Cluster::_handleClientWrite(int fd, Server &server)
 	// Process non-blocking data transmission stream
 	int	status = server.handleWrite(fd);
 
-	if (status <= WRITE_ERROR)
+	if (status <= Server::WRITE_ERROR)
 		_closeConnection(fd);
-	else if (status == WRITE_COMPLETE)
+	else if (status == Server::WRITE_COMPLETE)
 	{
 		// HTTP Keep-Alive: Reset target poll event back to POLLIN to await next request
 		for (size_t i = 0; i < _fds.size(); ++i)

@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:40 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/03 23:37:42 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/04 15:08:13 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,7 +104,7 @@ Server::setup()
 	}
 }
 
-ReadStatus
+Server::ReadStatus
 Server::handleRead(int client_fd)
 {
 	char	buff[4096];
@@ -114,7 +114,7 @@ Server::handleRead(int client_fd)
 	if (bytes_read <= 0)
 	{
 		_clearClientState(client_fd);
-		return CLIENT_READ_ERROR;
+		return Server::READ_ERROR;
 	}
 	buff[bytes_read] = '\0';
 
@@ -125,7 +125,7 @@ Server::handleRead(int client_fd)
 	curr.addData(std::string(buff, bytes_read));
 
 	// Handle immediate request header or payload body limit errors
-	if (curr.getState() == ERROR)
+	if (curr.getState() == Request::ERROR)
 	{
 		std::cerr << "[Server] Request parsing error detected on fd ["
 				  << client_fd << "] code: " << curr.getErrCode() << std::endl;
@@ -133,7 +133,7 @@ Server::handleRead(int client_fd)
 		Response	res;
 		res.defaultErrorPage(curr.getErrCode());
 		_resps[client_fd] = res;
-		return CLIENT_STATIC_READY;
+		return Server::STATIC_READY;
 	}
 
 	// 3. Monitor if the HTTP parsing framework reached completion
@@ -145,6 +145,27 @@ Server::handleRead(int client_fd)
 
 		std::cout << "[Server] Processing completed request on fd [" << client_fd
 				  << "] -> " << method << " " << path << std::endl;
+
+		// IM_A_TEAPOT 🫖
+		if (path == "/coffee")
+		{
+			std::string	teapotHtml = "<html><head><title>418 I'm a Teapot</title></head>"
+				"<body style='text-align:center; font-family:sans-serif; background-color:#fafafa; padding-top:100px;'>";
+			teapotHtml += "<div style='font-size: 120px; margin-bottom:10px;'>🫖</div>"
+				"<h1 style='font-size: 60px; color: #e67e22; margin: 0 0 10px 0;'>418 I'm a Teapot</h1>"
+				"<h3 style='color: #2c3e50;'>HTCPCP Error: This device is a teapot. Cannot brew coffee.</h3>"
+				"<hr style='width: 40%; border: 0; border-top: 1px solid #ddd; margin: 20px auto;'>"
+				"<p style='color: #7f8c8d; font-style: italic;'>\"I'm a little teapot, short and stout...\"</p>"
+				"<p style='color: #bdc3c7; font-size: 12px; margin-top:30px;'>webserv/1.0 (42 Paris)</p>"
+				"</body></html>";
+
+			response.setStatus(Http::IM_A_TEAPOT);
+			response.setBody(teapotHtml);
+			response.setHeader("Content-Type", "text/html");
+
+			_resps[client_fd] = response;
+			return Server::STATIC_READY;
+		}
 
 		// Dynamic Location Routing Match
 		const Location	*loc = _matchLocation(path);
@@ -167,7 +188,7 @@ Server::handleRead(int client_fd)
 			{
 				response.defaultErrorPage(Http::METHOD_NOT_ALLOWED);
 				_resps[client_fd] = response;
-				return CLIENT_STATIC_READY;
+				return Server::STATIC_READY;
 			}
 		}
 
@@ -177,7 +198,7 @@ Server::handleRead(int client_fd)
 			response.setStatus(Http::MOVED_PERMANENTLY);
 			response.setHeader("Location", loc->getRedirect());
 			_resps[client_fd] = response;
-			return CLIENT_STATIC_READY;
+			return Server::STATIC_READY;
 		}
 
 		// Determine Local Root Folder Override
@@ -215,9 +236,9 @@ Server::handleRead(int client_fd)
 				_cgis.erase(client_fd);
 				response.defaultErrorPage(Http::INTERNAL_SERVER_ERROR);
 				_resps[client_fd] = response;
-				return CLIENT_STATIC_READY;
+				return Server::STATIC_READY;
 			}
-			return CGI_PROCESS_READY;
+			return Server::CGI_READY;
 		}
 		// CASE B: Static Resources & Location-specific Autoindex
 		else
@@ -242,12 +263,12 @@ Server::handleRead(int client_fd)
 							response.setBody(autoindexHtml);
 							response.setHeader("Content-Type", "text/html");
 							_resps[client_fd] = response;
-							return CLIENT_STATIC_READY;
+							return Server::STATIC_READY;
 						}
 					}
 					response.defaultErrorPage(Http::FORBIDDEN);
 					_resps[client_fd] = response;
-					return CLIENT_STATIC_READY;
+					return Server::STATIC_READY;
 				}
 				indexCheck.close();
 			}
@@ -312,13 +333,13 @@ Server::handleRead(int client_fd)
 				}
 			}
 			_resps[client_fd] = response;
-			return CLIENT_STATIC_READY;
+			return Server::STATIC_READY;
 		}
 	}
-	return CLIENT_READ_INCOMPLETE;
+	return Server::READ_INCOMPLETE;
 }
 
-WriteStatus
+Server::WriteStatus
 Server::handleWrite(int client_fd)
 {
 	if (_writeBuffs.count(client_fd) == 0)
