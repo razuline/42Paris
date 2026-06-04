@@ -1,7 +1,7 @@
 *This project has been created as part
 of the 42 curriculum by erazumov, esergeev and mchiacha*
 
-# webserv - Buiding a Non-Bocking Web Server in C++98
+# webserv - Non-Blocking HTTP/1.1 Server in C++98
 
 ## 📝 Description
 **webserv** is a simple HTTP/1.1 web server written in **C++98**. The goal of this project is to create a server like Nginx that can handle many clients at the same time using only one thread.
@@ -110,6 +110,23 @@ We divided the project into three technical modules so the team could collaborat
 - Uses non-blocking UNIX pipes to pass the request body to the script and read back the output.
 - Sets up the exact environment variables matrix needed for standard CGI communication.
 - Parses the script's output headers (`Status`, `Content-Type`) before returning the response.
+
+### Module 4: HTCPCP Protocol Integration (Protocol Extension)
+**Focus:** Custom Error Boundaries & Semantic Compliance
+- Extends the core routing engine to intercept specific semantic test patterns natively in memory.
+- Implements specialised visual error templates for non-standard protocol behavior.
+- Optimises connection lifecycles by immediately flushing simulated errors back to the multiplexer without exhausting real file-system stream descriptors.
+
+---
+
+## 🫖 Deep Dive: The `418 I'm a Teapot` Easter Egg
+
+The **Hyper Text Coffee Pot Control Protocol** (**HTCPCP**) is a communication protocol for controlling, monitoring, and diagnosing coffee pots. RFC 2324 is published on 1 April 1998 as an April Fools' Day RFC, as a part of an April Fools prank.
+
+`418 I'm a teapot`
+
+The HTCPCP server is a teapot but was requested to brew coffee. The resulting entity body "may be short and stout" (a reference to the song "I'm a Little Teapot"). Demonstrations of this behaviour exist.
+The status code `418` is used as an **Easter egg** in some websites, such as [Google.com](https://www.google.com/)'s *"I'm a teapot"* easter egg.
 
 ---
 
