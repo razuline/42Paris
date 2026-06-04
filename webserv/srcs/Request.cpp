@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/25 15:33:23 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/04 15:05:43 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/04 16:22:11 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,10 @@ Request::Request() :
 	_raw(""),
 	_state(READING_HEADERS),
 	_limit(1000000), // Default 1 Mb fallback
-	_errCode(Http::OK)
+	_errCode(Http::OK),
+	_isChunked(false),
+	_currChunkSize(-1),
+	_chunkedBytesProcessed(0)
 {
 }
 
@@ -41,7 +44,10 @@ Request::Request(const Request &copy) :
 	_contentLength(copy._contentLength),
 	_raw(copy._raw),
 	_state(copy._state),
-	_limit(copy._limit)
+	_limit(copy._limit),
+	_isChunked(copy._isChunked),
+	_currChunkSize(copy._currChunkSize),
+	_chunkedBytesProcessed(copy._chunkedBytesProcessed)
 {
 }
 
@@ -60,6 +66,9 @@ Request
 		_raw = other._raw;
 		_state = other._state;
 		_limit = other._limit;
+		_isChunked = other._isChunked;
+		_currChunkSize = other._currChunkSize;
+		_chunkedBytesProcessed = other._chunkedBytesProcessed;
 	}
 	return *this;
 }
@@ -123,29 +132,89 @@ Request::_handleHeaders()
 void
 Request::_handleBody()
 {
-	size_t	curr_body_size = _raw.size() - _headerSize;
-
-	// Check if the current payload exceeds the server configuration limits
-	if (curr_body_size > _limit)
+	// CASE 1: Standard read with Content-Length
+	if (!_isChunked)
 	{
-		_state = ERROR;
-		_errCode = Http::PAYLOAD_TOO_LARGE;
+		size_t	curr_body_size = _raw.size() - _headerSize;
+
+		// Check if the current payload exceeds the server configuration limits
+		if (curr_body_size > _limit)
+		{
+			_state = ERROR;
+			_errCode = Http::PAYLOAD_TOO_LARGE;
+			return;
+		}
+
+		// Safety check to ensure the payload chunk doesn't overflow Content-Length
+		if (curr_body_size > _contentLength)
+		{
+			_state = ERROR;
+			_errCode = Http::BAD_REQUEST;
+			return;
+		}
+
+		// Transition state once the complete expected body bytes are received
+		if (curr_body_size == _contentLength)
+		{
+			_body = _raw.substr(_headerSize, _contentLength);
+			_state = COMPLETE;
+		}
 		return;
 	}
 
-	// Safety check to ensure the payload chunk doesn't overflow Content-Length
-	if (curr_body_size > _contentLength)
-	{
-		_state = ERROR;
-		_errCode = Http::BAD_REQUEST;
-		return;
-	}
+	// CASE 2: Chunked read (Transfer-Encoding: chunked)
+	if (_chunkedBytesProcessed == 0)
+		_chunkedBytesProcessed = _headerSize; // Initialisation after headers
 
-	// Transition state once the complete expected body bytes are received
-	if (curr_body_size == _contentLength)
+	while (_state == READING_BODY)
 	{
-		_body = _raw.substr(_headerSize, _contentLength);
-		_state = COMPLETE;
+		// A. Look for the chunk size
+		if (_currChunkSize == -1)
+		{
+			size_t	crlf_pos = _raw.find("\r\n", _chunkedBytesProcessed);
+			if (crlf_pos == std::string::npos)
+				break; // Waiting for more data from the socket (non-blocking)
+
+			std::string			hexSize = _raw.substr(_chunkedBytesProcessed,
+											crlf_pos - _chunkedBytesProcessed);
+			std::stringstream	ss;
+			ss << std::hex << hexSize;
+			ss >> _currChunkSize;
+
+			if (ss.fail())
+			{
+				_state = ERROR;
+				_errCode = Http::BAD_REQUEST;
+				return;
+			}
+			// A chunk of size 0 indicates the end of the request
+			if (_currChunkSize == 0)
+			{
+				_state = COMPLETE;
+				break;
+			}
+			_chunkedBytesProcessed = crlf_pos + 2; // Skip the \r\n after the size
+		}
+		// B. Extract chunk data
+		else
+		{
+			// Check if we received the full chunk + trailing \r\n
+			if (_raw.size() < _chunkedBytesProcessed + _currChunkSize + 2)
+				break; // Waiting for more data
+
+			// Add pure data to our decoded body
+			_body += _raw.substr(_chunkedBytesProcessed, _currChunkSize);
+
+			// Safeguard against oversized payloads
+			if (_body.size() > _limit)
+			{
+				_state = ERROR;
+				_errCode = Http::PAYLOAD_TOO_LARGE;
+				return;
+			}
+			_chunkedBytesProcessed += _currChunkSize + 2; // +2 for the \r\n
+			_currChunkSize = -1; // Reset for the next chunk
+		}
 	}
 }
 
@@ -190,17 +259,26 @@ Request::_parseRawHeaders(const std::string &headers_part)
 		}
 	}
 
-	// --- 3. EXTRACT CONTENT-LENGTH METADATA ---
-	if (_headers.count("Content-Length"))
-		_contentLength = std::atoi(_headers["Content-Length"].c_str());
-	else
-		_contentLength = 0;
-
-	// Decide if to read a body is needed based on method type and payload markers
-	if (_method == "POST" && _contentLength > 0)
+	// --- 3. EXTRACT METADATA ---
+	if (_headers.count("Transfer-Encoding") &&
+		_headers["Transfer-Encoding"].find("chunked") != std::string::npos)
+	{
+		_isChunked = true;
 		_state = READING_BODY;
+	}
+	else if (_headers.count("Content-Length"))
+	{
+		_contentLength = std::atoi(_headers["Content-Length"].c_str());
+		if (_contentLength > 0)
+			_state = READING_BODY;
+		else
+			_state = COMPLETE;
+	}
 	else
+	{
+		_contentLength = 0;
 		_state = COMPLETE;
+	}
 }
 
 /* -------------------------------- GETTERS --------------------------------- */

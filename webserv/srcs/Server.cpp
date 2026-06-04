@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:40 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/04 15:08:13 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/04 16:02:09 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -201,25 +201,49 @@ Server::handleRead(int client_fd)
 			return Server::STATIC_READY;
 		}
 
-		// Determine Local Root Folder Override
-		std::string	activeRoot = (loc && !loc->getRoot().empty())
-								  ? loc->getRoot() : _config.getFolderRoot();
+		// --- ROBUST PATH RESOLUTION START ---
+		// 1. Get the base root and default index for this location
+		std::string	activeRoot = (loc && !loc->getRoot().empty()) ? loc->getRoot() : _config.getFolderRoot();
+		std::string	currentIndex = (loc && !loc->getIndex().empty()) ? loc->getIndex() : _config.getHomePage();
 
-		// Fallback home page setup if path hits base directory
-		std::string	activePath = path;
-		if (activePath == "/")
-			activePath = (loc && !loc->getRoot().empty())
-						  ? loc->getIndex() : _config.getHomePage();
+		// 2. Resolve the relative path by removing the location prefix (essential for the tester's /directory/ route)
+		std::string	relPath = path;
+		if (loc)
+		{
+			std::string	locPath = loc->getPath();
+			if (relPath.find(locPath) == 0)
+				relPath = relPath.substr(locPath.length());
+		}
 
-		std::string	fullPath = activeRoot + "/" + (activePath[0] == '/'
-							   ? activePath.substr(1) : activePath);
+		// 3. If the request targets a directory layout, append the default index file safely
+		if (relPath.empty() || relPath[relPath.size() - 1] == '/')
+		{
+			if (!currentIndex.empty() && currentIndex[0] == '/')
+				relPath += currentIndex.substr(1);
+			else
+				relPath += currentIndex;
+		}
+
+		// 4. Robust Path Joining: strip any trailing slashes from the root string
+		while (!activeRoot.empty() && activeRoot[activeRoot.size() - 1] == '/')
+			activeRoot.erase(activeRoot.size() - 1);
+
+		// 5. Ensure the relative path always starts with exactly one leading slash
+		if (relPath.empty() || relPath[0] != '/')
+			relPath = "/" + relPath;
+
+		// 6. Combine them into a flawless absolute path
+		std::string	fullPath = activeRoot + relPath;
+		// --- ROBUST PATH RESOLUTION END ---
 
 		// CASE A: CGI Processing
 		bool	isCgi = false;
 
-		if (activePath.size() >= 3 && activePath.substr(activePath.size() - 3) == ".py")
+		if (fullPath.size() >= 3 && fullPath.substr(fullPath.size() - 3) == ".py")
 			isCgi = true;
-		else if (activePath.size() >= 4 && activePath.substr(activePath.size() - 4) == ".php")
+		else if (fullPath.size() >= 4 && fullPath.substr(fullPath.size() - 4) == ".php")
+			isCgi = true;
+		else if (fullPath.size() >= 4 && fullPath.substr(fullPath.size() - 4) == ".bla")
 			isCgi = true;
 
 		if (isCgi)

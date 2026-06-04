@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/24 16:54:54 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/03 23:12:33 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/04 16:33:52 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,8 +41,13 @@ CGI::~CGI()
 	// Reap the child process to prevent zombie process leaks
 	if (_pid > 0)
 	{
-		kill(_pid, SIGKILL);
-		waitpid(_pid, NULL, 0);
+		int	status;
+
+		if (waitpid(_pid, &status, WNOHANG) == 0)
+		{
+			kill(_pid, SIGKILL);
+			waitpid(_pid, NULL, 0); // On récolte le zombie proprement
+		}
 	}
 
 	// Free dynamically allocated memory inside the environment matrix
@@ -132,7 +137,7 @@ CGI::execute(const Request &req, const std::string &script_path)
 		fcntl(_pipe_out[0], F_SETFL, O_NONBLOCK);
 
 		_clearEnv();
-		return Http::INTERNAL_SERVER_ERROR;
+		return Http::OK;
 	}
 }
 

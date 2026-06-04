@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/25 14:09:02 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/04 15:05:24 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/04 16:12:25 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,6 @@
 
 # include "HttpStatus.hpp"
 # include "Utils.hpp"
-
-
 
 class Request
 {
@@ -49,6 +47,10 @@ private:
 	State								_state;
 	size_t								_limit;
 	int									_errCode;
+
+	bool								_isChunked;
+	long								_currChunkSize;
+	size_t								_chunkedBytesProcessed;
 
 	/* --- Private Internal Helpers --- */
 	void	_handleHeaders();
