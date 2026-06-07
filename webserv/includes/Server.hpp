@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:32 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/04 16:46:30 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/07 14:38:29 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,10 +36,6 @@
 # include <map>
 
 extern volatile sig_atomic_t	g_stop;
-
-
-
-
 
 class Server
 {

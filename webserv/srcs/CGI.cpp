@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/24 16:54:54 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/04 17:47:00 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/07 16:09:17 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,6 +124,9 @@ CGI::execute(const Request &req, const std::string &script_path)
 
 		// Execute the script directly
 		execve(args[0], args, &_env[0]);
+
+		std::string	error_msg = "Status: 500 Internal Server Error\r\nContent-Type: text/html\r\n\r\n";
+		write(STDOUT_FILENO, error_msg.c_str(), error_msg.size());
 		exit(1); // If execve fails (e.g., script is not executable or shebang is malformed)
 	}
 	else // PARENT PROCESS

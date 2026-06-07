@@ -6,14 +6,14 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/03/09 15:17:52 by erazumov          #+#    #+#              #
-#    Updated: 2026/06/04 16:48:55 by erazumov         ###   ########.fr        #
+#    Updated: 2026/06/07 15:57:42 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME       = webserv
 
 CC         = c++
-FLAGS      = -Wall -Wextra -Werror -std=c++98
+FLAGS      = -Wall -Wextra -Werror -std=c++98 -fsanitize=address,undefined
 INC        = -I includes
 
 SRC_FILES  = main.cpp \

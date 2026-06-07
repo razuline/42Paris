@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/28 13:46:06 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/27 16:30:06 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/07 16:21:34 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -137,6 +137,14 @@ Config::parse(const std::string &filename)
 					loc.setRedirect(Utils::trim(line.substr(6)));
 				else if (line.find("upload_store") == 0)
 					loc.setUploadStore(Utils::trim(line.substr(12)));
+				else if (line.find("client_max_body_size") == 0)
+				{
+					std::string			value = Utils::trim(line.substr(20));
+					std::stringstream	ss(value);
+					size_t				localSize = 0;
+					ss >> localSize;
+					loc.setClientMaxBodySize(localSize);
+				}
 				else if (line.find("autoindex") == 0)
 				{
 					std::string	flag = Utils::trim(line.substr(9));

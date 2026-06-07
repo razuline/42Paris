@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/27 17:23:49 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/04 15:11:27 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/07 15:53:09 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,6 +75,7 @@ Response::defaultErrorPage(int code)
 {
 	setStatus(code);
 	setHeader("Content-Type", "text/html");
+	setHeader("Connection", "close");
 
 	std::string			phrase = _getReasonPhrase(code);
 	std::stringstream	ss;

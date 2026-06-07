@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:40 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/04 17:41:54 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/07 16:32:20 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -170,6 +170,17 @@ Server::handleRead(int client_fd)
 		// Dynamic Location Routing Match
 		const Location	*loc = _matchLocation(path);
 
+		if (loc && loc->getClientMaxBodySize() > 0)
+		{
+			if (curr.getBody().size() > loc->getClientMaxBodySize())
+			{
+				std::cerr << "[Server] Local location payload limit exceeded. Sending 413." << std::endl;
+				response.defaultErrorPage(Http::PAYLOAD_TOO_LARGE);
+				_resps[client_fd] = response;
+				return Server::STATIC_READY;
+			}
+		}
+
 		// Check allowed HTTP methods
 		if (loc && !loc->getMethods().empty())
 		{
@@ -201,7 +212,6 @@ Server::handleRead(int client_fd)
 			return Server::STATIC_READY;
 		}
 
-		// --- ROBUST PATH RESOLUTION START ---
 		// 1. Get the base root and default index for this location
 		std::string	activeRoot = (loc && !loc->getRoot().empty()) ? loc->getRoot() : _config.getFolderRoot();
 		std::string	currentIndex = (loc && !loc->getIndex().empty()) ? loc->getIndex() : _config.getHomePage();
@@ -234,7 +244,6 @@ Server::handleRead(int client_fd)
 
 		// 6. Combine them into a flawless absolute path
 		std::string	fullPath = activeRoot + relPath;
-		// --- ROBUST PATH RESOLUTION END ---
 
 		// CASE A: CGI Processing
 		bool	isCgi = false;
@@ -334,6 +343,7 @@ Server::handleRead(int client_fd)
 					response.setStatus(Http::CREATED);
 					response.setBody("<html><body><h1>201 Created</h1><p>File written successfully.</p></body></html>");
 					response.setHeader("Content-Type", "text/html");
+					response.setHeader("Connection", "close");
 				}
 			}
 			// --- HANDLE DELETE METHOD (File Removal) ---
@@ -353,6 +363,7 @@ Server::handleRead(int client_fd)
 						response.setStatus(Http::OK);
 						response.setBody("<html><body><h1>200 OK</h1><p>File deleted successfully.</p></body></html>");
 						response.setHeader("Content-Type", "text/html");
+						response.setHeader("Connection", "close");
 					}
 				}
 			}
@@ -452,17 +463,17 @@ const Location
 	for (size_t i = 0; i < locs.size(); ++i)
 	{
 		const std::string	&locPath = locs[i].getPath();
-		if (locPath[0] == '.' && path.size() >= locPath.size())
+		if (!locPath.empty() && locPath[0] == '.' && path.size() >= locPath.size())
 		{
 			if (path.substr(path.size() - locPath.size()) == locPath)
 				return &locs[i];
 		}
-
-		// Check if the request URI path matches the location prefix rule
-		for (size_t i = 0; i < locs.size(); ++i)
+	}
+	// Check if the request URI path matches the location prefix rule
+	for (size_t i = 0; i < locs.size(); ++i)
 	{
 		const std::string	&locPath = locs[i].getPath();
-		if (locPath[0] != '.' && path.find(locPath) == 0)
+		if (!locPath.empty() && locPath[0] != '.' && path.find(locPath) == 0)
 		{
 			if (locPath.size() > longestMatchLen)
 			{
@@ -470,7 +481,6 @@ const Location
 				bestMatch = &locs[i];
 			}
 		}
-	}
 	}
 	return bestMatch;
 }

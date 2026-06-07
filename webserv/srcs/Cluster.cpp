@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 17:16:00 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/04 16:46:40 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/07 16:39:55 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -215,22 +215,12 @@ void
 Cluster::_handleClientWrite(int fd, Server &server)
 {
 	// Process non-blocking data transmission stream
-	int	status = server.handleWrite(fd);
+	int		status = server.handleWrite(fd);
 
 	if (status <= Server::WRITE_ERROR)
 		_closeConnection(fd);
 	else if (status == Server::WRITE_COMPLETE)
-	{
-		// HTTP Keep-Alive: Reset target poll event back to POLLIN to await next request
-		for (size_t i = 0; i < _fds.size(); ++i)
-		{
-			if (_fds[i].fd == fd)
-			{
-				_fds[i].events = POLLIN;
-				break;
-			}
-		}
-	}
+		_closeConnection(fd);
 }
 
 void
