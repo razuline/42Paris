@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 17:16:00 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/07 16:39:55 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/07 21:14:34 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -194,13 +194,13 @@ Cluster::_handleClientRead(int fd, Server &server)
 		int				cgi_write_fd = server.getWriteFd(fd);
 		int				cgi_read_fd = server.getReadFd(fd);
 
-		struct pollfd	pfd_write;
+		struct	pollfd	pfd_write;
 		pfd_write.fd = cgi_write_fd;
 		pfd_write.events = POLLOUT;
 		pfd_write.revents = 0;
 		_fds.push_back(pfd_write);
 
-		struct pollfd	pfd_read;
+		struct	pollfd	pfd_read;
 		pfd_read.fd = cgi_read_fd;
 		pfd_read.events = POLLIN;
 		pfd_read.revents = 0;

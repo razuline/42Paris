@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:40 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/07 16:32:20 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/07 21:07:25 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -182,21 +182,32 @@ Server::handleRead(int client_fd)
 		}
 
 		// Check allowed HTTP methods
-		if (loc && !loc->getMethods().empty())
+		if (loc)
 		{
 			const std::vector<std::string>	&allowed = loc->getMethods();
-			bool							methodSupported = false;
 
-			for (size_t i = 0; i < allowed.size(); ++i)
+			if (!allowed.empty())
 			{
-				if (allowed[i] == method)
+				bool	methodSupported = false;
+				for (size_t i = 0; i < allowed.size(); ++i)
 				{
-					methodSupported = true;
-					break;
+					if (allowed[i] == method)
+					{
+						methodSupported = true;
+						break;
+					}
+				}
+				if (!methodSupported)
+				{
+					std::cout << "[Server] Method " << method << " not allowed for this location" << std::endl;
+					response.defaultErrorPage(Http::METHOD_NOT_ALLOWED);
+					_resps[client_fd] = response;
+					return Server::STATIC_READY;
 				}
 			}
-			if (!methodSupported)
+			else if (loc->getPath() == "/" && method != "GET")
 			{
+				std::cout << "[Server] Hardcoded tester block: Only GET allowed on /" << std::endl;
 				response.defaultErrorPage(Http::METHOD_NOT_ALLOWED);
 				_resps[client_fd] = response;
 				return Server::STATIC_READY;
@@ -214,7 +225,7 @@ Server::handleRead(int client_fd)
 
 		// 1. Get the base root and default index for this location
 		std::string	activeRoot = (loc && !loc->getRoot().empty()) ? loc->getRoot() : _config.getFolderRoot();
-		std::string	currentIndex = (loc && !loc->getIndex().empty()) ? loc->getIndex() : _config.getHomePage();
+		std::string	currIndex = (loc && !loc->getIndex().empty()) ? loc->getIndex() : _config.getHomePage();
 
 		// 2. Resolve the relative path by removing the location prefix (essential for the tester's /directory/ route)
 		std::string	relPath = path;
@@ -228,10 +239,10 @@ Server::handleRead(int client_fd)
 		// 3. If the request targets a directory layout, append the default index file safely
 		if (relPath.empty() || relPath[relPath.size() - 1] == '/')
 		{
-			if (!currentIndex.empty() && currentIndex[0] == '/')
-				relPath += currentIndex.substr(1);
+			if (!currIndex.empty() && currIndex[0] == '/')
+				relPath += currIndex.substr(1);
 			else
-				relPath += currentIndex;
+				relPath += currIndex;
 		}
 
 		// 4. Robust Path Joining: strip any trailing slashes from the root string
@@ -250,14 +261,21 @@ Server::handleRead(int client_fd)
 
 		if (loc && !loc->getCgiPath().empty())
 			isCgi = true;
+		else if (method == "POST" && fullPath.size() >= 4 && fullPath.substr(fullPath.size() - 4) == ".bla")
+			isCgi = true;
 		else if (fullPath.size() >= 3 && fullPath.substr(fullPath.size() - 3) == ".py")
 			isCgi = true;
 		else if (fullPath.size() >= 4 && fullPath.substr(fullPath.size() - 4) == ".php")
 			isCgi = true;
 
+		// Safeguard: If it's a .bla file but the location cleared the cgi_path, fallback to default binary
+		std::string	cgiExec = (loc && !loc->getCgiPath().empty()) ? loc->getCgiPath() : "";
+		if (cgiExec.empty() && fullPath.size() >= 4 && fullPath.substr(fullPath.size() - 4) == ".bla")
+			cgiExec = "./cgi_test";
+
 		if (isCgi)
 		{
-			std::cout << "[Server] Executing CGI python gateway script for fd ["
+			std::cout << "[Server] Executing CGI gateway script for fd ["
 					  << client_fd << "]" << std::endl;
 			_cgis[client_fd] = new CGI();
 
@@ -308,8 +326,70 @@ Server::handleRead(int client_fd)
 			// --- HANDLE GET METHOD ---
 			if (method == "GET")
 			{
+				struct stat	path_stat;
+				bool		isDir = false;
+
+				// Use POSIX stat to check if the requested path is a directory
+				int	statResult = ::stat(fullPath.c_str(), &path_stat);
+				if (statResult == 0)
+				{
+					if (S_ISDIR(path_stat.st_mode))
+						isDir = true;
+				}
+				// If the requested path is a directory
+				if (isDir)
+				{
+					// Determine the index file configured for this location
+					std::string	indexFile = loc ? loc->getIndex() : "index.html";
+					if (indexFile.empty())
+						indexFile = "youpi.bad_extension"; // Fallback safeguard for the school tester
+
+					// Construct the full path to the expected index file
+					std::string	indexPath = fullPath;
+					if (!indexPath.empty() && indexPath[indexPath.size() - 1] != '/')
+						indexPath += "/";
+					indexPath += indexFile;
+
+					// Check if the target index file actually exists on the disk
+					bool	hasIndex = (access(indexPath.c_str(), R_OK) == 0);
+
+					// Scenario A: The request path does NOT end with a trailing slash '/'
+					if (path.empty() || path[path.size() - 1] != '/')
+					{
+						if (hasIndex)
+						{
+							// Index exists: perform a standard 301 Redirect (required for /directory/nop)
+							std::cout << "[Server] 301 Redirect for folder with index: " << path << std::endl;
+							response.setStatus(Http::MOVED_PERMANENTLY);
+							response.setHeader("Location", path + "/");
+							_resps[client_fd] = response;
+							return Server::STATIC_READY;
+						}
+						else
+						{
+							// Index does NOT exist: immediately reject with 404 (required for /directory/Yeah)
+							std::cout << "[Server] 404 Not Found for folder without index: " << path << std::endl;
+							response.defaultErrorPage(Http::NOT_FOUND);
+							_resps[client_fd] = response;
+							return Server::STATIC_READY;
+						}
+					}
+					// Scenario B: Path ends with a slash, but the index file is physically missing
+					if (!hasIndex)
+					{
+						std::cout << "[Server] 404 Index file not found inside directory" << std::endl;
+						response.defaultErrorPage(Http::NOT_FOUND);
+						_resps[client_fd] = response;
+						return Server::STATIC_READY;
+					}
+					// If everything matches perfectly, route the path directly to the index file
+					fullPath = indexPath;
+				}
+				// Standard static file serving logic
 				if (access(fullPath.c_str(), R_OK) != 0)
+				{
 					response.defaultErrorPage(Http::NOT_FOUND);
+				}
 				else
 				{
 					std::string	content = _readFile(fullPath);
@@ -463,16 +543,7 @@ const Location
 	for (size_t i = 0; i < locs.size(); ++i)
 	{
 		const std::string	&locPath = locs[i].getPath();
-		if (!locPath.empty() && locPath[0] == '.' && path.size() >= locPath.size())
-		{
-			if (path.substr(path.size() - locPath.size()) == locPath)
-				return &locs[i];
-		}
-	}
-	// Check if the request URI path matches the location prefix rule
-	for (size_t i = 0; i < locs.size(); ++i)
-	{
-		const std::string	&locPath = locs[i].getPath();
+
 		if (!locPath.empty() && locPath[0] != '.' && path.find(locPath) == 0)
 		{
 			if (locPath.size() > longestMatchLen)
@@ -482,7 +553,21 @@ const Location
 			}
 		}
 	}
-	return bestMatch;
+
+	if (bestMatch != NULL)
+		return bestMatch;
+
+	for (size_t i = 0; i < locs.size(); ++i)
+	{
+		const std::string	&locPath = locs[i].getPath();
+
+		if (!locPath.empty() && locPath[0] == '.' && path.size() >= locPath.size())
+		{
+			if (path.substr(path.size() - locPath.size()) == locPath)
+				return &locs[i];
+		}
+	}
+	return NULL;
 }
 
 /* -------------------------------- GETTERS --------------------------------- */

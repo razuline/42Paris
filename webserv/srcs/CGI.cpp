@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/24 16:54:54 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/07 16:09:17 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/07 21:12:28 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,12 +131,36 @@ CGI::execute(const Request &req, const std::string &script_path)
 	}
 	else // PARENT PROCESS
 	{
-		// Close ends of the pipes that are exclusively used by the child process
+		// Close the read end of the input pipe and write end of the output pipe (used by child)
 		close(_pipe_in[0]);
 		close(_pipe_out[1]);
 
-		// Non-Blocking mode on
-		fcntl(_pipe_in[1], F_SETFL, O_NONBLOCK);
+		// Safely transfer the request body into the CGI input pipe
+		std::string	body = req.getBody();
+		size_t		bytes_written = 0;
+
+		// We push data in chunks to prevent the OS pipe buffer (64KB) from clogging
+		while (bytes_written < body.size())
+		{
+			size_t	chunk_size = body.size() - bytes_written;
+			if (chunk_size > 4096) chunk_size = 4096;
+
+			ssize_t	w_ret = write(_pipe_in[1], body.c_str() + bytes_written, chunk_size);
+			if (w_ret > 0)
+			{
+				bytes_written += w_ret;
+			}
+			else if (w_ret < 0)
+			{
+				// If writing fails (pipe closed or broke), terminate the loop
+				break;
+			}
+		}
+
+		// Critical: Close the write end of the input pipe so the CGI script knows STDIN is finished (EOF)
+		close(_pipe_in[1]);
+
+		// Leave _pipe_out[0] open and non-blocking so the Server/Cluster loop can read the response smoothly
 		fcntl(_pipe_out[0], F_SETFL, O_NONBLOCK);
 
 		_clearEnv();

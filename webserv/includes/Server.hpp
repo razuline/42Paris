@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:32 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/07 14:38:29 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/07 20:15:55 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,8 @@
 # include <cstring>
 # include <fcntl.h>
 # include <sys/socket.h>
+# include <sys/stat.h>
+# include <sys/types.h>
 # include <netinet/in.h>
 # include <vector>
 # include <sys/poll.h>
