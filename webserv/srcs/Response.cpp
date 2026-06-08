@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/27 17:23:49 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/07 15:53:09 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/08 13:06:58 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,14 +75,13 @@ Response::defaultErrorPage(int code)
 {
 	setStatus(code);
 	setHeader("Content-Type", "text/html");
-	setHeader("Connection", "close");
 
 	std::string			phrase = _getReasonPhrase(code);
 	std::stringstream	ss;
 	ss << code;
 	std::string			codeStr = ss.str();
 
-	_body =
+	std::string	body =
 		"<html><head><title>" + codeStr + " " + phrase + "</title></head>"
 		"<body style='background-color: #0f172a; color: #f8fafc; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;'>"
 		"<div style='text-align: center;'>"
@@ -92,6 +91,8 @@ Response::defaultErrorPage(int code)
 		"<p style='font-size: 12px; color: #475569;'>webserv/1.0 (42 Paris)</p>"
 		"</div>"
 		"</body></html>";
+
+	setBody(body);
 }
 
 /* ------------------------- PRIVATE INTERNAL HELPERS ----------------------- */
@@ -133,7 +134,13 @@ Response::_getReasonPhrase(int code)
 
 
 
-/* -------------------------------- SETTERS --------------------------------- */
+/* --------------------------- SETTERS / GETTERS ---------------------------- */
+
+int
+Response::getStatus() const
+{
+	return _status;
+}
 
 void
 Response::setStatus(int code)

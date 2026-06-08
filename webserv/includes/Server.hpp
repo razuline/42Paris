@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:32 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/07 20:15:55 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/08 18:40:41 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,8 +71,17 @@ private:
 
 	/* --- Private Internal Helpers --- */
 	std::string			_readFile(const std::string &path);
-	void				_clearClientState(int client_fd);
 	const Location		*_matchLocation(const std::string &path) const;
+
+	/* --- Split Handlers for handleRead --- */
+	ReadStatus			_execCompetedOrder(int client_fd, Request &req);
+	bool				_checkIncMethod(const Location *loc, const std::string &method) const;
+	bool				_isCgiResource(const Location *loc, const std::string &method, const std::string &path) const;
+
+	ReadStatus			_runStaticGet(int client_fd, std::string fullPath);
+	ReadStatus			_runStaticHead(int client_fd, std::string fullPath);
+	ReadStatus			_runStaticPostUpload(int client_fd, std::string fullPath);
+	ReadStatus			_runStaticDeleteFile(int client_fd, std::string fullPath);
 
 	// Hidden assignment operator
 	Server				&operator=(const Server &other);
@@ -91,7 +100,8 @@ public:
 	ReadStatus			handleRead(int client_fd);
 	WriteStatus			handleWrite(int client_fd);
 
-	void				clearClientState(int client_fd);
+	ReadStatus			clearClientState(int client_fd);
+	void				cleanupCgi(int client_fd);
 
 	/* --- Getters --- */
 	int					getServerFd() const;

@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/25 14:09:02 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/04 16:12:25 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/08 18:37:58 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,6 +68,7 @@ public:
 	bool	isComplete();
 	void	addData(std::string chunk);
 	void	setLimit(size_t limit);
+	void	clearButPreserveLeftover();
 
 	/* --- Getters --- */
 	const std::string	&getMethod() const;

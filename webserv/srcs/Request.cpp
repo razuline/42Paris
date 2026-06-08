@@ -6,53 +6,50 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/25 15:33:23 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/04 16:22:11 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/08 18:39:05 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
 
 // Standard 8 KB maximum limit for HTTP Request Headers fields
-const size_t	Request::HEADERS_SIZE = 8192;
+const size_t Request::HEADERS_SIZE = 8192;
 
 /* ------------------------- ORTHODOX CANONICAL FORM ------------------------ */
 
-Request::Request() :
-	_method(""),
-	_path(""),
-	_version(""),
-	_body(""),
-	_headerSize(0),
-	_contentLength(0),
-	_raw(""),
-	_state(READING_HEADERS),
-	_limit(1000000), // Default 1 Mb fallback
-	_errCode(Http::OK),
-	_isChunked(false),
-	_currChunkSize(-1),
-	_chunkedBytesProcessed(0)
+Request::Request() : _method(""),
+					 _path(""),
+					 _version(""),
+					 _body(""),
+					 _headerSize(0),
+					 _contentLength(0),
+					 _raw(""),
+					 _state(READING_HEADERS),
+					 _limit(1000000), // Default 1 Mb fallback
+					 _errCode(Http::OK),
+					 _isChunked(false),
+					 _currChunkSize(-1),
+					 _chunkedBytesProcessed(0)
 {
 }
 
-Request::Request(const Request &copy) :
-	_method(copy._method),
-	_path(copy._path),
-	_version(copy._version),
-	_headers(copy._headers),
-	_body(copy._body),
-	_headerSize(copy._headerSize),
-	_contentLength(copy._contentLength),
-	_raw(copy._raw),
-	_state(copy._state),
-	_limit(copy._limit),
-	_isChunked(copy._isChunked),
-	_currChunkSize(copy._currChunkSize),
-	_chunkedBytesProcessed(copy._chunkedBytesProcessed)
+Request::Request(const Request &copy) : _method(copy._method),
+										_path(copy._path),
+										_version(copy._version),
+										_headers(copy._headers),
+										_body(copy._body),
+										_headerSize(copy._headerSize),
+										_contentLength(copy._contentLength),
+										_raw(copy._raw),
+										_state(copy._state),
+										_limit(copy._limit),
+										_isChunked(copy._isChunked),
+										_currChunkSize(copy._currChunkSize),
+										_chunkedBytesProcessed(copy._chunkedBytesProcessed)
 {
 }
 
-Request
-&Request::operator=(const Request &other)
+Request &Request::operator=(const Request &other)
 {
 	if (this != &other)
 	{
@@ -90,7 +87,7 @@ Request::addData(std::string chunk)
 {
 	// Safeguard against malicious or malformed heavy header payload attacks
 	if (_state == READING_HEADERS &&
-	   (_raw.size() + chunk.size() > Request::HEADERS_SIZE))
+		(_raw.size() + chunk.size() > Request::HEADERS_SIZE))
 	{
 		_state = ERROR;
 		_errCode = Http::HEADER_FIELDS_TOO_LARGE;
@@ -112,18 +109,59 @@ Request::setLimit(size_t limit)
 	_limit = limit;
 }
 
+void
+Request::clearButPreserveLeftover()
+{
+	size_t	consumed = 0;
+	if (_state == COMPLETE)
+	{
+		if (_isChunked)
+			consumed = _chunkedBytesProcessed;
+		else
+			consumed = _headerSize + _contentLength;
+	}
+	else
+		consumed = _raw.size();
+
+	std::string	leftover = "";
+	if (_raw.size() > consumed)
+		leftover = _raw.substr(consumed);
+
+	_method.clear();
+	_path.clear();
+	_version.clear();
+	_headers.clear();
+	_body.clear();
+	_headerSize = 0;
+	_contentLength = 0;
+	_raw = leftover;
+	_state = READING_HEADERS;
+	_errCode = Http::OK;
+	_isChunked = false;
+	_currChunkSize = -1;
+	_chunkedBytesProcessed = 0;
+
+	// Automatically parse any leftover pipelined data immediately
+	if (!_raw.empty())
+	{
+		_handleHeaders();
+		if (_state == READING_BODY)
+			_handleBody();
+	}
+}
+
 /* ------------------------- PRIVATE INTERNAL HELPERS ----------------------- */
 
 void
 Request::_handleHeaders()
 {
 	// Look for the standard HTTP header/body boundary delimiter
-	size_t	pos = _raw.find("\r\n\r\n");
+	size_t pos = _raw.find("\r\n\r\n");
 
 	if (pos != std::string::npos)
 	{
 		_headerSize = pos + 4;
-		std::string	headers_part = _raw.substr(0, pos);
+		std::string headers_part = _raw.substr(0, pos);
 
 		_parseRawHeaders(headers_part);
 	}
@@ -135,7 +173,7 @@ Request::_handleBody()
 	// CASE 1: Standard read with Content-Length
 	if (!_isChunked)
 	{
-		size_t	curr_body_size = _raw.size() - _headerSize;
+		size_t curr_body_size = _raw.size() - _headerSize;
 
 		// Check if the current payload exceeds the server configuration limits
 		if (curr_body_size > _limit)
@@ -164,20 +202,29 @@ Request::_handleBody()
 
 	// CASE 2: Chunked read (Transfer-Encoding: chunked)
 	if (_chunkedBytesProcessed == 0)
-		_chunkedBytesProcessed = _headerSize; // Initialisation after headers
+	{
+		if (_headerSize == 0)
+		{
+			// If _headerSize isn't defined
+			_state = ERROR;
+			_errCode = Http::INTERNAL_SERVER_ERROR;
+			return;
+		}
+		_chunkedBytesProcessed = _headerSize;
+	}
 
 	while (_state == READING_BODY)
 	{
 		// A. Look for the chunk size
 		if (_currChunkSize == -1)
 		{
-			size_t	crlf_pos = _raw.find("\r\n", _chunkedBytesProcessed);
+			size_t crlf_pos = _raw.find("\r\n", _chunkedBytesProcessed);
 			if (crlf_pos == std::string::npos)
 				break; // Waiting for more data from the socket (non-blocking)
 
-			std::string			hexSize = _raw.substr(_chunkedBytesProcessed,
-											crlf_pos - _chunkedBytesProcessed);
-			std::stringstream	ss;
+			std::string hexSize = _raw.substr(_chunkedBytesProcessed,
+											  crlf_pos - _chunkedBytesProcessed);
+			std::stringstream ss;
 			ss << std::hex << hexSize;
 			ss >> _currChunkSize;
 
@@ -213,7 +260,7 @@ Request::_handleBody()
 				return;
 			}
 			_chunkedBytesProcessed += _currChunkSize + 2; // +2 for the \r\n
-			_currChunkSize = -1; // Reset for the next chunk
+			_currChunkSize = -1;						  // Reset for the next chunk
 		}
 	}
 }
@@ -221,8 +268,8 @@ Request::_handleBody()
 void
 Request::_parseRawHeaders(const std::string &headers_part)
 {
-	std::stringstream		ss(headers_part);
-	std::string				line;
+	std::stringstream ss(headers_part);
+	std::string line;
 
 	// --- 1. PARSE REQUEST-LINE (e.g., "GET /index.html HTTP/1.1") ---
 	if (std::getline(ss, line))
@@ -230,9 +277,9 @@ Request::_parseRawHeaders(const std::string &headers_part)
 		if (!line.empty() && line[line.size() - 1] == '\r')
 			line.erase(line.size() - 1);
 
-		std::stringstream	first_line_ss(line);
+		std::stringstream first_line_ss(line);
 		first_line_ss >> _method;  // Extract: POST
-		first_line_ss >> _path;    // Extract: /index.html
+		first_line_ss >> _path;	   // Extract: /index.html
 		first_line_ss >> _version; // Extract: HTTP/1.1
 	}
 
@@ -243,15 +290,15 @@ Request::_parseRawHeaders(const std::string &headers_part)
 			line.erase(line.size() - 1);
 
 		// Find the colon position to split Key and Value
-		size_t	colon = line.find(':');
+		size_t colon = line.find(':');
 		if (colon != std::string::npos)
 		{
 			// Extract Key and Value
-			std::string	key = line.substr(0, colon);
-			std::string	value = line.substr(colon + 1);
+			std::string key = line.substr(0, colon);
+			std::string value = line.substr(colon + 1);
 
 			// Strip leading spaces from the header field value data
-			size_t		first = value.find_first_not_of(' ');
+			size_t first = value.find_first_not_of(' ');
 			if (first != std::string::npos)
 				value = value.substr(first);
 
@@ -283,38 +330,33 @@ Request::_parseRawHeaders(const std::string &headers_part)
 
 /* -------------------------------- GETTERS --------------------------------- */
 
-const std::string
-&Request::getMethod() const
+const std::string &Request::getMethod() const
 {
 	return _method;
 }
 
-const std::string
-&Request::getPath() const
+const std::string &Request::getPath() const
 {
 	return _path;
 }
 
-const std::string
-&Request::getVersion() const
+const std::string &Request::getVersion() const
 {
 	return _version;
 }
 
-const std::string
-&Request::getHeader(const std::string &key) const
+const std::string &Request::getHeader(const std::string &key) const
 {
-	std::map<std::string, std::string>::const_iterator	it = _headers.find(key);
+	std::map<std::string, std::string>::const_iterator it = _headers.find(key);
 
 	if (it != _headers.end())
 		return it->second;
 
-	static std::string	empty = "";
+	static std::string empty = "";
 	return empty;
 }
 
-const std::string
-&Request::getBody() const
+const std::string &Request::getBody() const
 {
 	return _body;
 }
@@ -325,8 +367,7 @@ Request::getState() const
 	return _state;
 }
 
-int
-Request::getErrCode() const
+int Request::getErrCode() const
 {
 	return _errCode;
 }
