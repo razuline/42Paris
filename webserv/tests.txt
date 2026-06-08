@@ -1,0 +1,241 @@
+➜ webserv (main) ✗ ./tester http://127.0.0.1:8080
+Welcome in this little webserver tester.
+Passing the test here is the minimum before going to an evaluation.
+
+press enter to continue
+
+THIS TEST IS NOT MEANT TO BE THE ONLY TEST IN THE EVALUATION!!!
+
+press enter to continue
+
+Before starting please follow the next few steps (files content can be anything and will be shown to you by the test):
+- Download the cgi_test executable on the host
+- Create a directory YoupiBanane with:
+        - A file name youpi.bad_extension
+        - A file name youpi.bla
+        - A sub directory called nop
+                - A file name youpi.bad_extension in nop
+                - A file name other.pouic in nop
+        - A sub directory called Yeah
+                - A file name not_happy.bad_extension in Yeah
+press enter to continue
+
+Setup the configuration file as follow:
+- / must answer to GET request ONLY
+- Any file with .bla as extension must answer to POST request by calling the cgi_test executable
+- /post_body must answer anything to POST request with a maxBody of 100
+- /directory/ must answer to GET request and the root of it would be the repository YoupiBanane and if no file are requested, it should search for youpi.bad_extension files
+
+press enter to continue
+
+Before starting please verify that the server is launched
+press enter to continue
+
+
+Test GET http://127.0.0.1:8080/
+content returned: <html>
+<head>
+    <title>Pravetz</title>
+    <style>
+        html { color-scheme: light dark; }
+        body { width: 35em; margin: 0 auto;
+            font-family: Tahoma, Verdana, Arial, sans-serif; }
+    </style>
+</head>
+<body>
+<div>
+    <img src="img/pravetz.jpg" alt="Pravetz" width="500" height="600">
+</div>
+</body>
+</html>
+
+
+Test POST http://127.0.0.1:8080/ with a size of 0
+
+Test HEAD http://127.0.0.1:8080/
+
+Test GET http://127.0.0.1:8080/directory
+content returned: Goodbye
+
+
+Test GET http://127.0.0.1:8080/directory/youpi.bad_extension
+content returned: Goodbye
+
+
+Test GET http://127.0.0.1:8080/directory/youpi.bla
+content returned: PATH_INFO incorrect
+
+Test GET Expected 404 on http://127.0.0.1:8080/directory/oulalala
+content returned: <!DOCTYPE html>
+<html>
+<head>
+    <title>Error</title>
+    <style>
+        html { color-scheme: only light; }
+        body { width: 35em; margin: 0 auto;
+            font-family: Tahoma, Verdana, Arial, sans-serif; }
+    </style>
+</head>
+<body>
+<h1>404</h1>
+<p>The page could not be found on the server.</p>
+<p><em>Faithfully yours, Fintan.</em></p>
+</body>
+</html>
+
+
+Test GET http://127.0.0.1:8080/directory/nop
+content returned: Hello
+
+
+Test GET http://127.0.0.1:8080/directory/nop/
+content returned: Hello
+
+
+Test GET http://127.0.0.1:8080/directory/nop/other.pouic
+content returned:
+
+Test GET Expected 404 on http://127.0.0.1:8080/directory/nop/other.pouac
+content returned: <!DOCTYPE html>
+<html>
+<head>
+    <title>Error</title>
+    <style>
+        html { color-scheme: only light; }
+        body { width: 35em; margin: 0 auto;
+            font-family: Tahoma, Verdana, Arial, sans-serif; }
+    </style>
+</head>
+<body>
+<h1>404</h1>
+<p>The page could not be found on the server.</p>
+<p><em>Faithfully yours, Fintan.</em></p>
+</body>
+</html>
+
+
+Test GET Expected 404 on http://127.0.0.1:8080/directory/Yeah
+content returned: <!DOCTYPE html>
+<html>
+<head>
+    <title>Error</title>
+    <style>
+        html { color-scheme: only light; }
+        body { width: 35em; margin: 0 auto;
+            font-family: Tahoma, Verdana, Arial, sans-serif; }
+    </style>
+</head>
+<body>
+<h1>404</h1>
+<p>The page could not be found on the server.</p>
+<p><em>Faithfully yours, Fintan.</em></p>
+</body>
+</html>
+
+
+Test GET http://127.0.0.1:8080/directory/Yeah/not_happy.bad_extension
+content returned:
+
+Test POST http://127.0.0.1:8080/directory/youpi.bla with a size of 100000000
+
+ GET http://127.0.0.1:8080/directory/nop/
+content returned: Hello
+
+
+Test GET http://127.0.0.1:8080/directory/nop/other.pouic
+content returned:
+
+Test GET Expected 404 on http://127.0.0.1:8080/directory/nop/other.pouac
+content returned: <!DOCTYPE html>
+<html>
+<head>
+    <title>Error</title>
+    <style>
+        html { color-scheme: only light; }
+        body { width: 35em; margin: 0 auto;
+            font-family: Tahoma, Verdana, Arial, sans-serif; }
+    </style>
+</head>
+<body>
+<h1>404</h1>
+<p>The page could not be found on the server.</p>
+<p><em>Faithfully yours, Fintan.</em></p>
+</body>
+</html>
+
+
+Test GET Expected 404 on http://127.0.0.1:8080/directory/Yeah
+content returned: <!DOCTYPE html>
+<html>
+<head>
+    <title>Error</title>
+    <style>
+        html { color-scheme: only light; }
+        body { width: 35em; margin: 0 auto;
+            font-family: Tahoma, Verdana, Arial, sans-serif; }
+    </style>
+</head>
+<body>
+<h1>404</h1>
+<p>The page could not be found on the server.</p>
+<p><em>Faithfully yours, Fintan.</em></p>
+</body>
+</html>
+
+
+Test GET http://127.0.0.1:8080/directory/Yeah/not_happy.bad_extension
+content returned:
+
+Test POST http://127.0.0.1:8080/directory/youpi.bla with a size of 100000000➜ webserv (main) ✗ ./tester http://127.0.0.1:8080
+Welcome in this little webserver tester.
+Passing the test here is the minimum before going to an evaluation.
+
+press enter to continue
+
+THIS TEST IS NOT MEANT TO BE THE ONLY TEST IN THE EVALUATION!!!
+
+press enter to continue
+
+Before starting please follow the next few steps (files content can be anything and will be shown to you by the test):
+- Download the cgi_test executable on the host
+- Create a directory YoupiBanane with:
+        - A file name youpi.bad_extension
+        - A file name youpi.bla
+        - A sub directory called nop
+                - A file name youpi.bad_extension in nop
+                - A file name other.pouic in nop
+        - A sub directory called Yeah
+                - A file name not_happy.bad_extension in Yeah
+press enter to continue
+
+Setup the configuration file as follow:
+- / must answer to GET request ONLY
+- Any file with .bla as extension must answer to POST request by calling the cgi_test executable
+- /post_body must answer anything to POST request with a maxBody of 100
+- /directory/ must answer to GET request and the root of it would be the repository YoupiBanane and if no file are requested, it should search for youpi.bad_extension files
+
+press enter to continue
+
+Before starting please verify that the server is launched
+press enter to continue
+
+
+Test GET http://127.0.0.1:8080/
+content returned: <html>
+<head>
+    <title>Pravetz</title>
+    <style>
+        html { color-scheme: light dark; }
+        body { width: 35em; margin: 0 auto;
+            font-family: Tahoma, Verdana, Arial, sans-serif; }
+    </style>
+</head>
+<body>
+<div>
+    <img src="img/pravetz.jpg" alt="Pravetz" width="500" height="600">
+</div>
+</body>
+</html>
+
+
+Test POST http://127.0.0.1:8080/ with a size of 0

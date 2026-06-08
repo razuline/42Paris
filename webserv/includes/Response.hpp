@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/27 17:04:32 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/08 12:26:27 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/08 19:54:48 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@ public:
 	/* --- Core Methods --- */
 	std::string	build();
 	void		defaultErrorPage(int code);
+	void		clearBodyForHead();
 
 	/* --- Setters / Getters --- */
 	int			getStatus() const;

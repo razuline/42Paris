@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/24 16:54:31 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/03 22:38:12 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/08 21:20:21 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,7 @@ private:
 	/* --- Private Internal Helpers --- */
 	void	_initEnv(const Request &req, const std::string &script_path);
 	void	_clearEnv();
+	void	_cleanupPipes();
 
 public:
 	/* --- Orthodox Canonical Form --- */

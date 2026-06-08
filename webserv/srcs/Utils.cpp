@@ -6,11 +6,13 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/27 19:21:54 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/26 17:58:29 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/08 21:48:22 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Utils.hpp"
+
+#include <csignal>
 
 namespace Utils
 {
@@ -87,5 +89,12 @@ namespace Utils
 		closedir(dir);
 		html += "</ul>\n<hr>\n</body>\n</html>\n";
 		return html;
+	}
+
+	std::string Utils::toString(size_t number)
+	{
+		std::stringstream	ss;
+		ss << number;
+		return ss.str();
 	}
 }

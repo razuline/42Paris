@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 17:16:00 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/08 18:44:03 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/08 21:28:43 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -213,51 +213,61 @@ Cluster::_handleClientRead(int fd, Server &server)
 void
 Cluster::_handleClientWrite(int fd, Server &server)
 {
-	std::cout << "[Cluster] Success response sent. Resetting client fd ["
-			  << fd << "] back to POLLIN" << std::endl;
+	// Inspect the exact transmission metrics returned by the non-blocking socket
+	Server::WriteStatus status = server.handleWrite(fd);
 
-	for (size_t i = 0; i < _fds.size(); ++i)
+	if (status == Server::WRITE_ERROR)
 	{
-		if (_fds[i].fd == fd)
-		{
-			_fds[i].events = POLLIN;
-			_fds[i].revents = 0;
-			break;
-		}
+		_closeConnection(fd);
 	}
-
-	// Clear state and check if a pipelined request is already prepared to fire
-	Server::ReadStatus next_status = server.clearClientState(fd);
-	if (next_status == Server::STATIC_READY)
+	else if (status == Server::WRITE_COMPLETE)
 	{
+		std::cout << "[Cluster] Success response sent. Resetting client fd ["
+				  << fd << "] back to POLLIN" << std::endl;
+
 		for (size_t i = 0; i < _fds.size(); ++i)
 		{
 			if (_fds[i].fd == fd)
 			{
-				_fds[i].events = POLLOUT;
+				_fds[i].events = POLLIN;
+				_fds[i].revents = 0;
 				break;
 			}
 		}
-	}
-	else if (next_status == Server::CGI_READY)
-	{
-		int cgi_write_fd = server.getWriteFd(fd);
-		int cgi_read_fd = server.getReadFd(fd);
 
-		struct pollfd pfd_write;
-		pfd_write.fd = cgi_write_fd;
-		pfd_write.events = POLLOUT;
-		pfd_write.revents = 0;
-		_fds.push_back(pfd_write);
+		// Clear context and instantly fire the next pipelined request if it is already complete
+		Server::ReadStatus next_status = server.clearClientState(fd);
+		if (next_status == Server::STATIC_READY)
+		{
+			for (size_t i = 0; i < _fds.size(); ++i)
+			{
+				if (_fds[i].fd == fd)
+				{
+					_fds[i].events = POLLOUT; // Stay in write mode for the pipelined request immediately
+					break;
+				}
+			}
+		}
+		else if (next_status == Server::CGI_READY)
+		{
+			int cgi_write_fd = server.getWriteFd(fd);
+			int cgi_read_fd = server.getReadFd(fd);
 
-		struct pollfd pfd_read;
-		pfd_read.fd = cgi_read_fd;
-		pfd_read.events = POLLIN;
-		pfd_read.revents = 0;
-		_fds.push_back(pfd_read);
+			struct pollfd pfd_write;
+			pfd_write.fd = cgi_write_fd;
+			pfd_write.events = POLLOUT;
+			pfd_write.revents = 0;
+			_fds.push_back(pfd_write);
 
-		_pipeToClientMap[cgi_write_fd] = fd;
-		_pipeToClientMap[cgi_read_fd] = fd;
+			struct pollfd pfd_read;
+			pfd_read.fd = cgi_read_fd;
+			pfd_read.events = POLLIN;
+			pfd_read.revents = 0;
+			_fds.push_back(pfd_read);
+
+			_pipeToClientMap[cgi_write_fd] = fd;
+			_pipeToClientMap[cgi_read_fd] = fd;
+		}
 	}
 }
 
@@ -293,8 +303,8 @@ Cluster::_closeConnection(int fd)
 void
 Cluster::_handleCGIWrite(int pipe_write_fd, Server &server)
 {
-	int client_fd = _pipeToClientMap[pipe_write_fd];
-	std::string body = server.getRequestBody(client_fd);
+	int			client_fd = _pipeToClientMap[pipe_write_fd];
+	std::string	body = server.getRequestBody(client_fd);
 
 	// Clean up and exit immediately if there's no body payload to transmit
 	if (body.empty())
@@ -341,9 +351,9 @@ Cluster::_handleCGIRead(int pipe_read_fd, Server &server)
 {
 	std::cout << "[Cluster] Getting output from CGI pipe " << pipe_read_fd << std::endl;
 
-	char buff[4096];
-	int client_fd = _pipeToClientMap[pipe_read_fd];
-	int bytes_read = read(pipe_read_fd, buff, sizeof(buff) - 1);
+	char	buff[4096];
+	int		client_fd = _pipeToClientMap[pipe_read_fd];
+	int		bytes_read = read(pipe_read_fd, buff, sizeof(buff) - 1);
 
 	// Accumulate incoming script execution stream bytes
 	if (bytes_read > 0)
@@ -352,13 +362,13 @@ Cluster::_handleCGIRead(int pipe_read_fd, Server &server)
 		_cgiBuffs[client_fd] += std::string(buff, bytes_read); // Accumulate raw script output
 		return;
 	}
-	// Fault Tolerance: Script crashed or was killed (Returns SC_503 Service Unavailable)
+	  // Fault Tolerance: Script crashed or was killed
 	if (bytes_read < 0)
 	{
-		std::cerr << "[Cluster] CGI pipe crash detected. Sending HTTP [503]" << std::endl;
+		std::cerr << "[Cluster] CGI pipe crash detected. Sending HTTP [500]" << std::endl;
 
-		Response err_res;
-		err_res.defaultErrorPage(Http::OK);
+		Response	err_res;
+		err_res.defaultErrorPage(Http::INTERNAL_SERVER_ERROR);
 		server.setCgiResponse(client_fd, err_res);
 
 		close(pipe_read_fd);
@@ -378,8 +388,8 @@ Cluster::_handleCGIRead(int pipe_read_fd, Server &server)
 		return;
 	}
 
-	// Python script closed its write end: execution finished successfully
-	std::string cgiOutput = _cgiBuffs[client_fd];
+	// Script finished successfully - parse output
+	std::string	cgiOutput = _cgiBuffs[client_fd];
 	_cgiBuffs.erase(client_fd);
 
 	close(pipe_read_fd);
@@ -388,74 +398,109 @@ Cluster::_handleCGIRead(int pipe_read_fd, Server &server)
 
 	server.cleanupCgi(client_fd);
 
-	// Parse the script output stream to extract headers and payload
-	Response response;
-	size_t headerEnd = cgiOutput.find("\r\n\r\n");
+	// Parse CGI output
+	Response	response;
+	size_t		headerEnd = cgiOutput.find("\r\n\r\n");
 
 	if (headerEnd != std::string::npos)
 	{
-		std::string headersPart = cgiOutput.substr(0, headerEnd);
-		std::string bodyPart = cgiOutput.substr(headerEnd + 4);
+		// Case 1: Headers + body
+		std::string	headersPart = cgiOutput.substr(0, headerEnd);
+		std::string	bodyPart = cgiOutput.substr(headerEnd + 4);
 
-		response.setBody(bodyPart);
+		response.setBody(bodyPart); // This sets Content-Length automatically
 
-		int cgi_status_code = Http::OK;
-		bool has_content_type = false;
-		bool has_location = false;
+		int					cgi_status_code = Http::OK;
+		bool				has_content_type = false;
+		bool				has_location = false;
+		std::string			location_url;
 
-		std::stringstream header_ss(headersPart);
-		std::string line;
+		std::stringstream	header_ss(headersPart);
+		std::string			line;
 
-		// Extract custom gateway headers line by line
+		// Parse headers line by line
 		while (std::getline(header_ss, line))
 		{
+			// Remove trailing \r if present
 			if (!line.empty() && line[line.size() - 1] == '\r')
 				line.erase(line.size() - 1);
+
 			if (line.empty())
 				continue;
 
-			size_t colon = line.find(':');
+			size_t	colon = line.find(':');
 			if (colon != std::string::npos)
 			{
-				std::string key = Utils::trim(line.substr(0, colon));
-				std::string value = Utils::trim(line.substr(colon + 1));
+				std::string	key = Utils::trim(line.substr(0, colon));
+				std::string	value = Utils::trim(line.substr(colon + 1));
 
 				if (key == "Status")
 				{
-					std::stringstream status_ss(value);
+					// Parse status code (e.g., "Status: 404 Not Found")
+					std::stringstream	status_ss(value);
 					status_ss >> cgi_status_code;
+				}
+				else if (key == "Location")
+				{
+					has_location = true;
+					location_url = value;
+					response.setHeader("Location", value);
 				}
 				else
 				{
 					if (key == "Content-Type")
 						has_content_type = true;
-					if (key == "Location")
-						has_location = true;
 					response.setHeader(key, value); // Forward location, cookies, etc.
 				}
 			}
 		}
-		// CGI RFC Specification: Force 302 Redirect if Location header is present without Status
-		if (cgi_status_code == Http::OK && has_location)
+		// CGI RFC: If Location header is present without Status, it's a 302 redirect
+		if (has_location && cgi_status_code == Http::OK)
+		{
 			cgi_status_code = Http::FOUND;
+		}
 
 		response.setStatus(cgi_status_code);
 
-		// Fallback content-type metadata to safeguard browsers rendering
-		if (!has_content_type)
+		// Set default Content-Type if missing
+		if (!has_content_type && !has_location && !bodyPart.empty())
+		{
 			response.setHeader("Content-Type", "text/html");
+		}
+
+		// For redirects, ensure no body is sent
+		if (has_location && (cgi_status_code == Http::FOUND ||
+							 cgi_status_code == Http::MOVED_PERMANENTLY))
+		{
+			response.setBody("");  // Clear body, Content-Length becomes 0
+		}
+	}
+	else if (!cgiOutput.empty())
+	{
+		// Case 2: No headers, just raw output (treat as HTML)
+		response.setStatus(Http::OK);
+		response.setBody(cgiOutput);  // This sets Content-Length automatically
+		response.setHeader("Content-Type", "text/html");
 	}
 	else
 	{
-		// Raw script execution fallback if no headers are provided
-		response.setStatus(Http::OK);
-		response.setBody(cgiOutput);
-		response.setHeader("Content-Type", "text/html");
+		// Case 3: Empty response
+		response.setStatus(Http::NO_CONTENT);
+		response.setBody("");  // Content-Length: 0
+	}
+
+	// Ensure Content-Length is always set (Response::setBody already does this)
+	// But double-check for edge cases
+	if (response.getStatus() == Http::NO_CONTENT ||
+		(response.getStatus() >= 300 && response.getStatus() < 400))
+	{
+		// For 204 No Content and 3xx redirects, ensure no body
+		response.setBody("");
 	}
 
 	server.setCgiResponse(client_fd, response);
 
-	// Set target client socket back to POLLOUT to transmit data back to the client
+	// Switch target client socket back to POLLOUT
 	for (size_t i = 0; i < _fds.size(); ++i)
 	{
 		if (_fds[i].fd == client_fd)

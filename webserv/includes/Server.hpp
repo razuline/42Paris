@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:32 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/08 18:40:41 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/08 18:50:24 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,7 +76,8 @@ private:
 	/* --- Split Handlers for handleRead --- */
 	ReadStatus			_execCompetedOrder(int client_fd, Request &req);
 	bool				_checkIncMethod(const Location *loc, const std::string &method) const;
-	bool				_isCgiResource(const Location *loc, const std::string &method, const std::string &path) const;
+	bool				_isCgiResource(const Location *loc, const std::string &method,
+									   const std::string &path) const;
 
 	ReadStatus			_runStaticGet(int client_fd, std::string fullPath);
 	ReadStatus			_runStaticHead(int client_fd, std::string fullPath);

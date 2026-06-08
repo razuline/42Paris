@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/25 15:33:23 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/08 18:39:05 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/08 21:10:54 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -271,25 +271,29 @@ Request::_parseRawHeaders(const std::string &headers_part)
 	std::stringstream ss(headers_part);
 	std::string line;
 
-	// --- 1. PARSE REQUEST-LINE (e.g., "GET /index.html HTTP/1.1") ---
-	if (std::getline(ss, line))
+	// --- 1. PARSE REQUEST-LINE (Skip any leading empty lines/CRLFs as per RFC 7230) ---
+	while (std::getline(ss, line))
+	{
+		if (!line.empty() && line[line.size() - 1] == '\r')
+			line.erase(line.size() - 1);
+		if (!line.empty()) // Found the actual HTTP Request-Line!
+			break;
+	}
+
+	std::stringstream first_line_ss(line);
+	first_line_ss >> _method;
+	first_line_ss >> _path;
+	first_line_ss >> _version;
+
+	// --- 2. PARSE FIELDS HEADERS ---
+	while (std::getline(ss, line))
 	{
 		if (!line.empty() && line[line.size() - 1] == '\r')
 			line.erase(line.size() - 1);
 
-		std::stringstream first_line_ss(line);
-		first_line_ss >> _method;  // Extract: POST
-		first_line_ss >> _path;	   // Extract: /index.html
-		first_line_ss >> _version; // Extract: HTTP/1.1
-	}
+		if (line.empty()) // Empty boundary line discovered
+			break;
 
-	// --- 2. PARSE HTTP HEADER FIELDS (e.g., "Host: localhost") ---
-	while (std::getline(ss, line) && line != "\r" && !line.empty())
-	{
-		if (line[line.size() - 1] == '\r')
-			line.erase(line.size() - 1);
-
-		// Find the colon position to split Key and Value
 		size_t colon = line.find(':');
 		if (colon != std::string::npos)
 		{

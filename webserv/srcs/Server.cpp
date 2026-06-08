@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:40 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/08 18:41:52 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/08 21:46:38 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,8 +60,7 @@ Server::~Server()
 
 /* ------------------------------ CORE METHODS ------------------------------ */
 
-void
-Server::setup()
+void Server::setup()
 {
 	// 1. Create IPv4 TCP Socket
 	_serv_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -107,7 +106,7 @@ Server::handleRead(int client_fd)
 	char buff[4096];
 
 	// 1. Read raw bytes from the client socket without blocking
-	int	bytes_read = recv(client_fd, buff, sizeof(buff) - 1, 0);
+	int bytes_read = recv(client_fd, buff, sizeof(buff) - 1, 0);
 	if (bytes_read <= 0)
 	{
 		clearClientState(client_fd);
@@ -116,14 +115,14 @@ Server::handleRead(int client_fd)
 	buff[bytes_read] = '\0';
 
 	// 2. Push network data chunk into the client's dedicated Request state machine
-	Request	&curr = _reqs[client_fd];
+	Request &curr = _reqs[client_fd];
 	curr.setLimit(_config.getClientMaxBodySize());
 	curr.addData(std::string(buff, bytes_read));
 
 	// 3. Handle immediate request header or payload body limit errors
 	if (curr.getState() == Request::ERROR)
 	{
-		Response	res;
+		Response res;
 		res.defaultErrorPage(curr.getErrCode());
 		_resps[client_fd] = res;
 		return Server::STATIC_READY;
@@ -141,34 +140,32 @@ Server::WriteStatus
 Server::handleWrite(int client_fd)
 {
 	if (_writeBuffs.count(client_fd) == 0)
+	{
+		// FOR HEAD REQUESTS: Force empty body BEFORE building the response
+		if (_reqs.count(client_fd) && _reqs[client_fd].getMethod() == "HEAD")
+		{
+			_resps[client_fd].clearBodyForHead();  // Make sure this method exists
+			// OR directly: _resps[client_fd].setBody("");
+		}
 		_writeBuffs[client_fd] = _resps[client_fd].build();
+	}
 
-	const std::string &res_str = _writeBuffs[client_fd];
+	const std::string	&res_str = _writeBuffs[client_fd];
+	int					bytes_sent = send(client_fd, res_str.c_str(), res_str.size(), 0);
 
-	// Transmit data chunk through the client socket without blocking
-	int bytes_sent = send(client_fd, res_str.c_str(), res_str.size(), 0);
-
-	// Error handling: connection dropped or network failure
 	if (bytes_sent <= 0)
 	{
 		clearClientState(client_fd);
 		return WRITE_ERROR;
 	}
-
-	// Full response transmission success
 	if (static_cast<size_t>(bytes_sent) >= res_str.size())
 	{
 		std::cout << "[Server] Response successfully transmitted to client fd ["
 				  << client_fd << "]" << std::endl;
-
-		clearClientState(client_fd);
 		return WRITE_COMPLETE;
 	}
-
-	// Partial write tracking
 	_writeBuffs[client_fd] = res_str.substr(bytes_sent);
-
-	return WRITE_INCOMPLETE;
+	return Server::WRITE_INCOMPLETE;
 }
 
 Server::ReadStatus
@@ -177,7 +174,7 @@ Server::clearClientState(int client_fd)
 	_resps.erase(client_fd);
 	_writeBuffs.erase(client_fd);
 
-	std::map<int, CGI *>::iterator	it = _cgis.find(client_fd);
+	std::map<int, CGI *>::iterator it = _cgis.find(client_fd);
 	if (it != _cgis.end())
 	{
 		delete it->second;
@@ -196,12 +193,10 @@ Server::clearClientState(int client_fd)
 	return Server::READ_INCOMPLETE;
 }
 
-/* ------------------------- PRIVATE INTERNAL HELPERS ----------------------- */
-
 void
 Server::cleanupCgi(int client_fd)
 {
-	std::map<int, CGI *>::iterator it = _cgis.find(client_fd);
+	std::map<int, CGI *>::iterator	it = _cgis.find(client_fd);
 	if (it != _cgis.end())
 	{
 		pid_t pid = it->second->getPid();
@@ -215,6 +210,7 @@ Server::cleanupCgi(int client_fd)
 		_cgis.erase(it);
 	}
 }
+/* ------------------------- PRIVATE INTERNAL HELPERS ----------------------- */
 
 std::string
 Server::_readFile(const std::string &path)
@@ -248,7 +244,6 @@ const Location
 			}
 		}
 	}
-
 	if (bestMatch != NULL)
 		return bestMatch;
 
@@ -301,6 +296,8 @@ Server::_execCompetedOrder(int client_fd, Request &req)
 	if (!_checkIncMethod(loc, method))
 	{
 		response.defaultErrorPage(Http::METHOD_NOT_ALLOWED);
+		if (method == "HEAD")
+			response.setBody(""); // response.setSendBody(flase);
 		_resps[client_fd] = response;
 		return Server::STATIC_READY;
 	}
@@ -316,7 +313,8 @@ Server::_execCompetedOrder(int client_fd, Request &req)
 
 	// E. Resolve Base Paths
 	std::string	activeRoot = (loc && !loc->getRoot().empty())
-							  ? loc->getRoot() : _config.getFolderRoot();
+								 ? loc->getRoot()
+								 : _config.getFolderRoot();
 	std::string	relPath = path;
 	if (loc && relPath.find(loc->getPath()) == 0)
 		relPath = relPath.substr(loc->getPath().length());
@@ -324,7 +322,7 @@ Server::_execCompetedOrder(int client_fd, Request &req)
 	while (!activeRoot.empty() && activeRoot[activeRoot.size() - 1] == '/')
 		activeRoot.erase(activeRoot.size() - 1);
 
-	std::string normalRelPath = relPath;
+	std::string	normalRelPath = relPath;
 	if (normalRelPath.empty() || normalRelPath[0] != '/')
 		normalRelPath = "/" + normalRelPath;
 
@@ -350,7 +348,8 @@ Server::_execCompetedOrder(int client_fd, Request &req)
 	if (finalRelPath.empty() || finalRelPath[finalRelPath.size() - 1] == '/')
 	{
 		std::string currIndex = (loc && !loc->getIndex().empty())
-								 ? loc->getIndex() : _config.getHomePage();
+									? loc->getIndex()
+									: _config.getHomePage();
 		if (!currIndex.empty())
 		{
 			if (currIndex[0] == '/')
@@ -370,7 +369,7 @@ Server::_execCompetedOrder(int client_fd, Request &req)
 			indexCheck.close();
 			if (loc && loc->getAutoindex())
 			{
-				std::string	autoindexHtml = Utils::generateAutoindex(activeRoot + path, path);
+				std::string autoindexHtml = Utils::generateAutoindex(activeRoot + path, path);
 				if (!autoindexHtml.empty())
 				{
 					response.setStatus(Http::OK);
@@ -415,11 +414,10 @@ Server::_checkIncMethod(const Location *loc, const std::string &method) const
 			return false;
 		return true;
 	}
-
 	for (size_t i = 0; i < allowed.size(); ++i)
 	{
-		if (allowed[i] == method) return true;
-		if (method == "HEAD" && allowed[i] == "GET") return true;
+		if (allowed[i] == method)
+			return true;
 	}
 	return false;
 }
@@ -455,14 +453,16 @@ Server::_runStaticGet(int client_fd, std::string fullPath)
 
 	if (isDir)
 	{
-		std::string	indexFile = loc ? loc->getIndex() : "index.html";
-		if (indexFile.empty()) indexFile = "youpi.bad_extension";
+		std::string	indexFile = loc ? loc->getIndex() : _config.getHomePage();
+		if (indexFile.empty())
+			indexFile = "index.html";
 
 		std::string	indexPath = fullPath;
-		if (!indexPath.empty() && indexPath[indexPath.size() - 1] != '/') indexPath += "/";
+		if (!indexPath.empty() && indexPath[indexPath.size() - 1] != '/')
+			indexPath += "/";
 		indexPath += indexFile;
 
-		bool		hasIndex = (access(indexPath.c_str(), R_OK) == 0);
+		bool	hasIndex = (access(indexPath.c_str(), R_OK) == 0);
 
 		if (origPath.empty() || origPath[origPath.size() - 1] != '/')
 		{
@@ -491,13 +491,12 @@ Server::_runStaticGet(int client_fd, std::string fullPath)
 	}
 	else
 	{
-		std::string			content = _readFile(fullPath);
+		// For HEAD request: read file to get size, but DON'T set body
+		std::string	content = _readFile(fullPath);
 		response.setStatus(Http::OK);
-		std::stringstream	ss;
-		ss << content.size();
-		response.setHeader("Content-Length", ss.str());
+		response.setHeader("Content-Length", Utils::to_string(content.size()));
 		response.setHeader("Content-Type", Utils::getMimeType(fullPath));
-		response.setBody(content); // Forward full payload bytes
+		response.setBody("");  // Empty body for HEAD
 	}
 	_resps[client_fd] = response;
 	return Server::STATIC_READY;
@@ -520,10 +519,12 @@ Server::_runStaticHead(int client_fd, std::string fullPath)
 	if (isDir)
 	{
 		std::string	indexFile = loc ? loc->getIndex() : "index.html";
-		if (indexFile.empty()) indexFile = "youpi.bad_extension";
+		if (indexFile.empty())
+			indexFile = "youpi.bad_extension";
 
 		std::string	indexPath = fullPath;
-		if (!indexPath.empty() && indexPath[indexPath.size() - 1] != '/') indexPath += "/";
+		if (!indexPath.empty() && indexPath[indexPath.size() - 1] != '/')
+			indexPath += "/";
 		indexPath += indexFile;
 
 		bool	hasIndex = (access(indexPath.c_str(), R_OK) == 0);
@@ -569,27 +570,28 @@ Server::_runStaticHead(int client_fd, std::string fullPath)
 Server::ReadStatus
 Server::_runStaticPostUpload(int client_fd, std::string fullPath)
 {
-	Response		response;
-	Request			&req = _reqs[client_fd];
-	const Location	*loc = _matchLocation(req.getPath());
-	std::string		targetUploadPath = fullPath;
+	Response response;
+	Request &req = _reqs[client_fd];
+	const Location *loc = _matchLocation(req.getPath());
+	std::string targetUploadPath = fullPath;
 
 	if (loc && !loc->getUploadStore().empty())
 	{
-		size_t		lastSlash = req.getPath().find_last_of('/');
-		std::string	fileName = (lastSlash != std::string::npos)
-							   ? req.getPath().substr(lastSlash + 1) : "uploaded_file";
+		size_t lastSlash = req.getPath().find_last_of('/');
+		std::string fileName = (lastSlash != std::string::npos)
+								   ? req.getPath().substr(lastSlash + 1)
+								   : "uploaded_file";
 		targetUploadPath = loc->getUploadStore() + "/" + fileName;
 	}
 
-	std::ofstream	outFile(targetUploadPath.c_str(), std::ios::binary);
+	std::ofstream outFile(targetUploadPath.c_str(), std::ios::binary);
 	if (!outFile.is_open())
 	{
 		response.defaultErrorPage(Http::INTERNAL_SERVER_ERROR);
 	}
 	else
 	{
-		std::string	body = req.getBody();
+		std::string body = req.getBody();
 		outFile.write(body.c_str(), body.size());
 		outFile.close();
 
@@ -605,8 +607,8 @@ Server::_runStaticPostUpload(int client_fd, std::string fullPath)
 Server::ReadStatus
 Server::_runStaticDeleteFile(int client_fd, std::string fullPath)
 {
-	Response		response;
-	std::ifstream	fileCheck(fullPath.c_str());
+	Response response;
+	std::ifstream fileCheck(fullPath.c_str());
 
 	if (!fileCheck.good())
 	{
@@ -633,17 +635,20 @@ Server::_runStaticDeleteFile(int client_fd, std::string fullPath)
 
 /* -------------------------------- GETTERS --------------------------------- */
 
-int Server::getServerFd() const
+int
+Server::getServerFd() const
 {
 	return _serv_fd;
 }
 
-int Server::getReadFd(int client_fd)
+int
+Server::getReadFd(int client_fd)
 {
 	return _cgis[client_fd]->getReadFd();
 }
 
-int Server::getWriteFd(int client_fd)
+int
+Server::getWriteFd(int client_fd)
 {
 	return _cgis[client_fd]->getWriteFd();
 }
@@ -654,7 +659,8 @@ Server::getRequestBody(int client_fd)
 	return _reqs[client_fd].getBody();
 }
 
-void Server::setCgiResponse(int client_fd, const Response &res)
+void
+Server::setCgiResponse(int client_fd, const Response &res)
 {
 	_resps[client_fd] = res;
 }
