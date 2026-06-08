@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/25 15:33:23 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/08 21:10:54 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/08 23:52:09 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,14 +76,12 @@ Request::~Request()
 
 /* ------------------------------ CORE METHODS ------------------------------ */
 
-bool
-Request::isComplete()
+bool Request::isComplete()
 {
 	return _state == COMPLETE;
 }
 
-void
-Request::addData(std::string chunk)
+void Request::addData(std::string chunk)
 {
 	// Safeguard against malicious or malformed heavy header payload attacks
 	if (_state == READING_HEADERS &&
@@ -103,16 +101,14 @@ Request::addData(std::string chunk)
 		_handleBody();
 }
 
-void
-Request::setLimit(size_t limit)
+void Request::setLimit(size_t limit)
 {
 	_limit = limit;
 }
 
-void
-Request::clearButPreserveLeftover()
+void Request::clearButPreserveLeftover()
 {
-	size_t	consumed = 0;
+	size_t consumed = 0;
 	if (_state == COMPLETE)
 	{
 		if (_isChunked)
@@ -123,7 +119,7 @@ Request::clearButPreserveLeftover()
 	else
 		consumed = _raw.size();
 
-	std::string	leftover = "";
+	std::string leftover = "";
 	if (_raw.size() > consumed)
 		leftover = _raw.substr(consumed);
 
@@ -152,8 +148,7 @@ Request::clearButPreserveLeftover()
 
 /* ------------------------- PRIVATE INTERNAL HELPERS ----------------------- */
 
-void
-Request::_handleHeaders()
+void Request::_handleHeaders()
 {
 	// Look for the standard HTTP header/body boundary delimiter
 	size_t pos = _raw.find("\r\n\r\n");
@@ -167,8 +162,7 @@ Request::_handleHeaders()
 	}
 }
 
-void
-Request::_handleBody()
+void Request::_handleBody()
 {
 	// CASE 1: Standard read with Content-Length
 	if (!_isChunked)
@@ -265,22 +259,39 @@ Request::_handleBody()
 	}
 }
 
-void
-Request::_parseRawHeaders(const std::string &headers_part)
+void Request::_parseRawHeaders(const std::string &headers_part)
 {
-	std::stringstream ss(headers_part);
-	std::string line;
+	std::stringstream	ss(headers_part);
+	std::string			line;
 
-	// --- 1. PARSE REQUEST-LINE (Skip any leading empty lines/CRLFs as per RFC 7230) ---
+	// --- 1. PARSE REQUEST-LINE ---
 	while (std::getline(ss, line))
 	{
 		if (!line.empty() && line[line.size() - 1] == '\r')
 			line.erase(line.size() - 1);
-		if (!line.empty()) // Found the actual HTTP Request-Line!
-			break;
+
+		bool	is_blank = true;
+		for (size_t i = 0; i < line.size(); ++i)
+		{
+			if (line[i] != ' ' && line[i] != '\t')
+			{
+				is_blank = false;
+				break;
+			}
+		}
+		if (is_blank)
+			continue;
+		break;
 	}
 
-	std::stringstream first_line_ss(line);
+	if (line.empty())
+	{
+		_state = ERROR;
+		_errCode = Http::BAD_REQUEST;
+		return;
+	}
+
+	std::stringstream	first_line_ss(line);
 	first_line_ss >> _method;
 	first_line_ss >> _path;
 	first_line_ss >> _version;
@@ -294,22 +305,21 @@ Request::_parseRawHeaders(const std::string &headers_part)
 		if (line.empty()) // Empty boundary line discovered
 			break;
 
-		size_t colon = line.find(':');
+		size_t	colon = line.find(':');
 		if (colon != std::string::npos)
 		{
 			// Extract Key and Value
-			std::string key = line.substr(0, colon);
-			std::string value = line.substr(colon + 1);
+			std::string	key = line.substr(0, colon);
+			std::string	value = line.substr(colon + 1);
 
 			// Strip leading spaces from the header field value data
-			size_t first = value.find_first_not_of(' ');
+			size_t	first = value.find_first_not_of(' ');
 			if (first != std::string::npos)
 				value = value.substr(first);
 
 			_headers[key] = value;
 		}
 	}
-
 	// --- 3. EXTRACT METADATA ---
 	if (_headers.count("Transfer-Encoding") &&
 		_headers["Transfer-Encoding"].find("chunked") != std::string::npos)
