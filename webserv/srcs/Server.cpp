@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:40 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/09 17:20:12 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/09 18:35:35 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -328,20 +328,29 @@ Server::_execCompetedOrder(int client_fd, Request &req)
 		{
 			if (normalRelPath.substr(normalRelPath.size() - ext.size()) == ext)
 			{
-				cgiBin = allLocs[i].getCgiPath();
-				break;
+				const std::vector<std::string> &allowedMethods = allLocs[i].getMethods();
+				bool methodMatch = false;
+				for (size_t m = 0; m < allowedMethods.size(); ++m)
+				{
+					if (allowedMethods[m] == method)
+					{
+						methodMatch = true;
+						break;
+					}
+				}
+				if (methodMatch)
+				{
+					cgiBin = allLocs[i].getCgiPath();
+					break;
+				}
 			}
 		}
 	}
-	if (cgiBin.empty() && loc && !loc->getCgiPath().empty())
-		cgiBin = loc->getCgiPath();
-
 	if (!cgiBin.empty())
 	{
 		std::string	scriptPath = activeRoot + normalRelPath;
 
 		_cgis[client_fd] = new CGI();
-
 		int	cgi_status = _cgis[client_fd]->execute(req, scriptPath, cgiBin);
 		if (cgi_status == Http::INTERNAL_SERVER_ERROR)
 		{

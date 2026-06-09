@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 17:16:00 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/09 17:22:14 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/09 18:44:30 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,6 +83,12 @@ Cluster::run()
 		{
 			int	fd = _fds[i].fd;
 
+			if (_fds[i].revents == 0)
+			{
+				++i;
+				continue;
+			}
+
 			// A. Handle incoming data multiplexing
 			if ((_fds[i].revents & POLLIN) ||
 				((_fds[i].revents & POLLHUP) &&
@@ -93,7 +99,7 @@ Cluster::run()
 					_addNewConnection(fd);
 				else if (_pipeToClientMap.count(fd)) // 1. CGI internal read pipe
 				{
-					int client_fd = _pipeToClientMap[fd];
+					int	client_fd = _pipeToClientMap[fd];
 					_handleCGIRead(fd, *_clients[client_fd]);
 				}
 				else if (_clients.count(fd)) // 2. True external client socket
@@ -104,7 +110,7 @@ Cluster::run()
 			{
 				if (_pipeToClientMap.count(fd)) // 1. CGI internal write pipe
 				{
-					int client_fd = _pipeToClientMap[fd];
+					int	client_fd = _pipeToClientMap[fd];
 					_handleCGIWrite(fd, *_clients[client_fd]);
 				}
 				else if (_clients.count(fd)) // 2. True external client socket
@@ -115,15 +121,17 @@ Cluster::run()
 			{
 				if (_pipeToClientMap.count(fd))
 				{
-					close(fd);
-					_removePipeFromPoll(fd);
-					_cgiBytesWritten.erase(fd);
-					_pipeToClientMap.erase(fd);
+					int	pipe_fd = fd;
+					close(pipe_fd);
+					_removePipeFromPoll(pipe_fd);
+					_cgiBytesWritten.erase(pipe_fd);
+					_pipeToClientMap.erase(pipe_fd);
 				}
 				else
+				{
 					_closeConnection(fd);
+				}
 			}
-
 			// Safely skip index increment if current file descriptor was erased from vector
 			if (i < _fds.size() && _fds[i].fd == fd)
 				++i;
