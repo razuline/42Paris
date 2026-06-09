@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/24 16:54:31 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/08 21:20:21 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/09 15:10:48 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,8 @@ public:
 	~CGI();
 
 	/* --- Core Methods --- */
-	int		execute(const Request &req, const std::string &script_path);
+	int		execute(const Request &req, const std::string &script_path,
+					const std::string &cgi_path);
 
 	/* --- Getters --- */
 	pid_t	getPid() const;

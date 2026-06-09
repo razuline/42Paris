@@ -6,11 +6,13 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/24 16:54:54 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/08 21:21:40 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/09 17:12:15 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "CGI.hpp"
+
+#include <cstdio>
 
 /* ------------------------- ORTHODOX CANONICAL FORM ------------------------ */
 
@@ -55,10 +57,23 @@ CGI::~CGI()
 /* ------------------------------ CORE METHODS ------------------------------ */
 
 int
-CGI::execute(const Request &req, const std::string &script_path)
+CGI::execute(const Request &req, const std::string &script_path,
+				const std::string &cgi_path)
 {
 	// 1. Prepare env variables
 	_initEnv(req, script_path);
+
+	std::string	abs_cgi_path = cgi_path;
+	if (!abs_cgi_path.empty() && abs_cgi_path[0] != '/')
+	{
+		char	cwd[4096];
+		if (getcwd(cwd, sizeof(cwd)) != NULL)
+		{
+			if (abs_cgi_path.find("./") == 0)
+				abs_cgi_path = abs_cgi_path.substr(2);
+			abs_cgi_path = std::string(cwd) + "/" + abs_cgi_path;
+		}
+	}
 
 	// 2. Create the input pipe (Server writes body -> CGI script reads it)
 	if (pipe(_pipe_in) == -1 || pipe(_pipe_out) == -1)
@@ -71,7 +86,6 @@ CGI::execute(const Request &req, const std::string &script_path)
 	_pid = fork();
 	if (_pid < 0)
 	{
-		// Fork failed: close all open fds and clear memory
 		_clearEnv();
 		_cleanupPipes();
 		return Http::INTERNAL_SERVER_ERROR;
@@ -79,14 +93,14 @@ CGI::execute(const Request &req, const std::string &script_path)
 	if (_pid == 0) // CHILD PROCESS
 	{
 		// Child: Close unused pipe ends
-		close(_pipe_in[1]);  // Don't write to stdin pipe
-		close(_pipe_out[0]); // Don't read from stdout pipe
+		close(_pipe_in[1]);
+		close(_pipe_out[0]);
 
 		// Redirect stdin/stdout
 		dup2(_pipe_in[0], STDIN_FILENO);
 		dup2(_pipe_out[1], STDOUT_FILENO);
 
-		// Close original FDs (now duplicated)
+		// Close original FDs
 		close(_pipe_in[0]);
 		close(_pipe_out[1]);
 
@@ -101,13 +115,13 @@ CGI::execute(const Request &req, const std::string &script_path)
 		}
 
 		// Prepare arguments for execve
-		std::string	exec_path = "./" + target_script;
-		char *args[2];
-		args[0] = (char *)exec_path.c_str();
-		args[1] = NULL;
+		char	*args[3];
+		args[0] = (char *)abs_cgi_path.c_str();
+		args[1] = (char *)target_script.c_str();  // Le script ciblé
+		args[2] = NULL;
 
-		// NULL-terminated environment array
-		char *const	*envp = &_env[0];  // _env already has NULL at end from _initEnv
+		// NULL-terminated environment array (re-déclaré explicitement ici)
+		char *const	*envp = &_env[0];
 
 		// Execute
 		execve(args[0], args, envp);
@@ -120,15 +134,13 @@ CGI::execute(const Request &req, const std::string &script_path)
 	}
 	else // PARENT PROCESS
 	{
-		// Parent: Close unused pipe ends
-		close(_pipe_in[0]);  // Don't read from stdin pipe
-		close(_pipe_out[1]); // Don't write to stdout pipe
+		close(_pipe_in[0]);
+		close(_pipe_out[1]);
 
-		// Set non-blocking on the ends we keep
 		fcntl(_pipe_in[1], F_SETFL, O_NONBLOCK);
 		fcntl(_pipe_out[0], F_SETFL, O_NONBLOCK);
 
-		_clearEnv();  // Clean up environment strings (parent doesn't need them)
+		_clearEnv();
 		return Http::OK;
 	}
 }
@@ -138,21 +150,28 @@ CGI::execute(const Request &req, const std::string &script_path)
 void
 CGI::_initEnv(const Request &req, const std::string &script_path)
 {
-	// Clear any existing environment
-	_clearEnv();
-
-	std::stringstream	ss;
-	ss << req.getBody().size();
-
 	// Core CGI variables
 	_env.push_back(strdup(("REQUEST_METHOD=" + req.getMethod()).c_str()));
-	_env.push_back(strdup(("CONTENT_LENGTH=" + ss.str()).c_str()));
-	_env.push_back(strdup(("CONTENT_TYPE=" + req.getHeader("Content-Type")).c_str()));
 	_env.push_back(strdup("SERVER_PROTOCOL=HTTP/1.1"));
 	_env.push_back(strdup("GATEWAY_INTERFACE=CGI/1.1"));
+	_env.push_back(strdup("SERVER_PORT=8080"));
+	_env.push_back(strdup("SERVER_SOFTWARE=webserv/1.0"));
+	_env.push_back(strdup("SERVER_NAME=localhost"));
 	_env.push_back(strdup(("SCRIPT_FILENAME=" + script_path).c_str()));
 	_env.push_back(strdup(("SCRIPT_NAME=" + req.getPath()).c_str()));
 	_env.push_back(strdup("REDIRECT_STATUS=200"));
+	_env.push_back(strdup(("PATH_INFO=" + req.getPath()).c_str()));
+	_env.push_back(strdup(("PATH_TRANSLATED=" + script_path).c_str()));
+
+	// CONTENT_LENGTH
+	std::stringstream ss;
+	ss << req.getBody().size();
+	_env.push_back(strdup(("CONTENT_LENGTH=" + ss.str()).c_str()));
+
+	// CONTENT_TYPE
+	std::string contentType = req.getHeader("Content-Type");
+	if (!contentType.empty())
+		_env.push_back(strdup(("CONTENT_TYPE=" + contentType).c_str()));
 
 	// Optional headers
 	if (!req.getHeader("Cookie").empty())

@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/25 15:33:23 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/08 23:52:09 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/09 15:16:27 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -178,11 +178,10 @@ void Request::_handleBody()
 		}
 
 		// Safety check to ensure the payload chunk doesn't overflow Content-Length
-		if (curr_body_size > _contentLength)
+		if (curr_body_size >= _contentLength)
 		{
-			_state = ERROR;
-			_errCode = Http::BAD_REQUEST;
-			return;
+			_body = _raw.substr(_headerSize, _contentLength);
+			_state = COMPLETE;
 		}
 
 		// Transition state once the complete expected body bytes are received
@@ -217,7 +216,7 @@ void Request::_handleBody()
 				break; // Waiting for more data from the socket (non-blocking)
 
 			std::string hexSize = _raw.substr(_chunkedBytesProcessed,
-											  crlf_pos - _chunkedBytesProcessed);
+									crlf_pos - _chunkedBytesProcessed);
 			std::stringstream ss;
 			ss << std::hex << hexSize;
 			ss >> _currChunkSize;
@@ -231,7 +230,14 @@ void Request::_handleBody()
 			// A chunk of size 0 indicates the end of the request
 			if (_currChunkSize == 0)
 			{
-				_state = COMPLETE;
+				size_t	final_crlf = _raw.find("\r\n", crlf_pos + 2);
+				if (final_crlf != std::string::npos)
+				{
+					_chunkedBytesProcessed = final_crlf + 2;
+					_state = COMPLETE;
+				}
+				else
+					_currChunkSize = -1;
 				break;
 			}
 			_chunkedBytesProcessed = crlf_pos + 2; // Skip the \r\n after the size

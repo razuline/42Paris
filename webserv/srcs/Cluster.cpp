@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 17:16:00 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/09 00:27:43 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/09 17:22:14 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,7 +114,12 @@ Cluster::run()
 			else if (_fds[i].revents & (POLLERR | POLLHUP | POLLNVAL))
 			{
 				if (_pipeToClientMap.count(fd))
-					_closeConnection(_pipeToClientMap[fd]);
+				{
+					close(fd);
+					_removePipeFromPoll(fd);
+					_cgiBytesWritten.erase(fd);
+					_pipeToClientMap.erase(fd);
+				}
 				else
 					_closeConnection(fd);
 			}
@@ -306,8 +311,8 @@ Cluster::_closeConnection(int fd)
 void
 Cluster::_handleCGIWrite(int pipe_write_fd, Server &server)
 {
-	int			client_fd = _pipeToClientMap[pipe_write_fd];
-	std::string	body = server.getRequestBody(client_fd);
+	int					client_fd = _pipeToClientMap[pipe_write_fd];
+	const std::string	&body = server.getRequestBody(client_fd);
 
 	// Clean up and exit immediately if there's no body payload to transmit
 	if (body.empty())
@@ -321,31 +326,29 @@ Cluster::_handleCGIWrite(int pipe_write_fd, Server &server)
 
 	// Transmit the payload chunk over the non-blocking pipe
 	size_t	already_written = _cgiBytesWritten[pipe_write_fd];
+	size_t	to_write = body.size() - already_written;
 
-	int		ret = write(pipe_write_fd, body.c_str() + already_written,
-					body.size() - already_written);
+	if (to_write > 8192)
+		to_write = 8192;
+
+	int	ret = write(pipe_write_fd, body.c_str() + already_written, to_write);
 
 	// Error Handling: Drop the client connection if the write pipe breaks
-	if (ret <= 0)
+	if (ret > 0)
 	{
-		_closeConnection(client_fd);
-		close(pipe_write_fd);
-		_cgiBytesWritten.erase(pipe_write_fd);
-		return;
-	}
+		_cgiBytesWritten[pipe_write_fd] += ret;
 
-	_cgiBytesWritten[pipe_write_fd] += ret;
-
-	// Close write end of the pipe once the entire request payload is transmitted
-	if (_cgiBytesWritten[pipe_write_fd] == body.size())
-	{
-		std::cout << "[Cluster] Body chunk successfully pushed to CGI pipe ["
+		// Close write end of the pipe once the entire request payload is transmitted
+		if (_cgiBytesWritten[pipe_write_fd] == body.size())
+		{
+			std::cout << "[Cluster] Body chunk successfully pushed to CGI pipe ["
 				  << pipe_write_fd << "]" << std::endl;
 
-		close(pipe_write_fd);
-		_removePipeFromPoll(pipe_write_fd);
-		_pipeToClientMap.erase(pipe_write_fd);
-		_cgiBytesWritten.erase(pipe_write_fd);
+			close(pipe_write_fd);
+			_removePipeFromPoll(pipe_write_fd);
+			_pipeToClientMap.erase(pipe_write_fd);
+			_cgiBytesWritten.erase(pipe_write_fd);
+		}
 	}
 }
 

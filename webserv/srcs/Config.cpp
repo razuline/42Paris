@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/28 13:46:06 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/07 16:21:34 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/09 15:19:13 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -149,6 +149,10 @@ Config::parse(const std::string &filename)
 				{
 					std::string	flag = Utils::trim(line.substr(9));
 					loc.setAutoindex(flag == "on");
+				}
+				else if (line.find("cgi_path") == 0)
+				{
+					loc.setCgiPath(Utils::trim(line.substr(8)));
 				}
 				else if (line.find("allow_methods") == 0)
 				{

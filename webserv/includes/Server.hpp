@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:32 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/08 18:50:24 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/09 15:00:41 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,6 +83,7 @@ private:
 	ReadStatus			_runStaticHead(int client_fd, std::string fullPath);
 	ReadStatus			_runStaticPostUpload(int client_fd, std::string fullPath);
 	ReadStatus			_runStaticDeleteFile(int client_fd, std::string fullPath);
+	ReadStatus			_runDirRedirect(int client_fd, const std::string &reqPath);
 
 	// Hidden assignment operator
 	Server				&operator=(const Server &other);
@@ -108,7 +109,7 @@ public:
 	int					getServerFd() const;
 	int					getReadFd(int client_fd);  // To read from Python
 	int					getWriteFd(int client_fd); // To write to Python
-	std::string			getRequestBody(int client_fd);
+	const std::string	&getRequestBody(int client_fd);
 	void				setCgiResponse(int client_fd, const Response &res);
 };
 
