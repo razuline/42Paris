@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:40 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/09 18:35:35 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/09 19:11:16 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -161,7 +161,7 @@ Server::handleWrite(int client_fd)
 	}
 	if (static_cast<size_t>(bytes_sent) >= res_str.size())
 	{
-		std::cout << "[Server] Response successfully transmitted to client fd ["
+		std::cout << "[Server]  Response successfully transmitted to client fd ["
 				  << client_fd << "]" << std::endl;
 		_writeBuffs.erase(client_fd);
 		_resps.erase(client_fd);
@@ -207,7 +207,7 @@ Server::cleanupCgi(int client_fd)
 		{
 			int status;
 			waitpid(pid, &status, WNOHANG);
-			std::cout << "[Server] Cleaned up CGI process " << pid << std::endl;
+			std::cout << "[Server]  Cleaned up CGI process " << pid << std::endl;
 		}
 		delete it->second;
 		_cgis.erase(it);
@@ -318,8 +318,8 @@ Server::_execCompetedOrder(int client_fd, Request &req)
 		normalRelPath = "/" + normalRelPath;
 
 	// F. CGI Gateway Check
-	std::string					cgiBin = "";
-	const std::vector<Location>	&allLocs = _config.getLocations();
+	std::string cgiBin = "";
+	const std::vector<Location> &allLocs = _config.getLocations();
 
 	for (size_t i = 0; i < allLocs.size(); ++i)
 	{

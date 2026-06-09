@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 17:16:00 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/09 18:44:30 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/09 20:50:40 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,6 +132,14 @@ Cluster::run()
 					_closeConnection(fd);
 				}
 			}
+			else
+			{
+				if (_clients.count(fd))
+					_closeConnection(fd);
+				else
+					++i;
+			}
+
 			// Safely skip index increment if current file descriptor was erased from vector
 			if (i < _fds.size() && _fds[i].fd == fd)
 				++i;
@@ -404,6 +412,7 @@ Cluster::_handleCGIRead(int pipe_read_fd, Server &server)
 
 	// Script finished successfully - parse output
 	std::string	cgiOutput = _cgiBuffs[client_fd];
+
 	_cgiBuffs.erase(client_fd);
 
 	close(pipe_read_fd);
@@ -511,6 +520,9 @@ Cluster::_handleCGIRead(int pipe_read_fd, Server &server)
 		// For 204 No Content and 3xx redirects, ensure no body
 		response.setBody("");
 	}
+
+	std::cout << "\033[33m[DEBUG CGI] Server built response for client:\033[0m" << std::endl;
+	std::cout << "  -> Status Code: " << response.getStatus() << std::endl;
 
 	server.setCgiResponse(client_fd, response);
 

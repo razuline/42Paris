@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/27 19:21:54 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/09 00:24:48 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/09 21:42:14 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,7 +118,6 @@ namespace Utils
 		return std::string(buf);
 	}
 
-	// Лог входящего запроса: [00:11:22] ➜ GET /directory/nop
 	void logRequest(const std::string &method, const std::string &path)
 	{
 		std::string methodColor = CYAN;
@@ -130,7 +129,6 @@ namespace Utils
 				  << " " << path << std::endl;
 	}
 
-	// Лог ответа сервера: [00:11:22] ◀ 200 OK (/directory/nop/)
 	void logResponse(int statusCode, const std::string &path)
 	{
 		std::string statusColor = GREEN;
@@ -142,7 +140,6 @@ namespace Utils
 				  << " (" << path << ")" << std::endl;
 	}
 
-	// Лог системных ошибок (например, провал бинда порта)
 	void logError(const std::string &message)
 	{
 		std::cerr << WHITE << getCurrentTime() << RESET
@@ -150,7 +147,6 @@ namespace Utils
 				  << message << std::endl;
 	}
 
-	// Лог успешных событий (старт сервера)
 	void logInfo(const std::string &message)
 	{
 		std::cout << WHITE << getCurrentTime() << RESET

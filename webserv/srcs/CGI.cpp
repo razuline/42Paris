@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/24 16:54:54 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/09 17:12:15 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/09 21:41:00 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,8 @@ CGI::CGI() :
 
 CGI::~CGI()
 {
+	std::cout << "\033[31m[DEBUG] CGI Destructor called for PID " << _pid << "\033[0m" << std::endl;
+
 	// Ensure any open pipe file descriptor is securely closed to prevent FD leaks
 	if (_pipe_in[0] != -1)
 		close(_pipe_in[0]);
@@ -58,10 +60,22 @@ CGI::~CGI()
 
 int
 CGI::execute(const Request &req, const std::string &script_path,
-				const std::string &cgi_path)
+								 const std::string &cgi_path)
 {
+	std::string	abs_script_path = script_path;
+	if (!abs_script_path.empty() && abs_script_path[0] != '/')
+	{
+		char	cwd[4096];
+		if (getcwd(cwd, sizeof(cwd)) != NULL)
+		{
+			if (abs_script_path.find("./") == 0)
+				abs_script_path = abs_script_path.substr(2);
+			abs_script_path = std::string(cwd) + "/" + abs_script_path;
+		}
+	}
+
 	// 1. Prepare env variables
-	_initEnv(req, script_path);
+	_initEnv(req, abs_script_path);
 
 	std::string	abs_cgi_path = cgi_path;
 	if (!abs_cgi_path.empty() && abs_cgi_path[0] != '/')
@@ -105,25 +119,22 @@ CGI::execute(const Request &req, const std::string &script_path,
 		close(_pipe_out[1]);
 
 		// Change to script directory
-		std::string	target_script = script_path;
-		size_t		last_slash = script_path.find_last_of('/');
+		std::string	target_script = abs_script_path;
+		size_t		last_slash = abs_script_path.find_last_of('/');
 		if (last_slash != std::string::npos)
 		{
-			std::string	dir = script_path.substr(0, last_slash);
+			std::string	dir = abs_script_path.substr(0, last_slash);
 			chdir(dir.c_str());
-			target_script = script_path.substr(last_slash + 1);
+			target_script = abs_script_path.substr(last_slash + 1);
 		}
 
 		// Prepare arguments for execve
 		char	*args[3];
 		args[0] = (char *)abs_cgi_path.c_str();
-		args[1] = (char *)target_script.c_str();  // Le script ciblé
+		args[1] = (char *)target_script.c_str();
 		args[2] = NULL;
 
-		// NULL-terminated environment array (re-déclaré explicitement ici)
 		char *const	*envp = &_env[0];
-
-		// Execute
 		execve(args[0], args, envp);
 
 		// If we get here, execve failed
@@ -150,18 +161,37 @@ CGI::execute(const Request &req, const std::string &script_path,
 void
 CGI::_initEnv(const Request &req, const std::string &script_path)
 {
-	// Core CGI variables
+	_env.clear();
+
+	std::string abs_script_path = script_path;
+	if (!abs_script_path.empty() && abs_script_path[0] != '/')
+	{
+		char cwd[4096];
+		if (getcwd(cwd, sizeof(cwd)) != NULL)
+		{
+			if (abs_script_path.find("./") == 0)
+				abs_script_path = abs_script_path.substr(2);
+			else if (abs_script_path.find(".") == 0)
+				abs_script_path = abs_script_path.substr(1);
+			abs_script_path = std::string(cwd) + "/" + abs_script_path;
+		}
+	}
+
 	_env.push_back(strdup(("REQUEST_METHOD=" + req.getMethod()).c_str()));
 	_env.push_back(strdup("SERVER_PROTOCOL=HTTP/1.1"));
 	_env.push_back(strdup("GATEWAY_INTERFACE=CGI/1.1"));
 	_env.push_back(strdup("SERVER_PORT=8080"));
 	_env.push_back(strdup("SERVER_SOFTWARE=webserv/1.0"));
 	_env.push_back(strdup("SERVER_NAME=localhost"));
-	_env.push_back(strdup(("SCRIPT_FILENAME=" + script_path).c_str()));
+	_env.push_back(strdup(("SCRIPT_FILENAME=" + abs_script_path).c_str()));
 	_env.push_back(strdup(("SCRIPT_NAME=" + req.getPath()).c_str()));
+
+	_env.push_back(strdup(("REQUEST_URI=" + req.getPath()).c_str()));
 	_env.push_back(strdup("REDIRECT_STATUS=200"));
+	_env.push_back(strdup("QUERY_STRING="));
+
 	_env.push_back(strdup(("PATH_INFO=" + req.getPath()).c_str()));
-	_env.push_back(strdup(("PATH_TRANSLATED=" + script_path).c_str()));
+	_env.push_back(strdup(("PATH_TRANSLATED=" + abs_script_path).c_str()));
 
 	// CONTENT_LENGTH
 	std::stringstream ss;
@@ -178,10 +208,8 @@ CGI::_initEnv(const Request &req, const std::string &script_path)
 		_env.push_back(strdup(("HTTP_COOKIE=" + req.getHeader("Cookie")).c_str()));
 
 	if (!req.getHeader("X-Secret-Header-For-Test").empty())
-		_env.push_back(strdup(("HTTP_X_SECRET_HEADER_FOR_TEST=" +
-							   req.getHeader("X-Secret-Header-For-Test")).c_str()));
+		_env.push_back(strdup(("HTTP_X_SECRET_HEADER_FOR_TEST=" + req.getHeader("X-Secret-Header-For-Test")).c_str()));
 
-	// NULL terminate the array for execve
 	_env.push_back(NULL);
 }
 
