@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 17:16:00 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/09 20:50:40 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/10 14:55:34 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ Cluster::setup(std::vector<Config> configs)
 		Server	*server = new Server(configs[i]);
 		server->setup(); // Opens, binds, and listens the server socket
 
-		int	serv_fd = server->getServerFd();
+		int		serv_fd = server->getServerFd();
 		_servers[serv_fd] = server;
 
 		struct	pollfd pfd;
@@ -62,7 +62,8 @@ Cluster::setup(std::vector<Config> configs)
 		_fds.push_back(pfd);
 
 		std::stringstream	ss;
-		ss << "Server virtual host listening on port [" << configs[i].getPort() << "]";
+		ss << "Server virtual host listening on port ["
+		   << configs[i].getPort() << "]";
 
 		Utils::logInfo(ss.str());
 	}
@@ -91,7 +92,7 @@ Cluster::run()
 
 			// A. Handle incoming data multiplexing
 			if ((_fds[i].revents & POLLIN) ||
-				((_fds[i].revents & POLLHUP) &&
+			   ((_fds[i].revents & POLLHUP) &&
 				 _pipeToClientMap.count(fd) &&
 				 _fds[i].events == POLLIN))
 			{
@@ -139,8 +140,7 @@ Cluster::run()
 				else
 					++i;
 			}
-
-			// Safely skip index increment if current file descriptor was erased from vector
+			// Safely skip index increment if current fd was erased from vector
 			if (i < _fds.size() && _fds[i].fd == fd)
 				++i;
 		}
@@ -157,7 +157,6 @@ Cluster::_addNewConnection(int serv_fd)
 
 	// 1. Accept the incoming TCP connection
 	int	client_fd = accept(serv_fd, (struct sockaddr *)&client_addr, &addr_len);
-
 	if (client_fd < 0)
 	{
 		perror("accept failed");
@@ -259,7 +258,7 @@ Cluster::_handleClientWrite(int fd, Server &server)
 			}
 		}
 
-		// Clear context and instantly fire the next pipelined request if it is already complete
+		// Clear context and instantly fire the next pipelined request if it's already complete
 		Server::ReadStatus	next_status = server.clearClientState(fd);
 		if (next_status == Server::STATIC_READY)
 		{
@@ -304,7 +303,7 @@ Cluster::_closeConnection(int fd)
 	{
 		if (it->second == fd)
 		{
-			int pipe_fd = it->first;
+			int	pipe_fd = it->first;
 			close(pipe_fd);
 			_removePipeFromPoll(pipe_fd);
 			_cgiBytesWritten.erase(pipe_fd);
@@ -321,7 +320,8 @@ Cluster::_closeConnection(int fd)
 	_clients.erase(fd);
 	_cgiBuffs.erase(fd);
 
-	std::cout << "[Cluster] Connection securely closed on fd [" << fd << "]" << std::endl;
+	std::cout << "[Cluster] Connection securely closed on fd [" << fd
+			  << "]" << std::endl;
 }
 
 void
@@ -358,7 +358,7 @@ Cluster::_handleCGIWrite(int pipe_write_fd, Server &server)
 		if (_cgiBytesWritten[pipe_write_fd] == body.size())
 		{
 			std::cout << "[Cluster] Body chunk successfully pushed to CGI pipe ["
-				  << pipe_write_fd << "]" << std::endl;
+					  << pipe_write_fd << "]" << std::endl;
 
 			close(pipe_write_fd);
 			_removePipeFromPoll(pipe_write_fd);
@@ -371,7 +371,8 @@ Cluster::_handleCGIWrite(int pipe_write_fd, Server &server)
 void
 Cluster::_handleCGIRead(int pipe_read_fd, Server &server)
 {
-	std::cout << "[Cluster] Getting output from CGI pipe " << pipe_read_fd << std::endl;
+	std::cout << "[Cluster] Getting output from CGI pipe " << pipe_read_fd
+			  << std::endl;
 
 	char	buff[4096];
 	int		client_fd = _pipeToClientMap[pipe_read_fd];
@@ -384,10 +385,11 @@ Cluster::_handleCGIRead(int pipe_read_fd, Server &server)
 		_cgiBuffs[client_fd] += std::string(buff, bytes_read); // Accumulate raw script output
 		return;
 	}
-	  // Fault Tolerance: Script crashed or was killed
+	// Fault Tolerance: Script crashed or was killed
 	if (bytes_read < 0)
 	{
-		std::cerr << "[Cluster] CGI pipe crash detected. Sending HTTP [500]" << std::endl;
+		std::cerr << "[Cluster] CGI pipe crash detected. Sending HTTP [500]"
+				  << std::endl;
 
 		Response	err_res;
 		err_res.defaultErrorPage(Http::INTERNAL_SERVER_ERROR);
@@ -447,7 +449,6 @@ Cluster::_handleCGIRead(int pipe_read_fd, Server &server)
 			// Remove trailing \r if present
 			if (!line.empty() && line[line.size() - 1] == '\r')
 				line.erase(line.size() - 1);
-
 			if (line.empty())
 				continue;
 
@@ -482,7 +483,6 @@ Cluster::_handleCGIRead(int pipe_read_fd, Server &server)
 		{
 			cgi_status_code = Http::FOUND;
 		}
-
 		response.setStatus(cgi_status_code);
 
 		// Set default Content-Type if missing
@@ -495,33 +495,34 @@ Cluster::_handleCGIRead(int pipe_read_fd, Server &server)
 		if (has_location && (cgi_status_code == Http::FOUND ||
 							 cgi_status_code == Http::MOVED_PERMANENTLY))
 		{
-			response.setBody("");  // Clear body, Content-Length becomes 0
+			response.setBody(""); // Clear body, Content-Length becomes 0
 		}
 	}
 	else if (!cgiOutput.empty())
 	{
 		// Case 2: No headers, just raw output (treat as HTML)
 		response.setStatus(Http::OK);
-		response.setBody(cgiOutput);  // This sets Content-Length automatically
+		response.setBody(cgiOutput); // This sets Content-Length automatically
 		response.setHeader("Content-Type", "text/html");
 	}
 	else
 	{
 		// Case 3: Empty response
 		response.setStatus(Http::NO_CONTENT);
-		response.setBody("");  // Content-Length: 0
+		response.setBody(""); // Content-Length: 0
 	}
 
 	// Ensure Content-Length is always set (Response::setBody already does this)
 	// But double-check for edge cases
 	if (response.getStatus() == Http::NO_CONTENT ||
-		(response.getStatus() >= 300 && response.getStatus() < 400))
+	   (response.getStatus() >= 300 && response.getStatus() < 400))
 	{
 		// For 204 No Content and 3xx redirects, ensure no body
 		response.setBody("");
 	}
 
-	std::cout << "\033[33m[DEBUG CGI] Server built response for client:\033[0m" << std::endl;
+	std::cout << "\033[33m[DEBUG CGI] Server built response for client:\033[0m"
+			  << std::endl;
 	std::cout << "  -> Status Code: " << response.getStatus() << std::endl;
 
 	server.setCgiResponse(client_fd, response);

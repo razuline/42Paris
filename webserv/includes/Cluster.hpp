@@ -6,23 +6,23 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 16:51:10 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/09 16:36:28 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/10 14:47:46 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef CLUSTER_HPP
 # define CLUSTER_HPP
 
-# include <vector>
-# include <map>
-# include <sys/poll.h>
-# include <unistd.h>
-# include <fcntl.h>
-# include <iostream>
-
 # include "Server.hpp"
 # include "Config.hpp"
 # include "HttpStatus.hpp"
+
+# include <iostream>
+# include <fcntl.h>
+# include <map>
+# include <sys/poll.h>
+# include <unistd.h>
+# include <vector>
 
 class Cluster
 {
@@ -36,10 +36,6 @@ private:
 	std::map<int, std::string>	_cgiBuffs;              // Maps client_fd -> accumulated response
 	std::map<int, size_t>		_cgiBytesWritten;
 
-	/* --- Copy Blockade --- */
-	Cluster(const Cluster &copy);
-	Cluster	&operator=(const Cluster &other);
-
 	/* --- Private Internal Helpers --- */
 	void	_addNewConnection(int serv_fd);             // accept()
 	void	_handleClientRead(int fd, Server &server);  // recv()
@@ -48,6 +44,10 @@ private:
 	void	_handleCGIWrite(int pipe_write_fd, Server &server);
 	void	_handleCGIRead(int pipe_read_fd, Server &server);
 	void	_removePipeFromPoll(int pipe_fd);
+
+	/* --- Copy Blockade --- */
+	Cluster(const Cluster &copy);
+	Cluster	&operator=(const Cluster &other);
 
 public:
 	/* --- Orthodox Canonical Form --- */
