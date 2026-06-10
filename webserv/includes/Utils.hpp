@@ -6,17 +6,19 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/27 19:21:01 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/09 00:25:09 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/10 13:21:01 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef UTILS_HPP
 # define UTILS_HPP
 
+# include <csignal>
 # include <ctime>
-# include <iostream>
-# include <string>
 # include <dirent.h>
+# include <iostream>
+# include <sstream>
+# include <string>
 
 namespace Utils
 {
@@ -25,6 +27,7 @@ namespace Utils
 	std::string	generateAutoindex(const std::string &dirPath, const std::string &reqPath);
 	std::string	toStr(int number);
 
+	/* --- LOGS --- */
 	#define RESET   "\033[0m"
 	#define RED     "\033[31m"
 	#define GREEN   "\033[32m"

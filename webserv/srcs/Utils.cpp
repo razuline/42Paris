@@ -6,14 +6,11 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/27 19:21:54 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/09 21:42:14 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/10 13:26:07 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Utils.hpp"
-
-#include <csignal>
-#include <sstream>
 
 namespace Utils
 {
@@ -21,13 +18,12 @@ namespace Utils
 	getMimeType(const std::string &path)
 	{
 		// 1. Find the position of the last dot '.' in the path
-		size_t dotPos = path.find_last_of('.');
-
+		size_t	dotPos = path.find_last_of('.');
 		if (dotPos == std::string::npos)
 			return "text/plain";
 
 		// 2. Extract the extension (everything after the dot)
-		std::string ext = path.substr(dotPos + 1);
+		std::string	ext = path.substr(dotPos + 1);
 
 		// 3. Map common extensions to their official MIME types
 		if (ext == "html" || ext == "htm")
@@ -55,11 +51,11 @@ namespace Utils
 	std::string
 	trim(const std::string &str)
 	{
-		size_t first = str.find_first_not_of(" \t;");
+		size_t	first = str.find_first_not_of(" \t;");
 		if (first == std::string::npos)
 			return "";
 
-		size_t last = str.find_last_not_of(" \t;");
+		size_t	last = str.find_last_not_of(" \t;");
 
 		return str.substr(first, (last - first + 1));
 	}
@@ -67,15 +63,15 @@ namespace Utils
 	std::string
 	generateAutoindex(const std::string &dirPath, const std::string &reqPath)
 	{
-		DIR *dir = opendir(dirPath.c_str());
-		struct dirent *entry;
-		std::string html;
+		DIR				*dir = opendir(dirPath.c_str());
+		struct dirent	*entry;
+		std::string		html;
 
 		if (!dir)
 			return "";
 
 		// Ensure the request path ends with a slash for clean relative links
-		std::string basePath = reqPath;
+		std::string		basePath = reqPath;
 		if (basePath.empty() || basePath[basePath.size() - 1] != '/')
 			basePath += "/";
 
@@ -84,7 +80,7 @@ namespace Utils
 
 		while ((entry = readdir(dir)) != NULL)
 		{
-			std::string name = entry->d_name;
+			std::string	name = entry->d_name;
 
 			// Skip the current directory pointer '.'
 			if (name == ".")
@@ -94,7 +90,8 @@ namespace Utils
 			if (entry->d_type == DT_DIR)
 				name += "/";
 
-			html += "  <li><a href=\"" + basePath + entry->d_name + "\">" + name + "</a></li>\n";
+			html += "  <li><a href=\"" + basePath + entry->d_name + "\">" +
+				name + "</a></li>\n";
 		}
 		closedir(dir);
 		html += "</ul>\n<hr>\n</body>\n</html>\n";
@@ -109,47 +106,57 @@ namespace Utils
 		return ss.str();
 	}
 
-	static std::string getCurrentTime()
+	static std::string
+	getCurrTime()
 	{
-		std::time_t now = std::time(0);
-		std::tm* now_tm = std::localtime(&now);
-		char buf[16];
-		std::strftime(buf, sizeof(buf), "[%H:%M:%S]", now_tm);
-		return std::string(buf);
+		std::time_t	now = std::time(0);
+		std::tm		*now_tm = std::localtime(&now);
+		char		buff[16];
+
+		std::strftime(buff, sizeof(buff), "[%H:%M:%S]", now_tm);
+		return std::string(buff);
 	}
 
-	void logRequest(const std::string &method, const std::string &path)
+	void
+	logRequest(const std::string &method, const std::string &path)
 	{
-		std::string methodColor = CYAN;
-		if (method == "POST") methodColor = MAGENTA;
-		if (method == "DELETE") methodColor = RED;
+		std::string	methodColor = CYAN;
+		if (method == "POST")
+			methodColor = MAGENTA;
+		if (method == "DELETE")
+			methodColor = RED;
 
-		std::cout << WHITE << getCurrentTime() << RESET
+		std::cout << WHITE << getCurrTime() << RESET
 				  << " ➜ " << methodColor << BOLD << method << RESET
 				  << " " << path << std::endl;
 	}
 
-	void logResponse(int statusCode, const std::string &path)
+	void
+	logResponse(int statusCode, const std::string &path)
 	{
-		std::string statusColor = GREEN;
-		if (statusCode >= 300 && statusCode < 400) statusColor = YELLOW;
-		if (statusCode >= 400) statusColor = RED;
+		std::string	statusColor = GREEN;
+		if (statusCode >= 300 && statusCode < 400)
+			statusColor = YELLOW;
+		if (statusCode >= 400)
+			statusColor = RED;
 
-		std::cout << WHITE << getCurrentTime() << RESET
+		std::cout << WHITE << getCurrTime() << RESET
 				  << " ◀ " << statusColor << BOLD << statusCode << RESET
 				  << " (" << path << ")" << std::endl;
 	}
 
-	void logError(const std::string &message)
+	void
+	logError(const std::string &message)
 	{
-		std::cerr << WHITE << getCurrentTime() << RESET
+		std::cerr << WHITE << getCurrTime() << RESET
 				  << " [" << RED << BOLD << "ERROR" << RESET << "] "
 				  << message << std::endl;
 	}
 
-	void logInfo(const std::string &message)
+	void
+	logInfo(const std::string &message)
 	{
-		std::cout << WHITE << getCurrentTime() << RESET
+		std::cout << WHITE << getCurrTime() << RESET
 				  << " [" << GREEN << BOLD << "INFO" << RESET << "] "
 				  << message << std::endl;
 	}
