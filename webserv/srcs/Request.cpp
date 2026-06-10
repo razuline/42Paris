@@ -6,50 +6,53 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/25 15:33:23 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/09 15:16:27 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/10 13:18:05 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
 
 // Standard 8 KB maximum limit for HTTP Request Headers fields
-const size_t Request::HEADERS_SIZE = 8192;
+const size_t	Request::HEADERS_SIZE = 8192;
 
 /* ------------------------- ORTHODOX CANONICAL FORM ------------------------ */
 
-Request::Request() : _method(""),
-					 _path(""),
-					 _version(""),
-					 _body(""),
-					 _headerSize(0),
-					 _contentLength(0),
-					 _raw(""),
-					 _state(READING_HEADERS),
-					 _limit(1000000), // Default 1 Mb fallback
-					 _errCode(Http::OK),
-					 _isChunked(false),
-					 _currChunkSize(-1),
-					 _chunkedBytesProcessed(0)
+Request::Request() :
+	_method(""),
+	_path(""),
+	_version(""),
+	_body(""),
+	_headerSize(0),
+	_contentLength(0),
+	_raw(""),
+	_state(READING_HEADERS),
+	_limit(1000000), // Default 1 Mb fallback
+	_errCode(Http::OK),
+	_isChunked(false),
+	_currChunkSize(-1),
+	_chunkedBytesProcessed(0)
 {
 }
 
-Request::Request(const Request &copy) : _method(copy._method),
-										_path(copy._path),
-										_version(copy._version),
-										_headers(copy._headers),
-										_body(copy._body),
-										_headerSize(copy._headerSize),
-										_contentLength(copy._contentLength),
-										_raw(copy._raw),
-										_state(copy._state),
-										_limit(copy._limit),
-										_isChunked(copy._isChunked),
-										_currChunkSize(copy._currChunkSize),
-										_chunkedBytesProcessed(copy._chunkedBytesProcessed)
+Request::Request(const Request &copy) :
+	_method(copy._method),
+	_path(copy._path),
+	_version(copy._version),
+	_headers(copy._headers),
+	_body(copy._body),
+	_headerSize(copy._headerSize),
+	_contentLength(copy._contentLength),
+	_raw(copy._raw),
+	_state(copy._state),
+	_limit(copy._limit),
+	_isChunked(copy._isChunked),
+	_currChunkSize(copy._currChunkSize),
+	_chunkedBytesProcessed(copy._chunkedBytesProcessed)
 {
 }
 
-Request &Request::operator=(const Request &other)
+Request
+&Request::operator=(const Request &other)
 {
 	if (this != &other)
 	{
@@ -76,39 +79,41 @@ Request::~Request()
 
 /* ------------------------------ CORE METHODS ------------------------------ */
 
-bool Request::isComplete()
+bool
+Request::isComplete()
 {
 	return _state == COMPLETE;
 }
 
-void Request::addData(std::string chunk)
+void
+Request::addData(std::string chunk)
 {
 	// Safeguard against malicious or malformed heavy header payload attacks
 	if (_state == READING_HEADERS &&
-		(_raw.size() + chunk.size() > Request::HEADERS_SIZE))
+	   (_raw.size() + chunk.size() > Request::HEADERS_SIZE))
 	{
 		_state = ERROR;
 		_errCode = Http::HEADER_FIELDS_TOO_LARGE;
 		return;
 	}
-
 	_raw += chunk;
 
 	if (_state == READING_HEADERS)
 		_handleHeaders();
-
 	if (_state == READING_BODY)
 		_handleBody();
 }
 
-void Request::setLimit(size_t limit)
+void
+Request::setLimit(size_t limit)
 {
 	_limit = limit;
 }
 
-void Request::clearButPreserveLeftover()
+void
+Request::clearButPreserveLeftover()
 {
-	size_t consumed = 0;
+	size_t	consumed = 0;
 	if (_state == COMPLETE)
 	{
 		if (_isChunked)
@@ -119,7 +124,7 @@ void Request::clearButPreserveLeftover()
 	else
 		consumed = _raw.size();
 
-	std::string leftover = "";
+	std::string	leftover = "";
 	if (_raw.size() > consumed)
 		leftover = _raw.substr(consumed);
 
@@ -141,6 +146,7 @@ void Request::clearButPreserveLeftover()
 	if (!_raw.empty())
 	{
 		_handleHeaders();
+
 		if (_state == READING_BODY)
 			_handleBody();
 	}
@@ -148,26 +154,28 @@ void Request::clearButPreserveLeftover()
 
 /* ------------------------- PRIVATE INTERNAL HELPERS ----------------------- */
 
-void Request::_handleHeaders()
+void
+Request::_handleHeaders()
 {
 	// Look for the standard HTTP header/body boundary delimiter
-	size_t pos = _raw.find("\r\n\r\n");
+	size_t	pos = _raw.find("\r\n\r\n");
 
 	if (pos != std::string::npos)
 	{
 		_headerSize = pos + 4;
-		std::string headers_part = _raw.substr(0, pos);
+		std::string	headers_part = _raw.substr(0, pos);
 
 		_parseRawHeaders(headers_part);
 	}
 }
 
-void Request::_handleBody()
+void
+Request::_handleBody()
 {
 	// CASE 1: Standard read with Content-Length
 	if (!_isChunked)
 	{
-		size_t curr_body_size = _raw.size() - _headerSize;
+		size_t	curr_body_size = _raw.size() - _headerSize;
 
 		// Check if the current payload exceeds the server configuration limits
 		if (curr_body_size > _limit)
@@ -176,14 +184,12 @@ void Request::_handleBody()
 			_errCode = Http::PAYLOAD_TOO_LARGE;
 			return;
 		}
-
 		// Safety check to ensure the payload chunk doesn't overflow Content-Length
 		if (curr_body_size >= _contentLength)
 		{
 			_body = _raw.substr(_headerSize, _contentLength);
 			_state = COMPLETE;
 		}
-
 		// Transition state once the complete expected body bytes are received
 		if (curr_body_size == _contentLength)
 		{
@@ -192,7 +198,6 @@ void Request::_handleBody()
 		}
 		return;
 	}
-
 	// CASE 2: Chunked read (Transfer-Encoding: chunked)
 	if (_chunkedBytesProcessed == 0)
 	{
@@ -211,13 +216,14 @@ void Request::_handleBody()
 		// A. Look for the chunk size
 		if (_currChunkSize == -1)
 		{
-			size_t crlf_pos = _raw.find("\r\n", _chunkedBytesProcessed);
+			size_t	crlf_pos = _raw.find("\r\n", _chunkedBytesProcessed);
 			if (crlf_pos == std::string::npos)
 				break; // Waiting for more data from the socket (non-blocking)
 
-			std::string hexSize = _raw.substr(_chunkedBytesProcessed,
-									crlf_pos - _chunkedBytesProcessed);
-			std::stringstream ss;
+			std::string	hexSize = _raw.substr(_chunkedBytesProcessed,
+								  crlf_pos - _chunkedBytesProcessed);
+
+			std::stringstream	ss;
 			ss << std::hex << hexSize;
 			ss >> _currChunkSize;
 
@@ -245,7 +251,7 @@ void Request::_handleBody()
 		// B. Extract chunk data
 		else
 		{
-			// Check if we received the full chunk + trailing \r\n
+			// Check if received the full chunk + trailing \r\n
 			if (_raw.size() < _chunkedBytesProcessed + _currChunkSize + 2)
 				break; // Waiting for more data
 
@@ -260,12 +266,13 @@ void Request::_handleBody()
 				return;
 			}
 			_chunkedBytesProcessed += _currChunkSize + 2; // +2 for the \r\n
-			_currChunkSize = -1;						  // Reset for the next chunk
+			_currChunkSize = -1; // Reset for the next chunk
 		}
 	}
 }
 
-void Request::_parseRawHeaders(const std::string &headers_part)
+void
+Request::_parseRawHeaders(const std::string &headers_part)
 {
 	std::stringstream	ss(headers_part);
 	std::string			line;
@@ -289,7 +296,6 @@ void Request::_parseRawHeaders(const std::string &headers_part)
 			continue;
 		break;
 	}
-
 	if (line.empty())
 	{
 		_state = ERROR;
@@ -350,33 +356,37 @@ void Request::_parseRawHeaders(const std::string &headers_part)
 
 /* -------------------------------- GETTERS --------------------------------- */
 
-const std::string &Request::getMethod() const
+const std::string
+&Request::getMethod() const
 {
 	return _method;
 }
 
-const std::string &Request::getPath() const
+const std::string
+&Request::getPath() const
 {
 	return _path;
 }
 
-const std::string &Request::getVersion() const
+const std::string
+&Request::getVersion() const
 {
 	return _version;
 }
 
-const std::string &Request::getHeader(const std::string &key) const
+const std::string
+&Request::getHeader(const std::string &key) const
 {
-	std::map<std::string, std::string>::const_iterator it = _headers.find(key);
-
+	std::map<std::string, std::string>::const_iterator	it = _headers.find(key);
 	if (it != _headers.end())
 		return it->second;
 
-	static std::string empty = "";
+	static std::string	empty = "";
 	return empty;
 }
 
-const std::string &Request::getBody() const
+const std::string
+&Request::getBody() const
 {
 	return _body;
 }
@@ -387,7 +397,8 @@ Request::getState() const
 	return _state;
 }
 
-int Request::getErrCode() const
+int
+Request::getErrCode() const
 {
 	return _errCode;
 }

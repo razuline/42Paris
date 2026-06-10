@@ -6,21 +6,21 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/25 14:09:02 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/08 18:37:58 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/10 13:11:49 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef REQUEST_HPP
 # define REQUEST_HPP
 
-# include <string>
-# include <map>
-# include <iostream>
-# include <sstream>
-# include <cstdlib>
-
 # include "HttpStatus.hpp"
 # include "Utils.hpp"
+
+# include <cstdlib>
+# include <iostream>
+# include <map>
+# include <sstream>
+# include <string>
 
 class Request
 {
@@ -79,7 +79,7 @@ public:
 	State				getState() const;
 	int					getErrCode() const;
 
-	static const size_t					HEADERS_SIZE;
+	static const size_t	HEADERS_SIZE;
 };
 
 #endif
