@@ -6,19 +6,20 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/28 13:38:56 by erazumov          #+#    #+#             */
-/*   Updated: 2026/05/27 16:26:21 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/10 14:57:32 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef CONFIG_HPP
 # define CONFIG_HPP
 
-# include <string>
-# include <fstream>
-# include <iostream>
-# include <sstream>
-
 # include "Location.hpp"
+# include "Utils.hpp"
+
+# include <iostream>
+# include <fstream>
+# include <sstream>
+# include <string>
 
 class Config
 {

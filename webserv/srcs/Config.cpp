@@ -6,12 +6,11 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/28 13:46:06 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/09 15:19:13 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/10 14:59:01 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Config.hpp"
-#include "Utils.hpp"
 
 /* ------------------------- ORTHODOX CANONICAL FORM ------------------------ */
 
@@ -66,7 +65,8 @@ Config::parse(const std::string &filename)
 	// 2. Check if the STREAM is open
 	if (!file.is_open())
 	{
-		std::cerr << "[Config] Error: Cannot open config file " << filename << std::endl;
+		std::cerr << "[Config] Error: Cannot open config file "
+				  << filename << std::endl;
 		return;
 	}
 
@@ -105,6 +105,7 @@ Config::parse(const std::string &filename)
 			std::stringstream	ss(value);
 			ss >> _clientMaxBodySize;
 		}
+
 		// --- LOCATION PARSING ---
 		else if (line.find("location") == 0)
 		{
@@ -113,9 +114,9 @@ Config::parse(const std::string &filename)
 			size_t		bracketPos = line.find("{");
 
 			std::string	rawPath = line.substr(pathStart,
-				(bracketPos != std::string::npos
-					? bracketPos - pathStart
-					: std::string::npos));
+								  (bracketPos != std::string::npos
+								 ? bracketPos - pathStart
+								 : std::string::npos));
 			loc.setPath(Utils::trim(rawPath));
 
 			// Sub-loop to read the inner context of the bracket block
