@@ -6,19 +6,19 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/27 17:04:32 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/08 19:54:48 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/10 13:09:19 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef RESPONSE_HPP
 # define RESPONSE_HPP
 
-# include <string>
-# include <map>
-# include <iostream>
-# include <sstream>
-
 # include "HttpStatus.hpp"
+
+# include <iostream>
+# include <map>
+# include <sstream>
+# include <string>
 
 class Response
 {
