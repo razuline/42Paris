@@ -6,13 +6,11 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/24 16:54:54 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/09 21:41:00 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/10 14:45:23 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "CGI.hpp"
-
-#include <cstdio>
 
 /* ------------------------- ORTHODOX CANONICAL FORM ------------------------ */
 
@@ -29,14 +27,14 @@ CGI::CGI() :
 
 CGI::~CGI()
 {
-	std::cout << "\033[31m[DEBUG] CGI Destructor called for PID " << _pid << "\033[0m" << std::endl;
+	std::cout << "\033[31m[DEBUG] CGI Destructor called for PID " << _pid
+			  << "\033[0m" << std::endl;
 
-	// Ensure any open pipe file descriptor is securely closed to prevent FD leaks
+	// Ensure any open pipe fd is securely closed to prevent FD leaks
 	if (_pipe_in[0] != -1)
 		close(_pipe_in[0]);
 	if (_pipe_in[1] != -1)
 		close(_pipe_in[1]);
-
 	if (_pipe_out[0] != -1)
 		close(_pipe_out[0]);
 	if (_pipe_out[1] != -1)
@@ -52,7 +50,7 @@ CGI::~CGI()
 			waitpid(_pid, NULL, 0);
 		}
 	}
-	// Free dynamically allocated memory inside the environment matrix
+	// Free dynamically allocated memory inside the env matrix
 	_clearEnv();
 }
 
@@ -96,6 +94,7 @@ CGI::execute(const Request &req, const std::string &script_path,
 		_cleanupPipes();
 		return Http::INTERNAL_SERVER_ERROR;
 	}
+
 	// 3. Duplicate the current process
 	_pid = fork();
 	if (_pid < 0)
@@ -163,19 +162,7 @@ CGI::_initEnv(const Request &req, const std::string &script_path)
 {
 	_env.clear();
 
-	std::string abs_script_path = script_path;
-	if (!abs_script_path.empty() && abs_script_path[0] != '/')
-	{
-		char cwd[4096];
-		if (getcwd(cwd, sizeof(cwd)) != NULL)
-		{
-			if (abs_script_path.find("./") == 0)
-				abs_script_path = abs_script_path.substr(2);
-			else if (abs_script_path.find(".") == 0)
-				abs_script_path = abs_script_path.substr(1);
-			abs_script_path = std::string(cwd) + "/" + abs_script_path;
-		}
-	}
+	std::string	abs_script_path = script_path;
 
 	_env.push_back(strdup(("REQUEST_METHOD=" + req.getMethod()).c_str()));
 	_env.push_back(strdup("SERVER_PROTOCOL=HTTP/1.1"));
@@ -194,12 +181,12 @@ CGI::_initEnv(const Request &req, const std::string &script_path)
 	_env.push_back(strdup(("PATH_TRANSLATED=" + abs_script_path).c_str()));
 
 	// CONTENT_LENGTH
-	std::stringstream ss;
+	std::stringstream	ss;
 	ss << req.getBody().size();
 	_env.push_back(strdup(("CONTENT_LENGTH=" + ss.str()).c_str()));
 
 	// CONTENT_TYPE
-	std::string contentType = req.getHeader("Content-Type");
+	std::string	contentType = req.getHeader("Content-Type");
 	if (!contentType.empty())
 		_env.push_back(strdup(("CONTENT_TYPE=" + contentType).c_str()));
 
@@ -208,7 +195,8 @@ CGI::_initEnv(const Request &req, const std::string &script_path)
 		_env.push_back(strdup(("HTTP_COOKIE=" + req.getHeader("Cookie")).c_str()));
 
 	if (!req.getHeader("X-Secret-Header-For-Test").empty())
-		_env.push_back(strdup(("HTTP_X_SECRET_HEADER_FOR_TEST=" + req.getHeader("X-Secret-Header-For-Test")).c_str()));
+		_env.push_back(strdup(("HTTP_X_SECRET_HEADER_FOR_TEST=" +
+			req.getHeader("X-Secret-Header-For-Test")).c_str()));
 
 	_env.push_back(NULL);
 }
@@ -220,9 +208,9 @@ CGI::_clearEnv()
 	for (size_t i = 0; i < _env.size(); ++i)
 	{
 		if (_env[i] != NULL)
-			free(_env[i]);  // strdup uses malloc, so free is correct
+			free(_env[i]);
 	}
-	_env.clear();  // Vector is now empty
+	_env.clear();
 }
 
 void

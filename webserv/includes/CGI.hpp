@@ -6,26 +6,27 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/24 16:54:31 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/09 15:10:48 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/10 14:36:30 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef CGI_HPP
 # define CGI_HPP
 
-# include <string>
-# include <vector>
-# include <map>
-# include <cstring>
+# include "HttpStatus.hpp"
+# include "Request.hpp"
+
 # include <cstdlib>
-# include <unistd.h>
+# include <cstdio>
+# include <cstring>
 # include <fcntl.h>
+# include <map>
+# include <signal.h>
+# include <string>
 # include <sys/types.h>
 # include <sys/wait.h>
-# include <signal.h>
-
-# include "Request.hpp"
-# include "HttpStatus.hpp"
+# include <unistd.h>
+# include <vector>
 
 class CGI
 {
@@ -35,14 +36,14 @@ private:
 	int					_pipe_in[2];   // Server writes request body here
 	int					_pipe_out[2];  // Server reads CGI response from here
 
-	/* --- Copy Blockade --- */ // (prevents double-closing system pipes)
-	CGI(const CGI &copy);
-	CGI		&operator=(const CGI &other);
-
 	/* --- Private Internal Helpers --- */
 	void	_initEnv(const Request &req, const std::string &script_path);
 	void	_clearEnv();
 	void	_cleanupPipes();
+
+	/* --- Copy Blockade --- */ // (prevents double-closing system pipes)
+	CGI(const CGI &copy);
+	CGI		&operator=(const CGI &other);
 
 public:
 	/* --- Orthodox Canonical Form --- */
