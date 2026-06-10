@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:40 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/09 19:11:16 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/10 15:16:10 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,7 @@ Server::setup()
 
 	// 3. Allow immediate local port reuse
 	//    to avoid "Address already in use" errors
-	int opt = 1;
+	int	opt = 1;
 	if (setsockopt(_serv_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
 		perror("Setsockopt REUSEADDR failed");
 
@@ -105,10 +105,10 @@ Server::setup()
 Server::ReadStatus
 Server::handleRead(int client_fd)
 {
-	char buff[4096];
+	char	buff[4096];
 
 	// 1. Read raw bytes from the client socket without blocking
-	int bytes_read = recv(client_fd, buff, sizeof(buff) - 1, 0);
+	int	bytes_read = recv(client_fd, buff, sizeof(buff) - 1, 0);
 	if (bytes_read <= 0)
 	{
 		clearClientState(client_fd);
@@ -117,14 +117,14 @@ Server::handleRead(int client_fd)
 	buff[bytes_read] = '\0';
 
 	// 2. Push network data chunk into the client's dedicated Request state machine
-	Request &curr = _reqs[client_fd];
+	Request	&curr = _reqs[client_fd];
 	curr.setLimit(_config.getClientMaxBodySize());
 	curr.addData(std::string(buff, bytes_read));
 
 	// 3. Handle immediate request header or payload body limit errors
 	if (curr.getState() == Request::ERROR)
 	{
-		Response res;
+		Response	res;
 		res.defaultErrorPage(curr.getErrCode());
 		_resps[client_fd] = res;
 		return Server::STATIC_READY;
@@ -151,8 +151,8 @@ Server::handleWrite(int client_fd)
 		_writeBuffs[client_fd] = _resps[client_fd].build();
 	}
 
-	const std::string &res_str = _writeBuffs[client_fd];
-	int bytes_sent = send(client_fd, res_str.c_str(), res_str.size(), 0);
+	const std::string	&res_str = _writeBuffs[client_fd];
+	int	bytes_sent = send(client_fd, res_str.c_str(), res_str.size(), 0);
 
 	if (bytes_sent <= 0)
 	{
@@ -199,13 +199,13 @@ Server::clearClientState(int client_fd)
 void
 Server::cleanupCgi(int client_fd)
 {
-	std::map<int, CGI *>::iterator it = _cgis.find(client_fd);
+	std::map<int, CGI *>::iterator	it = _cgis.find(client_fd);
 	if (it != _cgis.end())
 	{
-		pid_t pid = it->second->getPid();
+		pid_t	pid = it->second->getPid();
 		if (pid > 0)
 		{
-			int status;
+			int	status;
 			waitpid(pid, &status, WNOHANG);
 			std::cout << "[Server]  Cleaned up CGI process " << pid << std::endl;
 		}
@@ -213,16 +213,17 @@ Server::cleanupCgi(int client_fd)
 		_cgis.erase(it);
 	}
 }
+
 /* ------------------------- PRIVATE INTERNAL HELPERS ----------------------- */
 
 std::string
 Server::_readFile(const std::string &path)
 {
-	std::ifstream file(path.c_str());
+	std::ifstream	file(path.c_str());
 	if (!file.is_open())
 		return "";
 
-	std::stringstream buff;
+	std::stringstream	buff;
 	buff << file.rdbuf();
 	return buff.str();
 }
@@ -256,14 +257,14 @@ Server::_execCompetedOrder(int client_fd, Request &req)
 {
 	Utils::logRequest(req.getMethod(), req.getPath());
 
-	std::string path = req.getPath();
-	std::string method = req.getMethod();
-	Response response;
+	std::string	path = req.getPath();
+	std::string	method = req.getMethod();
+	Response	response;
 
 	// A. Teapot Verification 🫖
 	if (path == "/coffee")
 	{
-		std::string teapotHtml = "<html><head><title>418 I'm a Teapot</title></head>"
+		std::string	teapotHtml = "<html><head><title>418 I'm a Teapot</title></head>"
 								 "<body><h1>418 I'm a Teapot</h1></body></html>";
 		response.setStatus(Http::IM_A_TEAPOT);
 		response.setBody(teapotHtml);
@@ -272,7 +273,7 @@ Server::_execCompetedOrder(int client_fd, Request &req)
 		return Server::STATIC_READY;
 	}
 
-	const Location *loc = _matchLocation(path);
+	const Location	*loc = _matchLocation(path);
 
 	// B. Request Body Limit Check
 	if (loc && loc->getClientMaxBodySize() > 0 &&
@@ -304,8 +305,9 @@ Server::_execCompetedOrder(int client_fd, Request &req)
 
 	// E. Resolve Base Paths
 	std::string	activeRoot = (loc && !loc->getRoot().empty())
-								 ? loc->getRoot()
-								 : _config.getFolderRoot();
+							? loc->getRoot()
+							: _config.getFolderRoot();
+
 	std::string	relPath = path;
 	if (loc && relPath.find(loc->getPath()) == 0)
 		relPath = relPath.substr(loc->getPath().length());
@@ -318,18 +320,19 @@ Server::_execCompetedOrder(int client_fd, Request &req)
 		normalRelPath = "/" + normalRelPath;
 
 	// F. CGI Gateway Check
-	std::string cgiBin = "";
-	const std::vector<Location> &allLocs = _config.getLocations();
+	std::string	cgiBin = "";
+	const std::vector<Location>	&allLocs = _config.getLocations();
 
 	for (size_t i = 0; i < allLocs.size(); ++i)
 	{
-		const std::string &ext = allLocs[i].getPath();
+		const std::string	&ext = allLocs[i].getPath();
 		if (!ext.empty() && ext[0] == '.' && normalRelPath.size() >= ext.size())
 		{
 			if (normalRelPath.substr(normalRelPath.size() - ext.size()) == ext)
 			{
-				const std::vector<std::string> &allowedMethods = allLocs[i].getMethods();
-				bool methodMatch = false;
+				const std::vector<std::string>	&allowedMethods = allLocs[i].getMethods();
+				bool	methodMatch = false;
+
 				for (size_t m = 0; m < allowedMethods.size(); ++m)
 				{
 					if (allowedMethods[m] == method)
@@ -351,6 +354,7 @@ Server::_execCompetedOrder(int client_fd, Request &req)
 		std::string	scriptPath = activeRoot + normalRelPath;
 
 		_cgis[client_fd] = new CGI();
+
 		int	cgi_status = _cgis[client_fd]->execute(req, scriptPath, cgiBin);
 		if (cgi_status == Http::INTERNAL_SERVER_ERROR)
 		{
@@ -367,9 +371,9 @@ Server::_execCompetedOrder(int client_fd, Request &req)
 	std::string	finalRelPath = normalRelPath;
 	if (finalRelPath.empty() || finalRelPath[finalRelPath.size() - 1] == '/')
 	{
-		std::string currIndex = (loc && !loc->getIndex().empty())
-									? loc->getIndex()
-									: _config.getHomePage();
+		std::string	currIndex = (loc && !loc->getIndex().empty())
+							   ? loc->getIndex()
+							   : _config.getHomePage();
 		if (!currIndex.empty())
 		{
 			if (currIndex[0] == '/')
@@ -378,18 +382,19 @@ Server::_execCompetedOrder(int client_fd, Request &req)
 				finalRelPath += currIndex;
 		}
 	}
+
 	std::string	fullPath = activeRoot + finalRelPath;
 
 	// H. Autoindex Management
 	if (!path.empty() && path[path.size() - 1] == '/')
 	{
-		std::ifstream indexCheck(fullPath.c_str());
+		std::ifstream	indexCheck(fullPath.c_str());
 		if (!indexCheck.good())
 		{
 			indexCheck.close();
 			if (loc && loc->getAutoindex())
 			{
-				std::string autoindexHtml = Utils::generateAutoindex(activeRoot + path, path);
+				std::string	autoindexHtml = Utils::generateAutoindex(activeRoot + path, path);
 				if (!autoindexHtml.empty())
 				{
 					response.setStatus(Http::OK);
@@ -421,12 +426,13 @@ Server::_execCompetedOrder(int client_fd, Request &req)
 	return Server::STATIC_READY;
 }
 
-bool Server::_checkIncMethod(const Location *loc, const std::string &method) const
+bool
+Server::_checkIncMethod(const Location *loc, const std::string &method) const
 {
 	if (!loc)
 		return true;
 
-	const std::vector<std::string> &allowed = loc->getMethods();
+	const std::vector<std::string>	&allowed = loc->getMethods();
 	if (allowed.empty())
 	{
 		if (loc->getPath() == "/" && method != "GET" && method != "HEAD")
@@ -441,7 +447,9 @@ bool Server::_checkIncMethod(const Location *loc, const std::string &method) con
 	return false;
 }
 
-bool Server::_isCgiResource(const Location *loc, const std::string &, const std::string &) const
+bool
+Server::_isCgiResource(const Location *loc, const std::string &,
+											const std::string &) const
 {
 	if (loc && !loc->getCgiPath().empty())
 		return true;
@@ -451,34 +459,34 @@ bool Server::_isCgiResource(const Location *loc, const std::string &, const std:
 Server::ReadStatus
 Server::_runStaticGet(int client_fd, std::string fullPath)
 {
-	Response response;
-	Request &req = _reqs[client_fd];
-	std::string reqPath = req.getPath();
-	const Location *loc = _matchLocation(reqPath);
+	Response		response;
+	Request			&req = _reqs[client_fd];
+	std::string		reqPath = req.getPath();
+	const Location	*loc = _matchLocation(reqPath);
 
-	DIR *dir = ::opendir(fullPath.c_str());
-	bool isDir = false;
+	DIR				*dir = ::opendir(fullPath.c_str());
+	bool			isDir = false;
+
 	if (dir)
 	{
 		::closedir(dir);
 		isDir = true;
 	}
-
 	if (isDir)
 	{
 		if (reqPath.empty() || reqPath[reqPath.size() - 1] != '/')
 			fullPath += '/';
 
-		std::string indexFile = loc ? loc->getIndex() : _config.getHomePage();
+		std::string	indexFile = loc ? loc->getIndex() : _config.getHomePage();
 		if (indexFile.empty())
 			indexFile = "index.html";
 
-		std::string indexPath = fullPath;
+		std::string	indexPath = fullPath;
 		if (!indexPath.empty() && indexPath[indexPath.size() - 1] != '/')
 			indexPath += "/";
 		indexPath += indexFile;
 
-		bool hasIndex = (access(indexPath.c_str(), R_OK) == 0);
+		bool	hasIndex = (access(indexPath.c_str(), R_OK) == 0);
 		if (!hasIndex)
 		{
 			response.defaultErrorPage(Http::NOT_FOUND);
@@ -487,7 +495,6 @@ Server::_runStaticGet(int client_fd, std::string fullPath)
 		}
 		fullPath = indexPath;
 	}
-
 	if (access(fullPath.c_str(), R_OK) != 0)
 	{
 		response.defaultErrorPage(Http::NOT_FOUND);
@@ -495,7 +502,7 @@ Server::_runStaticGet(int client_fd, std::string fullPath)
 		return Server::STATIC_READY;
 	}
 
-	std::ifstream file(fullPath.c_str());
+	std::ifstream	file(fullPath.c_str());
 	if (!file.is_open())
 	{
 		response.defaultErrorPage(Http::NOT_FOUND);
@@ -503,7 +510,7 @@ Server::_runStaticGet(int client_fd, std::string fullPath)
 		return Server::STATIC_READY;
 	}
 
-	std::string content = _readFile(fullPath);
+	std::string	content = _readFile(fullPath);
 	response.setStatus(Http::OK);
 	response.setHeader("Content-Length", Utils::toStr(content.size()));
 	response.setHeader("Content-Type", Utils::getMimeType(fullPath));
@@ -518,29 +525,28 @@ Server::_runStaticGet(int client_fd, std::string fullPath)
 Server::ReadStatus
 Server::_runStaticHead(int client_fd, std::string fullPath)
 {
-	Response response;
-	Request &req = _reqs[client_fd];
-	std::string origPath = req.getPath();
-	const Location *loc = _matchLocation(origPath);
+	Response		response;
+	Request			&req = _reqs[client_fd];
+	std::string		origPath = req.getPath();
+	const Location	*loc = _matchLocation(origPath);
 
-	struct stat path_stat;
-	bool isDir = false;
+	struct stat		path_stat;
+	bool			isDir = false;
 
 	if (::stat(fullPath.c_str(), &path_stat) == 0 && S_ISDIR(path_stat.st_mode))
 		isDir = true;
-
 	if (isDir)
 	{
-		std::string indexFile = loc ? loc->getIndex() : "index.html";
+		std::string	indexFile = loc ? loc->getIndex() : "index.html";
 		if (indexFile.empty())
 			indexFile = "youpi.bad_extension";
 
-		std::string indexPath = fullPath;
+		std::string	indexPath = fullPath;
 		if (indexPath.empty() || indexPath[indexPath.size() - 1] != '/')
 			indexPath += "/";
 		indexPath += indexFile;
 
-		bool hasIndex = (access(indexPath.c_str(), R_OK) == 0);
+		bool	hasIndex = (access(indexPath.c_str(), R_OK) == 0);
 
 		if (origPath.empty() || origPath[origPath.size() - 1] != '/')
 		{
@@ -569,11 +575,12 @@ Server::_runStaticHead(int client_fd, std::string fullPath)
 	}
 	else
 	{
-		std::string content = _readFile(fullPath);
+		std::string	content = _readFile(fullPath);
 		response.setStatus(Http::OK);
 		response.setHeader("Content-Length", Utils::toStr(content.size()));
 		response.setHeader("Content-Type", Utils::getMimeType(fullPath));
 	}
+
 	Utils::logResponse(response.getStatus(), _reqs[client_fd].getPath());
 
 	_resps[client_fd] = response;
@@ -583,28 +590,28 @@ Server::_runStaticHead(int client_fd, std::string fullPath)
 Server::ReadStatus
 Server::_runStaticPostUpload(int client_fd, std::string fullPath)
 {
-	Response response;
-	Request &req = _reqs[client_fd];
-	const Location *loc = _matchLocation(req.getPath());
-	std::string targetUploadPath = fullPath;
+	Response		response;
+	Request			&req = _reqs[client_fd];
+	const Location	*loc = _matchLocation(req.getPath());
+	std::string		targetUploadPath = fullPath;
 
 	if (loc && !loc->getUploadStore().empty())
 	{
-		size_t lastSlash = req.getPath().find_last_of('/');
-		std::string fileName = (lastSlash != std::string::npos)
-								   ? req.getPath().substr(lastSlash + 1)
-								   : "uploaded_file";
+		size_t		lastSlash = req.getPath().find_last_of('/');
+		std::string	fileName = (lastSlash != std::string::npos)
+							  ? req.getPath().substr(lastSlash + 1)
+							  : "uploaded_file";
 		targetUploadPath = loc->getUploadStore() + "/" + fileName;
 	}
 
-	std::ofstream outFile(targetUploadPath.c_str(), std::ios::binary);
+	std::ofstream	outFile(targetUploadPath.c_str(), std::ios::binary);
 	if (!outFile.is_open())
 	{
 		response.defaultErrorPage(Http::INTERNAL_SERVER_ERROR);
 	}
 	else
 	{
-		std::string body = req.getBody();
+		std::string	body = req.getBody();
 		outFile.write(body.c_str(), body.size());
 		outFile.close();
 
@@ -613,6 +620,7 @@ Server::_runStaticPostUpload(int client_fd, std::string fullPath)
 		response.setHeader("Content-Type", "text/html");
 		response.setHeader("Connection", "close");
 	}
+
 	Utils::logResponse(response.getStatus(), _reqs[client_fd].getPath());
 
 	_resps[client_fd] = response;
@@ -622,8 +630,8 @@ Server::_runStaticPostUpload(int client_fd, std::string fullPath)
 Server::ReadStatus
 Server::_runStaticDeleteFile(int client_fd, std::string fullPath)
 {
-	Response response;
-	std::ifstream fileCheck(fullPath.c_str());
+	Response		response;
+	std::ifstream	fileCheck(fullPath.c_str());
 
 	if (!fileCheck.good())
 	{
@@ -644,6 +652,7 @@ Server::_runStaticDeleteFile(int client_fd, std::string fullPath)
 			response.setHeader("Connection", "close");
 		}
 	}
+
 	Utils::logResponse(response.getStatus(), _reqs[client_fd].getPath());
 
 	_resps[client_fd] = response;

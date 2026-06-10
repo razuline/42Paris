@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:32 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/09 15:00:41 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/10 15:03:47 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,17 +25,17 @@
 # include <cstdio>
 # include <cstring>
 # include <fcntl.h>
+# include <fstream>
+# include <iostream>
+# include <map>
+# include <netinet/in.h>
+# include <sstream>
 # include <sys/socket.h>
 # include <sys/stat.h>
-# include <sys/types.h>
-# include <netinet/in.h>
-# include <vector>
 # include <sys/poll.h>
-# include <fstream>
-# include <sstream>
-# include <iostream>
+# include <sys/types.h>
 # include <unistd.h>
-# include <map>
+# include <vector>
 
 extern volatile sig_atomic_t	g_stop;
 
@@ -105,12 +105,12 @@ public:
 	ReadStatus			clearClientState(int client_fd);
 	void				cleanupCgi(int client_fd);
 
-	/* --- Getters --- */
+	/* --- Setters / Getters --- */
+	void				setCgiResponse(int client_fd, const Response &res);
 	int					getServerFd() const;
 	int					getReadFd(int client_fd);  // To read from Python
 	int					getWriteFd(int client_fd); // To write to Python
 	const std::string	&getRequestBody(int client_fd);
-	void				setCgiResponse(int client_fd, const Response &res);
 };
 
 #endif
