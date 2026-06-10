@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/24 16:54:54 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/10 14:45:23 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/10 19:46:45 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,9 +27,6 @@ CGI::CGI() :
 
 CGI::~CGI()
 {
-	std::cout << "\033[31m[DEBUG] CGI Destructor called for PID " << _pid
-			  << "\033[0m" << std::endl;
-
 	// Ensure any open pipe fd is securely closed to prevent FD leaks
 	if (_pipe_in[0] != -1)
 		close(_pipe_in[0]);
@@ -167,7 +164,7 @@ CGI::_initEnv(const Request &req, const std::string &script_path)
 	_env.push_back(strdup(("REQUEST_METHOD=" + req.getMethod()).c_str()));
 	_env.push_back(strdup("SERVER_PROTOCOL=HTTP/1.1"));
 	_env.push_back(strdup("GATEWAY_INTERFACE=CGI/1.1"));
-	_env.push_back(strdup("SERVER_PORT=8080"));
+	_env.push_back(strdup("SERVER_PORT=8080")); //TODO: Fix port number
 	_env.push_back(strdup("SERVER_SOFTWARE=webserv/1.0"));
 	_env.push_back(strdup("SERVER_NAME=localhost"));
 	_env.push_back(strdup(("SCRIPT_FILENAME=" + abs_script_path).c_str()));

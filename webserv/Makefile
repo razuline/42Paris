@@ -6,7 +6,7 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/03/09 15:17:52 by erazumov          #+#    #+#              #
-#    Updated: 2026/06/08 19:24:32 by erazumov         ###   ########.fr        #
+#    Updated: 2026/06/10 19:31:15 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -30,6 +30,9 @@ SRCS       = $(addprefix srcs/, $(SRC_FILES))
 
 OBJ_DIR    = objs
 OBJS       = $(addprefix $(OBJ_DIR)/, $(SRC_FILES:.cpp=.o))
+
+#TEST_DIR   = tests
+#TEST       =
 
 # Colors
 Y = \033[33m
@@ -62,7 +65,7 @@ fclean: clean
 	@echo "$(R)🗑️  Executables removed$(X)"
 
 re: fclean
-		+$(MAKE) all --jobs=$(shell nproc)
+	+$(MAKE) all --jobs=$(shell nproc)
 
 .PHONY: all clean fclean re
 

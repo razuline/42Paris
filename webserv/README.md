@@ -119,6 +119,16 @@ We divided the project into three technical modules so the team could collaborat
 
 ---
 
+## 📚 Additional Documentation
+More detailed design documentation is available in the `docs/` folder:
+
+- `docs/HTTP.md` — HTTP parsing, routing, request handling, and response generation.
+- `docs/Event-Loop.md` — non-blocking `poll()` architecture and socket lifecycle.
+- `docs/CGI.md` — CGI execution, pipe management, and script output parsing.
+
+These files are organized to support team defenses and make the implementation easier to review.
+
+
 ## 🫖 Deep Dive: The `418 I'm a Teapot` Easter Egg
 
 The **Hyper Text Coffee Pot Control Protocol** (**HTCPCP**) is a communication protocol for controlling, monitoring, and diagnosing coffee pots. RFC 2324 is published on 1 April 1998 as an April Fools' Day RFC, as a part of an April Fools prank.
@@ -135,4 +145,5 @@ The status code `418` is used as an **Easter egg** in some websites, such as [Go
 ### Compilation
 To compile the project executable using `c++` and strict flags (`-Wall -Wextra -Werror -std=c++98`), run:
 ```bash
-make
+make	std::cout << "\033[31m[DEBUG] CGI Destructor called for PID " << _pid
+			  << "\033[0m" << std::endl;
