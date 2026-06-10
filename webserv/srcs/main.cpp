@@ -6,14 +6,14 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:07:21 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/09 16:44:54 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/10 13:29:51 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Cluster.hpp"
 
-#include <signal.h>
 #include <iostream>
+#include <signal.h>
 
 volatile sig_atomic_t	g_stop = 0;
 
@@ -21,24 +21,23 @@ volatile sig_atomic_t	g_stop = 0;
 void	handle_signal(int sig)
 {
 	(void)sig;
-	g_stop = 1; // Signal the server to stop gracefully
+	g_stop = 1;
 	std::cout << "\n[Signal received] Stopping the webserv..." << std::endl;
 }
 
-int		main(int ac, char **av)
+int	main(int ac, char **av)
 {
 	signal(SIGPIPE, SIG_IGN);
 
 	if (ac > 2)
 	{
-		std::cerr << "Usage: ./webserv [configuration_file]" << std::endl;
+		std::cerr << "Usage: ./webserv [config_file]" << std::endl;
 		return 1;
 	}
 
 	std::string	configPath = (ac == 2) ? av[1] : "configs/default.conf";
 	std::cout << "Loading configuration: " << configPath << std::endl;
 
-	// 1. Single config instance for now (will receive vector after location parser)
 	Config	config;
 	config.parse(configPath);
 
