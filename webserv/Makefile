@@ -6,7 +6,7 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/03/09 15:17:52 by erazumov          #+#    #+#              #
-#    Updated: 2026/06/10 19:31:15 by erazumov         ###   ########.fr        #
+#    Updated: 2026/06/11 17:54:02 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -31,8 +31,7 @@ SRCS       = $(addprefix srcs/, $(SRC_FILES))
 OBJ_DIR    = objs
 OBJS       = $(addprefix $(OBJ_DIR)/, $(SRC_FILES:.cpp=.o))
 
-#TEST_DIR   = tests
-#TEST       =
+TEST_ROOT  = www
 
 # Colors
 Y = \033[33m
@@ -44,6 +43,20 @@ UP = \033[A
 CUT = \033[K
 
 all: $(NAME)
+
+test: $(NAME) setup_tester
+	@echo "$(G)🚀 Running tests...$(X)"
+
+setup_tester:
+	@echo "$(B)📁 Creating YoupiBanane directory structure...$(X)"
+	@mkdir -p $(TEST_ROOT)/YoupiBanane/nop
+	@mkdir -p $(TEST_ROOT)/YoupiBanane/Yeah
+	@touch $(TEST_ROOT)/YoupiBanane/youpi.bad_extension
+	@touch $(TEST_ROOT)/YoupiBanane/youpi.bla
+	@touch $(TEST_ROOT)/YoupiBanane/nop/youpi.bad_extension
+	@touch $(TEST_ROOT)/YoupiBanane/nop/other.pouic
+	@touch $(TEST_ROOT)/YoupiBanane/Yeah/not_happy.bad_extension
+	@echo "$(G)✅ YoupiBanane structure is ready!"
 
 $(NAME): $(OBJS)
 	@echo "$(Y)📁 Compiling object files...$(X)"
@@ -62,12 +75,13 @@ clean:
 
 fclean: clean
 	@rm -rf $(NAME)
-	@echo "$(R)🗑️  Executables removed$(X)"
+	@rm -rf $(TEST_ROOT)/YoupiBanane
+	@echo "$(R)🗑️  Executables and test directories removed$(X)"
 
 re: fclean
 	+$(MAKE) all --jobs=$(shell nproc)
 
-.PHONY: all clean fclean re
+.PHONY: all clean fclean re test setup_tester
 
 # valgrind --leak-check=full ./webserv
 # leaks --atExit -- ./webserv
