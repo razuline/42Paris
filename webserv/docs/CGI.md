@@ -1,82 +1,96 @@
-# CGI Handling
+# CGI Subsystem Configuration & Process Lifecycle
 
-This section describes how `webserv` executes dynamic CGI scripts and integrates their output into HTTP responses.
+This section provides an exhaustive technical analysis of how `webserv` handles dynamic Common Gateway Interface (CGI/1.1) scripts asynchronously using non-blocking file descriptors, process isolation, and safe process reclamation.
 
-## CGI subsystem responsibilities
+---
 
-The CGI subsystem is implemented in `CGI` and coordinated by `Server` and `Cluster`.
-Its main tasks are:
-- create an isolated child process
-- set the CGI environment variables
-- stream request bodies into the script
-- capture the script output without blocking the main event loop
+## 1. Subsystem Core Responsibilities
 
-## CGI execution flow
+The CGI subsystem is encapsulated within the `CGI` class and orchestrated by the central event loop (`Cluster`) and virtual server logic (`Server`). Its primary mandates are:
+1. **Process Isolation:** Spawning an independent sub-process via `fork()` to run the script interpreter (`execve`), keeping the main server safe from external crashes.
+2. **Meta-Variable Construction:** Formulating a strictly compliant environment matrix matching the CGI/1.1 specification.
+3. **Asynchronous IPC Pipelines:** Creating unidirectional pipe pairs to channel the HTTP request body into the script and harvest its response without stalling the server.
+4. **Zombie Reclamation:** Proactively tracking child PIDs and freeing system resources using non-blocking process reaping.
 
-`Server::_execCompetedOrder()` determines whether a request should be handled by CGI.
-It examines configured `Location` entries and checks for extensions that begin with `.`.
-If the request path matches a CGI-enabled extension and the HTTP method is allowed, the server creates a new `CGI` instance.
+---
 
-The relevant `Location` fields are:
-- `path` containing the CGI file extension (e.g. `/.py`)
-- `cgi_path` containing the interpreter path
+## 2. Core Class Attributes & Architecture
 
-## CGI class behavior
+The `CGI` class relies on specific member variables to safely maintain state during an asynchronous execution cycle:
 
-`CGI` builds an environment array and creates two pipe pairs:
-- `_pipe_in[2]` for writing the request body into the child process
-- `_pipe_out[2]` for reading the script’s stdout
+* `std::vector<char*> _env`: A dynamically allocated matrix storing `Key=Value` environmental strings passed to `execve()`.
+* `pid_t _pid`: Stores the unique Process ID of the spawned child runtime.
+* `int _pipe_in[2]`: Unidirectional pipe matrix handling data flowing **into** the CGI script.
+    * `_pipe_in[1]` is the **Write End** held by the Parent (`Cluster`).
+    * `_pipe_in[0]` is the **Read End** cloned into the Child's `STDIN`.
+* `int _pipe_out[2]`: Unidirectional pipe matrix handling output data flowing **out** of the CGI script.
+    * `_pipe_out[1]` is the **Write End** cloned into the Child's `STDOUT`.
+    * `_pipe_out[0]` is the **Read End** held by the Parent (`Cluster`).
 
-It then forks a child process and executes the CGI interpreter via `execve()`.
-The parent keeps the pipe file descriptors and returns control to the event loop.
 
-## Non-blocking pipe management
 
-`Cluster` adds both CGI pipe ends to the `poll()` array:
-- write end with `POLLOUT`
-- read end with `POLLIN`
+---
 
-When `CLUSTER` receives `POLLOUT` on the write pipe, `Cluster::_handleCGIWrite()` writes the request body in chunks, tracking bytes written. Once the body is fully sent, the write pipe is closed.
+## 3. Detailed Execution Flow (`CGI::execute`)
 
-When `POLLIN` arrives on the read pipe, `Cluster::_handleCGIRead()` reads available bytes into `_cgiBuffs[client_fd]`.
-When the script closes its output, EOF is detected and `CGI` cleanup begins.
+When `Server::_execCompletedOrder()` matches an active request to a CGI location handler based on file extension matching (e.g., `.bla` or `.py`), it instantiates a `CGI` tracking instance and triggers `CGI::execute()`.
 
-## Parsing CGI output
+### Step 1: Absolute Path Resolution
+The method accepts the relative script and interpreter paths, validating them against the current working directory using `getcwd()`. If a path is relative, it normalizes it into a fully absolute path starting with `/`.
 
-After the CGI script finishes, `Cluster` parses the raw output stream.
-The output is split into headers and body by the first `\r\n\r\n` separator.
+### Step 2: Environment Allocation (`_initEnv`)
+The subsystem populates `_env` with the essential parameters extracted from the incoming `Request` instance:
+-   **Execution Metadata:** `REQUEST_METHOD`, `SERVER_PROTOCOL=HTTP/1.1`, `GATEWAY_INTERFACE=CGI/1.1`.
+-   **Target Routing:** `SCRIPT_FILENAME` (absolute path to script file), `SCRIPT_NAME` (virtual URI path).
+-   **Payload Specs:** `CONTENT_LENGTH` (string size of request body) and `CONTENT_TYPE`.
+-   **Specialized Tokens:** Custom variables such as `HTTP_COOKIE` and test-specific keys like `HTTP_X_SECRET_HEADER_FOR_TEST`.
 
-Headers are forwarded into the `Response` object. The server supports:
-- `Status`
-- `Content-Type`
-- `Location`
-- any additional CGI headers
+### Step 3: Process Forking & Pipeline Splicing
+Two pipes are instantiated via `pipe()`. Immediately after, `fork()` splits execution:
 
-`Status` is converted to the HTTP response code.
-If `Location` is present without a status, the server treats it as a redirect and returns `302 Found`.
+#### A. Inside the Child Process (`_pid == 0`)
+1.  **Unused End Closures:** The child immediately isolates its context by closing the parent-managed pipe ends: `_pipe_in[1]` and `_pipe_out[0]`.
+2.  **Stream Redirection:** `dup2()` links `_pipe_in[0]` directly to `STDIN_FILENO`, and links `_pipe_out[1]` directly to `STDOUT_FILENO`.
+3.  **Local Isolation:** The original pipe descriptors are cleanly closed using `close()`.
+4.  **Directory Traversal:** The child uses `chdir()` to shift into the specific script repository folder. This step prevents cross-directory file mapping vulnerabilities within local CGI contexts.
+5.  **Overlay:** Arguments are constructed (`args[0]` points to the binary path, `args[1]` points to the target script). The system invokes `execve(args[0], args, &_env[0])`.
+6.  **Error Fallback:** If `execve()` fails, a hardcoded 500 error string payload is pushed directly out of `STDOUT_FILENO`, and the child terminates via `exit(1)`.
 
-If the CGI output contains no headers, it is returned as HTML with `200 OK`.
-If the output is empty, the server returns `204 No Content`.
+#### B. Inside the Parent Process (`_pid > 0`)
+1.  **Immediate Isolation:** The parent closes the child-cloned descriptors: `_pipe_in[0]` and `_pipe_out[1]`.
+2.  **Enforcing Non-Blocking Flags:** Crucially, the parent uses `fcntl()` to assign **`O_NONBLOCK`** to both `_pipe_in[1]` (Write end) and `_pipe_out[0]` (Read end).
+3.  **Memory Cleanliness:** The dynamic strings within the vector are immediately freed through `_clearEnv()`, keeping memory clean during long event loop lifecycles.
+4.  **Yielding:** The method returns `Http::OK` and yields execution back to the `poll()` loop.
 
-## Error recovery
+---
 
-If the CGI pipe read fails or the script crashes, the server builds a `500 Internal Server Error` response.
-The client socket is then switched to `POLLOUT` to send the error page.
+## 4. Asynchronous Pipeline Integration (`Cluster`)
 
-`Server::cleanupCgi()` also waits for the child process with `waitpid(..., WNOHANG)` and deletes the CGI tracker.
+Rather than blocking to write data or await script completion, the parent hands management over to the event loop. The file descriptors are mapped inside the `Cluster` tracking matrices (`_pipeToClientMap`) and appended into the central `poll()` event vector:
 
-## Security and isolation
+* **`_pipe_in[1]` with `POLLOUT`:** Triggered whenever the system pipe buffer is receptive. `Cluster::_handleCGIWrite()` feeds the incoming request body payload in chunks, tracking bytes written via `_cgiBytesWritten`. Once fully transmitted, the write pipe is closed to transmit an EOF signal to the CGI application.
+* **`_pipe_out[0]` with `POLLIN`:** Triggered whenever the CGI runtime flushes out data. `Cluster::_handleCGIRead()` accumulates the incoming stream incrementally into the tracking buffer array `_cgiBuffs[client_fd]` until an EOF condition (read returning 0) is encountered.
 
-- CGI runs in a child process separate from the main server.
-- request body content is passed through a dedicated pipe rather than being loaded directly into the interpreter.
-- CGI execution failures do not block the main `poll()` loop.
+---
 
-## Example pipeline
+## 5. CGI Output Parsing & Protocol Resilience
 
-1. client request arrives for `/script.py`
-2. `Server` detects CGI extension and creates `CGI`
-3. `CGI` forks and execs Python interpreter with environment variables
-4. `Cluster` writes request body to CGI stdin via pipe
-5. `Cluster` reads CGI stdout via pipe
-6. output is parsed and converted to an HTTP response
-7. response is sent back to the client
+Once an EOF is registered across a CGI read pipe, the raw buffer is parsed.
+
+### Header and Body Splitting
+The stream is scanned for the canonical HTTP line delimiter `\r\n\r\n`. Everything preceding the marker is parsed as response headers (e.g., `Status`, `Content-Type`, `Location`), while everything succeeding it is loaded as the payload body into the client's `Response` block.
+
+### The Tester Infinite Loop Fix (`Connection: close`)
+High-volume network stress testing tools (such as the School 42 `cgi_tester`) run concurrent workers across overlapping cycles. If a server advertises `HTTP/1.1` but closes the connection socket directly after transmitting a CGI response without explicitly notifying the client via headers, the testing runtime can trap itself in a tight infinite loop, pinning a CPU core at 99.9%.
+
+To ensure perfect evaluation compatibility and clean client tear-downs, the server's `Response::build()` framework evaluates headers right before assembly. If no persistent connection parameters are configured, it automatically appends an explicit **`Connection: close`** token to guarantee that testing runtimes handle socket closures cleanly instead of freezing.
+
+---
+
+## 6. Defensive Resource Safety & Zombie Prevention
+
+To achieve total compliance with strict memory guidelines and system resource constraints, the `CGI` subsystem acts defensively during cleanup or premature object destruction:
+
+1.  **Descriptor Leak Immunity:** The destructor verifies all internal pipe indexes (`_pipe_in` and `_pipe_out`). If any descriptor is not `-1`, `close()` is safely executed.
+2.  **Non-Blocking Reaping:** The destructor calls `waitpid(_pid, &status, WNOHANG)`. The **`WNOHANG`** flag allows the parent to poll the state of the child process instantly without blocking the server loop.
+3.  **Active Hazard Mitigation:** If `waitpid()` returns `0`, it means the child script is stuck or deadlocked. The destructor safely mitigates this hazard by escalating to a forceful **`kill(_pid, SIGKILL)`**, followed by a blocking `waitpid(_pid, NULL, 0)` to guarantee that the process table entry is cleanly removed from the operating system kernels.

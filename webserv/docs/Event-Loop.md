@@ -1,91 +1,86 @@
-# Event Loop
+# Event Loop Multiplexing & Non-Blocking I/O Kernel
 
-This section describes the server’s single-threaded event loop and non-blocking I/O architecture.
+This section provides a rigorous technical breakdown of the single-threaded, asynchronous I/O multiplexing core implemented within the `Cluster` class.
 
-## Core design
+---
 
-`webserv` uses a single `poll()` loop to handle all network activity and CGI communication in one thread.
-This design avoids thread creation, locking, and shared-memory synchronization.
+## 1. Architectural Philosophy: Single-Threaded Multiplexing
 
-### Main components
+The core design of `webserv` rejects the traditional "thread-per-connection" or "process-per-request" models. Spawning threads introduces severe operating system overhead due to context-switching, thread-contention, and complex resource locking.
 
-- `Cluster`
-- `Server`
-- `CGI`
+Instead, this server routes all concurrent network activity and Inter-Process Communication (IPC) through a **single execution thread** governed by the **`poll()`** system call.
 
-`Cluster` is the central event multiplexer:
-- manages listening sockets for server ports
-- accepts new client connections
-- tracks client sockets and CGI pipes
-- uses a single `std::vector<struct pollfd>` to store all active file descriptors
+### System Core Benefits:
+* **Zero Synchronization Overhead:** No mutexes, condition variables, or read-write locks are required because data is never accessed concurrently by multiple threads.
+* **Determinism & Stability:** Eliminates memory corruption vectors such as data races and deadlocks.
+* **Scale-Up Capability:** Efficiently manages thousands of volatile, active connections simultaneously using minimal CPU and memory footprints.
 
-## File descriptor management
+---
 
-`Cluster` keeps these maps:
-- `_servers`: listening socket fd → `Server*`
-- `_clients`: client socket fd → `Server*`
-- `_pipeToClientMap`: CGI pipe fd → client socket fd
-- `_cgiBuffs`: client fd → CGI output buffer
-- `_cgiBytesWritten`: pipe fd → bytes written so far
+## 2. Tracking Matrices (Data Structures)
 
-Each file descriptor in `_fds` is monitored for events such as `POLLIN`, `POLLOUT`, `POLLERR`, and `POLLHUP`.
+To coordinate sockets and CGI pipelines across a single vector stream, the `Cluster` class manages a centralized collection array along with specialized associative lookup maps:
 
-## Poll loop behavior
+* **`std::vector<struct pollfd> _fds`:** The master kernel-monitoring array. Every active descriptor (listeners, clients, and pipes) must register an entry here specifying its target event flags (`POLLIN`, `POLLOUT`).
+* **`std::map<int, Server*> _servers`:** Maps a master listening socket file descriptor directly to its corresponding virtual `Server` configuration context.
+* **`std::map<int, Server*> _clients`:** Maps an active client connection socket descriptor back to the specific `Server` instance routing its lifecycle.
+* **`std::map<int, int> _pipeToClientMap`:** An IPC bridge mapping internal CGI read/write pipe file descriptors back to the originating client socket descriptor awaiting execution results.
+* **`std::map<int, std::string> _cgiBuffs`:** Tracks incomplete dynamic output streams, mapping a client socket descriptor to its accumulated CGI stdout text buffer.
+* **`std::map<int, size_t> _cgiBytesWritten`:** Tracks the progressive byte count of request bodies pushed into a CGI stdin pipe descriptor across partial write cycles.
 
-The main loop in `Cluster::run()` performs:
-1. `poll()` on `_fds`
-2. iterates over all ready descriptors
-3. dispatches events based on descriptor type:
-   - listening socket: accept new connection
-   - client socket + `POLLIN`: read request data
-   - client socket + `POLLOUT`: write response data
-   - CGI pipe read side + `POLLIN`: read CGI output
-   - CGI pipe write side + `POLLOUT`: write request body to CGI
+---
 
-### Accepting connections
+## 3. The Polling Lifecycle (`Cluster::run`)
 
-New clients are accepted with `accept()` and immediately set to non-blocking mode (`O_NONBLOCK`).
-The new client socket is added to `_fds` and associated with the correct virtual `Server`.
+The entire server execution frame is contained within an infinite loop inside `Cluster::run()`. Each iteration executes a strict, synchronized multi-step dispatch sequence:
 
-### Reading client requests
 
-`Cluster::_handleClientRead()` calls `Server::handleRead()`.
-Possible return values:
-- `READ_ERROR`: close connection
-- `READ_INCOMPLETE`: wait for more data
-- `STATIC_READY`: prepare the response for writing
-- `CGI_READY`: begin CGI pipe monitoring
 
-When `STATIC_READY` is returned, the client socket switches from `POLLIN` to `POLLOUT`.
+### Step 1: The Kernel Wait Phase
+The system invokes `poll(&_fds[0], _fds.size(), timeout)`. This call suspends the server thread, yielding CPU cycles until at least one registered file descriptor flags an event or the timeout threshold expires.
 
-### Writing client responses
+### Step 2: Event Traversal
+Upon wake-up, the loop iterates over the `_fds` vector sequentially. For each item, it inspects the `revents` (returned events) bitmask populated by the operating system kernel.
 
-`Cluster::_handleClientWrite()` calls `Server::handleWrite()`.
-If the response is fully written, the socket is switched back to `POLLIN`.
-If pipelined requests are already buffered, the server can immediately restart the next request cycle.
+### Step 3: Branch Dispatching
+The server evaluates the active descriptor type by cross-referencing its tracking maps and acts accordingly:
 
-### CGI pipe handling
+---
 
-CGI uses two pipes:
-- write pipe: server → CGI stdin
-- read pipe: CGI stdout → server
+## 4. Non-Blocking Event Mechanics
 
-`Cluster` registers the CGI pipe endpoints in `_fds` and maps them to the originating client.
+To maintain non-blocking safety, no system call (`recv`, `send`, `read`, `write`) is ever allowed to halt thread execution. Every descriptor undergoes immediate non-blocking configuration.
 
-When the write pipe is writable, `Cluster::_handleCGIWrite()` sends the request body to the CGI script.
-When the read pipe becomes readable, `Cluster::_handleCGIRead()` accumulates script output until EOF.
+### A. Connection Ingestion (Listening Sockets)
+When `POLLIN` fires on a master socket tracked inside `_servers`, a client is attempting to connect.
+1. The server calls `accept()` to obtain a new client socket descriptor.
+2. It immediately executes `fcntl(client_fd, F_SETFL, O_NONBLOCK)` to enforce non-blocking execution.
+3. The descriptor is added to `_fds` with an initial interest flag of `POLLIN`.
 
-## Error and cleanup handling
+### B. Inbound Stream Parsing (Client Sockets + `POLLIN`)
+When `POLLIN` fires on an established client socket, `Cluster::_handleClientRead()` delegates data collection to `Server::handleRead()`.
+* The server performs a non-blocking `recv()` to extract available bytes, transitioning the client's `Request` state machine.
+* If the request transitions to `STATIC_READY`, the server updates the descriptor's interest flags inside `_fds` from `POLLIN` to `POLLOUT` to signal readiness to transmit.
+* If it transitions to `CGI_READY`, the server instantiates the CGI pipelines, registers the pipe ends into `_fds`, and maps them inside `_pipeToClientMap`.
 
-`Cluster` handles events such as `POLLERR`, `POLLHUP`, and `POLLNVAL` by closing the relevant descriptor and cleaning up state.
+### C. Outbound Network Egress (Client Sockets + `POLLOUT`)
+When `POLLOUT` fires, the client socket is ready to accept outgoing data. The server calls `Server::handleWrite()` which leverages non-blocking `send()` calls.
+* **Partial Write Resolution:** If a large resource (or stress tester spike) saturates the socket's kernel buffer, `send()` transmits only a fraction of the data and returns the partial byte count.
+* The server safely slices the sent data, queues the remaining unsent bytes inside `_writeBuffs`, retains the `POLLOUT` flag inside `_fds`, and immediately returns to the event loop. Once the kernel buffer empties, `POLLOUT` fires again, and transmission resumes smoothly.
 
-Closing a client connection also removes any associated CGI pipes and frees server state.
+### D. CGI Pipeline Flow (Pipe Descriptors)
+* **`_pipe_in[1]` + `POLLOUT`:** `Cluster::_handleCGIWrite()` pushes chunks of the HTTP request body into the CGI runtime's stdin stream. Once fully sent, the parent closes this pipe end to signal an EOF to the child script.
+* **`_pipe_out[0]` + `POLLIN`:** `Cluster::_handleCGIRead()` aggressively harvests chunks of text thrown out by the script into `_cgiBuffs[client_fd]` until an EOF condition (read returning 0) is encountered.
 
-## Non-blocking safety
+---
 
-The server does not block on network or CGI I/O:
-- client sockets are non-blocking
-- CGI pipes are monitored with `poll()`
-- read/write operations handle partial transfers and incomplete conditions
+## 5. Fault Management & Clean Tear-Down
 
-This allows the server to keep accepting and servicing multiple clients concurrently without threads.
+The event loop processes administrative and failure conditions natively via event bitmasks:
+
+* **`POLLHUP` / `POLLERR` / `POLLNVAL`:** Indicates that a client terminated abruptly, a pipe closed prematurely, or a descriptor encountered a hardware/kernel fault.
+* **The Cleanup Protocol:** Whenever a fault is encountered or a request lifecycle ends, `Cluster` executes an isolated tear-down sequence:
+  1. The invalid file descriptor is removed from the master `_fds` vector.
+  2. The descriptor index is scrubbed from `_clients`, `_servers`, and `_pipeToClientMap` arrays to prevent dangling references.
+  3. Any associated CGI pipeline structures are reaped non-blockingly using `waitpid(..., WNOHANG)`, and its temporary text buffers are purged from `_cgiBuffs`.
+  4. The system safely calls `close()` on the raw descriptor.
