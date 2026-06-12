@@ -33,22 +33,7 @@ press enter to continue
 
 
 Test GET http://127.0.0.1:8080/
-content returned: <html>
-<head>
-    <title>Pravetz</title>
-    <style>
-        html { color-scheme: light dark; }
-        body { width: 35em; margin: 0 auto;
-            font-family: Tahoma, Verdana, Arial, sans-serif; }
-    </style>
-</head>
-<body>
-<div>
-    <img src="img/pravetz.jpg" alt="Pravetz" width="500" height="600">
-</div>
-</body>
-</html>
-
+content returned: pppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp
 
 Test POST http://127.0.0.1:8080/ with a size of 0
 

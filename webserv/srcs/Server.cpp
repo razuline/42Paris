@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:40 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/10 15:16:10 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/12 13:22:49 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -355,7 +355,8 @@ Server::_execCompetedOrder(int client_fd, Request &req)
 
 		_cgis[client_fd] = new CGI();
 
-		int	cgi_status = _cgis[client_fd]->execute(req, scriptPath, cgiBin);
+		int	cgi_status = _cgis[client_fd]->execute(req, scriptPath,
+												cgiBin, Utils::toStr(_port));
 		if (cgi_status == Http::INTERNAL_SERVER_ERROR)
 		{
 			delete _cgis[client_fd];
@@ -668,11 +669,17 @@ Server::_runDirRedirect(int client_fd, const std::string &reqPath)
 	if (loc.empty() || loc[loc.size() - 1] != '/')
 		loc += "/";
 
+	std::string	host = _reqs[client_fd].getHeader("Host");
+	if (!host.empty())
+		response.setHeader("Location", "http://" + host + loc);
+	else
+		response.setHeader("Location", loc);
+
 	response.setStatus(Http::MOVED_PERMANENTLY);
 	response.setHeader("Location", loc);
 	response.setHeader("Content-Type", "text/html");
 	response.setHeader("Content-Length", "0");
-	response.setHeader("Connection", "keep-alive");
+	response.setHeader("Connection", "close");
 
 	Utils::logResponse(Http::MOVED_PERMANENTLY, reqPath);
 

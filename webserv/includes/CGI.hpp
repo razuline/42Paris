@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/24 16:54:31 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/10 14:36:30 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/12 12:52:47 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,8 @@ private:
 	int					_pipe_out[2];  // Server reads CGI response from here
 
 	/* --- Private Internal Helpers --- */
-	void	_initEnv(const Request &req, const std::string &script_path);
+	void	_initEnv(const Request &req, const std::string &script_path,
+					 const std::string &port);
 	void	_clearEnv();
 	void	_cleanupPipes();
 
@@ -52,7 +53,7 @@ public:
 
 	/* --- Core Methods --- */
 	int		execute(const Request &req, const std::string &script_path,
-					const std::string &cgi_path);
+					const std::string &cgi_path, const std::string &port);
 
 	/* --- Getters --- */
 	pid_t	getPid() const;

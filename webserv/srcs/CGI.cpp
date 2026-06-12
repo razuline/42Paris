@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/24 16:54:54 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/10 19:46:45 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/12 12:55:50 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,7 @@ CGI::~CGI()
 
 int
 CGI::execute(const Request &req, const std::string &script_path,
-								 const std::string &cgi_path)
+			 const std::string &cgi_path, const std::string &port)
 {
 	std::string	abs_script_path = script_path;
 	if (!abs_script_path.empty() && abs_script_path[0] != '/')
@@ -70,7 +70,7 @@ CGI::execute(const Request &req, const std::string &script_path,
 	}
 
 	// 1. Prepare env variables
-	_initEnv(req, abs_script_path);
+	_initEnv(req, abs_script_path, port);
 
 	std::string	abs_cgi_path = cgi_path;
 	if (!abs_cgi_path.empty() && abs_cgi_path[0] != '/')
@@ -155,7 +155,8 @@ CGI::execute(const Request &req, const std::string &script_path,
 /* ------------------------- PRIVATE INTERNAL HELPERS ----------------------- */
 
 void
-CGI::_initEnv(const Request &req, const std::string &script_path)
+CGI::_initEnv(const Request &req, const std::string &script_path,
+			  const std::string &port)
 {
 	_env.clear();
 
@@ -164,7 +165,7 @@ CGI::_initEnv(const Request &req, const std::string &script_path)
 	_env.push_back(strdup(("REQUEST_METHOD=" + req.getMethod()).c_str()));
 	_env.push_back(strdup("SERVER_PROTOCOL=HTTP/1.1"));
 	_env.push_back(strdup("GATEWAY_INTERFACE=CGI/1.1"));
-	_env.push_back(strdup("SERVER_PORT=8080")); //TODO: Fix port number
+	_env.push_back(strdup(("SERVER_PORT=" + port).c_str()));
 	_env.push_back(strdup("SERVER_SOFTWARE=webserv/1.0"));
 	_env.push_back(strdup("SERVER_NAME=localhost"));
 	_env.push_back(strdup(("SCRIPT_FILENAME=" + abs_script_path).c_str()));
