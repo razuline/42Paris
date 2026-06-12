@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 16:51:10 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/10 14:47:46 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/12 18:28:22 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,9 @@ private:
 	std::map<int, int>			_pipeToClientMap;       // Maps pipe_read_fd -> client_fd
 	std::map<int, std::string>	_cgiBuffs;              // Maps client_fd -> accumulated response
 	std::map<int, size_t>		_cgiBytesWritten;
+	std::map<int, time_t>		_cgiStartTime;          // Track when CGI started
+
+	int							_active_cgis;
 
 	/* --- Private Internal Helpers --- */
 	void	_addNewConnection(int serv_fd);             // accept()

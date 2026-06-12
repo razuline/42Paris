@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 17:16:00 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/10 19:45:54 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/12 18:45:30 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,8 @@ Cluster::Cluster() :
 	_clients(),
 	_fds(),
 	_pipeToClientMap(),
-	_cgiBuffs()
+	_cgiBuffs(),
+	_active_cgis(0)
 {
 }
 
@@ -79,6 +80,44 @@ Cluster::run()
 			if (g_stop == 0)
 				perror("poll error");
 			continue;
+		}
+
+		// Check for CGI timeouts (run this check every iteration)
+		time_t	now = time(NULL);
+		std::map<int, time_t>::iterator	it = _cgiStartTime.begin();
+		while (it != _cgiStartTime.end())
+		{
+			if (now - it->second > 30) // 30 seconds timeout
+			{
+				std::cerr << "[Cluster] CGI timeout for client_fd " << it->first
+						  << std::endl;
+
+				// Kill the CGI process
+				if (_clients.count(it->first))
+				{
+					_clients[it->first]->cleanupCgi(it->first);
+
+					// Send 504 Gateway Timeout
+					Response	err_res;
+					err_res.defaultErrorPage(Http::GATEWAY_TIMEOUT);
+					_clients[it->first]->setCgiResponse(it->first, err_res);
+
+					// Switch client to POLLOUT
+					for (size_t i = 0; i < _fds.size(); ++i)
+					{
+						if (_fds[i].fd == it->first)
+						{
+							_fds[i].events = POLLOUT;
+							break;
+						}
+					}
+				}
+				_cgiStartTime.erase(it++);
+			}
+			else
+			{
+				++it;
+			}
 		}
 		for (size_t i = 0; i < _fds.size();)
 		{
@@ -210,11 +249,15 @@ Cluster::_handleClientRead(int fd, Server &server)
 	}
 	else if (status == Server::CGI_READY)
 	{
-		std::cout << "[Cluster] CGI pipe pooling activated for client fd ["
-				  << fd << "]" << std::endl;
+		_active_cgis++;
+
+		std::cout << "[Cluster] Active CGIs: " << _active_cgis << std::endl;
 
 		int	cgi_write_fd = server.getWriteFd(fd);
 		int	cgi_read_fd = server.getReadFd(fd);
+
+		// Record CGI start time for timeout tracking
+		_cgiStartTime[fd] = time(NULL);
 
 		struct pollfd	pfd_write;
 		pfd_write.fd = cgi_write_fd;
@@ -328,9 +371,19 @@ void
 Cluster::_handleCGIWrite(int pipe_write_fd, Server &server)
 {
 	int					client_fd = _pipeToClientMap[pipe_write_fd];
-	const std::string	&body = server.getRequestBody(client_fd);
 
-	// Clean up and exit immediately if there's no body payload to transmit
+	// Check if client still exists
+	if (_clients.find(client_fd) == _clients.end())
+	{
+		// Client already gone, clean up pipe
+		close(pipe_write_fd);
+		_removePipeFromPoll(pipe_write_fd);
+		_pipeToClientMap.erase(pipe_write_fd);
+		_cgiBytesWritten.erase(pipe_write_fd);
+		return;
+	}
+
+	const std::string	&body = server.getRequestBody(client_fd);
 	if (body.empty())
 	{
 		close(pipe_write_fd);
@@ -342,29 +395,68 @@ Cluster::_handleCGIWrite(int pipe_write_fd, Server &server)
 
 	// Transmit the payload chunk over the non-blocking pipe
 	size_t	already_written = _cgiBytesWritten[pipe_write_fd];
-	size_t	to_write = body.size() - already_written;
+	size_t	remaining = body.size() - already_written;
 
+	// Don't write if nothing left
+	if (remaining == 0)
+	{
+		close(pipe_write_fd);
+		_removePipeFromPoll(pipe_write_fd);
+		_pipeToClientMap.erase(pipe_write_fd);
+		_cgiBytesWritten.erase(pipe_write_fd);
+		return;
+	}
+
+	size_t	to_write = remaining;
 	if (to_write > 8192)
 		to_write = 8192;
 
 	int	ret = write(pipe_write_fd, body.c_str() + already_written, to_write);
 
-	// Error Handling: Drop the client connection if the write pipe breaks
-	if (ret > 0)
+	if (ret <= 0)
 	{
-		_cgiBytesWritten[pipe_write_fd] += ret;
+		if (_active_cgis > 0)
+			_active_cgis--;
 
-		// Close write end of the pipe once the entire request payload is transmitted
-		if (_cgiBytesWritten[pipe_write_fd] == body.size())
+		// Write failed - but don't immediately give up if pipe might be recoverable
+		// However, since we can't check errno, we'll assume pipe is broken
+		std::cerr << "[Cluster] CGI pipe write failed for fd " << pipe_write_fd
+				  << std::endl;
+
+		// Clean up this pipe
+		close(pipe_write_fd);
+		_removePipeFromPoll(pipe_write_fd);
+		_pipeToClientMap.erase(pipe_write_fd);
+		_cgiBytesWritten.erase(pipe_write_fd);
+
+		// Send error response to client
+		Response	err_res;
+		err_res.defaultErrorPage(Http::BAD_GATEWAY);  // 502 Bad Gateway
+		server.setCgiResponse(client_fd, err_res);
+
+		// Switch client to POLLOUT
+		for (size_t i = 0; i < _fds.size(); ++i)
 		{
-			std::cout << "[Cluster] Body chunk successfully pushed to CGI pipe ["
-					  << pipe_write_fd << "]" << std::endl;
-
-			close(pipe_write_fd);
-			_removePipeFromPoll(pipe_write_fd);
-			_pipeToClientMap.erase(pipe_write_fd);
-			_cgiBytesWritten.erase(pipe_write_fd);
+			if (_fds[i].fd == client_fd)
+			{
+				_fds[i].events = POLLOUT;
+				break;
+			}
 		}
+		return;
+	}
+
+	// ret > 0
+	_cgiBytesWritten[pipe_write_fd] += ret;
+
+	if (_cgiBytesWritten[pipe_write_fd] == body.size())
+	{
+		std::cout << "[Cluster] Complete body (" << body.size()
+				  << " bytes) written to CGI pipe" << std::endl;
+		close(pipe_write_fd);
+		_removePipeFromPoll(pipe_write_fd);
+		_pipeToClientMap.erase(pipe_write_fd);
+		_cgiBytesWritten.erase(pipe_write_fd);
 	}
 }
 
@@ -378,49 +470,35 @@ Cluster::_handleCGIRead(int pipe_read_fd, Server &server)
 	int		client_fd = _pipeToClientMap[pipe_read_fd];
 	int		bytes_read = read(pipe_read_fd, buff, sizeof(buff) - 1);
 
-	// Accumulate incoming script execution stream bytes
+	// Case 1: Got data - accumulate and continue
 	if (bytes_read > 0)
 	{
 		buff[bytes_read] = '\0';
-		_cgiBuffs[client_fd] += std::string(buff, bytes_read); // Accumulate raw script output
-		return;
-	}
-	// Fault Tolerance: Script crashed or was killed
-	if (bytes_read < 0)
-	{
-		std::cerr << "[Cluster] CGI pipe crash detected. Sending HTTP [500]"
-				  << std::endl;
-
-		Response	err_res;
-		err_res.defaultErrorPage(Http::INTERNAL_SERVER_ERROR);
-		server.setCgiResponse(client_fd, err_res);
-
-		close(pipe_read_fd);
-		_removePipeFromPoll(pipe_read_fd);
-		_pipeToClientMap.erase(pipe_read_fd);
-		_cgiBuffs.erase(client_fd);
-
-		// Switch client event monitor to POLLOUT to transmit the error page
-		for (size_t i = 0; i < _fds.size(); ++i)
-		{
-			if (_fds[i].fd == client_fd)
-			{
-				_fds[i].events = POLLOUT;
-				break;
-			}
-		}
+		_cgiBuffs[client_fd] += std::string(buff, bytes_read);
 		return;
 	}
 
-	// Script finished successfully - parse output
+	// bytes_read <= 0 means CGI is done
+	std::cout << "[Cluster] CGI pipe completed (bytes_read=" << bytes_read
+			  << "), processing output" << std::endl;
+
+	// Get accumulated output
 	std::string	cgiOutput = _cgiBuffs[client_fd];
-
 	_cgiBuffs.erase(client_fd);
 
+	// Clean up pipe - do this ONCE
 	close(pipe_read_fd);
 	_removePipeFromPoll(pipe_read_fd);
 	_pipeToClientMap.erase(pipe_read_fd);
+	_cgiBytesWritten.erase(pipe_read_fd);
+	_cgiStartTime.erase(client_fd);
 
+	// Decrement active CGI counter
+	if (_active_cgis > 0)
+		_active_cgis--;
+	std::cout << "[Cluster] Active CGIs: " << _active_cgis << std::endl;
+
+	// Clean up CGI process
 	server.cleanupCgi(client_fd);
 
 	// Parse CGI output
@@ -432,21 +510,18 @@ Cluster::_handleCGIRead(int pipe_read_fd, Server &server)
 		// Case 1: Headers + body
 		std::string	headersPart = cgiOutput.substr(0, headerEnd);
 		std::string	bodyPart = cgiOutput.substr(headerEnd + 4);
+		response.setBody(bodyPart);
 
-		response.setBody(bodyPart); // This sets Content-Length automatically
-
-		int					cgi_status_code = Http::OK;
-		bool				has_content_type = false;
-		bool				has_location = false;
-		std::string			location_url;
+		int			cgi_status_code = Http::OK;
+		bool		has_content_type = false;
+		bool		has_location = false;
+		std::string	location_url;
 
 		std::stringstream	header_ss(headersPart);
 		std::string			line;
 
-		// Parse headers line by line
 		while (std::getline(header_ss, line))
 		{
-			// Remove trailing \r if present
 			if (!line.empty() && line[line.size() - 1] == '\r')
 				line.erase(line.size() - 1);
 			if (line.empty())
@@ -460,7 +535,6 @@ Cluster::_handleCGIRead(int pipe_read_fd, Server &server)
 
 				if (key == "Status")
 				{
-					// Parse status code (e.g., "Status: 404 Not Found")
 					std::stringstream	status_ss(value);
 					status_ss >> cgi_status_code;
 				}
@@ -474,50 +548,40 @@ Cluster::_handleCGIRead(int pipe_read_fd, Server &server)
 				{
 					if (key == "Content-Type")
 						has_content_type = true;
-					response.setHeader(key, value); // Forward location, cookies, etc.
+					response.setHeader(key, value);
 				}
 			}
 		}
-		// CGI RFC: If Location header is present without Status, it's a 302 redirect
+
 		if (has_location && cgi_status_code == Http::OK)
-		{
 			cgi_status_code = Http::FOUND;
-		}
+
 		response.setStatus(cgi_status_code);
 
-		// Set default Content-Type if missing
 		if (!has_content_type && !has_location && !bodyPart.empty())
-		{
 			response.setHeader("Content-Type", "text/html");
-		}
 
-		// For redirects, ensure no body is sent
 		if (has_location && (cgi_status_code == Http::FOUND ||
 							 cgi_status_code == Http::MOVED_PERMANENTLY))
-		{
-			response.setBody(""); // Clear body, Content-Length becomes 0
-		}
+			response.setBody("");
 	}
 	else if (!cgiOutput.empty())
 	{
-		// Case 2: No headers, just raw output (treat as HTML)
+		// Case 2: No headers, just raw output
 		response.setStatus(Http::OK);
-		response.setBody(cgiOutput); // This sets Content-Length automatically
+		response.setBody(cgiOutput);
 		response.setHeader("Content-Type", "text/html");
 	}
 	else
 	{
 		// Case 3: Empty response
 		response.setStatus(Http::NO_CONTENT);
-		response.setBody(""); // Content-Length: 0
+		response.setBody("");
 	}
 
-	// Ensure Content-Length is always set (Response::setBody already does this)
-	// But double-check for edge cases
 	if (response.getStatus() == Http::NO_CONTENT ||
-	   (response.getStatus() >= 300 && response.getStatus() < 400))
+		(response.getStatus() >= 300 && response.getStatus() < 400))
 	{
-		// For 204 No Content and 3xx redirects, ensure no body
 		response.setBody("");
 	}
 

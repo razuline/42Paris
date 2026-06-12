@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:32 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/10 15:03:47 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/12 18:27:48 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,6 +69,9 @@ private:
 	std::map<int, CGI *>		_cgis;       // client_fd -> Active CGI trackers
 	std::map<int, std::string>	_writeBuffs; // client_fd -> Raw unsent response bytes
 
+	static int					_active_cgis; // Track active CGI processes
+	static const int			MAX_CONCURRENT_CGIS = 100; // Limit concurrent CGIs
+
 	/* --- Private Internal Helpers --- */
 	std::string			_readFile(const std::string &path);
 	const Location		*_matchLocation(const std::string &path) const;
@@ -111,6 +114,8 @@ public:
 	int					getReadFd(int client_fd);  // To read from Python
 	int					getWriteFd(int client_fd); // To write to Python
 	const std::string	&getRequestBody(int client_fd);
+	int					getActiveCgis();
+	void				setActiveCgis(int count);
 };
 
 #endif

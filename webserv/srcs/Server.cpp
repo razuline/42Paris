@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:40 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/12 13:22:49 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/12 18:43:04 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,6 +105,9 @@ Server::setup()
 Server::ReadStatus
 Server::handleRead(int client_fd)
 {
+	static std::map<int, int>		read_count;
+	static std::map<int, size_t>	total_bytes;
+
 	char	buff[4096];
 
 	// 1. Read raw bytes from the client socket without blocking
@@ -113,6 +116,18 @@ Server::handleRead(int client_fd)
 	{
 		clearClientState(client_fd);
 		return Server::READ_ERROR;
+	}
+
+	read_count[client_fd]++;
+	total_bytes[client_fd] += bytes_read;
+
+	// Log every 1000 reads or every 10MB
+	if (read_count[client_fd] % 1000 == 0)
+	{
+		std::cout << "[Server] Client " << client_fd
+				  << ": read " << read_count[client_fd] << " times, "
+				  << total_bytes[client_fd] / (1024*1024) << " MB received"
+				  << std::endl;
 	}
 	buff[bytes_read] = '\0';
 
@@ -132,10 +147,9 @@ Server::handleRead(int client_fd)
 
 	// 4. Monitor if the HTTP parsing framework reached completion
 	if (!curr.isComplete())
-		return Server::READ_INCOMPLETE;
+		return Server::READ_INCOMPLETE; // status code 1
 
-	// 5. Request is fully ready, forward it to the flat dispatcher
-	return _execCompetedOrder(client_fd, curr);
+	return _execCompetedOrder(client_fd, curr); // status code 2 or 3
 }
 
 Server::WriteStatus
@@ -252,6 +266,9 @@ const Location
 
 /* ------------------------------- handeRead() ------------------------------ */
 
+int
+Server::_active_cgis = 0;
+
 Server::ReadStatus
 Server::_execCompetedOrder(int client_fd, Request &req)
 {
@@ -304,20 +321,54 @@ Server::_execCompetedOrder(int client_fd, Request &req)
 	}
 
 	// E. Resolve Base Paths
-	std::string	activeRoot = (loc && !loc->getRoot().empty())
-							? loc->getRoot()
-							: _config.getFolderRoot();
-
+	std::string	activeRoot;
 	std::string	relPath = path;
-	if (loc && relPath.find(loc->getPath()) == 0)
-		relPath = relPath.substr(loc->getPath().length());
 
+	if (loc && !loc->getRoot().empty())
+	{
+		activeRoot = loc->getRoot();
+		if (relPath.find(loc->getPath()) == 0)
+			relPath = relPath.substr(loc->getPath().length());
+		if (!relPath.empty() && relPath[0] != '/')
+			relPath = "/" + relPath;
+	}
+	else
+	{
+		activeRoot = _config.getFolderRoot();
+		if (loc && relPath.find(loc->getPath()) == 0)
+		{
+			relPath = relPath.substr(loc->getPath().length());
+			if (!relPath.empty() && relPath[0] != '/')
+				relPath = "/" + relPath;
+		}
+	}
+
+	// Clean trailing slashes from activeRoot
 	while (!activeRoot.empty() && activeRoot[activeRoot.size() - 1] == '/')
 		activeRoot.erase(activeRoot.size() - 1);
 
 	std::string	normalRelPath = relPath;
 	if (normalRelPath.empty() || normalRelPath[0] != '/')
 		normalRelPath = "/" + normalRelPath;
+
+	std::string	fullPath = activeRoot + normalRelPath;
+
+	// G. Default Index Resolution
+	std::string	finalRelPath = normalRelPath;
+	if (finalRelPath.empty() || finalRelPath[finalRelPath.size() - 1] == '/')
+	{
+		std::string	currIndex = (loc && !loc->getIndex().empty())
+							   ? loc->getIndex()
+							   : _config.getHomePage();
+		if (!currIndex.empty())
+		{
+			if (currIndex[0] == '/')
+				finalRelPath += currIndex.substr(1);
+			else
+				finalRelPath += currIndex;
+			fullPath = activeRoot + finalRelPath;
+		}
+	}
 
 	// F. CGI Gateway Check
 	std::string	cgiBin = "";
@@ -332,7 +383,6 @@ Server::_execCompetedOrder(int client_fd, Request &req)
 			{
 				const std::vector<std::string>	&allowedMethods = allLocs[i].getMethods();
 				bool	methodMatch = false;
-
 				for (size_t m = 0; m < allowedMethods.size(); ++m)
 				{
 					if (allowedMethods[m] == method)
@@ -349,42 +399,6 @@ Server::_execCompetedOrder(int client_fd, Request &req)
 			}
 		}
 	}
-	if (!cgiBin.empty())
-	{
-		std::string	scriptPath = activeRoot + normalRelPath;
-
-		_cgis[client_fd] = new CGI();
-
-		int	cgi_status = _cgis[client_fd]->execute(req, scriptPath,
-												cgiBin, Utils::toStr(_port));
-		if (cgi_status == Http::INTERNAL_SERVER_ERROR)
-		{
-			delete _cgis[client_fd];
-			_cgis.erase(client_fd);
-			response.defaultErrorPage(Http::INTERNAL_SERVER_ERROR);
-			_resps[client_fd] = response;
-			return Server::STATIC_READY;
-		}
-		return Server::CGI_READY;
-	}
-
-	// G. Default Index Resolution
-	std::string	finalRelPath = normalRelPath;
-	if (finalRelPath.empty() || finalRelPath[finalRelPath.size() - 1] == '/')
-	{
-		std::string	currIndex = (loc && !loc->getIndex().empty())
-							   ? loc->getIndex()
-							   : _config.getHomePage();
-		if (!currIndex.empty())
-		{
-			if (currIndex[0] == '/')
-				finalRelPath += currIndex.substr(1);
-			else
-				finalRelPath += currIndex;
-		}
-	}
-
-	std::string	fullPath = activeRoot + finalRelPath;
 
 	// H. Autoindex Management
 	if (!path.empty() && path[path.size() - 1] == '/')
@@ -398,21 +412,53 @@ Server::_execCompetedOrder(int client_fd, Request &req)
 				std::string	autoindexHtml = Utils::generateAutoindex(activeRoot + path, path);
 				if (!autoindexHtml.empty())
 				{
-					response.setStatus(Http::OK);
-					response.setBody(autoindexHtml);
-					response.setHeader("Content-Type", "text/html");
-					_resps[client_fd] = response;
+					Response	autoResponse;
+					autoResponse.setStatus(Http::OK);
+					autoResponse.setBody(autoindexHtml);
+					autoResponse.setHeader("Content-Type", "text/html");
+					_resps[client_fd] = autoResponse;
 					return Server::STATIC_READY;
 				}
 			}
-			response.defaultErrorPage(Http::FORBIDDEN);
-			_resps[client_fd] = response;
+			Response	autoResponse;
+			autoResponse.defaultErrorPage(Http::FORBIDDEN);
+			_resps[client_fd] = autoResponse;
 			return Server::STATIC_READY;
 		}
 		indexCheck.close();
 	}
 
-	// I. Route to Isolated Method Handlers
+	// I. CGI Gateway Check
+	if (!cgiBin.empty())
+	{
+		// Check concurrent CGI limit
+		if (_active_cgis >= MAX_CONCURRENT_CGIS)
+		{
+			Response	cgiResponse;
+			cgiResponse.defaultErrorPage(Http::SERVICE_UNAVAILABLE);
+			_resps[client_fd] = cgiResponse;
+			return Server::STATIC_READY;
+		}
+
+		_active_cgis++;
+		_cgis[client_fd] = new CGI();
+
+		int	cgi_status = _cgis[client_fd]->execute(req, fullPath,
+												cgiBin, Utils::toStr(_port));
+		if (cgi_status == Http::INTERNAL_SERVER_ERROR)
+		{
+			_active_cgis--;
+			delete _cgis[client_fd];
+			_cgis.erase(client_fd);
+			Response	cgiResponse;
+			cgiResponse.defaultErrorPage(Http::INTERNAL_SERVER_ERROR);
+			_resps[client_fd] = cgiResponse;
+			return Server::STATIC_READY;
+		}
+		return Server::CGI_READY;
+	}
+
+	// J. Route to Isolated Method Handlers
 	if (method == "GET")
 		return _runStaticGet(client_fd, fullPath);
 	if (method == "HEAD")
@@ -422,8 +468,9 @@ Server::_execCompetedOrder(int client_fd, Request &req)
 	if (method == "DELETE")
 		return _runStaticDeleteFile(client_fd, fullPath);
 
-	response.defaultErrorPage(Http::BAD_REQUEST);
-	_resps[client_fd] = response;
+	Response	finalResponse;
+	finalResponse.defaultErrorPage(Http::BAD_REQUEST);
+	_resps[client_fd] = finalResponse;
 	return Server::STATIC_READY;
 }
 
@@ -717,4 +764,16 @@ void
 Server::setCgiResponse(int client_fd, const Response &res)
 {
 	_resps[client_fd] = res;
+}
+
+int
+Server::getActiveCgis()
+{
+	return _active_cgis;
+}
+
+void
+Server::setActiveCgis(int count)
+{
+	_active_cgis = count;
 }
