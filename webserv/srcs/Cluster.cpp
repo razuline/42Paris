@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 17:16:00 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/13 18:56:30 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/13 20:13:20 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -191,7 +191,11 @@ Cluster::run()
 				}
 				else if (_clients.count(curr_fd))
 				{
-					if (events & POLLIN)
+					if ((events & POLLIN) || (revents & (POLLERR | POLLNVAL)))
+					{
+						_closeConnection(curr_fd);
+					}
+					else if (revents & POLLHUP)
 					{
 						_closeConnection(curr_fd);
 					}
@@ -441,15 +445,15 @@ Cluster::_handleCGIWrite(int pipe_write_fd, Server &server)
 void
 Cluster::_handleCGIRead(int pipe_read_fd, Server &server)
 {
-	char	buff[4096];
+	char	buff[65536];
 	int		client_fd = _pipeToClientMap[pipe_read_fd];
 	int		bytes_read = read(pipe_read_fd, buff, sizeof(buff) - 1);
 
-	// Case 1: Got data - accumulate and continue
+	// Case 1: Accumulate data asynchronously
 	if (bytes_read > 0)
 	{
 		buff[bytes_read] = '\0';
-		_cgiBuffs[client_fd] += std::string(buff, bytes_read);
+		_cgiBuffs[client_fd].append(buff, bytes_read);
 		return;
 	}
 	if (bytes_read < 0)
@@ -457,38 +461,39 @@ Cluster::_handleCGIRead(int pipe_read_fd, Server &server)
 		return;
 	}
 
-	// Get accumulated output
+	// Case 2: EOF reached (bytes_read == 0)
 	std::string	cgiOutput = _cgiBuffs[client_fd];
 	_cgiBuffs.erase(client_fd);
 
-	// Close pipe and clean up
 	close(pipe_read_fd);
 	_removePipeFromPoll(pipe_read_fd);
 	_pipeToClientMap.erase(pipe_read_fd);
 	_cgiBytesWritten.erase(pipe_read_fd);
 	_cgiStartTime.erase(client_fd);
 
-	// Decrement active CGI counter
 	if (_active_cgis > 0)
 		_active_cgis--;
 
 	server.cleanupCgi(client_fd);
 
-	// Parse CGI output
 	Response	response;
 	size_t		headerEnd = cgiOutput.find("\r\n\r\n");
+	size_t		delimiterLen = 4;
+
+	if (headerEnd == std::string::npos)
+	{
+		headerEnd = cgiOutput.find("\n\n");
+		delimiterLen = 2;
+	}
 
 	if (headerEnd != std::string::npos)
 	{
-		// Case 1: Headers + body
 		std::string	headersPart = cgiOutput.substr(0, headerEnd);
-		std::string	bodyPart = cgiOutput.substr(headerEnd + 4);
-		response.setBody(bodyPart);
+		std::string	bodyPart = cgiOutput.substr(headerEnd + delimiterLen);
 
 		int			cgi_status_code = Http::OK;
 		bool		has_content_type = false;
 		bool		has_location = false;
-		std::string	location_url;
 
 		std::stringstream	header_ss(headersPart);
 		std::string			line;
@@ -514,7 +519,6 @@ Cluster::_handleCGIRead(int pipe_read_fd, Server &server)
 				else if (key == "Location")
 				{
 					has_location = true;
-					location_url = value;
 					response.setHeader("Location", value);
 				}
 				else
@@ -525,6 +529,7 @@ Cluster::_handleCGIRead(int pipe_read_fd, Server &server)
 				}
 			}
 		}
+
 		if (has_location && cgi_status_code == Http::OK)
 			cgi_status_code = Http::FOUND;
 
@@ -534,15 +539,15 @@ Cluster::_handleCGIRead(int pipe_read_fd, Server &server)
 			response.setHeader("Content-Type", "text/html");
 
 		if (has_location && (cgi_status_code == Http::FOUND ||
-							 cgi_status_code == Http::MOVED_PERMANENTLY))
+			cgi_status_code == Http::MOVED_PERMANENTLY))
 			bodyPart = "";
 
+		// FIX: Set the body and Content-Length explicitly from the untouched bodyPart substring
 		response.setBody(bodyPart);
 		response.setHeader("Content-Length", Utils::toStr(bodyPart.size()));
 	}
 	else if (!cgiOutput.empty())
 	{
-		// Case 2: No headers, just raw output
 		response.setStatus(Http::OK);
 		response.setBody(cgiOutput);
 		response.setHeader("Content-Type", "text/html");
@@ -550,7 +555,6 @@ Cluster::_handleCGIRead(int pipe_read_fd, Server &server)
 	}
 	else
 	{
-		// Case 3: Empty response
 		response.setStatus(Http::NO_CONTENT);
 		response.setBody("");
 		response.setHeader("Content-Length", "0");
@@ -565,12 +569,12 @@ Cluster::_handleCGIRead(int pipe_read_fd, Server &server)
 
 	server.setCgiResponse(client_fd, response);
 
-	// Switch target client socket back to POLLOUT
+	// Wake up the client socket for writing the payload back
 	for (size_t i = 0; i < _fds.size(); ++i)
 	{
 		if (_fds[i].fd == client_fd)
 		{
-			_fds[i].events = POLLOUT; // Wake up the client socket to send the answer
+			_fds[i].events = POLLOUT;
 			break;
 		}
 	}
