@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 17:16:00 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/13 17:33:29 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/13 18:56:30 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,7 +90,7 @@ Cluster::run()
 		std::map<int, time_t>::iterator	it = _cgiStartTime.begin();
 		while (it != _cgiStartTime.end())
 		{
-			if (now - it->second > 120)
+			if (now - it->second > 300)
 			{
 				std::cerr << "[Cluster] CGI timeout for client_fd " << it->first
 						  << std::endl;
@@ -398,35 +398,38 @@ Cluster::_handleCGIWrite(int pipe_write_fd, Server &server)
 	if (to_write > 65536)
 		to_write = 65536;
 
-	int	ret = write(pipe_write_fd, body.c_str() + already_written, to_write);
+	size_t	total_chunk_written = 0;
+	int		fail_counter = 0;
 
-	if (ret <= 0)
+	while (total_chunk_written < to_write)
 	{
-		std::cerr << "[Cluster] CGI pipe write failed, ret=" << ret << std::endl;
-		close(pipe_write_fd);
-		_removePipeFromPoll(pipe_write_fd);
-		_pipeToClientMap.erase(pipe_write_fd);
-		_cgiBytesWritten.erase(pipe_write_fd);
+		int	ret = write(pipe_write_fd,
+						body.c_str() + already_written + total_chunk_written,
+						to_write - total_chunk_written);
 
-		Response	err_res;
-		err_res.defaultErrorPage(Http::BAD_GATEWAY);
-		server.setCgiResponse(client_fd, err_res);
-
-		for (size_t i = 0; i < _fds.size(); ++i)
+		if (ret > 0)
 		{
-			if (_fds[i].fd == client_fd)
-			{
-				_fds[i].events = POLLOUT;
-				break;
-			}
+			total_chunk_written += ret;
+			fail_counter = 0;
 		}
-		return;
+		else if (ret == 0 || (ret < 0 && total_chunk_written > 0))
+		{
+			usleep(10);
+			if (++fail_counter > 5000)
+				break;
+		}
+		else
+		{
+			break;
+		}
 	}
-	_cgiBytesWritten[pipe_write_fd] += ret;
+
+	_cgiBytesWritten[pipe_write_fd] += total_chunk_written;
 
 	if (_cgiBytesWritten[pipe_write_fd] == body.size())
 	{
-		std::cout << "[Cluster] Complete body written to CGI pipe" << std::endl;
+		std::cout << "[Cluster] Complete body written to CGI pipe ("
+				  << body.size() << " bytes)" << std::endl;
 
 		close(pipe_write_fd);
 		_removePipeFromPoll(pipe_write_fd);
@@ -469,7 +472,6 @@ Cluster::_handleCGIRead(int pipe_read_fd, Server &server)
 	if (_active_cgis > 0)
 		_active_cgis--;
 
-	// Clean up CGI process - ONLY ONCE!
 	server.cleanupCgi(client_fd);
 
 	// Parse CGI output

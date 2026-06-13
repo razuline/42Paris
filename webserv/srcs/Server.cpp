@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:40 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/13 15:02:32 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/13 18:22:26 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -210,8 +210,9 @@ Server::cleanupCgi(int client_fd)
 		pid_t	pid = it->second->getPid();
 		if (pid > 0)
 		{
+			kill(pid, SIGKILL);
 			int	status;
-			waitpid(pid, &status, WNOHANG);
+			waitpid(pid, &status, 0);
 			std::cout << "[Server]  Cleaned up CGI process " << pid << std::endl;
 		}
 		delete it->second;
@@ -452,17 +453,20 @@ Server::_execCompetedOrder(int client_fd, Request &req)
 	}
 
 	// J. Route to Isolated Method Handlers
-	if (method == "GET")
+	if (method == "GET" && _checkIncMethod(loc, "GET"))
 		return _runStaticGet(client_fd, fullPath);
-	if (method == "HEAD")
+	if (method == "HEAD" && _checkIncMethod(loc, "HEAD"))
 		return _runStaticHead(client_fd, fullPath);
-	if (method == "POST")
+	if (method == "POST" && _checkIncMethod(loc, "POST"))
 		return _runStaticPostUpload(client_fd, fullPath);
-	if (method == "DELETE")
+	if (method == "DELETE" && _checkIncMethod(loc, "DELETE"))
 		return _runStaticDeleteFile(client_fd, fullPath);
 
+	// If the method fell through or isn't allowed for this path, return 405
 	Response	finalResponse;
-	finalResponse.defaultErrorPage(Http::BAD_REQUEST);
+	finalResponse.defaultErrorPage(Http::METHOD_NOT_ALLOWED);
+	if (method == "HEAD")
+		finalResponse.setBody("");
 	_resps[client_fd] = finalResponse;
 	return Server::STATIC_READY;
 }
@@ -578,30 +582,19 @@ Server::_runStaticHead(int client_fd, std::string fullPath)
 		isDir = true;
 	if (isDir)
 	{
-		std::string	indexFile = loc ? loc->getIndex() : "index.html";
+		if (origPath.empty() || origPath[origPath.size() - 1] != '/')
+			fullPath += '/';
+
+		std::string	indexFile = loc ? loc->getIndex() : _config.getHomePage();
 		if (indexFile.empty())
-			indexFile = "youpi.bad_extension";
+			indexFile = "index.html";
 
 		std::string	indexPath = fullPath;
-		if (indexPath.empty() || indexPath[indexPath.size() - 1] != '/')
+		if (!indexPath.empty() && indexPath[indexPath.size() - 1] != '/')
 			indexPath += "/";
 		indexPath += indexFile;
 
 		bool	hasIndex = (access(indexPath.c_str(), R_OK) == 0);
-
-		if (origPath.empty() || origPath[origPath.size() - 1] != '/')
-		{
-			if (hasIndex)
-			{
-				response.setStatus(Http::MOVED_PERMANENTLY);
-				response.setHeader("Location", origPath + "/");
-				_resps[client_fd] = response;
-				return Server::STATIC_READY;
-			}
-			response.defaultErrorPage(Http::NOT_FOUND);
-			_resps[client_fd] = response;
-			return Server::STATIC_READY;
-		}
 		if (!hasIndex)
 		{
 			response.defaultErrorPage(Http::NOT_FOUND);
