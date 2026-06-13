@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:40 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/12 18:43:04 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/13 15:02:32 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,38 +105,32 @@ Server::setup()
 Server::ReadStatus
 Server::handleRead(int client_fd)
 {
-	static std::map<int, int>		read_count;
-	static std::map<int, size_t>	total_bytes;
-
 	char	buff[4096];
+	int		bytes_read = recv(client_fd, buff, sizeof(buff) - 1, 0);
 
-	// 1. Read raw bytes from the client socket without blocking
-	int	bytes_read = recv(client_fd, buff, sizeof(buff) - 1, 0);
+	std::cout << "[Server] handleRead fd=" << client_fd << " bytes_read="
+			  << bytes_read << std::endl;
+
 	if (bytes_read <= 0)
 	{
+		std::cout << "[Server] recv returned " << bytes_read
+				  << ", closing connection" << std::endl;
 		clearClientState(client_fd);
 		return Server::READ_ERROR;
 	}
 
-	read_count[client_fd]++;
-	total_bytes[client_fd] += bytes_read;
-
-	// Log every 1000 reads or every 10MB
-	if (read_count[client_fd] % 1000 == 0)
-	{
-		std::cout << "[Server] Client " << client_fd
-				  << ": read " << read_count[client_fd] << " times, "
-				  << total_bytes[client_fd] / (1024*1024) << " MB received"
-				  << std::endl;
-	}
 	buff[bytes_read] = '\0';
-
-	// 2. Push network data chunk into the client's dedicated Request state machine
 	Request	&curr = _reqs[client_fd];
+
+	std::cout << "[Server] Current raw size before addData: "
+			  << curr.getRawSize() << std::endl;
+
 	curr.setLimit(_config.getClientMaxBodySize());
 	curr.addData(std::string(buff, bytes_read));
 
-	// 3. Handle immediate request header or payload body limit errors
+	std::cout << "[Server] After addData: state=" << curr.getState()
+			  << ", isComplete=" << curr.isComplete() << std::endl;
+
 	if (curr.getState() == Request::ERROR)
 	{
 		Response	res;
@@ -145,11 +139,10 @@ Server::handleRead(int client_fd)
 		return Server::STATIC_READY;
 	}
 
-	// 4. Monitor if the HTTP parsing framework reached completion
 	if (!curr.isComplete())
-		return Server::READ_INCOMPLETE; // status code 1
+		return Server::READ_INCOMPLETE;
 
-	return _execCompetedOrder(client_fd, curr); // status code 2 or 3
+	return _execCompetedOrder(client_fd, curr);
 }
 
 Server::WriteStatus
@@ -188,6 +181,8 @@ Server::handleWrite(int client_fd)
 Server::ReadStatus
 Server::clearClientState(int client_fd)
 {
+	std::cout << "[Server] clearClientState for fd " << client_fd << std::endl;
+
 	_resps.erase(client_fd);
 	_writeBuffs.erase(client_fd);
 
@@ -202,10 +197,6 @@ Server::clearClientState(int client_fd)
 	if (_reqs.count(client_fd))
 	{
 		_reqs[client_fd].clearButPreserveLeftover();
-		if (_reqs[client_fd].getState() == Request::COMPLETE)
-		{
-			return _execCompetedOrder(client_fd, _reqs[client_fd]);
-		}
 	}
 	return Server::READ_INCOMPLETE;
 }
@@ -377,10 +368,16 @@ Server::_execCompetedOrder(int client_fd, Request &req)
 	for (size_t i = 0; i < allLocs.size(); ++i)
 	{
 		const std::string	&ext = allLocs[i].getPath();
+
+		std::cout << "[Server] Checking extension: '" << ext << "' against path: '"
+				  << normalRelPath << "'" << std::endl;
+
 		if (!ext.empty() && ext[0] == '.' && normalRelPath.size() >= ext.size())
 		{
 			if (normalRelPath.substr(normalRelPath.size() - ext.size()) == ext)
 			{
+				std::cout << "[Server] ✓ Extension MATCHED: " << ext << std::endl;
+
 				const std::vector<std::string>	&allowedMethods = allLocs[i].getMethods();
 				bool	methodMatch = false;
 				for (size_t m = 0; m < allowedMethods.size(); ++m)
@@ -431,14 +428,8 @@ Server::_execCompetedOrder(int client_fd, Request &req)
 	// I. CGI Gateway Check
 	if (!cgiBin.empty())
 	{
-		// Check concurrent CGI limit
-		if (_active_cgis >= MAX_CONCURRENT_CGIS)
-		{
-			Response	cgiResponse;
-			cgiResponse.defaultErrorPage(Http::SERVICE_UNAVAILABLE);
-			_resps[client_fd] = cgiResponse;
-			return Server::STATIC_READY;
-		}
+		std::cout << "[Server] CGI DETECTED! cgiBin=" << cgiBin
+				  << ", scriptPath=" << fullPath << std::endl;
 
 		_active_cgis++;
 		_cgis[client_fd] = new CGI();
@@ -450,11 +441,13 @@ Server::_execCompetedOrder(int client_fd, Request &req)
 			_active_cgis--;
 			delete _cgis[client_fd];
 			_cgis.erase(client_fd);
-			Response	cgiResponse;
-			cgiResponse.defaultErrorPage(Http::INTERNAL_SERVER_ERROR);
-			_resps[client_fd] = cgiResponse;
+			Response	response;
+			response.defaultErrorPage(Http::INTERNAL_SERVER_ERROR);
+			_resps[client_fd] = response;
 			return Server::STATIC_READY;
 		}
+		std::cout << "[Server] Returning CGI_READY, body size="
+				  << req.getBody().size() << std::endl;
 		return Server::CGI_READY;
 	}
 
@@ -776,4 +769,13 @@ void
 Server::setActiveCgis(int count)
 {
 	_active_cgis = count;
+}
+
+pid_t
+Server::getCgiPid(int client_fd) const
+{
+	std::map<int, CGI *>::const_iterator	it = _cgis.find(client_fd);
+	if (it != _cgis.end())
+		return it->second->getPid();
+	return -1;
 }

@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/27 17:23:49 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/10 13:08:28 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/13 12:57:46 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,12 +52,12 @@ Response::build()
 
 	// 1. Build HTTP Protocol Status Line (e.g., HTTP/1.1 200 OK\r\n)
 	ss << "HTTP/1.1 " << _status << " " << _getReasonPhrase(_status) << "\r\n";
-	ss << "Server: " << "webserv/1.0 (42 Paris)" << "\r\n";
+	ss << "Server: webserv/1.0 (42 Paris)\r\n";
 
-	// For tester
+	// Add Connection: keep-alive by default
 	if (_headers.find("Connection") == _headers.end())
 	{
-		ss << "Connection: close\r\n";
+		ss << "Connection: keep-alive\r\n";
 	}
 
 	// 2. Append all custom standard map-mapped headers to the stream
@@ -193,7 +193,7 @@ Response::setBody(std::string body)
 	// Only set Content-Length if not a redirect or special status
 	if (_status != Http::NO_CONTENT &&
 	   (_status < 300 || _status >= 400) &&
-	    _status != Http::NOT_MODIFIED)
+		_status != Http::NOT_MODIFIED)
 	{
 		std::stringstream	ss;
 		ss << _body.size();

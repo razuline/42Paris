@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:32 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/12 18:27:48 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/13 15:01:55 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,6 +116,7 @@ public:
 	const std::string	&getRequestBody(int client_fd);
 	int					getActiveCgis();
 	void				setActiveCgis(int count);
+	pid_t				getCgiPid(int client_fd) const;
 };
 
 #endif

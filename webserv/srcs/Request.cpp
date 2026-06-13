@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/25 15:33:23 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/10 13:18:05 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/13 13:47:06 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,6 +113,9 @@ Request::setLimit(size_t limit)
 void
 Request::clearButPreserveLeftover()
 {
+	std::cout << "[Request] clearButPreserveLeftover called, state=" << _state
+			  << ", raw.size=" << _raw.size() << std::endl;
+
 	size_t	consumed = 0;
 	if (_state == COMPLETE)
 	{
@@ -128,6 +131,16 @@ Request::clearButPreserveLeftover()
 	if (_raw.size() > consumed)
 		leftover = _raw.substr(consumed);
 
+	std::cout << "[Request] consumed=" << consumed << ", leftover.size="
+			  << leftover.size() << std::endl;
+
+	if (!leftover.empty())
+	{
+		std::cout << "[Request] Leftover data (first 50 chars): "
+				  << leftover.substr(0, 50) << std::endl;
+	}
+
+	// Clear everything
 	_method.clear();
 	_path.clear();
 	_version.clear();
@@ -141,15 +154,6 @@ Request::clearButPreserveLeftover()
 	_isChunked = false;
 	_currChunkSize = -1;
 	_chunkedBytesProcessed = 0;
-
-	// Automatically parse any leftover pipelined data immediately
-	if (!_raw.empty())
-	{
-		_handleHeaders();
-
-		if (_state == READING_BODY)
-			_handleBody();
-	}
 }
 
 /* ------------------------- PRIVATE INTERNAL HELPERS ----------------------- */
@@ -401,4 +405,16 @@ int
 Request::getErrCode() const
 {
 	return _errCode;
+}
+
+size_t
+Request::getRawSize() const
+{
+	return _raw.size();
+}
+
+const std::map<std::string, std::string>
+&Request::getHeaders() const
+{
+	return _headers;
 }

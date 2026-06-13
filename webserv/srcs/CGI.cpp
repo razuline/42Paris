@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/24 16:54:54 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/12 17:39:18 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/13 16:12:47 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,7 +115,7 @@ CGI::execute(const Request &req, const std::string &script_path,
 	}
 	if (_pid == 0) // CHILD PROCESS
 	{
-		// Child: Close unused pipe ends
+		// Close unused pipe ends
 		close(_pipe_in[1]);
 		close(_pipe_out[0]);
 
@@ -128,13 +128,13 @@ CGI::execute(const Request &req, const std::string &script_path,
 		close(_pipe_out[1]);
 
 		// Change to script directory
-		std::string	target_script = abs_script_path;
-		size_t		last_slash = abs_script_path.find_last_of('/');
+		std::string	target_script = script_path;
+		size_t		last_slash = script_path.find_last_of('/');
 		if (last_slash != std::string::npos)
 		{
-			std::string	dir = abs_script_path.substr(0, last_slash);
+			std::string	dir = script_path.substr(0, last_slash);
 			chdir(dir.c_str());
-			target_script = abs_script_path.substr(last_slash + 1);
+			target_script = script_path.substr(last_slash + 1);
 		}
 
 		// Prepare arguments for execve
@@ -146,17 +146,17 @@ CGI::execute(const Request &req, const std::string &script_path,
 		char *const	*envp = &_env[0];
 		execve(args[0], args, envp);
 
-		// If we get here, execve failed
-		std::string	error_msg = "Status: 500 Internal Server Error\r\nContent-Type: text/html\r\n\r\n"
-								"<html><body><h1>500 CGI Error</h1></body></html>";
-		write(STDOUT_FILENO, error_msg.c_str(), error_msg.size());
 		exit(1);
 	}
 	else // PARENT PROCESS
 	{
+		std::cout << "[CGI] Parent: spawned child " << _pid << std::endl;
+
+		// Close unused pipe ends
 		close(_pipe_in[0]);
 		close(_pipe_out[1]);
 
+		// Set non-blocking
 		fcntl(_pipe_in[1], F_SETFL, O_NONBLOCK);
 		fcntl(_pipe_out[0], F_SETFL, O_NONBLOCK);
 
@@ -173,41 +173,59 @@ CGI::_initEnv(const Request &req, const std::string &script_path,
 {
 	_env.clear();
 
-	std::string	abs_script_path = script_path;
-
+	// 1. Core RFC CGI standard variables
 	_env.push_back(strdup(("REQUEST_METHOD=" + req.getMethod()).c_str()));
+	_env.push_back(strdup(("SCRIPT_FILENAME=" + script_path).c_str()));
+	_env.push_back(strdup(("SCRIPT_NAME=" + req.getPath()).c_str()));
+	_env.push_back(strdup(("PATH_INFO=" + req.getPath()).c_str()));
+	_env.push_back(strdup("QUERY_STRING="));
 	_env.push_back(strdup("SERVER_PROTOCOL=HTTP/1.1"));
 	_env.push_back(strdup("GATEWAY_INTERFACE=CGI/1.1"));
 	_env.push_back(strdup(("SERVER_PORT=" + port).c_str()));
 	_env.push_back(strdup("SERVER_SOFTWARE=webserv/1.0"));
 	_env.push_back(strdup("SERVER_NAME=localhost"));
-	_env.push_back(strdup(("SCRIPT_FILENAME=" + abs_script_path).c_str()));
-	_env.push_back(strdup(("SCRIPT_NAME=" + req.getPath()).c_str()));
-
-	_env.push_back(strdup(("REQUEST_URI=" + req.getPath()).c_str()));
 	_env.push_back(strdup("REDIRECT_STATUS=200"));
-	_env.push_back(strdup("QUERY_STRING="));
 
-	_env.push_back(strdup(("PATH_INFO=" + req.getPath()).c_str()));
-	_env.push_back(strdup(("PATH_TRANSLATED=" + abs_script_path).c_str()));
+	// 2. Strict variables required by the 42 cgi_tester to avoid 500 errors
+	_env.push_back(strdup(("REQUEST_URI=" + req.getPath()).c_str()));
+	_env.push_back(strdup(("PATH_TRANSLATED=" + script_path).c_str()));
 
-	// CONTENT_LENGTH
+	// 3. Content metrics (must remain strictly without the HTTP_ prefix per RFC)
 	std::stringstream	ss;
 	ss << req.getBody().size();
 	_env.push_back(strdup(("CONTENT_LENGTH=" + ss.str()).c_str()));
 
-	// CONTENT_TYPE
 	std::string	contentType = req.getHeader("Content-Type");
 	if (!contentType.empty())
 		_env.push_back(strdup(("CONTENT_TYPE=" + contentType).c_str()));
 
-	// Optional headers
+	// 4. Manually handled headers to guarantee formatting consistency
 	if (!req.getHeader("Cookie").empty())
 		_env.push_back(strdup(("HTTP_COOKIE=" + req.getHeader("Cookie")).c_str()));
 
 	if (!req.getHeader("X-Secret-Header-For-Test").empty())
 		_env.push_back(strdup(("HTTP_X_SECRET_HEADER_FOR_TEST=" +
 			req.getHeader("X-Secret-Header-For-Test")).c_str()));
+
+	// 5. Dynamically convert and safely pass all other incoming request headers
+	const std::map<std::string, std::string>	&headers = req.getHeaders();
+	std::map<std::string, std::string>::const_iterator	it;
+	for (it = headers.begin(); it != headers.end(); ++it)
+	{
+		// Skip headers already explicitly defined above to prevent duplication
+		if (it->first == "Content-Type" || it->first == "Content-Length" ||
+			it->first == "X-Secret-Header-For-Test" || it->first == "Cookie")
+			continue;
+
+		std::string	key = "HTTP_" + it->first;
+		for (size_t i = 0; i < key.size(); ++i)
+		{
+			if (key[i] == '-')
+				key[i] = '_';
+			key[i] = std::toupper(key[i]);
+		}
+		_env.push_back(strdup((key + "=" + it->second).c_str()));
+	}
 
 	_env.push_back(NULL);
 }

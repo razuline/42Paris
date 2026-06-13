@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 17:16:00 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/12 18:45:30 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/13 17:33:29 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,9 @@ Cluster::Cluster() :
 	_fds(),
 	_pipeToClientMap(),
 	_cgiBuffs(),
+	_cgiBytesWritten(),
+	_cgiStartTime(),
+	_pendingCgiReadFd(),
 	_active_cgis(0)
 {
 }
@@ -82,12 +85,12 @@ Cluster::run()
 			continue;
 		}
 
-		// Check for CGI timeouts (run this check every iteration)
+		// Check for CGI timeouts
 		time_t	now = time(NULL);
 		std::map<int, time_t>::iterator	it = _cgiStartTime.begin();
 		while (it != _cgiStartTime.end())
 		{
-			if (now - it->second > 30) // 30 seconds timeout
+			if (now - it->second > 120)
 			{
 				std::cerr << "[Cluster] CGI timeout for client_fd " << it->first
 						  << std::endl;
@@ -119,69 +122,81 @@ Cluster::run()
 				++it;
 			}
 		}
-		for (size_t i = 0; i < _fds.size();)
-		{
-			int	fd = _fds[i].fd;
 
-			if (_fds[i].revents == 0)
+		// 1. Snapshot all file descriptors that received an event
+		std::vector<int>	ready_fds;
+		for (size_t i = 0; i < _fds.size(); ++i)
+		{
+			if (_fds[i].revents != 0)
+				ready_fds.push_back(_fds[i].fd);
+		}
+		// 2. Process each ready fd using live safe indices
+		for (size_t k = 0; k < ready_fds.size(); ++k)
+		{
+			int	curr_fd = ready_fds[k];
+
+			// Dynamically locate where curr_fd sits right now in the vector
+			size_t	live_idx = 0;
+			bool	found = false;
+			for (; live_idx < _fds.size(); ++live_idx)
 			{
-				++i;
-				continue;
+				if (_fds[live_idx].fd == curr_fd)
+				{
+					found = true;
+					break;
+				}
 			}
+			if (!found)
+				continue; // Skipped safely if closed or removed by a previous event action
+
+			short	revents = _fds[live_idx].revents;
+			short	events = _fds[live_idx].events;
+			if (revents == 0)
+				continue;
 
 			// A. Handle incoming data multiplexing
-			if ((_fds[i].revents & POLLIN) ||
-			   ((_fds[i].revents & POLLHUP) &&
-				 _pipeToClientMap.count(fd) &&
-				 _fds[i].events == POLLIN))
+			if (((revents & POLLIN) && (events & POLLIN)) ||
+				((revents & POLLHUP) && (events & POLLIN)))
 			{
-				if (_servers.count(fd))
-					_addNewConnection(fd);
-				else if (_pipeToClientMap.count(fd)) // 1. CGI internal read pipe
+				if (_servers.count(curr_fd))
+					_addNewConnection(curr_fd);
+				else if (_pipeToClientMap.count(curr_fd))
 				{
-					int	client_fd = _pipeToClientMap[fd];
-					_handleCGIRead(fd, *_clients[client_fd]);
+					int	client_fd = _pipeToClientMap[curr_fd];
+					_handleCGIRead(curr_fd, *_clients[client_fd]);
 				}
-				else if (_clients.count(fd)) // 2. True external client socket
-					_handleClientRead(fd, *_clients[fd]);
+				else if (_clients.count(curr_fd))
+					_handleClientRead(curr_fd, *_clients[curr_fd]);
 			}
 			// B. Handle outgoing data transmission multiplexing
-			else if (_fds[i].revents & POLLOUT)
+			else if ((revents & POLLOUT) && (events & POLLOUT))
 			{
-				if (_pipeToClientMap.count(fd)) // 1. CGI internal write pipe
+				if (_pipeToClientMap.count(curr_fd))
 				{
-					int	client_fd = _pipeToClientMap[fd];
-					_handleCGIWrite(fd, *_clients[client_fd]);
+					int	client_fd = _pipeToClientMap[curr_fd];
+					_handleCGIWrite(curr_fd, *_clients[client_fd]);
 				}
-				else if (_clients.count(fd)) // 2. True external client socket
-					_handleClientWrite(fd, *_clients[fd]);
+				else if (_clients.count(curr_fd))
+					_handleClientWrite(curr_fd, *_clients[curr_fd]);
 			}
 			// C. Handle network errors or unexpected hang-ups
-			else if (_fds[i].revents & (POLLERR | POLLHUP | POLLNVAL))
+			else if (revents & (POLLERR | POLLHUP | POLLNVAL))
 			{
-				if (_pipeToClientMap.count(fd))
+				if (_pipeToClientMap.count(curr_fd))
 				{
-					int	pipe_fd = fd;
-					close(pipe_fd);
-					_removePipeFromPoll(pipe_fd);
-					_cgiBytesWritten.erase(pipe_fd);
-					_pipeToClientMap.erase(pipe_fd);
+					close(curr_fd);
+					_removePipeFromPoll(curr_fd);
+					_cgiBytesWritten.erase(curr_fd);
+					_pipeToClientMap.erase(curr_fd);
 				}
-				else
+				else if (_clients.count(curr_fd))
 				{
-					_closeConnection(fd);
+					if (events & POLLIN)
+					{
+						_closeConnection(curr_fd);
+					}
 				}
 			}
-			else
-			{
-				if (_clients.count(fd))
-					_closeConnection(fd);
-				else
-					++i;
-			}
-			// Safely skip index increment if current fd was erased from vector
-			if (i < _fds.size() && _fds[i].fd == fd)
-				++i;
 		}
 	}
 }
@@ -234,7 +249,12 @@ Cluster::_handleClientRead(int fd, Server &server)
 			  << static_cast<int>(status) << std::endl;
 
 	if (status <= Server::READ_ERROR)
+	{
+		std::cout << "[Cluster] READ_ERROR, closing connection fd " << fd
+				  << std::endl;
+
 		_closeConnection(fd);
+	}
 	else if (status == Server::STATIC_READY)
 	{
 		// Parsing complete: Toggle poll event from POLLIN to POLLOUT to transmit response
@@ -249,30 +269,41 @@ Cluster::_handleClientRead(int fd, Server &server)
 	}
 	else if (status == Server::CGI_READY)
 	{
-		_active_cgis++;
-
-		std::cout << "[Cluster] Active CGIs: " << _active_cgis << std::endl;
-
 		int	cgi_write_fd = server.getWriteFd(fd);
 		int	cgi_read_fd = server.getReadFd(fd);
 
-		// Record CGI start time for timeout tracking
+		// Record CGI start time
 		_cgiStartTime[fd] = time(NULL);
 
-		struct pollfd	pfd_write;
+		for (size_t i = 0; i < _fds.size(); ++i)
+		{
+			if (_fds[i].fd == fd)
+			{
+				_fds[i].events = 0; // Temporarily mute client socket triggers
+				break;
+			}
+		}
+
+		// ONLY add the write pipe initially
+		struct pollfd pfd_write;
 		pfd_write.fd = cgi_write_fd;
 		pfd_write.events = POLLOUT;
 		pfd_write.revents = 0;
 		_fds.push_back(pfd_write);
+
+		_pipeToClientMap[cgi_write_fd] = fd;
 
 		struct pollfd	pfd_read;
 		pfd_read.fd = cgi_read_fd;
 		pfd_read.events = POLLIN;
 		pfd_read.revents = 0;
 		_fds.push_back(pfd_read);
-
-		_pipeToClientMap[cgi_write_fd] = fd;
 		_pipeToClientMap[cgi_read_fd] = fd;
+
+		_pendingCgiReadFd.erase(fd);
+
+		std::cout << "[Cluster] Added both write and read CGI pipes to poll "
+				  << "simultaneously" << std::endl;
 	}
 }
 
@@ -291,6 +322,7 @@ Cluster::_handleClientWrite(int fd, Server &server)
 		std::cout << "[Cluster] Success response sent. Resetting client fd ["
 				  << fd << "] back to POLLIN" << std::endl;
 
+		// Reset to POLLIN to wait for next request
 		for (size_t i = 0; i < _fds.size(); ++i)
 		{
 			if (_fds[i].fd == fd)
@@ -300,40 +332,7 @@ Cluster::_handleClientWrite(int fd, Server &server)
 				break;
 			}
 		}
-
-		// Clear context and instantly fire the next pipelined request if it's already complete
-		Server::ReadStatus	next_status = server.clearClientState(fd);
-		if (next_status == Server::STATIC_READY)
-		{
-			for (size_t i = 0; i < _fds.size(); ++i)
-			{
-				if (_fds[i].fd == fd)
-				{
-					_fds[i].events = POLLOUT; // Stay in write mode for the pipelined request immediately
-					break;
-				}
-			}
-		}
-		else if (next_status == Server::CGI_READY)
-		{
-			int	cgi_write_fd = server.getWriteFd(fd);
-			int	cgi_read_fd = server.getReadFd(fd);
-
-			struct pollfd	pfd_write;
-			pfd_write.fd = cgi_write_fd;
-			pfd_write.events = POLLOUT;
-			pfd_write.revents = 0;
-			_fds.push_back(pfd_write);
-
-			struct pollfd	pfd_read;
-			pfd_read.fd = cgi_read_fd;
-			pfd_read.events = POLLIN;
-			pfd_read.revents = 0;
-			_fds.push_back(pfd_read);
-
-			_pipeToClientMap[cgi_write_fd] = fd;
-			_pipeToClientMap[cgi_read_fd] = fd;
-		}
+		server.clearClientState(fd);
 	}
 }
 
@@ -371,19 +370,8 @@ void
 Cluster::_handleCGIWrite(int pipe_write_fd, Server &server)
 {
 	int					client_fd = _pipeToClientMap[pipe_write_fd];
-
-	// Check if client still exists
-	if (_clients.find(client_fd) == _clients.end())
-	{
-		// Client already gone, clean up pipe
-		close(pipe_write_fd);
-		_removePipeFromPoll(pipe_write_fd);
-		_pipeToClientMap.erase(pipe_write_fd);
-		_cgiBytesWritten.erase(pipe_write_fd);
-		return;
-	}
-
 	const std::string	&body = server.getRequestBody(client_fd);
+
 	if (body.empty())
 	{
 		close(pipe_write_fd);
@@ -393,13 +381,12 @@ Cluster::_handleCGIWrite(int pipe_write_fd, Server &server)
 		return;
 	}
 
-	// Transmit the payload chunk over the non-blocking pipe
 	size_t	already_written = _cgiBytesWritten[pipe_write_fd];
 	size_t	remaining = body.size() - already_written;
 
-	// Don't write if nothing left
 	if (remaining == 0)
 	{
+		// Close write pipe to signal EOF to CGI
 		close(pipe_write_fd);
 		_removePipeFromPoll(pipe_write_fd);
 		_pipeToClientMap.erase(pipe_write_fd);
@@ -408,33 +395,23 @@ Cluster::_handleCGIWrite(int pipe_write_fd, Server &server)
 	}
 
 	size_t	to_write = remaining;
-	if (to_write > 8192)
-		to_write = 8192;
+	if (to_write > 65536)
+		to_write = 65536;
 
 	int	ret = write(pipe_write_fd, body.c_str() + already_written, to_write);
 
 	if (ret <= 0)
 	{
-		if (_active_cgis > 0)
-			_active_cgis--;
-
-		// Write failed - but don't immediately give up if pipe might be recoverable
-		// However, since we can't check errno, we'll assume pipe is broken
-		std::cerr << "[Cluster] CGI pipe write failed for fd " << pipe_write_fd
-				  << std::endl;
-
-		// Clean up this pipe
+		std::cerr << "[Cluster] CGI pipe write failed, ret=" << ret << std::endl;
 		close(pipe_write_fd);
 		_removePipeFromPoll(pipe_write_fd);
 		_pipeToClientMap.erase(pipe_write_fd);
 		_cgiBytesWritten.erase(pipe_write_fd);
 
-		// Send error response to client
 		Response	err_res;
-		err_res.defaultErrorPage(Http::BAD_GATEWAY);  // 502 Bad Gateway
+		err_res.defaultErrorPage(Http::BAD_GATEWAY);
 		server.setCgiResponse(client_fd, err_res);
 
-		// Switch client to POLLOUT
 		for (size_t i = 0; i < _fds.size(); ++i)
 		{
 			if (_fds[i].fd == client_fd)
@@ -445,14 +422,12 @@ Cluster::_handleCGIWrite(int pipe_write_fd, Server &server)
 		}
 		return;
 	}
-
-	// ret > 0
 	_cgiBytesWritten[pipe_write_fd] += ret;
 
 	if (_cgiBytesWritten[pipe_write_fd] == body.size())
 	{
-		std::cout << "[Cluster] Complete body (" << body.size()
-				  << " bytes) written to CGI pipe" << std::endl;
+		std::cout << "[Cluster] Complete body written to CGI pipe" << std::endl;
+
 		close(pipe_write_fd);
 		_removePipeFromPoll(pipe_write_fd);
 		_pipeToClientMap.erase(pipe_write_fd);
@@ -463,9 +438,6 @@ Cluster::_handleCGIWrite(int pipe_write_fd, Server &server)
 void
 Cluster::_handleCGIRead(int pipe_read_fd, Server &server)
 {
-	std::cout << "[Cluster] Getting output from CGI pipe " << pipe_read_fd
-			  << std::endl;
-
 	char	buff[4096];
 	int		client_fd = _pipeToClientMap[pipe_read_fd];
 	int		bytes_read = read(pipe_read_fd, buff, sizeof(buff) - 1);
@@ -477,16 +449,16 @@ Cluster::_handleCGIRead(int pipe_read_fd, Server &server)
 		_cgiBuffs[client_fd] += std::string(buff, bytes_read);
 		return;
 	}
-
-	// bytes_read <= 0 means CGI is done
-	std::cout << "[Cluster] CGI pipe completed (bytes_read=" << bytes_read
-			  << "), processing output" << std::endl;
+	if (bytes_read < 0)
+	{
+		return;
+	}
 
 	// Get accumulated output
 	std::string	cgiOutput = _cgiBuffs[client_fd];
 	_cgiBuffs.erase(client_fd);
 
-	// Clean up pipe - do this ONCE
+	// Close pipe and clean up
 	close(pipe_read_fd);
 	_removePipeFromPoll(pipe_read_fd);
 	_pipeToClientMap.erase(pipe_read_fd);
@@ -496,9 +468,8 @@ Cluster::_handleCGIRead(int pipe_read_fd, Server &server)
 	// Decrement active CGI counter
 	if (_active_cgis > 0)
 		_active_cgis--;
-	std::cout << "[Cluster] Active CGIs: " << _active_cgis << std::endl;
 
-	// Clean up CGI process
+	// Clean up CGI process - ONLY ONCE!
 	server.cleanupCgi(client_fd);
 
 	// Parse CGI output
@@ -552,7 +523,6 @@ Cluster::_handleCGIRead(int pipe_read_fd, Server &server)
 				}
 			}
 		}
-
 		if (has_location && cgi_status_code == Http::OK)
 			cgi_status_code = Http::FOUND;
 
@@ -563,7 +533,10 @@ Cluster::_handleCGIRead(int pipe_read_fd, Server &server)
 
 		if (has_location && (cgi_status_code == Http::FOUND ||
 							 cgi_status_code == Http::MOVED_PERMANENTLY))
-			response.setBody("");
+			bodyPart = "";
+
+		response.setBody(bodyPart);
+		response.setHeader("Content-Length", Utils::toStr(bodyPart.size()));
 	}
 	else if (!cgiOutput.empty())
 	{
@@ -571,21 +544,22 @@ Cluster::_handleCGIRead(int pipe_read_fd, Server &server)
 		response.setStatus(Http::OK);
 		response.setBody(cgiOutput);
 		response.setHeader("Content-Type", "text/html");
+		response.setHeader("Content-Length", Utils::toStr(cgiOutput.size()));
 	}
 	else
 	{
 		// Case 3: Empty response
 		response.setStatus(Http::NO_CONTENT);
 		response.setBody("");
+		response.setHeader("Content-Length", "0");
 	}
 
 	if (response.getStatus() == Http::NO_CONTENT ||
-		(response.getStatus() >= 300 && response.getStatus() < 400))
+	   (response.getStatus() >= 300 && response.getStatus() < 400))
 	{
 		response.setBody("");
+		response.setHeader("Content-Length", "0");
 	}
-
-	std::cout << "  -> Status Code: " << response.getStatus() << std::endl;
 
 	server.setCgiResponse(client_fd, response);
 
@@ -594,7 +568,7 @@ Cluster::_handleCGIRead(int pipe_read_fd, Server &server)
 	{
 		if (_fds[i].fd == client_fd)
 		{
-			_fds[i].events = POLLOUT;
+			_fds[i].events = POLLOUT; // Wake up the client socket to send the answer
 			break;
 		}
 	}

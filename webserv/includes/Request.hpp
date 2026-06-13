@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/25 14:09:02 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/10 13:11:49 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/13 13:47:57 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,6 +78,8 @@ public:
 	const std::string	&getBody() const;
 	State				getState() const;
 	int					getErrCode() const;
+	size_t				getRawSize() const;
+	const std::map<std::string, std::string>	&getHeaders() const;
 
 	static const size_t	HEADERS_SIZE;
 };

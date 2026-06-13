@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 16:51:10 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/12 18:28:22 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/13 14:19:02 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@ private:
 	std::map<int, std::string>	_cgiBuffs;              // Maps client_fd -> accumulated response
 	std::map<int, size_t>		_cgiBytesWritten;
 	std::map<int, time_t>		_cgiStartTime;          // Track when CGI started
+	std::map<int, int>			_pendingCgiReadFd;  // client_fd -> read_fd
 
 	int							_active_cgis;
 
