@@ -6,7 +6,7 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/03/09 15:17:52 by erazumov          #+#    #+#              #
-#    Updated: 2026/06/14 16:32:31 by erazumov         ###   ########.fr        #
+#    Updated: 2026/06/14 18:34:43 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -45,17 +45,25 @@ CUT = \033[K
 
 all: $(NAME)
 
-test: $(NAME) setup_tester
-	@printf "$(C)[TEST]$(X)  Setting up evaluation testing environment...\n"
-	@mkdir -p $(TEST_ROOT)/YoupiBanane/nop
-	@mkdir -p $(TEST_ROOT)/YoupiBanane/Yeah
-	@touch $(TEST_ROOT)/YoupiBanane/youpi.bad_extension
-	@touch $(TEST_ROOT)/YoupiBanane/youpi.bla
-	@touch $(TEST_ROOT)/YoupiBanane/nop/youpi.bad_extension
-	@touch $(TEST_ROOT)/YoupiBanane/nop/other.pouic
-	@touch $(TEST_ROOT)/YoupiBanane/Yeah/not_happy.bad_extension
-	@ln -sf www/YoupiBanane YoupiBanane 2>/dev/null || true
-	@printf "$(G)[OK]  $(X)  YoupiBanane directory matrix is ready!\n"
+test: $(NAME)
+	@printf "$(C)[DIR] $(X)  Generating YoupiBanane directory matrix in root...\n"
+	@rm -rf YoupiBanane
+	@mkdir -p YoupiBanane/nop
+	@mkdir -p YoupiBanane/Yeah
+	@touch YoupiBanane/youpi.bad_extension
+	@touch YoupiBanane/youpi.bla
+	@touch YoupiBanane/nop/youpi.bad_extension
+	@touch YoupiBanane/nop/other.pouic
+	@touch YoupiBanane/Yeah/not_happy.bad_extension
+	@printf "$(G)[OK]  $(X)  Root directory matrix deployed.\n"
+	@printf "$(Y)[RUN] $(X)  Executing integration tester (Make sure webserv is running!)...\n"
+	@if [ -f ./tester ]; then \
+		chmod +x ./tester && ./tester http://localhost:8080; \
+	elif [ -f $(TEST_ROOT)/test.py ]; then \
+		python3 $(TEST_ROOT)/test.py; \
+	else \
+		printf "$(Y)[WARN]$(X)  No local tester binaries found.\n"; \
+	fi
 
 $(NAME): $(OBJS)
 	@printf "$(G)[LD]  $(X)  Linking executable target: $(NAME)\n"
@@ -73,14 +81,14 @@ clean:
 
 fclean: clean
 	@rm -rf $(NAME)
-	@rm -rf $(TEST_ROOT)/YoupiBanane
-	@rm -f YoupiBanane
-	@printf "$(R)[RM]  $(X)  Removed compiled binary and test roots\n"
+	@rm -rf YoupiBanane
+	@rm -f .server.pid
+	@printf "$(R)[RM]  $(X)  Removed compiled binary and generated test directories\n"
 
 re: fclean
 	@+$(MAKE) all --jobs=$(shell nproc) --no-print-directory
 
-.PHONY: all clean fclean re test setup_tester
+.PHONY: all clean fclean re test
 
 # valgrind --leak-check=full ./webserv
 # leaks --atExit -- ./webserv

@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:07:21 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/10 13:29:51 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/14 19:21:09 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,6 @@
 
 volatile sig_atomic_t	g_stop = 0;
 
-// Function to handle system signals (like Ctrl+C)
 void	handle_signal(int sig)
 {
 	(void)sig;
@@ -44,12 +43,12 @@ int	main(int ac, char **av)
 	std::vector<Config>	configs;
 	configs.push_back(config);
 
-	// 2. Setup system signal handlers for graceful shutdown
+	// Setup system signal handlers for graceful shutdown
 	signal(SIGINT, handle_signal);
 	signal(SIGQUIT, handle_signal);
 	signal(SIGPIPE, SIG_IGN);
 
-	// 3. Launch Cluster multiplexer loop
+	// Launch Cluster multiplexer loop
 	Cluster	cluster;
 	cluster.setup(configs);
 	cluster.run();

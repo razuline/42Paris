@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/27 19:21:01 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/10 13:21:01 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/14 19:30:55 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 # include <csignal>
 # include <ctime>
 # include <dirent.h>
+# include <iomanip>
 # include <iostream>
 # include <sstream>
 # include <string>
@@ -42,6 +43,8 @@ namespace Utils
 	void	logResponse(int statusCode, const std::string &path);
 	void	logError(const std::string &message);
 	void	logInfo(const std::string &message);
+	void	logProgress(size_t bytesReceived);
+	void	clearProgress();
 }
 
 #endif

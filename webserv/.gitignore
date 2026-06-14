@@ -1,16 +1,25 @@
 # Binaries
 webserv
 
-# Objects
+# Objects and Cache
+objs/
 *.o
+
+# Testers (Stay local on your machine)
+tester
+cgi_tester
+www/test.py
+.server.pid
 
 # Debug and Sanitizers
 *.dSYM/
+
+# IDE Configurations
+.idea/
 .vscode/
 
-# OS junk
+# OS junk & Temporary files
 .DS_Store
-
-# Temporary files
 *.swp
 *~
+*.pdf

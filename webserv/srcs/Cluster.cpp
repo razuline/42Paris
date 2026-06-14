@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 17:16:00 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/13 20:13:20 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/14 19:27:27 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,9 +66,8 @@ Cluster::setup(std::vector<Config> configs)
 		_fds.push_back(pfd);
 
 		std::stringstream	ss;
-		ss << "Server virtual host listening on port ["
+		ss << "[Cluster] Server virtual host listening on port ["
 		   << configs[i].getPort() << "]";
-
 		Utils::logInfo(ss.str());
 	}
 }
@@ -92,8 +91,9 @@ Cluster::run()
 		{
 			if (now - it->second > 300)
 			{
-				std::cerr << "[Cluster] CGI timeout for client_fd " << it->first
-						  << std::endl;
+				std::stringstream	ss;
+				ss << "CGI gate timeout triggered for client fd [" << it->first << "]";
+				Utils::logError(ss.str());
 
 				// Kill the CGI process
 				if (_clients.count(it->first))
@@ -239,8 +239,9 @@ Cluster::_addNewConnection(int serv_fd)
 	// 4. Bind client socket descriptor to its respective virtual server
 	_clients[client_fd] = _servers[serv_fd];
 
-	std::cout << "[Cluster] Connection accepted on client fd [" << client_fd
-			  << "]" << std::endl;
+	std::stringstream	ss;
+	ss << "[Cluster] New client connected on socket fd [" << client_fd << "]";
+	Utils::logInfo(ss.str());
 }
 
 void
@@ -249,14 +250,8 @@ Cluster::_handleClientRead(int fd, Server &server)
 	// Process non-blocking request reading stream
 	Server::ReadStatus	status = server.handleRead(fd);
 
-	std::cout << "[Cluster] handleRead on fd [" << fd << "] status code: "
-			  << static_cast<int>(status) << std::endl;
-
 	if (status <= Server::READ_ERROR)
 	{
-		std::cout << "[Cluster] READ_ERROR, closing connection fd " << fd
-				  << std::endl;
-
 		_closeConnection(fd);
 	}
 	else if (status == Server::STATIC_READY)
@@ -305,9 +300,6 @@ Cluster::_handleClientRead(int fd, Server &server)
 		_pipeToClientMap[cgi_read_fd] = fd;
 
 		_pendingCgiReadFd.erase(fd);
-
-		std::cout << "[Cluster] Added both write and read CGI pipes to poll "
-				  << "simultaneously" << std::endl;
 	}
 }
 
@@ -323,8 +315,10 @@ Cluster::_handleClientWrite(int fd, Server &server)
 	}
 	else if (status == Server::WRITE_COMPLETE)
 	{
-		std::cout << "[Cluster] Success response sent. Resetting client fd ["
-				  << fd << "] back to POLLIN" << std::endl;
+		std::stringstream	ss;
+		ss << "[Cluster] Success response sent. Resetting client fd ["
+		   << fd << "] back to POLLIN";
+		Utils::logInfo(ss.str());
 
 		// Reset to POLLIN to wait for next request
 		for (size_t i = 0; i < _fds.size(); ++i)
@@ -366,8 +360,9 @@ Cluster::_closeConnection(int fd)
 	_clients.erase(fd);
 	_cgiBuffs.erase(fd);
 
-	std::cout << "[Cluster] Connection securely closed on fd [" << fd
-			  << "]" << std::endl;
+	std::stringstream	ss;
+	ss << "[Cluster] Connection closed securely on fd [" << fd << "]";
+	Utils::logInfo(ss.str());
 }
 
 void
@@ -390,7 +385,7 @@ Cluster::_handleCGIWrite(int pipe_write_fd, Server &server)
 
 	if (remaining == 0)
 	{
-		// Close write pipe to signal EOF to CGI
+		// Shut down pipe write end to trigger immediate EOF on the script side
 		close(pipe_write_fd);
 		_removePipeFromPoll(pipe_write_fd);
 		_pipeToClientMap.erase(pipe_write_fd);
@@ -432,9 +427,6 @@ Cluster::_handleCGIWrite(int pipe_write_fd, Server &server)
 
 	if (_cgiBytesWritten[pipe_write_fd] == body.size())
 	{
-		std::cout << "[Cluster] Complete body written to CGI pipe ("
-				  << body.size() << " bytes)" << std::endl;
-
 		close(pipe_write_fd);
 		_removePipeFromPoll(pipe_write_fd);
 		_pipeToClientMap.erase(pipe_write_fd);

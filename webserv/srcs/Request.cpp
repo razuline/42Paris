@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/25 15:33:23 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/13 13:47:06 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/14 19:14:30 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,7 +88,7 @@ Request::isComplete()
 void
 Request::addData(std::string chunk)
 {
-	// Safeguard against malicious or malformed heavy header payload attacks
+	// Security Enforcement: Mitigate heavy HTTP header flooding / DoS attacks
 	if (_state == READING_HEADERS &&
 	   (_raw.size() + chunk.size() > Request::HEADERS_SIZE))
 	{
@@ -113,9 +113,6 @@ Request::setLimit(size_t limit)
 void
 Request::clearButPreserveLeftover()
 {
-	std::cout << "[Request] clearButPreserveLeftover called, state=" << _state
-			  << ", raw.size=" << _raw.size() << std::endl;
-
 	size_t	consumed = 0;
 	if (_state == COMPLETE)
 	{
@@ -130,15 +127,6 @@ Request::clearButPreserveLeftover()
 	std::string	leftover = "";
 	if (_raw.size() > consumed)
 		leftover = _raw.substr(consumed);
-
-	std::cout << "[Request] consumed=" << consumed << ", leftover.size="
-			  << leftover.size() << std::endl;
-
-	if (!leftover.empty())
-	{
-		std::cout << "[Request] Leftover data (first 50 chars): "
-				  << leftover.substr(0, 50) << std::endl;
-	}
 
 	// Clear everything
 	_method.clear();
@@ -161,14 +149,11 @@ Request::clearButPreserveLeftover()
 void
 Request::_handleHeaders()
 {
-	// Look for the standard HTTP header/body boundary delimiter
 	size_t	pos = _raw.find("\r\n\r\n");
-
 	if (pos != std::string::npos)
 	{
 		_headerSize = pos + 4;
 		std::string	headers_part = _raw.substr(0, pos);
-
 		_parseRawHeaders(headers_part);
 	}
 }
@@ -176,25 +161,22 @@ Request::_handleHeaders()
 void
 Request::_handleBody()
 {
-	// CASE 1: Standard read with Content-Length
+	// Stream Context: Standard Content-Length payload accumulation
 	if (!_isChunked)
 	{
 		size_t	curr_body_size = _raw.size() - _headerSize;
 
-		// Check if the current payload exceeds the server configuration limits
 		if (curr_body_size > _limit)
 		{
 			_state = ERROR;
 			_errCode = Http::PAYLOAD_TOO_LARGE;
 			return;
 		}
-		// Safety check to ensure the payload chunk doesn't overflow Content-Length
 		if (curr_body_size >= _contentLength)
 		{
 			_body = _raw.substr(_headerSize, _contentLength);
 			_state = COMPLETE;
 		}
-		// Transition state once the complete expected body bytes are received
 		if (curr_body_size == _contentLength)
 		{
 			_body = _raw.substr(_headerSize, _contentLength);
@@ -202,12 +184,12 @@ Request::_handleBody()
 		}
 		return;
 	}
-	// CASE 2: Chunked read (Transfer-Encoding: chunked)
+
+	// Stream Context: Dynamic HTTP/1.1 Chunked Transfer Decoding
 	if (_chunkedBytesProcessed == 0)
 	{
 		if (_headerSize == 0)
 		{
-			// If _headerSize isn't defined
 			_state = ERROR;
 			_errCode = Http::INTERNAL_SERVER_ERROR;
 			return;
@@ -217,7 +199,6 @@ Request::_handleBody()
 
 	while (_state == READING_BODY)
 	{
-		// A. Look for the chunk size
 		if (_currChunkSize == -1)
 		{
 			size_t	crlf_pos = _raw.find("\r\n", _chunkedBytesProcessed);
@@ -250,26 +231,23 @@ Request::_handleBody()
 					_currChunkSize = -1;
 				break;
 			}
-			_chunkedBytesProcessed = crlf_pos + 2; // Skip the \r\n after the size
+			_chunkedBytesProcessed = crlf_pos + 2;
 		}
 		// B. Extract chunk data
 		else
 		{
-			// Check if received the full chunk + trailing \r\n
 			if (_raw.size() < _chunkedBytesProcessed + _currChunkSize + 2)
 				break; // Waiting for more data
 
-			// Add pure data to our decoded body
 			_body += _raw.substr(_chunkedBytesProcessed, _currChunkSize);
 
-			// Safeguard against oversized payloads
 			if (_body.size() > _limit)
 			{
 				_state = ERROR;
 				_errCode = Http::PAYLOAD_TOO_LARGE;
 				return;
 			}
-			_chunkedBytesProcessed += _currChunkSize + 2; // +2 for the \r\n
+			_chunkedBytesProcessed += _currChunkSize + 2;
 			_currChunkSize = -1; // Reset for the next chunk
 		}
 	}
@@ -281,7 +259,7 @@ Request::_parseRawHeaders(const std::string &headers_part)
 	std::stringstream	ss(headers_part);
 	std::string			line;
 
-	// --- 1. PARSE REQUEST-LINE ---
+	// RFC Compliance: Skip leading empty CRLF padding chains safely
 	while (std::getline(ss, line))
 	{
 		if (!line.empty() && line[line.size() - 1] == '\r')
@@ -312,7 +290,7 @@ Request::_parseRawHeaders(const std::string &headers_part)
 	first_line_ss >> _path;
 	first_line_ss >> _version;
 
-	// --- 2. PARSE FIELDS HEADERS ---
+	// Structural Parser: Populate metadata map sets
 	while (std::getline(ss, line))
 	{
 		if (!line.empty() && line[line.size() - 1] == '\r')
@@ -324,11 +302,9 @@ Request::_parseRawHeaders(const std::string &headers_part)
 		size_t	colon = line.find(':');
 		if (colon != std::string::npos)
 		{
-			// Extract Key and Value
 			std::string	key = line.substr(0, colon);
 			std::string	value = line.substr(colon + 1);
 
-			// Strip leading spaces from the header field value data
 			size_t	first = value.find_first_not_of(' ');
 			if (first != std::string::npos)
 				value = value.substr(first);
@@ -336,7 +312,8 @@ Request::_parseRawHeaders(const std::string &headers_part)
 			_headers[key] = value;
 		}
 	}
-	// --- 3. EXTRACT METADATA ---
+
+	// State Machine Transition Check
 	if (_headers.count("Transfer-Encoding") &&
 		_headers["Transfer-Encoding"].find("chunked") != std::string::npos)
 	{

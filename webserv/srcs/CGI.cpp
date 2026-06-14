@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/24 16:54:54 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/13 16:12:47 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/14 19:18:15 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ CGI::CGI() :
 
 CGI::~CGI()
 {
-	// Ensure any open pipe fd is securely closed to prevent FD leaks
+	// Mitigate FD leaks by securely closing open pipe infrastructure
 	if (_pipe_in[0] != -1)
 		close(_pipe_in[0]);
 	if (_pipe_in[1] != -1)
@@ -37,7 +37,7 @@ CGI::~CGI()
 	if (_pipe_out[1] != -1)
 		close(_pipe_out[1]);
 
-	// Reap the child process to prevent zombie process leaks
+	// Prevent zombie process generation by reaping the child process layout
 	if (_pid > 0)
 	{
 		int	status;
@@ -47,7 +47,6 @@ CGI::~CGI()
 			waitpid(_pid, NULL, 0);
 		}
 	}
-	// Free dynamically allocated memory inside the env matrix
 	_clearEnv();
 }
 
@@ -99,7 +98,7 @@ CGI::execute(const Request &req, const std::string &script_path,
 	fcntl(_pipe_out[1], F_SETFL, O_NONBLOCK);
 
 	#ifdef __linux__
-		// Increase pipe buffer size for large concurrent uploads
+		// Increase pipe buffer size for large concurrent POST uploads
 		int	pipe_size = 1048576; // 1MB buffer
 		fcntl(_pipe_in[1], F_SETPIPE_SZ, pipe_size);
 		fcntl(_pipe_out[0], F_SETPIPE_SZ, pipe_size);
@@ -150,7 +149,7 @@ CGI::execute(const Request &req, const std::string &script_path,
 	}
 	else // PARENT PROCESS
 	{
-		std::cout << "[CGI] Parent: spawned child " << _pid << std::endl;
+		Utils::logInfo("[CGI] Spawned pipeline child process [PID " + Utils::toStr(_pid) + "]");
 
 		// Close unused pipe ends
 		close(_pipe_in[0]);
@@ -173,7 +172,7 @@ CGI::_initEnv(const Request &req, const std::string &script_path,
 {
 	_env.clear();
 
-	// 1. Core RFC CGI standard variables
+	// RFC 3875 Compliance: Core CGI/1.1 standard execution environment matrix
 	_env.push_back(strdup(("REQUEST_METHOD=" + req.getMethod()).c_str()));
 	_env.push_back(strdup(("SCRIPT_FILENAME=" + script_path).c_str()));
 	_env.push_back(strdup(("SCRIPT_NAME=" + req.getPath()).c_str()));
@@ -186,11 +185,10 @@ CGI::_initEnv(const Request &req, const std::string &script_path,
 	_env.push_back(strdup("SERVER_NAME=localhost"));
 	_env.push_back(strdup("REDIRECT_STATUS=200"));
 
-	// 2. Strict variables required by the 42 cgi_tester to avoid 500 errors
+	// Evaluation Specifics: Constraints requested by the School 42 cgi_tester asset
 	_env.push_back(strdup(("REQUEST_URI=" + req.getPath()).c_str()));
 	_env.push_back(strdup(("PATH_TRANSLATED=" + script_path).c_str()));
 
-	// 3. Content metrics (must remain strictly without the HTTP_ prefix per RFC)
 	std::stringstream	ss;
 	ss << req.getBody().size();
 	_env.push_back(strdup(("CONTENT_LENGTH=" + ss.str()).c_str()));
@@ -199,7 +197,6 @@ CGI::_initEnv(const Request &req, const std::string &script_path,
 	if (!contentType.empty())
 		_env.push_back(strdup(("CONTENT_TYPE=" + contentType).c_str()));
 
-	// 4. Manually handled headers to guarantee formatting consistency
 	if (!req.getHeader("Cookie").empty())
 		_env.push_back(strdup(("HTTP_COOKIE=" + req.getHeader("Cookie")).c_str()));
 
@@ -207,12 +204,10 @@ CGI::_initEnv(const Request &req, const std::string &script_path,
 		_env.push_back(strdup(("HTTP_X_SECRET_HEADER_FOR_TEST=" +
 			req.getHeader("X-Secret-Header-For-Test")).c_str()));
 
-	// 5. Dynamically convert and safely pass all other incoming request headers
 	const std::map<std::string, std::string>	&headers = req.getHeaders();
 	std::map<std::string, std::string>::const_iterator	it;
 	for (it = headers.begin(); it != headers.end(); ++it)
 	{
-		// Skip headers already explicitly defined above to prevent duplication
 		if (it->first == "Content-Type" || it->first == "Content-Length" ||
 			it->first == "X-Secret-Header-For-Test" || it->first == "Cookie")
 			continue;
@@ -233,7 +228,6 @@ CGI::_initEnv(const Request &req, const std::string &script_path,
 void
 CGI::_clearEnv()
 {
-	// Free all strings except the NULL terminator
 	for (size_t i = 0; i < _env.size(); ++i)
 	{
 		if (_env[i] != NULL)

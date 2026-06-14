@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:40 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/14 16:18:56 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/14 19:32:20 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,13 +108,8 @@ Server::handleRead(int client_fd)
 	char	buff[4096];
 	int		bytes_read = recv(client_fd, buff, sizeof(buff) - 1, 0);
 
-	std::cout << "[Server] handleRead fd=" << client_fd << " bytes_read="
-			  << bytes_read << std::endl;
-
 	if (bytes_read <= 0)
 	{
-		std::cout << "[Server] recv returned " << bytes_read
-				  << ", closing connection" << std::endl;
 		clearClientState(client_fd);
 		return Server::READ_ERROR;
 	}
@@ -122,14 +117,8 @@ Server::handleRead(int client_fd)
 	buff[bytes_read] = '\0';
 	Request	&curr = _reqs[client_fd];
 
-	std::cout << "[Server] Current raw size before addData: "
-			  << curr.getRawSize() << std::endl;
-
 	curr.setLimit(_config.getClientMaxBodySize());
 	curr.addData(std::string(buff, bytes_read));
-
-	std::cout << "[Server] After addData: state=" << curr.getState()
-			  << ", isComplete=" << curr.isComplete() << std::endl;
 
 	if (curr.getState() == Request::ERROR)
 	{
@@ -140,7 +129,19 @@ Server::handleRead(int client_fd)
 	}
 
 	if (!curr.isComplete())
+	{
+		// Visual Feedback: Show a live counter only for substantial payloads (> 512 KB)
+		if (curr.getRawSize() > 512 * 1024)
+		{
+			Utils::logProgress(curr.getRawSize());
+		}
 		return Server::READ_INCOMPLETE;
+	}
+	// Stream finished
+	if (curr.getRawSize() > 512 * 1024)
+	{
+		Utils::clearProgress();
+	}
 
 	return _execCompetedOrder(client_fd, curr);
 }
@@ -150,7 +151,7 @@ Server::handleWrite(int client_fd)
 {
 	if (_writeBuffs.count(client_fd) == 0)
 	{
-		// FOR HEAD REQUESTS: Force empty body BEFORE building the response
+		// RFC Compliance: Force empty payload body for HEAD responses before serialisation
 		if (_reqs.count(client_fd) && _reqs[client_fd].getMethod() == "HEAD")
 		{
 			_resps[client_fd].clearBodyForHead();
@@ -168,8 +169,6 @@ Server::handleWrite(int client_fd)
 	}
 	if (static_cast<size_t>(bytes_sent) >= res_str.size())
 	{
-		std::cout << "[Server]  Response successfully transmitted to client fd ["
-				  << client_fd << "]" << std::endl;
 		_writeBuffs.erase(client_fd);
 		_resps.erase(client_fd);
 		return WRITE_COMPLETE;
@@ -181,8 +180,6 @@ Server::handleWrite(int client_fd)
 Server::ReadStatus
 Server::clearClientState(int client_fd)
 {
-	std::cout << "[Server] clearClientState for fd " << client_fd << std::endl;
-
 	_resps.erase(client_fd);
 	_writeBuffs.erase(client_fd);
 
@@ -213,7 +210,6 @@ Server::cleanupCgi(int client_fd)
 			kill(pid, SIGKILL);
 			int	status;
 			waitpid(pid, &status, 0);
-			std::cout << "[Server]  Cleaned up CGI process " << pid << std::endl;
 		}
 		delete it->second;
 		_cgis.erase(it);
@@ -378,15 +374,10 @@ Server::_execCompetedOrder(int client_fd, Request &req)
 	{
 		const std::string	&ext = allLocs[i].getPath();
 
-		std::cout << "[Server] Checking extension: '" << ext << "' against path: '"
-				  << normalRelPath << "'" << std::endl;
-
 		if (!ext.empty() && ext[0] == '.' && normalRelPath.size() >= ext.size())
 		{
 			if (normalRelPath.substr(normalRelPath.size() - ext.size()) == ext)
 			{
-				std::cout << "[Server] ✓ Extension MATCHED: " << ext << std::endl;
-
 				const std::vector<std::string>	&allowedMethods = allLocs[i].getMethods();
 				bool	methodMatch = false;
 				for (size_t m = 0; m < allowedMethods.size(); ++m)
@@ -437,9 +428,6 @@ Server::_execCompetedOrder(int client_fd, Request &req)
 	// I. CGI Gateway Check
 	if (!cgiBin.empty())
 	{
-		std::cout << "[Server] CGI DETECTED! cgiBin=" << cgiBin
-				  << ", scriptPath=" << fullPath << std::endl;
-
 		_active_cgis++;
 		_cgis[client_fd] = new CGI();
 
@@ -455,8 +443,6 @@ Server::_execCompetedOrder(int client_fd, Request &req)
 			_resps[client_fd] = response;
 			return Server::STATIC_READY;
 		}
-		std::cout << "[Server] Returning CGI_READY, body size="
-				  << req.getBody().size() << std::endl;
 		return Server::CGI_READY;
 	}
 

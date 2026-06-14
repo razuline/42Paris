@@ -198,11 +198,12 @@ The foundational concepts behind our asynchronous architecture were built using 
 
 ### 3. AI Assistance & Transparency Declaration
 
-In alignment with modern coding standards and 42 evaluation policies, artificial intelligence (Large Language Models) was used as an interactive debugging and architecture simulator during this project's development.
+In alignment with modern coding standards and 42 evaluation policies, artificial intelligence (Large Language Models) was used as an interactive debugging, interface design, and architecture simulator during this project's development.
 
 * **Edge-Case Troubleshooting:** Utilised to simulate concurrent traffic spikes and trace elusive short-write overflows in system buffers under high load.
 
-* **Log Diagnostics:** Employed to parser raw high-volume server debug outputs, accelerating the pinpointing of byte-drop deltas inside the CGI read boundary.
+* **Log Diagnostics & Terminal Aesthetics:** Employed to parse raw, high-volume server debug outputs and transition them into a production-grade interface. Co-developed an automated ANSI formatting engine to cleanly highlight crucial telemetry parameters (sockets, ports, and core class contexts like `[Cluster]`, `[Server]`, and `[CGI]`).
+* **Live Progress Streaming:** Designed an in-place carriage-return (`\r`) dynamic streamer to monitor heavy payload ingestions (100 MB+) in real-time, preventing terminal freezing sensations while maintaining zero `stdout` buffer clutter.
 * **Documentation Automation:** Used to dynamically optimise layout formatting and compile scalable visual ASCII and Mermaid data-flow schemas.
 
 ---

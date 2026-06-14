@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/28 13:46:06 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/10 14:59:01 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/14 19:19:57 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,6 +70,7 @@ Config::parse(const std::string &filename)
 		return;
 	}
 
+	// Tokenisation Phase: Linear evaluation of the global directive matrix
 	while (std::getline(file, line))
 	{
 		// 1. Remove comments
@@ -106,7 +107,7 @@ Config::parse(const std::string &filename)
 			ss >> _clientMaxBodySize;
 		}
 
-		// --- LOCATION PARSING ---
+		// Scoped Evaluation: Isolating route-specific configuration blocks
 		else if (line.find("location") == 0)
 		{
 			Location	loc;
@@ -119,7 +120,7 @@ Config::parse(const std::string &filename)
 								 : std::string::npos));
 			loc.setPath(Utils::trim(rawPath));
 
-			// Sub-loop to read the inner context of the bracket block
+			// Nested Context Processing: Extract variables inside the active bracket block
 			while (std::getline(file, line) && Utils::trim(line) != "}")
 			{
 				size_t	innerComment = line.find("#");

@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/27 17:23:49 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/13 12:57:46 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/14 19:15:16 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,6 @@ Response::build()
 {
 	std::stringstream	ss;
 
-	// 1. Build HTTP Protocol Status Line (e.g., HTTP/1.1 200 OK\r\n)
 	ss << "HTTP/1.1 " << _status << " " << _getReasonPhrase(_status) << "\r\n";
 	ss << "Server: webserv/1.0 (42 Paris)\r\n";
 
@@ -60,17 +59,13 @@ Response::build()
 		ss << "Connection: keep-alive\r\n";
 	}
 
-	// 2. Append all custom standard map-mapped headers to the stream
 	std::map<std::string, std::string>::iterator	it;
 	for (it = _headers.begin(); it != _headers.end(); ++it)
 	{
 		ss << it->first << ": " << it->second << "\r\n";
 	}
 
-	// 3. Mandatory empty line boundary
 	ss << "\r\n";
-
-	// 4. Append the final payload body data
 	ss << _body;
 
 	return ss.str();

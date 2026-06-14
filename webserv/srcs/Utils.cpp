@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/27 19:21:54 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/10 13:26:07 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/14 19:30:10 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,6 +117,35 @@ namespace Utils
 		return std::string(buff);
 	}
 
+	static std::string
+	_highlightMetrics(const std::string &message)
+	{
+		std::string	result;
+		bool		insideBrackets = false;
+
+		for (size_t i = 0; i < message.size(); ++i)
+		{
+			if (message[i] == '[')
+			{
+				result += "[";
+				result += BOLD;
+				result += WHITE;
+				insideBrackets = true;
+			}
+			else if (message[i] == ']' && insideBrackets)
+			{
+				result += RESET;
+				result += "]";
+				insideBrackets = false;
+			}
+			else
+			{
+				result += message[i];
+			}
+		}
+		return result;
+	}
+
 	void
 	logRequest(const std::string &method, const std::string &path)
 	{
@@ -127,8 +156,9 @@ namespace Utils
 			methodColor = RED;
 
 		std::cout << WHITE << getCurrTime() << RESET
+				  << " " << BOLD << CYAN << "[Server]" << RESET
 				  << " ➜ " << methodColor << BOLD << method << RESET
-				  << " " << path << std::endl;
+				  << " " << BOLD << WHITE << path << RESET << std::endl;
 	}
 
 	void
@@ -141,8 +171,9 @@ namespace Utils
 			statusColor = RED;
 
 		std::cout << WHITE << getCurrTime() << RESET
+				  << " " << BOLD << CYAN << "[Server]" << RESET
 				  << " ◀ " << statusColor << BOLD << statusCode << RESET
-				  << " (" << path << ")" << std::endl;
+				  << " " << BOLD << "(" << path << ")" << RESET << std::endl;
 	}
 
 	void
@@ -150,7 +181,7 @@ namespace Utils
 	{
 		std::cerr << WHITE << getCurrTime() << RESET
 				  << " [" << RED << BOLD << "ERROR" << RESET << "] "
-				  << message << std::endl;
+				  << _highlightMetrics(message) << std::endl;
 	}
 
 	void
@@ -158,6 +189,25 @@ namespace Utils
 	{
 		std::cout << WHITE << getCurrTime() << RESET
 				  << " [" << GREEN << BOLD << "INFO" << RESET << "] "
-				  << message << std::endl;
+				  << _highlightMetrics(message) << std::endl;
+	}
+
+	void
+	logProgress(size_t bytesReceived)
+	{
+		double	mb = static_cast<double>(bytesReceived) / (1024 * 1024);
+		std::stringstream	ss;
+
+		ss << "[Server] Ingesting dynamic data stream... [" << std::fixed
+		   << std::setprecision(2) << mb << " MB] loaded";
+
+		std::cout << "\r\033[K" << WHITE << getCurrTime() << RESET
+				  << " " << _highlightMetrics(ss.str()) << std::flush;
+	}
+
+	void
+	clearProgress()
+	{
+		std::cout << "\r\033[K" << std::flush;
 	}
 }
