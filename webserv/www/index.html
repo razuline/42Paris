@@ -1,1 +1,244 @@
-pppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>webserv Panel // Evaluation Matrix</title>
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --card-bg: #161b22;
+            --border-color: #30363d;
+            --text-color: #c9d1d9;
+            --accent-color: #58a6ff;
+            --success-color: #238636;
+            --warning-color: #d29922;
+            --error-color: #f85149;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+        }
+
+        header {
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin: 0;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .status-badge {
+            background-color: rgba(35, 134, 54, 0.15);
+            color: #56d364;
+            border: 1px solid rgba(56, 139, 253, 0.4);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-family: monospace;
+            font-weight: bold;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card h2 {
+            font-size: 16px;
+            margin-top: 0;
+            margin-bottom: 12px;
+            color: var(--accent-color);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+
+        .card p {
+            font-size: 14px;
+            line-height: 1.5;
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: #8b949e;
+        }
+
+        .btn {
+            display: inline-block;
+            text-align: center;
+            background-color: #21262d;
+            color: var(--accent-color);
+            border: 1px solid var(--border-color);
+            padding: 10px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: monospace;
+        }
+
+        .btn:hover {
+            background-color: var(--accent-color);
+            color: #ffffff;
+            border-color: var(--accent-color);
+        }
+
+        .btn-warning {
+            color: var(--warning-color);
+        }
+        .btn-warning:hover {
+            background-color: var(--warning-color);
+            color: #0d1117;
+            border-color: var(--warning-color);
+        }
+
+        .btn-submit {
+            background-color: var(--success-color);
+            color: white;
+            border: 1px solid rgba(240, 246, 252, 0.1);
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .btn-submit:hover {
+            background-color: #2ea44f;
+            border-color: rgba(27, 31, 36, 0.15);
+        }
+
+        ul {
+            padding-left: 20px;
+            margin: 0;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #8b949e;
+        }
+
+        input[type="file"] {
+            display: block;
+            margin-bottom: 15px;
+            font-size: 12px;
+            color: #8b949e;
+            width: 100%;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 12px;
+            color: #8b949e;
+            border-top: 1px solid var(--border-color);
+            padding-top: 20px;
+            margin-top: 40px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div>
+            <h1>webserv Interactive Defense Panel</h1>
+            <span style="font-size: 12px; color: #8b949e; font-family: monospace;">École 42 Cluster Compliance Check</span>
+        </div>
+        <div class="status-badge">● CLUSTER_ACTIVE (PORT 8080)</div>
+    </header>
+
+    <div class="grid">
+        <div class="card">
+            <div>
+                <h2>⚡ Dynamic CGI Pipeline</h2>
+                <p>Launches a child process using <code>fork()</code> and <code>execve()</code> to dynamically execute the verified Python script container asynchronously.</p>
+            </div>
+            <a href="/hello.py" class="btn">🚀 Run hello.py</a>
+        </div>
+
+        <div class="card">
+            <div>
+                <h2>🫖 Protocol Extension</h2>
+                <p>Triggers the custom memory intercept module. Directly evaluates custom status code parsing logic by executing the 418 Easter egg protocol loop.</p>
+            </div>
+            <a href="/coffee" class="btn btn-warning">☕ Request /coffee</a>
+        </div>
+
+        <div class="card">
+            <div>
+                <h2>📤 Body Size Limits & Uploads</h2>
+                <p>Tests payload handling parameters by processing multipart data. Triggers limits if body threshold values are systematically breached.</p>
+            </div>
+            <form action="/post_body" method="POST" enctype="multipart/form-data">
+                <input type="file" name="uploaded_file" required>
+                <button type="submit" class="btn btn-submit">Submit POST Form</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="grid">
+        <div class="card" style="grid-column: span 3;">
+            <h2>🛠️ Live Testing Verification Checklist for Evaluators</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-top: 5px;">
+                <div>
+                    <h3 style="font-size: 13px; margin: 0 0 8px 0; color: #8b949e; font-family: monospace;">[GET /] Baseline Content</h3>
+                    <ul>
+                        <li>Verifies static index lookup configurations.</li>
+                        <li>Confirms non-blocking socket reads.</li>
+                        <li>Validates response header generation rules.</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 style="font-size: 13px; margin: 0 0 8px 0; color: #8b949e; font-family: monospace;">[GET /hello.py] CGI Handling</h3>
+                    <ul>
+                        <li>Validates <code>\r\n\r\n</code> text segment breaks.</li>
+                        <li>Ensures clean process loop tracking.</li>
+                        <li>Confirms browser stream interpretation.</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 style="font-size: 13px; margin: 0 0 8px 0; color: #8b949e; font-family: monospace;">[GET /coffee] Protocol Status</h3>
+                    <ul>
+                        <li>Triggers native <code>418 I'm a Teapot</code> error status codes.</li>
+                        <li>Validates custom fallback code layouts.</li>
+                        <li>Saves descriptor tables dynamically.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        webserv // compiled under c++98 diagnostic configurations // erazumov & team // 2026
+    </footer>
+</div>
+
+</body>
+</html>

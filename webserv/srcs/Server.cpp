@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:40 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/13 18:22:26 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/14 16:18:56 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -273,11 +273,19 @@ Server::_execCompetedOrder(int client_fd, Request &req)
 	// A. Teapot Verification 🫖
 	if (path == "/coffee")
 	{
-		std::string	teapotHtml = "<html><head><title>418 I'm a Teapot</title></head>"
-								 "<body><h1>418 I'm a Teapot</h1></body></html>";
+		std::string	teapotHtml = _readFile("./www/418.html");
+
+		if (teapotHtml.empty())
+		{
+			teapotHtml = "<html><head><title>418 I'm a Teapot</title></head>"
+						 "<body><h1>418 I'm a Teapot</h1></body></html>";
+		}
+
 		response.setStatus(Http::IM_A_TEAPOT);
 		response.setBody(teapotHtml);
 		response.setHeader("Content-Type", "text/html");
+		response.setHeader("Content-Length", Utils::toStr(teapotHtml.size()));
+
 		_resps[client_fd] = response;
 		return Server::STATIC_READY;
 	}

@@ -6,7 +6,7 @@
 #    By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/03/09 15:17:52 by erazumov          #+#    #+#              #
-#    Updated: 2026/06/12 16:55:52 by erazumov         ###   ########.fr        #
+#    Updated: 2026/06/14 16:32:31 by erazumov         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -38,6 +38,7 @@ Y = \033[33m
 R = \033[31m
 G = \033[32m
 B = \033[34m
+C = \033[36m
 X = \033[0m
 UP = \033[A
 CUT = \033[K
@@ -45,8 +46,7 @@ CUT = \033[K
 all: $(NAME)
 
 test: $(NAME) setup_tester
-	@echo "$(G)🚀 Running tests...$(X)"
-	@echo "$(B)📁 Creating YoupiBanane directory structure...$(X)"
+	@printf "$(C)[TEST]$(X)  Setting up evaluation testing environment...\n"
 	@mkdir -p $(TEST_ROOT)/YoupiBanane/nop
 	@mkdir -p $(TEST_ROOT)/YoupiBanane/Yeah
 	@touch $(TEST_ROOT)/YoupiBanane/youpi.bad_extension
@@ -55,31 +55,30 @@ test: $(NAME) setup_tester
 	@touch $(TEST_ROOT)/YoupiBanane/nop/other.pouic
 	@touch $(TEST_ROOT)/YoupiBanane/Yeah/not_happy.bad_extension
 	@ln -sf www/YoupiBanane YoupiBanane 2>/dev/null || true
-	@echo "$(G)✅ YoupiBanane structure is ready!$(X)"
+	@printf "$(G)[OK]  $(X)  YoupiBanane directory matrix is ready!\n"
 
 $(NAME): $(OBJS)
-	@echo "$(Y)📁 Compiling object files...$(X)"
+	@printf "$(G)[LD]  $(X)  Linking executable target: $(NAME)\n"
 	@$(CC) $(FLAGS) $(INC) $(OBJS) -o $(NAME)
-	@echo "$(G)✅ Finished [$(NAME)]$(X)"
 
 $(OBJ_DIR)/%.o: srcs/%.cpp
 	@mkdir -p $(OBJ_DIR)
-	@echo "$(Y)Compiling [$<]...$(X)"
-	$(CC) $(FLAGS) $(INC) -c $< -o $@
+	@printf "$(Y)[CC]  $(X)  Compiling source frame: $<\n"
+	@$(CC) $(FLAGS) $(INC) -c $< -o $@
 	@printf "$(UP)$(CUT)"
 
 clean:
 	@rm -rf $(OBJ_DIR)
-	@echo "$(R)🧹 Object files removed$(X)"
+	@printf "$(R)[RM]  $(X)  Cleaned internal object cache\n"
 
 fclean: clean
 	@rm -rf $(NAME)
 	@rm -rf $(TEST_ROOT)/YoupiBanane
 	@rm -f YoupiBanane
-	@echo "$(R)🗑️  Executables and test directories removed$(X)"
+	@printf "$(R)[RM]  $(X)  Removed compiled binary and test roots\n"
 
 re: fclean
-	+$(MAKE) all --jobs=$(shell nproc)
+	@+$(MAKE) all --jobs=$(shell nproc) --no-print-directory
 
 .PHONY: all clean fclean re test setup_tester
 

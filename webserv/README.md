@@ -232,9 +232,9 @@ Rather than just throwing a static string, our server handles this protocol expa
 You can instantly verify the server's asynchronous multiplexing, method handling, and compliance using standard network utilities. Run these commands from a separate terminal window while the server is active:
 
 * **Test Core Asynchronous `GET` (Static Content):**
-```bash
-curl -v http://127.0.0.1:8080/
-```
+	```bash
+	curl -v http://127.0.0.1:8080/
+	```
 
 * **Test High-Volume `POST` Payload Processing (CGI Gateway):**
 
