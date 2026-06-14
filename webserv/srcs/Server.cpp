@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:40 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/14 19:32:20 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/14 21:14:25 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,6 +116,8 @@ Server::handleRead(int client_fd)
 
 	buff[bytes_read] = '\0';
 	Request	&curr = _reqs[client_fd];
+	
+	size_t	prev_size = curr.getRawSize();
 
 	curr.setLimit(_config.getClientMaxBodySize());
 	curr.addData(std::string(buff, bytes_read));
@@ -127,17 +129,19 @@ Server::handleRead(int client_fd)
 		_resps[client_fd] = res;
 		return Server::STATIC_READY;
 	}
-
 	if (!curr.isComplete())
 	{
-		// Visual Feedback: Show a live counter only for substantial payloads (> 512 KB)
-		if (curr.getRawSize() > 512 * 1024)
+		size_t	curr_size = curr.getRawSize();
+		size_t	milestone = 512 * 1024;
+
+		if (curr_size > 512 * 1024 &&
+		   (curr_size / milestone > prev_size / milestone))
 		{
-			Utils::logProgress(curr.getRawSize());
+			Utils::logProgress(client_fd, curr_size);
 		}
 		return Server::READ_INCOMPLETE;
 	}
-	// Stream finished
+
 	if (curr.getRawSize() > 512 * 1024)
 	{
 		Utils::clearProgress();

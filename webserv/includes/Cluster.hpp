@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 16:51:10 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/13 14:19:02 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/14 21:32:53 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 # include <fcntl.h>
 # include <map>
 # include <sys/poll.h>
+# include <sys/wait.h>
 # include <unistd.h>
 # include <vector>
 

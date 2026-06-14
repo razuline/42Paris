@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/27 19:21:54 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/14 19:30:10 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/14 21:33:41 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,9 +146,66 @@ namespace Utils
 		return result;
 	}
 
+	static bool	_progressActive = false;
+
+	void
+	logProgress(int fd, size_t bytesReceived)
+	{
+		struct timeval	tv;
+		gettimeofday(&tv, NULL);
+
+		long long			now_ms = static_cast<long long>(tv.tv_sec) *
+										1000 + (tv.tv_usec / 1000);
+		static long long	last_update_ms = 0;
+
+		if (_progressActive && (now_ms - last_update_ms < 100))
+			return;
+		last_update_ms = now_ms;
+
+		double	mb = static_cast<double>(bytesReceived) / (1024 * 1024);
+		std::stringstream	ss;
+
+		ss << "[Server] Ingesting fd [" << fd << "]: " << std::fixed
+		   << std::setprecision(2) << mb << " MB";
+
+		std::cout << "\r\033[K" << WHITE << getCurrTime() << RESET
+				  << " " << CYAN << BOLD << ss.str() << RESET << std::flush;
+
+		_progressActive = true;
+	}
+
+	void
+	clearProgress()
+	{
+		if (_progressActive)
+		{
+			std::cout << "\r\033[K" << std::flush;
+			_progressActive = false;
+		}
+	}
+
+	void
+	logHeartbeat()
+	{
+		if (!_progressActive)
+		{
+			std::cout << "\r\033[K" << WHITE << getCurrTime() << RESET
+					  << " [" << YELLOW << BOLD << "Cluster" << RESET
+					  << "] Event loop ticking. Awaiting tester payload..."
+					  << std::flush;
+			_progressActive = true;
+		}
+	}
+
 	void
 	logRequest(const std::string &method, const std::string &path)
 	{
+		if (_progressActive)
+		{
+			std::cout << std::endl;
+			_progressActive = false;
+		}
+
 		std::string	methodColor = CYAN;
 		if (method == "POST")
 			methodColor = MAGENTA;
@@ -164,6 +221,12 @@ namespace Utils
 	void
 	logResponse(int statusCode, const std::string &path)
 	{
+		if (_progressActive)
+		{
+			std::cout << std::endl;
+			_progressActive = false;
+		}
+
 		std::string	statusColor = GREEN;
 		if (statusCode >= 300 && statusCode < 400)
 			statusColor = YELLOW;
@@ -179,6 +242,12 @@ namespace Utils
 	void
 	logError(const std::string &message)
 	{
+		if (_progressActive)
+		{
+			std::cout << std::endl;
+			_progressActive = false;
+		}
+
 		std::cerr << WHITE << getCurrTime() << RESET
 				  << " [" << RED << BOLD << "ERROR" << RESET << "] "
 				  << _highlightMetrics(message) << std::endl;
@@ -187,27 +256,14 @@ namespace Utils
 	void
 	logInfo(const std::string &message)
 	{
+		if (_progressActive)
+		{
+			std::cout << std::endl;
+			_progressActive = false;
+		}
+
 		std::cout << WHITE << getCurrTime() << RESET
 				  << " [" << GREEN << BOLD << "INFO" << RESET << "] "
 				  << _highlightMetrics(message) << std::endl;
-	}
-
-	void
-	logProgress(size_t bytesReceived)
-	{
-		double	mb = static_cast<double>(bytesReceived) / (1024 * 1024);
-		std::stringstream	ss;
-
-		ss << "[Server] Ingesting dynamic data stream... [" << std::fixed
-		   << std::setprecision(2) << mb << " MB] loaded";
-
-		std::cout << "\r\033[K" << WHITE << getCurrTime() << RESET
-				  << " " << _highlightMetrics(ss.str()) << std::flush;
-	}
-
-	void
-	clearProgress()
-	{
-		std::cout << "\r\033[K" << std::flush;
 	}
 }

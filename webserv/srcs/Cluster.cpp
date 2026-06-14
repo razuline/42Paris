@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 17:16:00 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/14 19:27:27 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/14 22:04:30 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,10 +77,22 @@ Cluster::run()
 {
 	while (g_stop == 0)
 	{
-		if (poll(&_fds[0], _fds.size(), -1) < 0)
+		// 1. NON-BLOCKING PROCESS REAPER
+		while (waitpid(-1, NULL, WNOHANG) > 0);
+
+		// 2. TIMEOUT METRONOME (1 second)
+		int ret = poll(&_fds[0], _fds.size(), 1000);
+		if (ret < 0)
 		{
 			if (g_stop == 0)
 				perror("poll error");
+			continue;
+		}
+
+		// 3. LIVE HEARTBEAT PULSE
+		if (ret == 0)
+		{
+			Utils::logHeartbeat();
 			continue;
 		}
 
@@ -92,20 +104,18 @@ Cluster::run()
 			if (now - it->second > 300)
 			{
 				std::stringstream	ss;
-				ss << "CGI gate timeout triggered for client fd [" << it->first << "]";
+				ss << "CGI gate timeout triggered for client fd ["
+				   << it->first << "]";
 				Utils::logError(ss.str());
 
-				// Kill the CGI process
 				if (_clients.count(it->first))
 				{
 					_clients[it->first]->cleanupCgi(it->first);
 
-					// Send 504 Gateway Timeout
 					Response	err_res;
 					err_res.defaultErrorPage(Http::GATEWAY_TIMEOUT);
 					_clients[it->first]->setCgiResponse(it->first, err_res);
 
-					// Switch client to POLLOUT
 					for (size_t i = 0; i < _fds.size(); ++i)
 					{
 						if (_fds[i].fd == it->first)
@@ -123,19 +133,19 @@ Cluster::run()
 			}
 		}
 
-		// 1. Snapshot all file descriptors that received an event
+		// Snapshot all file descriptors that received an event
 		std::vector<int>	ready_fds;
 		for (size_t i = 0; i < _fds.size(); ++i)
 		{
 			if (_fds[i].revents != 0)
 				ready_fds.push_back(_fds[i].fd);
 		}
-		// 2. Process each ready fd using live safe indices
+
+		// Process each ready fd using live safe indices
 		for (size_t k = 0; k < ready_fds.size(); ++k)
 		{
 			int	curr_fd = ready_fds[k];
 
-			// Dynamically locate where curr_fd sits right now in the vector
 			size_t	live_idx = 0;
 			bool	found = false;
 			for (; live_idx < _fds.size(); ++live_idx)
@@ -146,8 +156,9 @@ Cluster::run()
 					break;
 				}
 			}
+
 			if (!found)
-				continue; // Skipped safely if closed or removed by a previous event action
+				continue;
 
 			short	revents = _fds[live_idx].revents;
 			short	events = _fds[live_idx].events;
@@ -169,7 +180,8 @@ Cluster::run()
 					_handleClientRead(curr_fd, *_clients[curr_fd]);
 			}
 			// B. Handle outgoing data transmission multiplexing
-			else if ((revents & POLLOUT) && (events & POLLOUT))
+			else if ((revents & POLLOUT) && (events & POLLOUT) &&
+					!(revents & (POLLERR | POLLHUP | POLLNVAL)))
 			{
 				if (_pipeToClientMap.count(curr_fd))
 				{
@@ -191,14 +203,7 @@ Cluster::run()
 				}
 				else if (_clients.count(curr_fd))
 				{
-					if ((events & POLLIN) || (revents & (POLLERR | POLLNVAL)))
-					{
-						_closeConnection(curr_fd);
-					}
-					else if (revents & POLLHUP)
-					{
-						_closeConnection(curr_fd);
-					}
+					_closeConnection(curr_fd);
 				}
 			}
 		}
@@ -381,41 +386,20 @@ Cluster::_handleCGIWrite(int pipe_write_fd, Server &server)
 	}
 
 	size_t	already_written = _cgiBytesWritten[pipe_write_fd];
-	size_t	remaining = body.size() - already_written;
-
-	if (remaining == 0)
-	{
-		// Shut down pipe write end to trigger immediate EOF on the script side
-		close(pipe_write_fd);
-		_removePipeFromPoll(pipe_write_fd);
-		_pipeToClientMap.erase(pipe_write_fd);
-		_cgiBytesWritten.erase(pipe_write_fd);
-		return;
-	}
-
-	size_t	to_write = remaining;
-	if (to_write > 65536)
-		to_write = 65536;
-
 	size_t	total_chunk_written = 0;
-	int		fail_counter = 0;
 
-	while (total_chunk_written < to_write)
+	while (already_written + total_chunk_written < body.size())
 	{
+		size_t	remaining = body.size() - (already_written + total_chunk_written);
+		size_t	chunk_size = remaining > 65536 ? 65536 : remaining;
+
 		int	ret = write(pipe_write_fd,
 						body.c_str() + already_written + total_chunk_written,
-						to_write - total_chunk_written);
+						chunk_size);
 
 		if (ret > 0)
 		{
 			total_chunk_written += ret;
-			fail_counter = 0;
-		}
-		else if (ret == 0 || (ret < 0 && total_chunk_written > 0))
-		{
-			usleep(10);
-			if (++fail_counter > 5000)
-				break;
 		}
 		else
 		{
@@ -450,6 +434,32 @@ Cluster::_handleCGIRead(int pipe_read_fd, Server &server)
 	}
 	if (bytes_read < 0)
 	{
+		_cgiBuffs.erase(client_fd);
+		close(pipe_read_fd);
+		_removePipeFromPoll(pipe_read_fd);
+		_pipeToClientMap.erase(pipe_read_fd);
+		_cgiBytesWritten.erase(pipe_read_fd);
+		_cgiStartTime.erase(client_fd);
+
+		if (_active_cgis > 0)
+			_active_cgis--;
+
+		server.cleanupCgi(client_fd);
+
+		Response	err_response;
+		err_response.setStatus(Http::INTERNAL_SERVER_ERROR);
+		err_response.setBody("");
+		err_response.setHeader("Content-Length", "0");
+		server.setCgiResponse(client_fd, err_response);
+
+		for (size_t i = 0; i < _fds.size(); ++i)
+		{
+			if (_fds[i].fd == client_fd)
+			{
+				_fds[i].events = POLLOUT;
+				break;
+			}
+		}
 		return;
 	}
 
