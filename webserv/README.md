@@ -1,5 +1,5 @@
 *This project has been created as part
-of the 42 curriculum by erazumov, esergeev and mchiacha*
+of the 42 curriculum by **erazumov**, **esergeev** and **mchiacha***
 
 # webserv — Non-Blocking HTTP/1.1 Server in C++98
 
@@ -77,9 +77,9 @@ Our server is designed using a **modular architecture**. Each class has one spec
 
 Here is the exact journey of a request inside our class architecture:
 
-1. **`Cluster`** catches a network event (`POLLIN`) on a listening socket ➡️ calls `accept()` ➡️ creates a new client socket and adds it to the `poll()` list.
+1. **`Cluster`** catches a network event (`POLLIN`) on a listening socket -> calls `accept()` -> creates a new client socket and adds it to the `poll()` list.
 
-2. **`Cluster`** detects data coming from the client ➡️ reads the bytes and passes them to the matching **`Server`** instance.
+2. **`Cluster`** detects data coming from the client -> reads the bytes and passes them to the matching **`Server`** instance.
 
 3. **`Server`** uses **`Request`** to parse the raw text data into a structured format.
 4. **`Server`** checks the **`Config` / `Location`** rules to find the requested file on the disk.
@@ -135,7 +135,7 @@ flowchart TD
 
 ## 👥 Team Distribution & Project Modules
 
-We divided the project into three technical modules so the team could collaborate easily.
+We divided the project into technical modules so the team could collaborate easily.
 
 ### Module 1: Network Engine & Event Loop
 
@@ -209,7 +209,7 @@ In alignment with modern coding standards and 42 evaluation policies, artificial
 
 ## 🫖 Deep Dive: The 418 I'm a Teapot Easter Egg
 
-`418 I'm a teapot`
+**`418 I'm a teapot`**
 
 ### 1. The HTCPCP Protocol
 The **Hyper Text Coffee Pot Control Protocol** (**HTCPCP**) is a tongue-in-cheek communication protocol designed for controlling, monitoring, and diagnosing networked coffee pots. Published as **RFC 2324** on April Fools' Day in 1998, it remains one of the internet's most famous collaborative pranks.
@@ -232,9 +232,9 @@ Rather than just throwing a static string, our server handles this protocol expa
 You can instantly verify the server's asynchronous multiplexing, method handling, and compliance using standard network utilities. Run these commands from a separate terminal window while the server is active:
 
 * **Test Core Asynchronous `GET` (Static Content):**
-	```bash
-	curl -v http://127.0.0.1:8080/
-	```
+```bash
+curl -v http://127.0.0.1:8080/
+```
 
 * **Test High-Volume `POST` Payload Processing (CGI Gateway):**
 
@@ -256,6 +256,7 @@ You can instantly verify the server's asynchronous multiplexing, method handling
 	```bash
 	curl -v -X BREW http://127.0.0.1:8080/
 	```
+
 ---
 
 ## 🛠️ Instructions
