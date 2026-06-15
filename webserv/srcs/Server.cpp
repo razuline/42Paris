@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:40 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/15 13:49:03 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/15 19:37:38 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -285,44 +285,83 @@ Server::_active_cgis = 0;
 Server::ReadStatus
 Server::_execCompetedOrder(int client_fd, Request &req)
 {
-	Utils::logRequest(req.getMethod(), req.getPath());
+	 // ADD THIS DEBUG BLOCK:
+    std::cout << "\n=== REQUEST ===" << std::endl;
+    std::cout << "Method: " << req.getMethod() << std::endl;
+    std::cout << "Path: " << req.getPath() << std::endl;
+    std::cout << "Version: " << req.getVersion() << std::endl;
+    std::cout << "State: " << req.getState() << std::endl;
+    std::cout << "Has Host header: " << (req.getHeader("Host").empty() ? "NO" : "YES") << std::endl;
+    if (!req.getHeader("Host").empty())
+        std::cout << "Host value: '" << req.getHeader("Host") << "'" << std::endl;
+    std::cout << "================" << std::endl;
 
-	std::string	path = req.getPath();
+	// Check if the Request parser flagged an HTTP parsing state error (e.g., malformed headers)
+	// if (req.getState() == Request::ERROR)
+	// {
+	// 	Response	res;
+	// 	res.defaultErrorPage(req.getErrCode());
+	// 	_resps[client_fd] = res;
+	// 	return Server::STATIC_READY;
+	// }
+
+	std::string	rawPath = req.getPath();
 	std::string	method = req.getMethod();
-	Response	response;
 
-	// A. Teapot Verification 🫖
-	if (path == "/coffee")
+	// 1. SECURITY FIX: Validate path sequences to block Path Traversal directory escapes ("..")
+	if (rawPath.find("..") != std::string::npos)
 	{
-		std::string	teapotHtml = _readFile("./www/418.html");
-
-		if (teapotHtml.empty())
-		{
-			teapotHtml = "<html><head><title>418 I'm a Teapot</title></head>"
-						 "<body><h1>418 I'm a Teapot</h1></body></html>";
-		}
-
-		response.setStatus(Http::IM_A_TEAPOT);
-		response.setBody(teapotHtml);
-		response.setHeader("Content-Type", "text/html");
-		response.setHeader("Content-Length", Utils::toStr(teapotHtml.size()));
-
+		Response	response;
+		response.defaultErrorPage(Http::BAD_REQUEST);
 		_resps[client_fd] = response;
 		return Server::STATIC_READY;
 	}
 
+	// 2. CGI FIX: Isolate and parse the Query String parameters out of the incoming URI path
+	std::string	path = rawPath;
+	std::string	queryString = "";
+	size_t		qPos = path.find('?');
+	if (qPos != std::string::npos)
+	{
+		queryString = path.substr(qPos + 1);
+		path = path.substr(0, qPos);
+	}
+
+	// Clear outstanding I/O feedback stream indicators and output standardized access metrics
+	Utils::logRequest(method, path);
+	Response	response;
+
+	// A. RFC Exception: Evaluate special teapot benchmark context ("/coffee")
+	if (path == "/coffee")
+	{
+		std::string	teapotHtml = _readFile("./www/418.html");
+		if (teapotHtml.empty())
+		{
+			teapotHtml = "<html><head><title>418 I'm a Teapot</title></head><body><h1>418 I'm a Teapot</h1></body></html>";
+		}
+		response.setStatus(Http::IM_A_TEAPOT);
+		response.setBody(teapotHtml);
+		response.setHeader("Content-Type", "text/html");
+		response.setHeader("Content-Length", Utils::toStr(teapotHtml.size()));
+		_resps[client_fd] = response;
+		return Server::STATIC_READY;
+	}
+
+	// Match the sanitized URI path against configured route scopes (locations)
 	const Location	*loc = _matchLocation(path);
 
-	// B. Request Body Limit Check
-	if (loc && loc->getClientMaxBodySize() > 0 &&
-		req.getBody().size() > loc->getClientMaxBodySize())
+	// B. Request Body Limit Check: Enforce location-specific constraints, falling back to global max
+	size_t	max_body = (loc && loc->getClientMaxBodySize() > 0)
+					   ? loc->getClientMaxBodySize()
+					   : _config.getClientMaxBodySize();
+	if (req.getBody().size() > max_body)
 	{
 		response.defaultErrorPage(Http::PAYLOAD_TOO_LARGE);
 		_resps[client_fd] = response;
 		return Server::STATIC_READY;
 	}
 
-	// C. HTTP Method Validation
+	// C. HTTP Method Validation: Verify if the requested method token is authorized for this route
 	if (!_checkIncMethod(loc, method))
 	{
 		response.defaultErrorPage(Http::METHOD_NOT_ALLOWED);
@@ -332,55 +371,146 @@ Server::_execCompetedOrder(int client_fd, Request &req)
 		return Server::STATIC_READY;
 	}
 
-	// D. HTTP Redirection (301)
+	// D. HTTP Redirection: Evaluate route redirection context rules (301 Moved Permanently)
 	if (loc && !loc->getRedirect().empty())
 	{
-		response.setStatus(Http::MOVED_PERMANENTLY);
-		response.setHeader("Location", loc->getRedirect());
+		std::string			redir = loc->getRedirect();
+		int					status = Http::MOVED_PERMANENTLY; // Fallback to 301
+		std::string			url = redir;
+		std::stringstream	r_ss(redir);
+		int					custom_status;
+
+		// FIX: Dynamically parse explicit status codes (301/302) from configuration token paths
+		if (r_ss >> custom_status)
+		{
+			if (custom_status >= 300 && custom_status < 400)
+			{
+				status = custom_status;
+				r_ss >> url;
+				if (url.empty())
+					url = redir.substr(redir.find_first_of(" \t") + 1);
+				url = Utils::trim(url);
+			}
+		}
+		response.setStatus(status);
+		response.setHeader("Location", url);
 		_resps[client_fd] = response;
 		return Server::STATIC_READY;
 	}
 
-	// E. Resolve Base Paths
-	std::string	activeRoot;
+	// E. Resolve Document Root System Paths
+	std::string	activeRoot = loc && !loc->getRoot().empty()
+							? loc->getRoot() : _config.getFolderRoot();
 	std::string	relPath = path;
 
-	if (loc && !loc->getRoot().empty())
+	// Strip matched location prefix paths for cleaner disk workspace alignments
+	if (loc && relPath.find(loc->getPath()) == 0)
 	{
-		activeRoot = loc->getRoot();
-		if (relPath.find(loc->getPath()) == 0)
-			relPath = relPath.substr(loc->getPath().length());
+		relPath = relPath.substr(loc->getPath().length());
 		if (!relPath.empty() && relPath[0] != '/')
 			relPath = "/" + relPath;
 	}
-	else
-	{
-		activeRoot = _config.getFolderRoot();
-		if (loc && relPath.find(loc->getPath()) == 0)
-		{
-			relPath = relPath.substr(loc->getPath().length());
-			if (!relPath.empty() && relPath[0] != '/')
-				relPath = "/" + relPath;
-		}
-	}
 
-	// Clean trailing slashes from activeRoot
+	// Sanitize paths by stripping trailing delimiters out of activeRoot
 	while (!activeRoot.empty() && activeRoot[activeRoot.size() - 1] == '/')
 		activeRoot.erase(activeRoot.size() - 1);
 
-	std::string	normalRelPath = relPath;
-	if (normalRelPath.empty() || normalRelPath[0] != '/')
-		normalRelPath = "/" + normalRelPath;
+	// Construct absolute server system workplace resource string
+	std::string	fullPath = activeRoot + (relPath.empty() || relPath[0] != '/'
+							? "/" + relPath : relPath);
 
-	std::string	fullPath = activeRoot + normalRelPath;
+	// Evaluate index route constraints if resource points to a directory
+	if (!path.empty() && path[path.size() - 1] == '/')
+	{
+		std::string	indexFile = (loc && !loc->getIndex().empty())
+								? loc->getIndex() : _config.getHomePage();
+		if (indexFile.empty())
+			indexFile = "index.html";
+		fullPath = fullPath + (fullPath[fullPath.size() - 1] == '/'
+							   ? "" : "/") + indexFile;
+	}
 
-	// G. Default Index Resolution
-	std::string	finalRelPath = normalRelPath;
+	// F. CGI Configuration Match Matrix: Map targeted extensions to available interpreter layouts
+	std::string	cgiBin = "";
+	const std::vector<Location>	&allLocs = _config.getLocations();
+	for (size_t i = 0; i < allLocs.size(); ++i)
+	{
+		const std::string	&ext = allLocs[i].getPath();
+		if (!ext.empty() && ext[0] == '.' && path.size() >= ext.size())
+		{
+			if (path.substr(path.size() - ext.size()) == ext)
+			{
+				cgiBin = allLocs[i].getCgiPath();
+				break;
+			}
+		}
+	}
+
+	// G. CGI Execution Control Context
+	if (!cgiBin.empty())
+	{
+		struct stat	cgi_s;
+		// Reject targeted CGI executions if resource does not point to a valid file layout on disk
+		if (stat(fullPath.c_str(), &cgi_s) != 0 || S_ISDIR(cgi_s.st_mode))
+		{
+			response.defaultErrorPage(Http::NOT_FOUND);
+			_resps[client_fd] = response;
+			return Server::STATIC_READY;
+		}
+
+		_active_cgis++;
+		_cgis[client_fd] = new CGI();
+
+		// Spawn independent non-blocking executor layout
+		int	cgi_status = _cgis[client_fd]->execute(req, fullPath, cgiBin, Utils::toStr(_port));
+		if (cgi_status == Http::INTERNAL_SERVER_ERROR)
+		{
+			_active_cgis--;
+			delete _cgis[client_fd];
+			_cgis.erase(client_fd);
+			response.defaultErrorPage(Http::INTERNAL_SERVER_ERROR);
+			_resps[client_fd] = response;
+			return Server::STATIC_READY;
+		}
+		return Server::CGI_READY; // Successfully bound asynchronously into the main multiplexer map
+	}
+
+	// H. File System Verification & Autoindex Evaluation
+	struct stat	path_stat;
+	if (stat(fullPath.c_str(), &path_stat) != 0)
+	{
+		response.defaultErrorPage(Http::NOT_FOUND);
+		_resps[client_fd] = response;
+		return Server::STATIC_READY;
+	}
+
+	// If targeted resource path resolves directly to a directory configuration context
+	if (S_ISDIR(path_stat.st_mode))
+	{
+		if (loc && loc->getAutoindex())
+		{
+			std::string	autoindexHtml = Utils::generateAutoindex(fullPath, path);
+			if (!autoindexHtml.empty())
+			{
+				Response	autoResponse;
+				autoResponse.setStatus(Http::OK);
+				autoResponse.setBody(autoindexHtml);
+				autoResponse.setHeader("Content-Type", "text/html");
+				_resps[client_fd] = autoResponse;
+				return Server::STATIC_READY;
+			}
+		}
+		response.defaultErrorPage(Http::FORBIDDEN);
+		_resps[client_fd] = response;
+		return Server::STATIC_READY;
+	}
+
+	// G. Default Index Resolution: Backup structural path checks
+	std::string	finalRelPath = relPath;
 	if (finalRelPath.empty() || finalRelPath[finalRelPath.size() - 1] == '/')
 	{
 		std::string	currIndex = (loc && !loc->getIndex().empty())
-							   ? loc->getIndex()
-							   : _config.getHomePage();
+								? loc->getIndex() : _config.getHomePage();
 		if (!currIndex.empty())
 		{
 			if (currIndex[0] == '/')
@@ -391,97 +521,15 @@ Server::_execCompetedOrder(int client_fd, Request &req)
 		}
 	}
 
-	// F. CGI Gateway Check
-	std::string	cgiBin = "";
-	const std::vector<Location>	&allLocs = _config.getLocations();
-
-	for (size_t i = 0; i < allLocs.size(); ++i)
-	{
-		const std::string	&ext = allLocs[i].getPath();
-
-		if (!ext.empty() && ext[0] == '.' && normalRelPath.size() >= ext.size())
-		{
-			if (normalRelPath.substr(normalRelPath.size() - ext.size()) == ext)
-			{
-				const std::vector<std::string>	&allowedMethods = allLocs[i].getMethods();
-				bool	methodMatch = false;
-				for (size_t m = 0; m < allowedMethods.size(); ++m)
-				{
-					if (allowedMethods[m] == method)
-					{
-						methodMatch = true;
-						break;
-					}
-				}
-				if (methodMatch)
-				{
-					cgiBin = allLocs[i].getCgiPath();
-					break;
-				}
-			}
-		}
-	}
-
-	// H. Autoindex Management
-	if (!path.empty() && path[path.size() - 1] == '/')
-	{
-		std::ifstream	indexCheck(fullPath.c_str());
-		if (!indexCheck.good())
-		{
-			indexCheck.close();
-			if (loc && loc->getAutoindex())
-			{
-				std::string	autoindexHtml = Utils::generateAutoindex(activeRoot + path, path);
-				if (!autoindexHtml.empty())
-				{
-					Response	autoResponse;
-					autoResponse.setStatus(Http::OK);
-					autoResponse.setBody(autoindexHtml);
-					autoResponse.setHeader("Content-Type", "text/html");
-					_resps[client_fd] = autoResponse;
-					return Server::STATIC_READY;
-				}
-			}
-			Response	autoResponse;
-			autoResponse.defaultErrorPage(Http::FORBIDDEN);
-			_resps[client_fd] = autoResponse;
-			return Server::STATIC_READY;
-		}
-		indexCheck.close();
-	}
-
-	// I. CGI Gateway Check
-	if (!cgiBin.empty())
-	{
-		_active_cgis++;
-		_cgis[client_fd] = new CGI();
-
-		int	cgi_status = _cgis[client_fd]->execute(req, fullPath,
-												cgiBin, Utils::toStr(_port));
-		if (cgi_status == Http::INTERNAL_SERVER_ERROR)
-		{
-			_active_cgis--;
-			delete _cgis[client_fd];
-			_cgis.erase(client_fd);
-			Response	response;
-			response.defaultErrorPage(Http::INTERNAL_SERVER_ERROR);
-			_resps[client_fd] = response;
-			return Server::STATIC_READY;
-		}
-		return Server::CGI_READY;
-	}
-
 	// J. Route to Isolated Method Handlers
-	if (method == "GET" && _checkIncMethod(loc, "GET"))
+	if (method == "GET")
 		return _runStaticGet(client_fd, fullPath);
-	if (method == "HEAD" && _checkIncMethod(loc, "HEAD"))
-		return _runStaticHead(client_fd, fullPath);
-	if (method == "POST" && _checkIncMethod(loc, "POST"))
+	if (method == "POST")
 		return _runStaticPostUpload(client_fd, fullPath);
-	if (method == "DELETE" && _checkIncMethod(loc, "DELETE"))
+	if (method == "DELETE")
 		return _runStaticDeleteFile(client_fd, fullPath);
 
-	// If the method fell through or isn't allowed for this path, return 405
+	// Fallback: If method is not supported or matched, return 405 Method Not Allowed
 	Response	finalResponse;
 	finalResponse.defaultErrorPage(Http::METHOD_NOT_ALLOWED);
 	if (method == "HEAD")
@@ -524,50 +572,8 @@ Server::ReadStatus
 Server::_runStaticGet(int client_fd, std::string fullPath)
 {
 	Response		response;
-	Request			&req = _reqs[client_fd];
-	std::string		reqPath = req.getPath();
-	const Location	*loc = _matchLocation(reqPath);
-
-	DIR				*dir = ::opendir(fullPath.c_str());
-	bool			isDir = false;
-
-	if (dir)
-	{
-		::closedir(dir);
-		isDir = true;
-	}
-	if (isDir)
-	{
-		if (reqPath.empty() || reqPath[reqPath.size() - 1] != '/')
-			fullPath += '/';
-
-		std::string	indexFile = loc ? loc->getIndex() : _config.getHomePage();
-		if (indexFile.empty())
-			indexFile = "index.html";
-
-		std::string	indexPath = fullPath;
-		if (!indexPath.empty() && indexPath[indexPath.size() - 1] != '/')
-			indexPath += "/";
-		indexPath += indexFile;
-
-		bool	hasIndex = (access(indexPath.c_str(), R_OK) == 0);
-		if (!hasIndex)
-		{
-			response.defaultErrorPage(Http::NOT_FOUND);
-			_resps[client_fd] = response;
-			return Server::STATIC_READY;
-		}
-		fullPath = indexPath;
-	}
-	if (access(fullPath.c_str(), R_OK) != 0)
-	{
-		response.defaultErrorPage(Http::NOT_FOUND);
-		_resps[client_fd] = response;
-		return Server::STATIC_READY;
-	}
-
-	std::ifstream	file(fullPath.c_str());
-	if (!file.is_open())
+	struct stat		s;
+	if (stat(fullPath.c_str(), &s) != 0 || S_ISDIR(s.st_mode))
 	{
 		response.defaultErrorPage(Http::NOT_FOUND);
 		_resps[client_fd] = response;
@@ -579,9 +585,6 @@ Server::_runStaticGet(int client_fd, std::string fullPath)
 	response.setHeader("Content-Length", Utils::toStr(content.size()));
 	response.setHeader("Content-Type", Utils::getMimeType(fullPath));
 	response.setBody(content);
-
-	Utils::logResponse(response.getStatus(), _reqs[client_fd].getPath());
-
 	_resps[client_fd] = response;
 	return Server::STATIC_READY;
 }
@@ -646,36 +649,31 @@ Server::_runStaticPostUpload(int client_fd, std::string fullPath)
 	Response		response;
 	Request			&req = _reqs[client_fd];
 	const Location	*loc = _matchLocation(req.getPath());
-	std::string		targetUploadPath = fullPath;
+	std::string		targetPath = fullPath;
 
 	if (loc && !loc->getUploadStore().empty())
 	{
+		std::string	store = loc->getUploadStore();
 		size_t		lastSlash = req.getPath().find_last_of('/');
 		std::string	fileName = (lastSlash != std::string::npos)
-							  ? req.getPath().substr(lastSlash + 1)
-							  : "uploaded_file";
-		targetUploadPath = loc->getUploadStore() + "/" + fileName;
+								? req.getPath().substr(lastSlash + 1) : "file.bin";
+		if (fileName.empty()) fileName = "file.bin";
+		targetPath = store + (store[store.size() - 1] == '/' ? "" : "/") + fileName;
 	}
 
-	std::ofstream	outFile(targetUploadPath.c_str(), std::ios::binary);
+	std::ofstream	outFile(targetPath.c_str(), std::ios::binary);
 	if (!outFile.is_open())
 	{
 		response.defaultErrorPage(Http::INTERNAL_SERVER_ERROR);
 	}
 	else
 	{
-		std::string	body = req.getBody();
-		outFile.write(body.c_str(), body.size());
+		outFile.write(req.getBody().c_str(), req.getBody().size());
 		outFile.close();
-
 		response.setStatus(Http::CREATED);
 		response.setBody("<html><body><h1>201 Created</h1></body></html>");
 		response.setHeader("Content-Type", "text/html");
-		response.setHeader("Connection", "close");
 	}
-
-	Utils::logResponse(response.getStatus(), _reqs[client_fd].getPath());
-
 	_resps[client_fd] = response;
 	return Server::STATIC_READY;
 }

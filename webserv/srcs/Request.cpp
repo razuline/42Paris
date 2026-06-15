@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/25 15:33:23 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/14 19:14:30 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/15 19:34:26 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,9 +88,8 @@ Request::isComplete()
 void
 Request::addData(std::string chunk)
 {
-	// Security Enforcement: Mitigate heavy HTTP header flooding / DoS attacks
-	if (_state == READING_HEADERS &&
-	   (_raw.size() + chunk.size() > Request::HEADERS_SIZE))
+	// Check if headers size exceeds standard 8 KB limit
+	if (_state == READING_HEADERS && (_raw.size() + chunk.size() > Request::HEADERS_SIZE))
 	{
 		_state = ERROR;
 		_errCode = Http::HEADER_FIELDS_TOO_LARGE;
@@ -99,7 +98,12 @@ Request::addData(std::string chunk)
 	_raw += chunk;
 
 	if (_state == READING_HEADERS)
+	{
 		_handleHeaders();
+		// FIX: Stop processing immediately if headers are malformed (avoids 200 OK bypass)
+		if (_state == ERROR)
+			return;
+	}
 	if (_state == READING_BODY)
 		_handleBody();
 }
@@ -156,6 +160,11 @@ Request::_handleHeaders()
 		std::string	headers_part = _raw.substr(0, pos);
 		_parseRawHeaders(headers_part);
 	}
+	else if (_raw.find("\n\n") != std::string::npos)
+	{
+		_state = ERROR;
+		_errCode = Http::BAD_REQUEST;
+	}
 }
 
 void
@@ -173,11 +182,6 @@ Request::_handleBody()
 			return;
 		}
 		if (curr_body_size >= _contentLength)
-		{
-			_body = _raw.substr(_headerSize, _contentLength);
-			_state = COMPLETE;
-		}
-		if (curr_body_size == _contentLength)
 		{
 			_body = _raw.substr(_headerSize, _contentLength);
 			_state = COMPLETE;
@@ -203,22 +207,23 @@ Request::_handleBody()
 		{
 			size_t	crlf_pos = _raw.find("\r\n", _chunkedBytesProcessed);
 			if (crlf_pos == std::string::npos)
-				break; // Waiting for more data from the socket (non-blocking)
+				break;
 
-			std::string	hexSize = _raw.substr(_chunkedBytesProcessed,
-								  crlf_pos - _chunkedBytesProcessed);
+			std::string	hexSize = _raw.substr(_chunkedBytesProcessed, crlf_pos - _chunkedBytesProcessed);
+			size_t ext_pos = hexSize.find(';');
+			if (ext_pos != std::string::npos)
+				hexSize = hexSize.substr(0, ext_pos);
 
 			std::stringstream	ss;
 			ss << std::hex << hexSize;
 			ss >> _currChunkSize;
 
-			if (ss.fail())
+			if (ss.fail() || _currChunkSize < 0)
 			{
 				_state = ERROR;
 				_errCode = Http::BAD_REQUEST;
 				return;
 			}
-			// A chunk of size 0 indicates the end of the request
 			if (_currChunkSize == 0)
 			{
 				size_t	final_crlf = _raw.find("\r\n", crlf_pos + 2);
@@ -233,11 +238,10 @@ Request::_handleBody()
 			}
 			_chunkedBytesProcessed = crlf_pos + 2;
 		}
-		// B. Extract chunk data
 		else
 		{
 			if (_raw.size() < _chunkedBytesProcessed + _currChunkSize + 2)
-				break; // Waiting for more data
+				break;
 
 			_body += _raw.substr(_chunkedBytesProcessed, _currChunkSize);
 
@@ -248,7 +252,7 @@ Request::_handleBody()
 				return;
 			}
 			_chunkedBytesProcessed += _currChunkSize + 2;
-			_currChunkSize = -1; // Reset for the next chunk
+			_currChunkSize = -1;
 		}
 	}
 }
@@ -256,73 +260,173 @@ Request::_handleBody()
 void
 Request::_parseRawHeaders(const std::string &headers_part)
 {
-	std::stringstream	ss(headers_part);
-	std::string			line;
-
-	// RFC Compliance: Skip leading empty CRLF padding chains safely
-	while (std::getline(ss, line))
-	{
-		if (!line.empty() && line[line.size() - 1] == '\r')
-			line.erase(line.size() - 1);
-
-		bool	is_blank = true;
-		for (size_t i = 0; i < line.size(); ++i)
-		{
-			if (line[i] != ' ' && line[i] != '\t')
-			{
-				is_blank = false;
-				break;
-			}
-		}
-		if (is_blank)
-			continue;
-		break;
-	}
-	if (line.empty())
+	size_t	first_crlf = headers_part.find("\r\n");
+	if (first_crlf == std::string::npos)
 	{
 		_state = ERROR;
 		_errCode = Http::BAD_REQUEST;
 		return;
 	}
 
-	std::stringstream	first_line_ss(line);
-	first_line_ss >> _method;
-	first_line_ss >> _path;
-	first_line_ss >> _version;
+	std::string	req_line = headers_part.substr(0, first_crlf);
 
-	// Structural Parser: Populate metadata map sets
-	while (std::getline(ss, line))
+	size_t	sp1 = req_line.find(' ');
+	size_t	sp2 = req_line.find(' ', sp1 + 1);
+	if (sp1 == std::string::npos ||
+		sp2 == std::string::npos ||
+		req_line.find(' ', sp2 + 1) != std::string::npos ||
+		req_line.find('\t') != std::string::npos)
 	{
-		if (!line.empty() && line[line.size() - 1] == '\r')
-			line.erase(line.size() - 1);
+		_state = ERROR;
+		_errCode = Http::BAD_REQUEST;
+		return;
+	}
 
-		if (line.empty()) // Empty boundary line discovered
-			break;
+	_method = req_line.substr(0, sp1);
+	_path = req_line.substr(sp1 + 1, sp2 - sp1 - 1);
+	_version = req_line.substr(sp2 + 1);
 
-		size_t	colon = line.find(':');
-		if (colon != std::string::npos)
+	for (size_t i = 0; i < _method.size(); ++i)
+	{
+		if (!std::isupper(_method[i]))
 		{
-			std::string	key = line.substr(0, colon);
-			std::string	value = line.substr(colon + 1);
-
-			size_t	first = value.find_first_not_of(' ');
-			if (first != std::string::npos)
-				value = value.substr(first);
-
-			_headers[key] = value;
+			_state = ERROR;
+			_errCode = Http::BAD_REQUEST;
+			return;
 		}
 	}
 
-	// State Machine Transition Check
-	if (_headers.count("Transfer-Encoding") &&
-		_headers["Transfer-Encoding"].find("chunked") != std::string::npos)
+	// Path validation
+	if (_path.empty() || _path.size() > 2048 ||
+		_path.find('#') != std::string::npos ||
+		_path.find('\\') != std::string::npos ||
+		_path.find('\0') != std::string::npos)
 	{
+		_errCode = (_path.size() > 2048)
+				  ? Http::HEADER_FIELDS_TOO_LARGE
+				  : Http::BAD_REQUEST;
+		_state = ERROR;
+		return;
+	}
+
+	// Version validation
+	if (_version != "HTTP/1.1" && _version != "HTTP/1.0")
+	{
+		_state = ERROR;
+		_errCode = (_version == "HTTP/2.0" || _version == "HTTP/3.0")
+					? Http::HTTP_VERSION_NOT_SUPPORTED
+					: Http::BAD_REQUEST;
+		return;
+	}
+
+	// Parse headers
+	size_t	head_pos = first_crlf + 2;
+	size_t	header_count = 0;
+	bool	has_host = false;
+
+	while (head_pos < headers_part.size())
+	{
+		size_t	next_crlf = headers_part.find("\r\n", head_pos);
+		if (next_crlf == std::string::npos)
+			break;
+
+		std::string	h_line = headers_part.substr(head_pos, next_crlf - head_pos);
+		head_pos = next_crlf + 2;
+
+		// Standard CRLF (empty line) marks the end of headers
+		if (h_line.empty())
+			break;
+
+		size_t	colon = h_line.find(':');
+		if (colon == std::string::npos)
+			continue; // Skip malformed lines without crashing the request
+
+		std::string	key = h_line.substr(0, colon);
+		std::string	value = Utils::trim(h_line.substr(colon + 1));
+
+		// Check for duplicate Host header
+		if (key == "Host")
+		{
+			if (has_host) // Second Host header!
+			{
+				_state = ERROR;
+				_errCode = Http::BAD_REQUEST;
+				return;
+			}
+			has_host = true;
+
+			// Validate Host value
+			size_t		p_pos = value.find(':');
+			std::string	host_part = (p_pos != std::string::npos)
+								   ? value.substr(0, p_pos) : value;
+			if (host_part.empty())
+			{
+				_state = ERROR;
+				_errCode = Http::BAD_REQUEST;
+				return;
+			}
+		}
+
+		// Insert header
+		_headers[key] = value;
+		header_count++;
+
+		if (header_count > 100)
+		{
+			_state = ERROR;
+			_errCode = Http::HEADER_FIELDS_TOO_LARGE;
+			return;
+		}
+	}
+
+	// RFC 7230: HTTP/1.1 requires Host header
+	if (_version == "HTTP/1.1" && !has_host)
+	{
+		_state = ERROR;
+		_errCode = Http::BAD_REQUEST;
+		return;
+	}
+
+	// Content-Length / Transfer-Encoding validation
+	bool	has_cl = _headers.count("Content-Length");
+	bool	has_te = _headers.count("Transfer-Encoding");
+
+	if (has_cl && has_te)
+	{
+		_state = ERROR;
+		_errCode = Http::BAD_REQUEST;
+		return;
+	}
+	if (has_te)
+	{
+		if (_headers["Transfer-Encoding"] != "chunked")
+		{
+			_state = ERROR;
+			_errCode = Http::BAD_REQUEST;
+			return;
+		}
 		_isChunked = true;
 		_state = READING_BODY;
 	}
-	else if (_headers.count("Content-Length"))
+	else if (has_cl)
 	{
-		_contentLength = std::atoi(_headers["Content-Length"].c_str());
+		std::string	cl_val = _headers["Content-Length"];
+		if (cl_val.empty())
+		{
+			_state = ERROR;
+			_errCode = Http::BAD_REQUEST;
+			return;
+		}
+		for (size_t i = 0; i < cl_val.size(); ++i)
+		{
+			if (!std::isdigit(cl_val[i]))
+			{
+				_state = ERROR;
+				_errCode = Http::BAD_REQUEST;
+				return;
+			}
+		}
+		_contentLength = std::strtoul(cl_val.c_str(), NULL, 10);
 		if (_contentLength > 0)
 			_state = READING_BODY;
 		else
@@ -330,6 +434,13 @@ Request::_parseRawHeaders(const std::string &headers_part)
 	}
 	else
 	{
+		// No body expected
+		if (_method == "POST" || _method == "PUT")
+		{
+			_state = ERROR;
+			_errCode = Http::BAD_REQUEST;
+			return;
+		}
 		_contentLength = 0;
 		_state = COMPLETE;
 	}

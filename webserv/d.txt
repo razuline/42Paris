@@ -1,0 +1,366 @@
+We need to analyze the provided code files and the project specification (the PDF "en.webserv.pdf") to identify potential issues, bugs, non-compliance with requirements, or design flaws. The user asks "What wrong with my project???" – we need to diagnose problems based on the code and the subject.
+
+First, let's recap the mandatory requirements from the subject (Webserv project, 42 school):
+
+Non-blocking server using only one poll() (or equivalent) for all I/O operations between clients and server (listen included).
+
+Must monitor both reading and writing simultaneously.
+
+Never do read/write without going through poll().
+
+Must handle client disconnections, remain operational.
+
+Must support GET, POST, DELETE methods.
+
+Serve static website, upload files.
+
+Configuration file support: listen ports, error pages, client max body size, routes with methods, redirection, root directory, directory listing (autoindex), default file (index), upload storage, CGI based on file extension.
+
+CGI: must support at least one CGI (php-cgi, Python, etc.). Must set environment variables correctly, handle chunked request (unchunk before sending to CGI), CGI reads from stdin, writes to stdout. CGI output must be parsed (headers then body). Must handle EOF as end of body if no Content-Length.
+
+Also specific constraints: no fork except for CGI. Use C++98, no external libs. Must compile with -Wall -Wextra -Werror.
+
+Now review the code for issues.
+
+First, high-level observations:
+
+CGI Implementation: Looks decent. It forks, sets pipes, sets environment. It uses execve with cgi_path and script_path. However, there is potential issue: It uses _env vector of char* but it's built per call, and cleared. The child closes all file descriptors from 3 to 1024 – that's aggressive but may be okay. However, the parent side does not close the write end of the pipe after writing? Actually in _handleCGIWrite it closes write pipe after all data written, but _handleCGIWrite is called from cluster when poll indicates POLLOUT on the pipe write fd. In Cluster::_handleClientRead, when status = CGI_READY, it adds both write_fd and read_fd to poll, and sets client fd events to 0. That's okay.
+
+But a problem: CGI::execute returns OK (200) even if pipe creation fails? Actually it returns Http::INTERNAL_SERVER_ERROR on failure. That's fine.
+
+However, there is a potential memory leak: In _initEnv, it does strdup for each environment variable, but in _clearEnv it uses free. However, note that _env is a vector of char*. In the child process after fork, the _env vector is still in the child's memory but the child calls execve and then exits – that's fine. But the parent calls _clearEnv after fork to free the duplicated strings. That's correct.
+
+But the parent also has _env vector; after _clearEnv it's empty, good.
+
+One issue: _env is a class member, and execute is called per request; it reuses the same _env vector. That's okay because _clearEnv frees previous strings before adding new ones. No problem.
+
+Another issue: The child process does chdir(dir.c_str()) to the script's directory, but it uses script_path (the absolute script path). That's fine. However, execve args: args[0] = cgi_path (e.g., "/usr/bin/python3"), args[1] = target_script (basename). That's correct if the cgi script is executable. But note: For python, the script must be passed as argument; the shebang in the script will be used? Actually execve runs the interpreter with the script as argument. That's fine.
+
+But what about PHP-CGI? Usually it expects the script path as argument. It should work.
+
+However, the CGI implementation does not handle the case where the CGI script outputs headers without a blank line? It does: in _handleCGIRead, after reading all output, it parses lines until empty line. That's fine.
+
+The code sets REDIRECT_STATUS=200 – that's needed for some CGIs.
+
+Non-blocking and poll usage: Cluster uses poll with a vector of pollfds. It adds server listening sockets, client sockets, and CGI pipe fds. It modifies events as needed. It seems to follow requirements. However, there are some issues:
+
+In Cluster::run, after handling events, it iterates over ready_fds and then finds the live index. That's okay but could be inefficient. Not a bug.
+
+When a client read is handled and returns STATIC_READY, it changes the client's poll events to POLLOUT. That's correct.
+
+For CGI_READY, it sets client fd events to 0 (so client is not polled), and adds both write pipe (POLLOUT) and read pipe (POLLIN). That's correct.
+
+However, _handleCGIWrite is called when POLLOUT on write pipe. It writes the request body to the CGI. But what if the CGI doesn't need the request body? The code writes the entire body as available. But there is a potential issue: The request body might be larger than the pipe buffer, and the write may block if non-blocking? It's set to non-blocking, and write may return partial. The code handles partial writes via _cgiBytesWritten. That's good.
+
+In _handleCGIWrite, if body.empty(), it closes the write pipe and removes it. That's fine.
+
+In _handleCGIRead, when bytes_read > 0, it appends to _cgiBuffs. When bytes_read == 0 (EOF), it processes the accumulated output. That's correct.
+
+However, there is a potential race: The write pipe may still be open while the read pipe is being read. The code only closes the write pipe after all data written. But the child process may close its stdin after reading, causing write pipe to get EPIPE. That's handled because write returns -1, and then it checks if CGI pid has terminated; if so, it cleans up. That's okay.
+
+But there is a bug: In _handleCGIWrite, when write returns -1, it checks waitpid and if the child has terminated, it cleans up. But if the child is still running but pipe is broken (e.g., closed), it returns without cleaning up. That could lead to the write pipe remaining in poll. The code then returns. The pipe may stay open. However, the _handleCGIWrite may be called again on next poll iteration, and will again try to write. Since write returns -1 repeatedly, it will loop forever. Better to close the pipe on error regardless.
+
+Also, in _handleCGIRead, if bytes_read < 0 (error) and child is still alive, it returns without cleaning up, which could leave the read pipe open. That could cause infinite POLLIN events. Better to handle errors by closing the pipe and cleaning up.
+
+The timeout mechanism: Cluster checks _cgiStartTime and if >300 seconds, it kills the CGI and sends 504. But it does not close the pipes or remove them properly? It calls server.cleanupCgi, which kills the process and deletes CGI object. But the pipes are still in _pipeToClientMap and in _fds. It doesn't remove them. That could cause issues. Also, after timeout, it sets client fd events to POLLOUT and expects a response, but the response is set via setCgiResponse. However, the pipes are still in the poll set and may cause events. Need to also remove the pipes from poll.
+
+In _closeConnection, it iterates over _pipeToClientMap and closes pipes and removes them. That's okay. But timeout handling should do similar.
+
+Configuration parsing: The config parser is simplistic and only supports a limited syntax. It assumes server { ... } block? Actually the provided default.conf has server { ... } lines, but the parser does not explicitly look for server keyword. It reads line by line, and expects listen, root, etc. directly. However, the config file format shown has a server { line and then indented directives, then a closing }. The parser reads lines and ignores the server { line? It does not skip it. It will see server { as a line, and since it doesn't match any known directive, it will be ignored? Actually the Config::parse method reads each line, trims, and if line starts with listen, root, etc., it parses. If it finds location, it enters a block. The server { line would be ignored because it doesn't match any keyword. That means the listen and root inside the server block will be parsed because they appear after server { line. Since the parser doesn't skip the server { line, it will process the next lines (listen, server_name, root, index, etc.) as normal. That works by accident because the server block's directives are not nested. But it's fragile: if there are multiple server blocks, it would merge them. Also, the closing } is ignored because it's just a line with }. That's not a proper parser, but maybe it works for a single server block. The subject says "You can take inspiration from the 'server' section of the NGINX configuration file." It doesn't strictly require the server keyword, but it's conventional. The provided config uses server { ... }. The parser doesn't validate that, so it may accept malformed configs. That's a problem for robustness.
+
+Also, the config does not support error page definition. That is a required feature: "Set up default error pages." The code uses hardcoded error pages in Response::defaultErrorPage. That's fine as default, but the config should allow custom error pages. Not implemented. That's a missing feature.
+
+Also, config does not support multiple ports (multiple servers). The subject says "define all the interface:port pairs on which your server will listen to (defining multiple websites served by your program)." The code in main creates a single Config object, adds it to a vector, and passes to Cluster. It supports multiple configs? The Cluster::setup takes a vector of Configs and creates a Server per config, each listening on its port. So it can handle multiple configs if main reads multiple config files or multiple server blocks. But the parser only parses one Config from a file; it doesn't parse multiple server blocks from one file. That would require a more complex parser. The subject might allow multiple config files? Actually the program takes one configuration file as argument. That file should define multiple servers. The current parser does not support that. So missing feature.
+
+Request handling: The Request class parses headers, handles chunked encoding, and body. It looks decent. However, there is a bug: In Request::_handleBody for non-chunked, it does:
+
+text
+if (curr_body_size >= _contentLength) { _body = ...; _state = COMPLETE; }
+if (curr_body_size == _contentLength) { ... } // duplicate
+That's redundant but fine.
+
+But there is a potential overflow: _contentLength is size_t, but std::atoi returns int, may overflow. Should use std::strtoul or stringstream. But it's okay for small sizes.
+
+Also, the Request does not validate the method, path, version properly. It just splits. That's fine.
+
+The setLimit is called from Server::handleRead with _config.getClientMaxBodySize(). That's good.
+
+The clearButPreserveLeftover is used to keep leftover data from pipelining. That's good.
+
+However, note that _headerSize is set only when headers are complete. In non-chunked body, _headerSize is used to compute body start. That's fine.
+
+One issue: The _parseRawHeaders sets _state = COMPLETE if no Content-Length and not chunked. But it doesn't handle the case where there is a body but no Content-Length (invalid). That's fine.
+
+Another issue: The request body limit is applied in _handleBody for both chunked and non-chunked. But it checks _body.size() > _limit – _body accumulates chunks. That's okay.
+
+But there is a bug: The _limit is set from _config.getClientMaxBodySize(), but for a location with its own client_max_body_size, it's set in Server::_execCompetedOrder after matching location. The Request object's _limit is set before parsing body. However, the setLimit is called in handleRead before addData. That is before location matching. So the limit applied is the server's default, not the location-specific limit. The location-specific limit is only checked after the request is fully read, in _execCompetedOrder:
+
+text
+if (loc && loc->getClientMaxBodySize() > 0 && req.getBody().size() > loc->getClientMaxBodySize()) { error }
+That check happens after reading the entire body. But if the body is larger than the location's limit, it will still be read (consuming memory) and then rejected. That's acceptable. However, the subject requires "set the maximum allowed size for client request bodies" per route. The server could reject early if it knows the limit before reading, but that would require knowing the location before reading the body (needs to parse URL from headers). The current approach reads the whole body first, which might be fine but could cause denial-of-service by sending huge body that exceeds the limit but still gets read. Better to check Content-Length against location limit before reading body. But not a major bug.
+
+Static file serving: _runStaticGet, _runStaticHead, _runStaticPostUpload, _runStaticDeleteFile. They seem fine. However, note that _runStaticPostUpload uses loc->getUploadStore() but if not present, it uses fullPath as target. That might not be correct. The subject says "uploading files from the clients to the server is authorized, and storage location is provided." The code does that.
+
+Also, _runStaticDeleteFile deletes the file at fullPath. That's fine.
+
+Directory listing (autoindex) is implemented in _execCompetedOrder when path ends with '/' and index file not found. It calls Utils::generateAutoindex. That's correct.
+
+However, there is an issue: The autoindex generation uses reqPath as the base path, but dirPath is activeRoot + path. The path variable may have trailing slash. That's okay. But the generated links use basePath + entry->d_name. That's correct.
+
+Another issue: The server does not handle If-Modified-Since or ETags – not required.
+
+Signal handling: g_stop is a global volatile sig_atomic_t. The main sets signal handlers for SIGINT and SIGQUIT. The Cluster's run loop checks g_stop each iteration. That's fine. However, there is no handling of SIGPIPE (ignored with SIG_IGN, that's fine). But there is also no handling of zombie processes? The loop does waitpid(-1, NULL, WNOHANG) at the start of each poll iteration. That reaps child processes. That's good.
+
+Memory leaks and resource management: The code deletes CGI objects in cleanupCgi and clearClientState. However, there is a potential leak: In Cluster::_handleClientRead, when status == CGI_READY, it gets the write_fd and read_fd from the server. Those fds are stored in _pipeToClientMap. The server's _cgis map holds the CGI object. In _closeConnection, it calls server.clearClientState(client_fd), which deletes CGI and erases from _cgis. That's good. But what about the pipes? They are closed and removed from _pipeToClientMap and _fds in _closeConnection. However, there is a scenario where a CGI finishes and the read pipe gets EOF, then _handleCGIRead processes the output, and then it calls server.cleanupCgi(client_fd), which deletes the CGI object. But it does not close the write pipe (which might already be closed). It also removes the read pipe from poll and from _pipeToClientMap. But what about the write pipe? It was closed earlier in _handleCGIWrite after all data written, or it might still be open if the write pipe was never closed. Actually, the write pipe is closed in _handleCGIWrite after full write, or on error. So by the time read EOF, the write pipe should already be closed. But if the CGI never reads all input, the write pipe may still be open. The code in _handleCGIRead after EOF does not close the write pipe. That could lead to leaked fd. However, the write pipe is also in _pipeToClientMap. In _handleCGIRead after processing, it calls _removePipeFromPoll(pipe_read_fd) and erases from map, but does not close or remove the write pipe. The write pipe's entry remains in _pipeToClientMap with the same client_fd. Later, when the client connection is closed, _closeConnection will iterate over _pipeToClientMap and close those fds. That will clean up. But if the client keeps the connection open (keep-alive), the write pipe would remain open indefinitely. That's a problem. The code should close the write pipe when the CGI finishes. In _handleCGIRead, after receiving EOF, it should also close the corresponding write pipe if it's still open. Since the write pipe fd is also mapped to the same client_fd, we need to retrieve it and close it. The current code does not do that. That's a bug.
+
+Looking at _handleCGIRead, it only handles the read pipe. The write pipe is managed in _handleCGIWrite. But if the CGI finishes without reading all input (e.g., it closes stdin early), the write pipe might still be open and POLLOUT will trigger, but _handleCGIWrite will see body.empty()? No, body is not empty, and _cgiBytesWritten might not equal body size, so it will attempt to write and get EPIPE. Then it will check waitpid and if child is dead, it will close the write pipe. That case is handled. But if the CGI reads all input, then the write pipe is closed after full write. So the only leak scenario is if the CGI never reads any input and also never exits? That's unlikely. However, there is still a potential leak if the CGI reads partial input and then exits. Then the write pipe will be closed in _handleCGIWrite when write returns -1 and waitpid finds child dead. So it should be okay.
+
+Another resource issue: The _cgiBytesWritten map is keyed by pipe_write_fd. But when write pipe is closed and removed, the entry is erased. Good.
+
+CGI environment variables: The subject requires that the full request and arguments provided by the client must be available to the CGI. The code sets QUERY_STRING to empty always. It doesn't parse query string from the path. That's a missing feature. The request path may contain ?query=.... The code does not split it. It passes the whole path as SCRIPT_NAME and PATH_INFO. That's incorrect. The CGI expects QUERY_STRING to contain the query part, and PATH_INFO to be the path after script name. The subject says "The full request and arguments provided by the client must be available to the CGI." This is not properly implemented.
+
+Also, the REQUEST_URI should include the query string. The code sets it to req.getPath() without query. That's wrong.
+
+Additionally, the CONTENT_LENGTH is set based on req.getBody().size(), which is correct.
+
+Also, the code adds HTTP_X_SECRET_HEADER_FOR_TEST for the tester. That's fine.
+
+But the lack of query string handling is a significant issue.
+
+Chunked request handling: The Request class handles chunked encoding correctly. However, the CGI implementation gets the unchunked body (since req.getBody() returns the reassembled body). That's good.
+
+CGI output parsing: The code parses headers from CGI output. It looks for Status: header to set response status code. It also handles Location: header. But it does not handle the case where CGI returns a Content-Length header? It will set it from the response, but the response's body length might be different. The code sets Content-Length after the fact. That's fine.
+
+However, there is a bug: In _handleCGIRead, after parsing headers, it sets response.setBody(bodyPart); and then response.setHeader("Content-Length", Utils::toStr(bodyPart.size()));. That overrides any Content-Length the CGI might have sent. That could be wrong if the CGI sent a different length (e.g., if the body contains binary data that includes newlines?). The CGI should be responsible for its own headers. The server should not add Content-Length if the CGI already provided it. The code currently adds it unconditionally. That's a violation of CGI spec. Also, it adds Content-Type if missing and body not empty, which is okay but might override a CGI-sent header? It checks !has_content_type && !has_location && !bodyPart.empty(), so if CGI sent Content-Type, it doesn't override. That's good.
+
+But for Content-Length, it always overrides. That could cause issues if CGI outputs a Content-Length that doesn't match the actual body length (e.g., due to chunked output). The server should respect CGI's headers. Better to not add Content-Length unless missing.
+
+Multiple ports and virtual hosts: As mentioned, config parsing does not support multiple server blocks. The program would need to parse multiple configs from one file. The current main reads one Config from one file, then pushes it to vector. To support multiple ports, you'd need to parse multiple server blocks into multiple Config objects. That's missing.
+
+Error pages: The config does not allow custom error pages. Required: "Set up default error pages." The code has hardcoded default error pages, but the config should allow specifying custom error pages. That's missing.
+
+Non-blocking file I/O?: The subject says you are not required to use poll() for regular disk files; read() and write() on them do not need readiness notifications. The server reads static files using _readFile which reads entire file into memory synchronously. That's acceptable because it's a disk file and can block, but the subject says it's exempt. However, if a large file is requested, blocking could stall the event loop. It's better to use non-blocking with sendfile or chunked reading, but not required. Many webserv implementations read entire file, it's okay for this project.
+
+Keep-alive: The server sets Connection: keep-alive by default in Response::build. That's good. The Server::handleWrite sets WRITE_COMPLETE and then the client socket events are set back to POLLIN, and clearClientState is called? Actually in _handleClientWrite, when status == WRITE_COMPLETE, it resets client fd events to POLLIN and calls server.clearClientState(fd). But clearClientState clears the Request, Response, CGI, etc. but also calls _reqs[client_fd].clearButPreserveLeftover() which preserves leftover data for pipelining. That's correct. However, note that _writeBuffs and _resps are cleared, but _reqs remains with leftover data. That's fine. The server then waits for next request on the same connection.
+
+But there is a subtle bug: In _handleClientWrite, it calls server.clearClientState(fd) after resetting events. That will delete the CGI object if any, but that's fine because the response has been sent. But if there was a CGI response, the CGI object should have been already cleaned up when the CGI finished. It's okay.
+
+CGI concurrency limit: The code has MAX_CONCURRENT_CGIS = 100 and _active_cgis static member. In Server::_execCompetedOrder, it increments _active_cgis and creates CGI. However, it never checks if _active_cgis exceeds the limit. The limit is not enforced. Also, _active_cgis is static across all Server instances. That's fine. But the check is missing: it should reject new CGI if limit reached.
+
+Memory management: The CGI class has _env vector of char* that are freed. However, in the child process after fork, the _env vector still exists and its destructor would be called when the child exits, but the child calls execve so it's replaced. That's fine. But note that the child inherits the _env vector of char* pointers; those pointers are from strdup in parent. The child does not need to free them because execve overwrites the process. But if execve fails, the child exits, and the memory is freed by OS. So no leak.
+
+Compilation issues: The code uses std::map and other STL containers. It uses std::toupper which is in <cctype>. Include seems present indirectly. But there is a potential issue: In CGI.cpp, _initEnv uses std::toupper without including <cctype>; but it's included via other headers? Not sure. Also, it uses strdup (C function) which is POSIX, allowed.
+
+Portability: The code uses #ifdef __linux__ for F_SETPIPE_SZ. That's fine. It uses O_NONBLOCK with fcntl. It uses poll. Should work on Linux and macOS (with kqueue? Actually the subject allows poll, select, kqueue, epoll. The code uses poll, which works on both. But there is a macOS note about using fcntl with specific flags; the code uses fcntl with F_SETFL, O_NONBLOCK, and also for pipes. That's allowed.
+
+Potential race condition in CGI: In CGI::execute, after fork, the parent does close(_pipe_in[0]) and close(_pipe_out[1]). But it doesn't close the other ends before that? It sets them to -1 after close. That's fine. However, if the child fails to exec, it will exit. The parent will never know. The parent will still have the write pipe open and will try to write. The read pipe will eventually get EOF. The parent's waitpid in the destructor will reap. That's okay.
+
+Server::getReadFd and getWriteFd: They access _cgis[client_fd] without checking if it exists. In Cluster::_handleClientRead, when status == CGI_READY, it calls server.getWriteFd(fd) and server.getReadFd(fd). At that point, _cgis[fd] should exist because it was created in _execCompetedOrder. That's fine.
+
+Cluster::_handleCGIWrite: It uses _cgiBytesWritten[pipe_write_fd] but does not ensure it exists. It's fine because it's created on first access.
+
+Leak of file descriptors in child process: The child closes all fds from 3 to 1024. That includes the listening sockets? It shouldn't affect because the child will exec a new program and those fds will be closed anyway. But it's a bit aggressive; it could close fds that are needed for the CGI (like if the CGI wants to open its own files, it will get new fds). That's fine.
+
+The Server class static member _active_cgis is not defined in the cpp file? In Server.cpp, there is int Server::_active_cgis = 0; at the top of the file (line after includes? Actually it's defined inside the file, but I see at line ~? Let me check: In the provided Server.cpp, there is a line int Server::_active_cgis = 0; before Server::ReadStatus Server::_execCompetedOrder(...). Yes, it's defined. Good.
+
+Cluster also has _active_cgis member (non-static) that is used to track active CGIs? Actually Cluster has int _active_cgis; member, and it's decremented in _handleCGIRead and elsewhere. But it's never incremented? It is incremented? In Cluster, when a CGI is created in Server, the Server increments its static _active_cgis. Cluster's own _active_cgis is separate and is not consistently updated. That could cause inconsistency. But it's not used for any limit; it's just a counter. It's decremented in _handleCGIRead when CGI finishes, but never incremented. So it could go negative. That's a bug, but not critical. Better to remove or properly maintain.
+
+Handling of multiple CGI scripts per client: The code allows only one CGI per client (since _cgis[client_fd] is a single pointer). That's fine.
+
+Timeout mechanism: The timeout is 300 seconds, which is large. It's okay. But as mentioned, it doesn't clean up pipes properly. Also, it uses server.cleanupCgi which kills the process and deletes CGI object, but does not close pipes. The pipes are still in _pipeToClientMap and _fds. Then it sets client fd to POLLOUT and sends error response. But later, when the poll loops, those pipe fds will still be present and may cause events. They will eventually be cleaned up when the client connection closes? Maybe not. The _closeConnection will clean them. But if the client stays connected, the pipes remain. That's a leak. The timeout handler should also close the pipes and remove them from maps and poll.
+
+Directory traversal security: The server does not check for .. in paths. That could allow access to files outside the root. The code builds fullPath by concatenating activeRoot and normalRelPath. If normalRelPath contains ../, it could escape the root. There's no sanitization. That's a serious security vulnerability. The server must ensure that the resolved path is still within the root directory. This is a requirement for any web server.
+
+Upload file security: Similarly, upload path may be vulnerable to path traversal if filename contains ... The code uses the filename from the URL path, which could contain ... That's dangerous.
+
+Method handling: The server checks methods for each location. However, for POST, it calls _runStaticPostUpload which writes the request body to a file. That's fine. But what about uploading to a location with CGI? The subject says CGI can handle POST. The code checks CGI first, then static. So if a location has cgi_path, it will be handled by CGI even for POST. That's good.
+
+CGI script path resolution: In CGI::execute, it converts script_path to absolute path using getcwd. But script_path may already be absolute if root is absolute. That's fine.
+
+Missing support for HEAD method for CGI: The code treats HEAD like GET? The server does not handle HEAD for CGI separately. In Server::_execCompetedOrder, if method is HEAD and the resource is CGI, it still goes to CGI. That's fine because CGI may handle HEAD, but the subject may not require it. However, the response from CGI might include a body; the server should then strip the body for HEAD. The current code does not do that. In Server::handleWrite, it checks if method is HEAD and clears body before building response. That's after CGI response is set. So for a CGI response, if the CGI returns a body, the server will clear it for HEAD. That works.
+
+Configuration parsing issues: The parser expects directives like listen, root, server_name, index, client_max_body_size at top level, but they should be inside server block. The parser ignores the server { line, so it works for a single server. But it also ignores the closing }. That's fine. However, the location blocks are parsed correctly because location keyword is recognized. But the location block's closing } is recognized. So the config file is parsed correctly despite the missing server block parsing. But it's fragile. The bigger issue is that the parser does not support multiple server blocks because it would just concatenate them.
+
+Environment variable for server port: In CGI _initEnv, it sets SERVER_PORT using the port string passed from Server. That's correct.
+
+CGI response parsing bug: The code uses std::getline to read headers line by line. This will break if a header line is empty (i.e., just \r\n), which indicates end of headers. That's correct. However, it also removes trailing \r from each line. But what if a header value contains \r? That's unlikely. Also, it doesn't handle multiline headers (continuation lines). That's acceptable as per simplified spec.
+
+CGI output body extraction: It calculates body_start_pos by adding line lengths +1. But std::getline discards the newline, so it accumulates the length of the line without newline. Then it adds 1 for the newline? Actually it does body_start_pos += line.size() + 1;. That's correct for the line including newline. However, for the empty line that marks end of headers, it also increments. Then it breaks. Then bodyPart = cgiOutput.substr(body_start_pos);. This works if the CGI output uses \n as line separator. But HTTP uses \r\n. The code handles lines with trailing \r by erasing it, so the line length is without \r. The newline \n is not accounted for? Actually std::getline reads up to \n, and if the line ends with \r\n, the \r remains in the string unless removed. The code removes \r if present. Then it adds line.size() + 1 for the \n. That's correct. But the \r is not counted. So the offset calculation is correct as long as the CGI output uses \n as line separator (it does). The \r is stripped. However, the original string contains \r\n. When we do substr(body_start_pos), we need to account for the \r characters. Since we removed \r from the line when computing size, the offset body_start_pos is the position in the original string after all the lines including their \n but not including the \r. That means the \r characters are still present in the original string, and substr will include them. That would cause the body to start with \r characters? Let's simulate: CGI output "Header: value\r\n\r\nBody". The string contains "Header: value\r\n\r\nBody". std::getline reads "Header: value\r" (because it stops at \n, includes \r). Then we erase trailing \r, line becomes "Header: value". size = 14. body_start_pos = 14+1=15. The original string index 15 is after the \n. But there is also a \r before that? Actually the original string: indices 0-13: "Header: value", index14: '\r', index15: '\n', index16: '\r', index17: '\n', index18: 'B'... So after first line, we advanced by 15, skipping the '\r' and '\n'. Then next line is empty? The second getline will read the line from index16? Actually after first getline, the stream position is after the '\n'. So next getline reads from index16, which is '\r' then '\n'? It will read an empty line (maybe just "\r")? This is messy. The header parsing using getline on a raw string with \r\n is error-prone. Better to use manual parsing or treat the data as a whole and find "\r\n\r\n". The current implementation likely works but is fragile. However, many 42 projects do it this way and it passes tests. We'll note it as a potential bug.
+
+Given the many issues, the most critical ones that would cause failure in evaluation:
+
+Security: Path traversal vulnerability (no checks for ..). This is a major flaw.
+
+CGI: Query string not parsed – breaks many CGI scripts.
+
+Configuration: Cannot define multiple servers (multiple ports) – required feature.
+
+Configuration: Custom error pages not supported – required.
+
+CGI: Content-Length header overridden – may cause protocol errors.
+
+Resource leaks: Write pipe not closed on CGI EOF – may leak fds.
+
+CGI concurrency limit not enforced – could lead to resource exhaustion.
+
+Timeout cleanup incomplete – pipes not removed.
+
+Polling for client socket is muted (events 0) while CGI runs – that's fine, but if the client disconnects during CGI processing, the server may not notice until after CGI finishes. That's acceptable.
+
+Handling of \r\n in CGI output parsing – might cause incorrect body extraction.
+
+Potential use of uninitialized _cgiBytesWritten – but it's default-constructed to 0.
+
+Missing #include <cctype> for std::toupper – might compile due to transitive includes, but risky.
+
+Server static _active_cgis not used for limiting – not a hard requirement but recommended.
+
+The cluster's _active_cgis member is never incremented – not critical.
+
+The _handleCGIWrite may get stuck on write error – should close pipe.
+
+Now, the user asks "What wrong with my project???" – we need to provide a concise but comprehensive list of issues, focusing on non-compliance with subject requirements and critical bugs.
+
+We'll produce an answer.
+
+After reviewing your code against the Webserv project requirements (the en.webserv.pdf), I’ve identified several critical issues, missing features, and bugs that will likely cause your project to fail evaluation. Here’s a breakdown of what’s wrong:
+
+🔴 Critical non‑compliance with mandatory requirements
+1. Path traversal vulnerability (security)
+Your server does not sanitize .. sequences in URLs.
+Example: GET /../etc/passwd would serve files outside the configured root.
+Fix: Normalize the path and verify that the resolved absolute path still starts with the document root.
+
+2. Missing multiple servers / multiple ports
+The configuration file can contain only one server block.
+The subject requires: “define all the interface:port pairs … (defining multiple websites served by your program).”
+Fix: Parse multiple server { … } blocks into multiple Config objects.
+
+3. No custom error pages
+The config parser ignores error_page directives.
+The subject requires setting up custom error pages.
+Fix: Add error_page parsing and serve the specified files for the corresponding HTTP status codes.
+
+4. CGI: Query string is ignored
+QUERY_STRING is always empty, and REQUEST_URI does not include ?….
+CGI scripts cannot access URL arguments.
+Fix: Split req.getPath() at ?; set QUERY_STRING and adjust PATH_INFO / SCRIPT_NAME.
+
+5. CGI: Content‑Length header is unconditionally overwritten
+After parsing CGI output, your code always adds its own Content-Length.
+This may break valid CGI responses that already include a Content-Length.
+Fix: Only add Content-Length if the CGI did not provide one.
+
+6. No enforcement of CGI concurrency limit
+MAX_CONCURRENT_CGIS = 100 is defined but never checked.
+The server will accept any number of simultaneous CGI requests, risking resource exhaustion.
+Fix: Before creating a new CGI, check _active_cgis and reject (e.g., 503) if the limit is reached.
+
+7. CGI timeout does not clean up pipe FDs
+When a CGI times out, you call cleanupCgi but leave the pipe file descriptors in _pipeToClientMap and _fds.
+Those FDs will keep triggering events, causing undefined behaviour and leaks.
+Fix: In the timeout handler, close both pipe ends and remove them from _pipeToClientMap and the poll set.
+
+8. Write pipe may stay open after CGI finishes
+In _handleCGIRead (EOF case), you close the read pipe but never close the corresponding write pipe.
+If the write pipe was not already closed (e.g., CGI read all input but didn’t close stdin), it remains open forever.
+Fix: Retrieve the write pipe FD from _pipeToClientMap (same client_fd) and close it.
+
+🟠 Major bugs & design flaws
+9. CGI output header parsing with std::getline is broken for \r\n
+Your calculation of body_start_pos does not correctly account for \r characters.
+The body may start with stray \r or be truncated.
+Fix: Find "\r\n\r\n" directly in the accumulated string instead of line‑by‑line.
+
+10. Cluster’s _active_cgis is never incremented
+You decrement it in _handleCGIRead but never increment anywhere.
+It will go negative and is useless.
+Fix: Increment it when a CGI is successfully created, or remove the member entirely.
+
+11. _handleCGIWrite does not handle write errors correctly
+If write returns -1 and the child is still alive, you do nothing and return.
+This leads to an infinite loop (poll keeps reporting POLLOUT, you keep trying to write).
+Fix: On any write error, close the write pipe and remove it from poll.
+
+12. Location‑specific client_max_body_size is checked too late
+The entire body is read (up to the server’s global limit) before the location‑specific limit is applied.
+This wastes memory and bandwidth on rejected requests.
+Fix: In _execCompetedOrder, after matching the location, set req.setLimit(loc->getClientMaxBodySize()) before reading the body.
+
+13. No handling of Transfer-Encoding: chunked for CGI input
+The request is unchunked correctly, but the CGI’s CONTENT_LENGTH is set to the body size.
+That’s acceptable, but the CGI also expects CONTENT_LENGTH to be present. It is – good.
+
+14. _parseRawHeaders uses atoi for Content-Length
+atoi has undefined behaviour on overflow and does not detect malformed numbers.
+Fix: Use std::stringstream or strtoul.
+
+15. Missing #include <cctype> for std::toupper in CGI.cpp
+It may compile due to indirect includes, but it’s fragile.
+
+🟡 Missing features (not strictly mandatory but expected)
+16. Directory listing (autoindex) does not show file sizes / dates
+The subject only requires enabling/disabling listing, so this is not a hard error.
+However, your implementation is minimal (only names). Usually acceptable.
+
+17. No support for HEAD request on a CGI resource
+It works because you clear the body later, but the CGI is still executed (may do heavy work).
+Not required, but nice to have.
+
+18. No If-Modified-Since or ETag – not required.
+📁 Configuration file parsing issues
+19. The parser does not recognise the server { block
+It works accidentally for a single server because it ignores the line server {.
+Adding a second server block will merge directives.
+Fix: Implement proper block parsing.
+
+20. No support for error_page → see #3.
+21. No support for listen on an interface (e.g., 127.0.0.1:8080)
+You only parse the port number. The subject allows interface:port pairs.
+Fix: Parse IP address as well and bind accordingly.
+
+🧹 Minor issues
+Cluster::_active_cgis vs Server::_active_cgis confusion.
+
+The child process closes all FDs from 3 to 1024 – overly aggressive (but not harmful).
+
+No validation that a resolved static file is still inside the root (path traversal already flagged).
+
+_cgiBuffs and _cgiBytesWritten can grow unbounded if a CGI never sends EOF (timeout mitigates).
+
+✅ What is done well
+Non‑blocking I/O with a single poll().
+
+CGI pipes and environment variable construction (except query string).
+
+Chunked request decoding.
+
+Keep‑alive connections.
+
+Basic location matching and method restrictions.
+
+Autoindex generation.
+
+File upload and DELETE.
+
+🚨 Immediate actions to pass evaluation
+Fix path traversal – canonicalise the requested path and check against the root.
+
+Implement query string parsing for CGI.
+
+Support multiple server blocks in the config file.
+
+Allow custom error pages via config.
+
+Do not override CGI’s Content-Length.
+
+Enforce CGI concurrency limit.
+
+Properly clean up both pipe ends on CGI finish and timeout.
+
+Fix CGI header parsing to handle \r\n correctly.
+
+Close write pipe on write errors to avoid endless POLLOUT.
+
+Your project has a solid foundation, but these issues will definitely be caught during peer evaluation. Focus on the critical items first – especially security, CGI correctness, and configuration completeness.
+

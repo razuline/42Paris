@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/28 13:38:56 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/10 14:57:32 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/15 17:19:52 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ public:
 	~Config();
 
 	/* --- Core Methods --- */
-	void	parse(const std::string &filename);
+	static std::vector<Config>	parseFile(const std::string &filename);
 
 	/* --- Getters --- */
 	int							getPort() const;

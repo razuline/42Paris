@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 16:51:10 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/14 21:32:53 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/15 17:42:34 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ private:
 	std::map<int, Server *>		_servers;               // serv_fd -> Server*
 	std::map<int, Server *>		_clients;               // client_fd -> Server*
 	std::vector<struct pollfd>	_fds;                   // poll array
+	std::map<int, time_t> 		_reqStartTime;
 
 	/* --- Asynchronous CGI Trackers --- */
 	std::map<int, int>			_pipeToClientMap;       // Maps pipe_read_fd -> client_fd

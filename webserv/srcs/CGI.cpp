@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/24 16:54:54 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/15 12:32:41 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/15 18:51:43 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -176,12 +176,23 @@ CGI::_initEnv(const Request &req, const std::string &script_path,
 {
 	_env.clear();
 
+	// Parse Query String out of the request path if it exists
+	std::string	raw_path = req.getPath();
+	std::string	query_string = "";
+	std::string	script_name = raw_path;
+	size_t		q_pos = raw_path.find('?');
+	if (q_pos != std::string::npos)
+	{
+		query_string = raw_path.substr(q_pos + 1);
+		script_name = raw_path.substr(0, q_pos);
+	}
+
 	// RFC 3875 Compliance: Core CGI/1.1 standard execution environment matrix
 	_env.push_back(strdup(("REQUEST_METHOD=" + req.getMethod()).c_str()));
 	_env.push_back(strdup(("SCRIPT_FILENAME=" + script_path).c_str()));
-	_env.push_back(strdup(("SCRIPT_NAME=" + req.getPath()).c_str()));
-	_env.push_back(strdup(("PATH_INFO=" + req.getPath()).c_str()));
-	_env.push_back(strdup("QUERY_STRING="));
+	_env.push_back(strdup(("SCRIPT_NAME=" + script_name).c_str()));
+	_env.push_back(strdup(("PATH_INFO=" + script_name).c_str()));
+	_env.push_back(strdup(("QUERY_STRING=" + query_string).c_str()));
 	_env.push_back(strdup("SERVER_PROTOCOL=HTTP/1.1"));
 	_env.push_back(strdup("GATEWAY_INTERFACE=CGI/1.1"));
 	_env.push_back(strdup(("SERVER_PORT=" + port).c_str()));

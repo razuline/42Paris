@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:07:21 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/14 19:21:09 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/15 18:58:09 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,11 +37,12 @@ int	main(int ac, char **av)
 	std::string	configPath = (ac == 2) ? av[1] : "configs/default.conf";
 	std::cout << "Loading configuration: " << configPath << std::endl;
 
-	Config	config;
-	config.parse(configPath);
-
-	std::vector<Config>	configs;
-	configs.push_back(config);
+	std::vector<Config>	configs = Config::parseFile(configPath);
+	if (configs.empty())
+	{
+		std::cerr << "Fatal: No valid server blocks parsed." << std::endl;
+		return 1;
+	}
 
 	// Setup system signal handlers for graceful shutdown
 	signal(SIGINT, handle_signal);

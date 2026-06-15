@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/28 13:46:06 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/14 19:19:57 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/15 18:56:16 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,59 +55,76 @@ Config::~Config()
 
 /* ------------------------------ CORE METHODS ------------------------------ */
 
-void
-Config::parse(const std::string &filename)
+std::vector<Config>
+Config::parseFile(const std::string &filename)
 {
-	// 1. Create the file stream object
-	std::ifstream	file(filename.c_str());
-	std::string		line;
+	std::vector<Config>	configs;
+	std::ifstream		file(filename.c_str());
+	std::string			line;
 
-	// 2. Check if the STREAM is open
 	if (!file.is_open())
 	{
 		std::cerr << "[Config] Error: Cannot open config file "
 				  << filename << std::endl;
-		return;
+		return configs;
 	}
 
-	// Tokenisation Phase: Linear evaluation of the global directive matrix
+	Config	currConfig;
+	bool	inServer = false;
+
 	while (std::getline(file, line))
 	{
-		// 1. Remove comments
 		size_t	commentPos = line.find("#");
 		if (commentPos != std::string::npos)
 			line.erase(commentPos);
 
-		// 2. Trim the line with only spaces and tabs
 		line = Utils::trim(line);
 		if (line.empty())
 			continue;
 
-		// 3. If NOT empty, look for keywords "listen"
+		if (line == "server" || (line.find("server") == 0 &&
+			line.find("{") != std::string::npos))
+		{
+			if (inServer)
+				configs.push_back(currConfig);
+			currConfig = Config(); // Reset to defaults for next context
+			inServer = true;
+			continue;
+		}
+		if (!inServer)
+			continue;
+		if (line == "}")
+		{
+			configs.push_back(currConfig);
+			inServer = false;
+			continue;
+		}
 		if (line.find("listen") == 0)
 		{
 			std::string			value = Utils::trim(line.substr(6));
+			size_t				colon_pos = value.find_last_of(':');
+			if (colon_pos != std::string::npos)
+				value = value.substr(colon_pos + 1);
+
 			std::stringstream	ss(value);
-			ss >> _port;
+			int					port = 8080;
+			ss >> port;
+			currConfig._port = port;
 		}
-		// "root"
 		else if (line.find("root") == 0)
-			_folderRoot = Utils::trim(line.substr(4));
-		// "server_name"
+			currConfig._folderRoot = Utils::trim(line.substr(4));
 		else if (line.find("server_name") == 0)
-			_serverName = Utils::trim(line.substr(11));
-		// "index"
+			currConfig._serverName = Utils::trim(line.substr(11));
 		else if (line.find("index") == 0)
-			_homePage = Utils::trim(line.substr(5));
-		// "client_max_body_size"
+			currConfig._homePage = Utils::trim(line.substr(5));
 		else if (line.find("client_max_body_size") == 0)
 		{
 			std::string			value = Utils::trim(line.substr(20));
 			std::stringstream	ss(value);
-			ss >> _clientMaxBodySize;
+			size_t				maxSize = 0;
+			ss >> maxSize;
+			currConfig._clientMaxBodySize = maxSize;
 		}
-
-		// Scoped Evaluation: Isolating route-specific configuration blocks
 		else if (line.find("location") == 0)
 		{
 			Location	loc;
@@ -120,7 +137,6 @@ Config::parse(const std::string &filename)
 								 : std::string::npos));
 			loc.setPath(Utils::trim(rawPath));
 
-			// Nested Context Processing: Extract variables inside the active bracket block
 			while (std::getline(file, line) && Utils::trim(line) != "}")
 			{
 				size_t	innerComment = line.find("#");
@@ -156,20 +172,38 @@ Config::parse(const std::string &filename)
 				{
 					loc.setCgiPath(Utils::trim(line.substr(8)));
 				}
-				else if (line.find("allow_methods") == 0)
+				// FIX: Support the 'cgi_extension .py /usr/bin/python3' format
+				else if (line.find("cgi_extension") == 0)
+				{
+					std::string			cgi_line = Utils::trim(line.substr(13));
+					std::stringstream	css(cgi_line);
+					std::string			ext, binary;
+					css >> ext >> binary;
+
+					// Inject a virtual extension location block for exact extension matching
+					Location	cgiLoc = loc;
+					cgiLoc.setPath(ext);
+					cgiLoc.setCgiPath(binary);
+					currConfig._locations.push_back(cgiLoc);
+				}
+				// FIX: Support both 'allow_methods' and 'allowed_methods' variations
+				else if (line.find("allow_methods") == 0 ||
+						 line.find("allowed_methods") == 0)
 				{
 					std::vector<std::string>	methods;
-					std::stringstream			mss(Utils::trim(line.substr(13)));
-					std::string					methodToken;
+					size_t	keyword_len = (line.find("allowed_methods") == 0) ? 15 : 13;
+					std::stringstream	mss(Utils::trim(line.substr(keyword_len)));
+					std::string			methodToken;
 					while (mss >> methodToken)
 						methods.push_back(methodToken);
 					loc.setMethods(methods);
 				}
 			}
-			_locations.push_back(loc);
+			currConfig._locations.push_back(loc);
 		}
 	}
 	file.close();
+	return configs;
 }
 
 /* -------------------------------- GETTERS --------------------------------- */
