@@ -1,0 +1,794 @@
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [57] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [58] back to POLLIN
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [62] back to POLLIN
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [65] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [66] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [67] back to POLLIN
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [70] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [71] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [72] back to POLLIN
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [74] back to POLLIN
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [77] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [78] back to POLLIN
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [82] back to POLLIN
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [86] back to POLLIN
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [91] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [92] back to POLLIN
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [97] back to POLLIN
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [105] back to POLLIN
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [107] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [108] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [109] back to POLLIN
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [111] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [112] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [113] back to POLLIN
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [116] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [117] back to POLLIN
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [119] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [120] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [121] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [122] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [123] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [124] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [125] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [126] back to POLLIN
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [133] back to POLLIN
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [6] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [7] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [8] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [9] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [10] back to POLLIN
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [12] back to POLLIN
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [14] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [15] back to POLLIN
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [17] back to POLLIN
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [21] back to POLLIN
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [28] back to POLLIN
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [32] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [33] back to POLLIN
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [36] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [37] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [38] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [39] back to POLLIN
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [41] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [42] back to POLLIN
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [44] back to POLLIN
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [47] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [48] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [49] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [50] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [54] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [56] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [59] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [60] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [61] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [63] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [64] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [68] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [69] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [73] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [75] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [76] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [79] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [80] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [81] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [83] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [84] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [85] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [87] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [88] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [89] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [90] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [93] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [94] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [95] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [96] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [98] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [99] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [100] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [101] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [102] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [104] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [106] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [110] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [114] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [115] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [118] back to POLLIN
+[14:31:46] [Server] ➜ GET /
+[14:31:46] [Server] ◀ 200 (/)
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [128] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [129] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [130] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [131] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [132] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [5] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [11] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [13] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [16] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [18] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [19] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [20] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [22] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [23] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [24] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [25] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [26] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [27] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [29] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [30] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [31] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [34] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [35] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [40] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [43] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [45] back to POLLIN
+[14:31:46] [INFO] [Cluster] Success response sent. Resetting client fd [127] back to POLLIN
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [46]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [51]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [53]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [52]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [55]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [57]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [58]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [62]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [65]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [66]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [67]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [70]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [71]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [72]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [74]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [77]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [78]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [82]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [86]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [91]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [92]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [97]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [105]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [107]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [108]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [109]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [111]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [112]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [113]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [116]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [117]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [119]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [120]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [121]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [122]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [123]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [124]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [6]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [125]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [126]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [133]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [7]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [8]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [9]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [10]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [12]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [14]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [15]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [17]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [21]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [28]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [32]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [33]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [36]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [37]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [38]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [39]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [41]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [42]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [44]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [47]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [48]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [49]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [50]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [54]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [56]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [59]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [60]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [61]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [63]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [64]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [68]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [69]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [73]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [75]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [76]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [79]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [80]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [81]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [83]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [84]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [85]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [87]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [88]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [89]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [90]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [93]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [94]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [95]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [96]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [98]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [99]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [100]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [101]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [102]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [104]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [106]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [110]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [114]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [115]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [118]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [128]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [5]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [129]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [130]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [131]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [132]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [11]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [13]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [16]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [18]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [19]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [20]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [22]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [23]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [24]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [25]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [26]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [27]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [29]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [30]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [31]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [34]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [35]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [40]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [43]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [45]
+[14:31:46] [INFO] [Cluster] Connection closed securely on fd [127]
+[14:31:46] [INFO] [Cluster] New client connected on socket fd [5]
+[14:31:46] [INFO] [Cluster] New client connected on socket fd [6]
+[14:31:46] [INFO] [Cluster] New client connected on socket fd [7]
+[14:31:46] [INFO] [Cluster] New client connected on socket fd [8]
+[14:31:46] [INFO] [Cluster] New client connected on socket fd [9]
+[14:31:46] [INFO] [Cluster] New client connected on socket fd [10]
+[14:31:46] [INFO] [Cluster] New client connected on socket fd [11]
+[14:31:46] [INFO] [Cluster] New client connected on socket fd [12]
+[14:31:46] [INFO] [Cluster] New client connected on socket fd [13]
+[14:31:46] [INFO] [Cluster] New client connected on socket fd [14]
+[14:31:46] [INFO] [Cluster] New client connected on socket fd [15]
+[14:31:46] [INFO] [Cluster] New client connected on socket fd [16]
+[14:31:46] [INFO] [Cluster] New client connected on socket fd [17]
+[14:31:46] [INFO] [Cluster] New client connected on socket fd [18]
+[14:31:46] [INFO] [Cluster] New client connected on socket fd [19]
+[14:31:46] [INFO] [Cluster] New client connected on socket fd [20]
+[14:31:46] [INFO] [Cluster] New client connected on socket fd [21]
+[14:31:46] [INFO] [Cluster] New client connected on socket fd [22]
+[14:31:46] [INFO] [Cluster] New client connected on socket fd [23]
+[14:31:46] [INFO] [Cluster] New client connected on socket fd [24]
+[14:31:50] [Server] ➜ POST /directory/youpi.bla
+[14:31:50] [INFO] [CGI] Spawned pipeline child process [PID 1965410]
+[14:31:50] [Server] ➜ POST /directory/youpi.bla
+[14:31:50] [INFO] [CGI] Spawned pipeline child process [PID 1965420]
+[14:31:50] [Server] ➜ POST /directory/youpi.bla
+[14:31:50] [INFO] [CGI] Spawned pipeline child process [PID 1965428]
+[14:31:50] [Server] ➜ POST /directory/youpi.bla
+[14:31:50] [INFO] [CGI] Spawned pipeline child process [PID 1965437]
+[14:31:50] [Server] ➜ POST /directory/youpi.bla
+[14:31:50] [INFO] [CGI] Spawned pipeline child process [PID 1965444]
+[14:31:50] [Server] ➜ POST /directory/youpi.bla
+[14:31:50] [INFO] [CGI] Spawned pipeline child process [PID 1965452]
+[14:31:50] [Server] ➜ POST /directory/youpi.bla
+[14:31:50] [INFO] [CGI] Spawned pipeline child process [PID 1965469]
+[14:31:50] [Server] ➜ POST /directory/youpi.bla
+[14:31:50] [INFO] [CGI] Spawned pipeline child process [PID 1965477]
+[14:31:50] [Server] ➜ POST /directory/youpi.bla
+[14:31:50] [INFO] [CGI] Spawned pipeline child process [PID 1965478]
+[14:31:50] [Server] ➜ POST /directory/youpi.bla
+[14:31:50] [INFO] [CGI] Spawned pipeline child process [PID 1965494]
+[14:31:50] [Server] ➜ POST /directory/youpi.bla
+[14:31:51] [INFO] [CGI] Spawned pipeline child process [PID 1965502]
+[14:31:54] [Server] ➜ POST /directory/youpi.bla
+[14:31:54] [INFO] [CGI] Spawned pipeline child process [PID 1965545]
+[14:31:54] [Server] ➜ POST /directory/youpi.bla
+[14:31:54] [INFO] [CGI] Spawned pipeline child process [PID 1965552]
+[14:31:54] [Server] ➜ POST /directory/youpi.bla
+[14:31:54] [INFO] [CGI] Spawned pipeline child process [PID 1965561]
+[14:31:54] [Server] Ingesting fd [22]: 93.50 MB
+[14:31:54] [INFO] [Cluster] Success response sent. Resetting client fd [5] back to POLLIN
+[14:31:54] [Server] ➜ POST /directory/youpi.bla
+[14:31:54] [INFO] [CGI] Spawned pipeline child process [PID 1965569]
+[14:31:54] [Server] ➜ POST /directory/youpi.bla
+[14:31:54] [INFO] [CGI] Spawned pipeline child process [PID 1965577]
+[14:31:54] [Server] ➜ POST /directory/youpi.bla
+[14:31:54] [INFO] [CGI] Spawned pipeline child process [PID 1965586]
+[14:31:54] [Server] Ingesting fd [15]: 95.00 MB
+[14:31:54] [INFO] [Cluster] Success response sent. Resetting client fd [11] back to POLLIN
+[14:31:55] [Server] ➜ POST /directory/youpi.bla
+[14:31:55] [INFO] [CGI] Spawned pipeline child process [PID 1965594]
+[14:31:55] [Server] ➜ POST /directory/youpi.bla
+[14:31:55] [INFO] [CGI] Spawned pipeline child process [PID 1965601]
+[14:31:55] [Server] Ingesting fd [14]: 93.50 MB
+[14:31:55] [INFO] [Cluster] Success response sent. Resetting client fd [23] back to POLLIN
+[14:31:55] [INFO] [Cluster] Success response sent. Resetting client fd [18] back to POLLIN
+[14:31:55] [INFO] [Cluster] Success response sent. Resetting client fd [16] back to POLLIN
+[14:31:55] [Server] Ingesting fd [5]: 2.50 MB
+[14:31:55] [INFO] [Cluster] Success response sent. Resetting client fd [19] back to POLLIN
+[14:31:55] [INFO] [Cluster] Success response sent. Resetting client fd [20] back to POLLIN
+[14:31:55] [INFO] [Cluster] Success response sent. Resetting client fd [9] back to POLLIN
+[14:31:55] [INFO] [Cluster] Success response sent. Resetting client fd [12] back to POLLIN
+[14:31:55] [INFO] [Cluster] Success response sent. Resetting client fd [17] back to POLLIN
+[14:31:55] [INFO] [Cluster] Success response sent. Resetting client fd [13] back to POLLIN
+[14:31:55] [Server] ➜ POST /directory/youpi.bla
+[14:31:55] [INFO] [CGI] Spawned pipeline child process [PID 1965612]
+[14:31:57] [Server] Ingesting fd [19]: 3.00 MB
+[14:31:57] [INFO] [Cluster] Success response sent. Resetting client fd [14] back to POLLIN
+[14:31:57] [Server] Ingesting fd [12]: 4.00 MB
+[14:31:57] [INFO] [Cluster] Success response sent. Resetting client fd [15] back to POLLIN
+[14:31:57] [INFO] [Cluster] Success response sent. Resetting client fd [21] back to POLLIN
+[14:31:57] [Server] Ingesting fd [13]: 6.00 MB
+[14:31:57] [INFO] [Cluster] Success response sent. Resetting client fd [6] back to POLLIN
+[14:31:57] [Server] Ingesting fd [9]: 6.50 MB
+[14:31:57] [INFO] [Cluster] Success response sent. Resetting client fd [22] back to POLLIN
+[14:31:57] [Server] Ingesting fd [16]: 7.00 MB
+[14:31:57] [INFO] [Cluster] Success response sent. Resetting client fd [24] back to POLLIN
+[14:31:57] [Server] Ingesting fd [21]: 0.50 MB
+[14:31:57] [INFO] [Cluster] Success response sent. Resetting client fd [8] back to POLLIN
+[14:31:57] [Server] Ingesting fd [15]: 1.00 MB
+[14:31:57] [INFO] [Cluster] Success response sent. Resetting client fd [10] back to POLLIN
+[14:31:57] [Server] Ingesting fd [17]: 8.00 MB
+[14:31:57] [INFO] [Cluster] Success response sent. Resetting client fd [7] back to POLLIN
+[14:31:59] [Server] ➜ POST /directory/youpi.bla
+[14:31:59] [INFO] [CGI] Spawned pipeline child process [PID 1965673]
+[14:31:59] [Server] ➜ POST /directory/youpi.bla
+[14:31:59] [INFO] [CGI] Spawned pipeline child process [PID 1965681]
+[14:31:59] [Server] ➜ POST /directory/youpi.bla
+[14:31:59] [INFO] [CGI] Spawned pipeline child process [PID 1965682]
+[14:31:59] [Server] ➜ POST /directory/youpi.bla
+[14:31:59] [INFO] [CGI] Spawned pipeline child process [PID 1965689]
+[14:31:59] [Server] ➜ POST /directory/youpi.bla
+[14:31:59] [INFO] [CGI] Spawned pipeline child process [PID 1965697]
+[14:31:59] [Server] ➜ POST /directory/youpi.bla
+[14:31:59] [INFO] [CGI] Spawned pipeline child process [PID 1965705]
+[14:31:59] [Server] ➜ POST /directory/youpi.bla
+[14:31:59] [INFO] [CGI] Spawned pipeline child process [PID 1965714]
+[14:31:59] [Server] ➜ POST /directory/youpi.bla
+[14:31:59] [INFO] [CGI] Spawned pipeline child process [PID 1965722]
+[14:31:59] [Server] ➜ POST /directory/youpi.bla
+[14:31:59] [INFO] [CGI] Spawned pipeline child process [PID 1965737]
+[14:32:00] [Server] ➜ POST /directory/youpi.bla
+[14:32:00] [INFO] [CGI] Spawned pipeline child process [PID 1965753]
+[14:32:03] [Server] Ingesting fd [8]: 78.50 MB
+[14:32:03] [INFO] [Cluster] Success response sent. Resetting client fd [20] back to POLLIN
+[14:32:03] [Server] Ingesting fd [20]: 2.00 MB
+[14:32:03] [INFO] [Cluster] Success response sent. Resetting client fd [5] back to POLLIN
+[14:32:03] [Server] ➜ POST /directory/youpi.bla
+[14:32:03] [INFO] [CGI] Spawned pipeline child process [PID 1965775]
+[14:32:03] [Server] Ingesting fd [8]: 83.50 MB
+[14:32:03] [INFO] [Cluster] Success response sent. Resetting client fd [23] back to POLLIN
+[14:32:03] [INFO] [Cluster] Success response sent. Resetting client fd [18] back to POLLIN
+[14:32:03] [Server] Ingesting fd [20]: 4.50 MB
+[14:32:03] [INFO] [Cluster] Success response sent. Resetting client fd [11] back to POLLIN
+[14:32:03] [Server] Ingesting fd [22]: 84.00 MB
+[14:32:03] [INFO] [Cluster] Success response sent. Resetting client fd [19] back to POLLIN
+[14:32:03] [INFO] [Cluster] Success response sent. Resetting client fd [9] back to POLLIN
+[14:32:03] [Server] Ingesting fd [10]: 82.50 MB
+[14:32:03] [INFO] [Cluster] Success response sent. Resetting client fd [16] back to POLLIN
+[14:32:03] [Server] Ingesting fd [5]: 1.50 MB
+[14:32:03] [INFO] [Cluster] Success response sent. Resetting client fd [12] back to POLLIN
+[14:32:03] [Server] Ingesting fd [8]: 84.00 MB
+[14:32:03] [INFO] [Cluster] Success response sent. Resetting client fd [13] back to POLLIN
+[14:32:03] [Server] ➜ POST /directory/youpi.bla
+[14:32:03] [INFO] [CGI] Spawned pipeline child process [PID 1965791]
+[14:32:04] [Server] ➜ POST /directory/youpi.bla
+[14:32:04] [INFO] [CGI] Spawned pipeline child process [PID 1965799]
+[14:32:04] [Server] ➜ POST /directory/youpi.bla
+[14:32:04] [INFO] [CGI] Spawned pipeline child process [PID 1965807]
+[14:32:04] [Server] ➜ POST /directory/youpi.bla
+[14:32:04] [INFO] [CGI] Spawned pipeline child process [PID 1965808]
+[14:32:04] [Server] ➜ POST /directory/youpi.bla
+[14:32:04] [INFO] [CGI] Spawned pipeline child process [PID 1965822]
+[14:32:04] [Server] ➜ POST /directory/youpi.bla
+[14:32:04] [INFO] [CGI] Spawned pipeline child process [PID 1965831]
+[14:32:04] [Server] ➜ POST /directory/youpi.bla
+[14:32:04] [INFO] [CGI] Spawned pipeline child process [PID 1965839]
+[14:32:04] [Server] ➜ POST /directory/youpi.bla
+[14:32:04] [INFO] [CGI] Spawned pipeline child process [PID 1965847]
+[14:32:04] [Server] Ingesting fd [20]: 17.50 MB
+[14:32:04] [INFO] [Cluster] Success response sent. Resetting client fd [17] back to POLLIN
+[14:32:04] [Server] ➜ POST /directory/youpi.bla
+[14:32:04] [INFO] [CGI] Spawned pipeline child process [PID 1965857]
+[14:32:06] [Server] Ingesting fd [17]: 2.50 MB
+[14:32:06] [INFO] [Cluster] Success response sent. Resetting client fd [7] back to POLLIN
+[14:32:06] [Server] Ingesting fd [13]: 17.00 MB
+[14:32:06] [INFO] [Cluster] Success response sent. Resetting client fd [10] back to POLLIN
+[14:32:06] [Server] Ingesting fd [20]: 23.00 MB
+[14:32:06] [INFO] [Cluster] Success response sent. Resetting client fd [24] back to POLLIN
+[14:32:06] [Server] Ingesting fd [12]: 18.00 MB
+[14:32:06] [INFO] [Cluster] Success response sent. Resetting client fd [8] back to POLLIN
+[14:32:06] [Server] Ingesting fd [24]: 0.50 MB
+[14:32:06] [INFO] [Cluster] Success response sent. Resetting client fd [6] back to POLLIN
+[14:32:06] [INFO] [Cluster] Success response sent. Resetting client fd [22] back to POLLIN
+[14:32:06] [Server] Ingesting fd [13]: 19.00 MB
+[14:32:06] [INFO] [Cluster] Success response sent. Resetting client fd [21] back to POLLIN
+[14:32:06] [Server] Ingesting fd [8]: 1.00 MB
+[14:32:06] [INFO] [Cluster] Success response sent. Resetting client fd [15] back to POLLIN
+[14:32:06] [Server] Ingesting fd [13]: 20.00 MB
+[14:32:07] [INFO] [Cluster] Success response sent. Resetting client fd [14] back to POLLIN
+[14:32:08] [Server] ➜ POST /directory/youpi.bla
+[14:32:08] [INFO] [CGI] Spawned pipeline child process [PID 1965877]
+[14:32:08] [Server] ➜ POST /directory/youpi.bla
+[14:32:08] [INFO] [CGI] Spawned pipeline child process [PID 1965885]
+[14:32:08] [Server] ➜ POST /directory/youpi.bla
+[14:32:08] [INFO] [CGI] Spawned pipeline child process [PID 1965886]
+[14:32:08] [Server] ➜ POST /directory/youpi.bla
+[14:32:08] [INFO] [CGI] Spawned pipeline child process [PID 1965895]
+[14:32:08] [Server] ➜ POST /directory/youpi.bla
+[14:32:08] [INFO] [CGI] Spawned pipeline child process [PID 1965912]
+[14:32:08] [Server] ➜ POST /directory/youpi.bla
+[14:32:08] [INFO] [CGI] Spawned pipeline child process [PID 1965923]
+[14:32:08] [Server] ➜ POST /directory/youpi.bla
+[14:32:08] [INFO] [CGI] Spawned pipeline child process [PID 1965924]
+[14:32:08] [Server] ➜ POST /directory/youpi.bla
+[14:32:08] [INFO] [CGI] Spawned pipeline child process [PID 1965939]
+[14:32:10] [Server] ➜ POST /directory/youpi.bla
+[14:32:10] [INFO] [CGI] Spawned pipeline child process [PID 1965954]
+[14:32:11] [Server] ➜ POST /directory/youpi.bla
+[14:32:11] [INFO] [CGI] Spawned pipeline child process [PID 1965963]
+[14:32:11] [Server] Ingesting fd [22]: 69.50 MB
+[14:32:11] [INFO] [Cluster] Success response sent. Resetting client fd [20] back to POLLIN
+[14:32:11] [Server] Ingesting fd [15]: 72.00 MB
+[14:32:12] [INFO] [Cluster] Success response sent. Resetting client fd [12] back to POLLIN
+[14:32:12] [Server] Ingesting fd [24]: 76.50 MB
+[14:32:12] [INFO] [Cluster] Success response sent. Resetting client fd [5] back to POLLIN
+[14:32:12] [Server] Ingesting fd [17]: 94.00 MB
+[14:32:12] [INFO] [Cluster] Success response sent. Resetting client fd [11] back to POLLIN
+[14:32:12] [INFO] [Cluster] Success response sent. Resetting client fd [16] back to POLLIN
+[14:32:12] [Server] Ingesting fd [14]: 73.00 MB
+[14:32:12] [INFO] [Cluster] Success response sent. Resetting client fd [9] back to POLLIN
+[14:32:12] [INFO] [Cluster] Success response sent. Resetting client fd [19] back to POLLIN
+[14:32:12] [Server] Ingesting fd [8]: 76.00 MB
+[14:32:12] [INFO] [Cluster] Success response sent. Resetting client fd [18] back to POLLIN
+[14:32:12] [Server] ➜ POST /directory/youpi.bla
+[14:32:12] [INFO] [CGI] Spawned pipeline child process [PID 1965972]
+[14:32:12] [Server] Ingesting fd [15]: 74.00 MB
+[14:32:12] [INFO] [Cluster] Success response sent. Resetting client fd [23] back to POLLIN
+[14:32:12] [Server] Ingesting fd [12]: 5.50 MB
+[14:32:12] [INFO] [Cluster] Success response sent. Resetting client fd [13] back to POLLIN
+[14:32:13] [Server] Ingesting fd [9]: 14.50 MB
+[14:32:13] [INFO] [Cluster] Success response sent. Resetting client fd [17] back to POLLIN
+[14:32:13] [Server] ➜ POST /directory/youpi.bla
+[14:32:13] [INFO] [CGI] Spawned pipeline child process [PID 1965988]
+[14:32:13] [Server] ➜ POST /directory/youpi.bla
+[14:32:13] [INFO] [CGI] Spawned pipeline child process [PID 1965989]
+[14:32:13] [Server] ➜ POST /directory/youpi.bla
+[14:32:13] [INFO] [CGI] Spawned pipeline child process [PID 1965998]
+[14:32:13] [Server] ➜ POST /directory/youpi.bla
+[14:32:13] [INFO] [CGI] Spawned pipeline child process [PID 1966013]
+[14:32:13] [Server] ➜ POST /directory/youpi.bla
+[14:32:13] [INFO] [CGI] Spawned pipeline child process [PID 1966021]
+[14:32:13] [Server] ➜ POST /directory/youpi.bla
+[14:32:13] [INFO] [CGI] Spawned pipeline child process [PID 1966034]
+[14:32:13] [Server] ➜ POST /directory/youpi.bla
+[14:32:13] [INFO] [CGI] Spawned pipeline child process [PID 1966042]
+[14:32:13] [Server] ➜ POST /directory/youpi.bla
+[14:32:13] [INFO] [CGI] Spawned pipeline child process [PID 1966050]
+[14:32:13] [Server] ➜ POST /directory/youpi.bla
+[14:32:13] [INFO] [CGI] Spawned pipeline child process [PID 1966059]
+[14:32:16] [Server] Ingesting fd [12]: 28.00 MB
+[14:32:16] [INFO] [Cluster] Success response sent. Resetting client fd [15] back to POLLIN
+[14:32:16] [Server] Ingesting fd [13]: 19.50 MB
+[14:32:16] [INFO] [Cluster] Success response sent. Resetting client fd [14] back to POLLIN
+[14:32:16] [Server] Ingesting fd [20]: 30.00 MB
+[14:32:16] [INFO] [Cluster] Success response sent. Resetting client fd [22] back to POLLIN
+[14:32:16] [Server] Ingesting fd [11]: 28.00 MB
+[14:32:16] [INFO] [Cluster] Success response sent. Resetting client fd [21] back to POLLIN
+[14:32:16] [Server] Ingesting fd [9]: 28.50 MB
+[14:32:16] [INFO] [Cluster] Success response sent. Resetting client fd [6] back to POLLIN
+[14:32:16] [Server] Ingesting fd [20]: 31.50 MB
+[14:32:16] [INFO] [Cluster] Success response sent. Resetting client fd [8] back to POLLIN
+[14:32:16] [Server] Ingesting fd [9]: 30.00 MB
+[14:32:16] [INFO] [Cluster] Success response sent. Resetting client fd [10] back to POLLIN
+[14:32:16] [Server] Ingesting fd [12]: 30.50 MB
+[14:32:16] [INFO] [Cluster] Success response sent. Resetting client fd [7] back to POLLIN
+[14:32:16] [Server] Ingesting fd [18]: 30.50 MB
+[14:32:16] [INFO] [Cluster] Success response sent. Resetting client fd [24] back to POLLIN
+[14:32:17] [Server] ➜ POST /directory/youpi.bla
+[14:32:17] [INFO] [CGI] Spawned pipeline child process [PID 1966072]
+[14:32:17] [Server] ➜ POST /directory/youpi.bla
+[14:32:17] [INFO] [CGI] Spawned pipeline child process [PID 1966086]
+[14:32:17] [Server] ➜ POST /directory/youpi.bla
+[14:32:17] [INFO] [CGI] Spawned pipeline child process [PID 1966087]
+[14:32:17] [Server] ➜ POST /directory/youpi.bla
+[14:32:17] [INFO] [CGI] Spawned pipeline child process [PID 1966096]
+[14:32:17] [Server] ➜ POST /directory/youpi.bla
+[14:32:17] [INFO] [CGI] Spawned pipeline child process [PID 1966105]
+[14:32:17] [Server] ➜ POST /directory/youpi.bla
+[14:32:17] [INFO] [CGI] Spawned pipeline child process [PID 1966114]
+[14:32:17] [Server] ➜ POST /directory/youpi.bla
+[14:32:17] [INFO] [CGI] Spawned pipeline child process [PID 1966122]
+[14:32:18] [Server] ➜ POST /directory/youpi.bla
+[14:32:18] [INFO] [CGI] Spawned pipeline child process [PID 1966141]
+[14:32:20] [Server] ➜ POST /directory/youpi.bla
+[14:32:20] [INFO] [CGI] Spawned pipeline child process [PID 1966155]
+[14:32:20] [Server] Ingesting fd [15]: 64.50 MB
+[14:32:20] [INFO] [Cluster] Success response sent. Resetting client fd [11] back to POLLIN
+[14:32:20] [Server] Ingesting fd [11]: 2.00 MB
+[14:32:20] [INFO] [Cluster] Success response sent. Resetting client fd [18] back to POLLIN
+[14:32:20] [INFO] [Cluster] Success response sent. Resetting client fd [12] back to POLLIN
+[14:32:20] [INFO] [Cluster] Success response sent. Resetting client fd [16] back to POLLIN
+[14:32:20] [INFO] [Cluster] Success response sent. Resetting client fd [5] back to POLLIN
+[14:32:20] [Server] Ingesting fd [15]: 69.50 MB
+[14:32:20] [INFO] [Cluster] Success response sent. Resetting client fd [9] back to POLLIN
+[14:32:20] [INFO] [Cluster] Success response sent. Resetting client fd [20] back to POLLIN
+[14:32:20] [INFO] [Cluster] Success response sent. Resetting client fd [19] back to POLLIN
+[14:32:20] [Server] ➜ POST /directory/youpi.bla
+[14:32:20] [INFO] [CGI] Spawned pipeline child process [PID 1966164]
+[14:32:21] [Server] Ingesting fd [9]: 2.50 MB
+[14:32:21] [INFO] [Cluster] Success response sent. Resetting client fd [13] back to POLLIN
+[14:32:21] [Server] ➜ POST /directory/youpi.bla
+[14:32:21] [INFO] [CGI] Spawned pipeline child process [PID 1966172]
+[14:32:21] [Server] Ingesting fd [6]: 73.00 MB
+[14:32:21] [INFO] [Cluster] Success response sent. Resetting client fd [23] back to POLLIN
+[14:32:22] [Server] Ingesting fd [9]: 20.50 MB
+[14:32:22] [INFO] [Cluster] Success response sent. Resetting client fd [17] back to POLLIN
+[14:32:22] [Server] ➜ POST /directory/youpi.bla
+[14:32:22] [INFO] [CGI] Spawned pipeline child process [PID 1966181]
+[14:32:22] [Server] ➜ POST /directory/youpi.bla
+[14:32:22] [INFO] [CGI] Spawned pipeline child process [PID 1966182]
+[14:32:22] [Server] ➜ POST /directory/youpi.bla
+[14:32:22] [INFO] [CGI] Spawned pipeline child process [PID 1966197]
+[14:32:22] [Server] ➜ POST /directory/youpi.bla
+[14:32:22] [INFO] [CGI] Spawned pipeline child process [PID 1966205]
+[14:32:22] [Server] ➜ POST /directory/youpi.bla
+[14:32:22] [INFO] [CGI] Spawned pipeline child process [PID 1966212]
+[14:32:22] [Server] ➜ POST /directory/youpi.bla
+[14:32:22] [INFO] [CGI] Spawned pipeline child process [PID 1966215]
+[14:32:22] [Server] ➜ POST /directory/youpi.bla
+[14:32:22] [INFO] [CGI] Spawned pipeline child process [PID 1966239]
+[14:32:22] [Server] ➜ POST /directory/youpi.bla
+[14:32:22] [INFO] [CGI] Spawned pipeline child process [PID 1966240]
+[14:32:22] [Server] ➜ POST /directory/youpi.bla
+[14:32:22] [INFO] [CGI] Spawned pipeline child process [PID 1966256]
+[14:32:24] [Server] Ingesting fd [11]: 36.00 MB
+[14:32:24] [INFO] [Cluster] Success response sent. Resetting client fd [24] back to POLLIN
+[14:32:24] [Server] Ingesting fd [9]: 33.50 MB
+[14:32:24] [INFO] [Cluster] Success response sent. Resetting client fd [7] back to POLLIN
+[14:32:24] [INFO] [Cluster] Success response sent. Resetting client fd [6] back to POLLIN
+[14:32:24] [Server] Ingesting fd [9]: 34.00 MB
+[14:32:24] [INFO] [Cluster] Success response sent. Resetting client fd [10] back to POLLIN
+[14:32:24] [Server] Ingesting fd [11]: 38.50 MB
+[14:32:24] [INFO] [Cluster] Success response sent. Resetting client fd [21] back to POLLIN
+[14:32:24] [Server] Ingesting fd [11]: 39.00 MB
+[14:32:24] [INFO] [Cluster] Success response sent. Resetting client fd [8] back to POLLIN
+[14:32:24] [Server] Ingesting fd [16]: 35.00 MB
+[14:32:24] [INFO] [Cluster] Success response sent. Resetting client fd [15] back to POLLIN
+[14:32:24] [Server] Ingesting fd [6]: 0.50 MB
+[14:32:24] [INFO] [Cluster] Success response sent. Resetting client fd [22] back to POLLIN
+[14:32:24] [Server] Ingesting fd [9]: 36.50 MB
+[14:32:24] [INFO] [Cluster] Success response sent. Resetting client fd [14] back to POLLIN
+[14:32:25] [Server] ➜ POST /directory/youpi.bla
+[14:32:25] [INFO] [CGI] Spawned pipeline child process [PID 1966276]
+[14:32:25] [Server] ➜ POST /directory/youpi.bla
+[14:32:25] [INFO] [CGI] Spawned pipeline child process [PID 1966285]
+[14:32:25] [Server] ➜ POST /directory/youpi.bla
+[14:32:25] [INFO] [CGI] Spawned pipeline child process [PID 1966286]
+[14:32:25] [Server] ➜ POST /directory/youpi.bla
+[14:32:26] [INFO] [CGI] Spawned pipeline child process [PID 1966295]
+[14:32:26] [Server] ➜ POST /directory/youpi.bla
+[14:32:26] [INFO] [CGI] Spawned pipeline child process [PID 1966303]
+[14:32:26] [Server] ➜ POST /directory/youpi.bla
+[14:32:26] [INFO] [CGI] Spawned pipeline child process [PID 1966312]
+[14:32:26] [Server] ➜ POST /directory/youpi.bla
+[14:32:26] [INFO] [CGI] Spawned pipeline child process [PID 1966320]
+[14:32:28] [Server] ➜ POST /directory/youpi.bla
+[14:32:28] [INFO] [CGI] Spawned pipeline child process [PID 1966360]
+[14:32:28] [Server] ➜ POST /directory/youpi.bla
+[14:32:28] [INFO] [CGI] Spawned pipeline child process [PID 1966368]
+[14:32:28] [Server] Ingesting fd [22]: 53.50 MB
+[14:32:28] [INFO] [Cluster] Success response sent. Resetting client fd [19] back to POLLIN
+[14:32:28] [Server] Ingesting fd [6]: 58.50 MB
+[14:32:28] [INFO] [Cluster] Success response sent. Resetting client fd [18] back to POLLIN
+[14:32:28] [Server] Ingesting fd [23]: 92.00 MB
+[14:32:28] [INFO] [Cluster] Success response sent. Resetting client fd [12] back to POLLIN
+[14:32:28] [Server] Ingesting fd [15]: 56.00 MB
+[14:32:28] [INFO] [Cluster] Success response sent. Resetting client fd [16] back to POLLIN
+[14:32:28] [Server] Ingesting fd [24]: 60.50 MB
+[14:32:28] [INFO] [Cluster] Success response sent. Resetting client fd [9] back to POLLIN
+[14:32:28] [Server] Ingesting fd [7]: 61.00 MB
+[14:32:28] [INFO] [Cluster] Success response sent. Resetting client fd [20] back to POLLIN
+[14:32:28] [Server] Ingesting fd [10]: 60.00 MB
+[14:32:28] [INFO] [Cluster] Success response sent. Resetting client fd [11] back to POLLIN
+[14:32:28] [Server] ➜ POST /directory/youpi.bla
+[14:32:28] [INFO] [CGI] Spawned pipeline child process [PID 1966384]
+[14:32:29] [Server] Ingesting fd [14]: 59.50 MB
+[14:32:29] [INFO] [Cluster] Success response sent. Resetting client fd [23] back to POLLIN
+[14:32:29] [Server] Ingesting fd [15]: 61.00 MB
+[14:32:29] [INFO] [Cluster] Success response sent. Resetting client fd [13] back to POLLIN
+[14:32:29] [Server] Ingesting fd [15]: 65.50 MB
+[14:32:29] [INFO] [Cluster] Success response sent. Resetting client fd [5] back to POLLIN
+[14:32:29] [Server] ➜ POST /directory/youpi.bla
+[14:32:29] [INFO] [CGI] Spawned pipeline child process [PID 1966392]
+[14:32:30] [Server] ➜ POST /directory/youpi.bla
+[14:32:30] [INFO] [CGI] Spawned pipeline child process [PID 1966401]
+[14:32:30] [Server] Ingesting fd [10]: 94.00 MB
+[14:32:30] [INFO] [Cluster] Success response sent. Resetting client fd [17] back to POLLIN
+[14:32:30] [Server] ➜ POST /directory/youpi.bla
+[14:32:30] [INFO] [CGI] Spawned pipeline child process [PID 1966402]
+[14:32:30] [Server] ➜ POST /directory/youpi.bla
+[14:32:30] [INFO] [CGI] Spawned pipeline child process [PID 1966410]
+[14:32:30] [Server] ➜ POST /directory/youpi.bla
+[14:32:30] [INFO] [CGI] Spawned pipeline child process [PID 1966424]
+[14:32:30] [Server] ➜ POST /directory/youpi.bla
+[14:32:30] [INFO] [CGI] Spawned pipeline child process [PID 1966433]
+[14:32:30] [Server] ➜ POST /directory/youpi.bla
+[14:32:30] [INFO] [CGI] Spawned pipeline child process [PID 1966441]
+[14:32:30] [Server] ➜ POST /directory/youpi.bla
+[14:32:30] [INFO] [CGI] Spawned pipeline child process [PID 1966451]
+[14:32:31] [Server] ➜ POST /directory/youpi.bla
+[14:32:31] [INFO] [CGI] Spawned pipeline child process [PID 1966457]
+[14:32:31] [Server] ➜ POST /directory/youpi.bla
+[14:32:31] [INFO] [CGI] Spawned pipeline child process [PID 1966458]
+[14:32:31] [INFO] [Cluster] Success response sent. Resetting client fd [7] back to POLLIN
+[14:32:31] [INFO] [Cluster] Success response sent. Resetting client fd [8] back to POLLIN
+[14:32:31] [INFO] [Cluster] Success response sent. Resetting client fd [6] back to POLLIN
+[14:32:32] [INFO] [Cluster] Success response sent. Resetting client fd [10] back to POLLIN
+[14:32:32] [INFO] [Cluster] Success response sent. Resetting client fd [24] back to POLLIN
+[14:32:32] [INFO] [Cluster] Success response sent. Resetting client fd [21] back to POLLIN
+[14:32:32] [INFO] [Cluster] Success response sent. Resetting client fd [14] back to POLLIN
+[14:32:32] [INFO] [Cluster] Success response sent. Resetting client fd [15] back to POLLIN
+[14:32:32] [INFO] [Cluster] Success response sent. Resetting client fd [22] back to POLLIN
+[14:32:32] [INFO] [Cluster] Connection closed securely on fd [19]
+[14:32:32] [INFO] [Cluster] Connection closed securely on fd [5]
+[14:32:32] [INFO] [Cluster] Connection closed securely on fd [9]
+[14:32:32] [INFO] [Cluster] Connection closed securely on fd [11]
+[14:32:32] [INFO] [Cluster] Connection closed securely on fd [12]
+[14:32:32] [INFO] [Cluster] Connection closed securely on fd [13]
+[14:32:32] [INFO] [Cluster] Connection closed securely on fd [16]
+[14:32:32] [INFO] [Cluster] Connection closed securely on fd [18]
+[14:32:32] [INFO] [Cluster] Connection closed securely on fd [20]
+[14:32:32] [INFO] [Cluster] Connection closed securely on fd [23]
+[14:32:32] [INFO] [Cluster] Connection closed securely on fd [6]
+[14:32:32] [INFO] [Cluster] Connection closed securely on fd [7]
+[14:32:32] [INFO] [Cluster] Connection closed securely on fd [8]
+[14:32:32] [INFO] [Cluster] Connection closed securely on fd [10]
+[14:32:32] [INFO] [Cluster] Connection closed securely on fd [17]
+[14:32:32] [INFO] [Cluster] Connection closed securely on fd [24]
+[14:32:32] [INFO] [Cluster] Connection closed securely on fd [21]
+[14:32:32] [INFO] [Cluster] Connection closed securely on fd [14]
+[14:32:32] [INFO] [Cluster] Connection closed securely on fd [15]
+[14:32:32] [INFO] [Cluster] Connection closed securely on fd [22]
+[14:32:32] [INFO] [Cluster] Connection closed securely on fd [4]
+[14:32:33] [Cluster] Event loop ticking. Awaiting tester payload...
+
+Test multiple workers(20) doing multiple times(5): Post on /directory/youpi.bla with size 100000000
+FATAL ERROR ON LAST TEST: bad cgi returned size body

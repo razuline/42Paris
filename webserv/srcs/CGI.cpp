@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/24 16:54:54 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/15 12:14:59 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/15 12:32:41 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,11 +91,9 @@ CGI::execute(const Request &req, const std::string &script_path,
 		return Http::INTERNAL_SERVER_ERROR;
 	}
 
-	 // Set pipes to non-blocking mode
-	fcntl(_pipe_in[0], F_SETFL, O_NONBLOCK);
+	// Set pipes to non-blocking mode
 	fcntl(_pipe_in[1], F_SETFL, O_NONBLOCK);
 	fcntl(_pipe_out[0], F_SETFL, O_NONBLOCK);
-	fcntl(_pipe_out[1], F_SETFL, O_NONBLOCK);
 
 	#ifdef __linux__
 		// Increase pipe buffer size for large concurrent POST uploads

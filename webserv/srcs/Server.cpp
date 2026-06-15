@@ -6,11 +6,13 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/09 15:20:40 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/14 21:14:25 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/15 13:49:03 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
+
+static std::map<int, size_t>	g_bytesSent;
 
 /* ------------------------- ORTHODOX CANONICAL FORM ------------------------ */
 
@@ -108,15 +110,19 @@ Server::handleRead(int client_fd)
 	char	buff[4096];
 	int		bytes_read = recv(client_fd, buff, sizeof(buff) - 1, 0);
 
-	if (bytes_read <= 0)
+	if (bytes_read == 0)
 	{
 		clearClientState(client_fd);
 		return Server::READ_ERROR;
 	}
+	if (bytes_read < 0)
+	{
+		return Server::READ_INCOMPLETE;
+	}
 
 	buff[bytes_read] = '\0';
 	Request	&curr = _reqs[client_fd];
-	
+
 	size_t	prev_size = curr.getRawSize();
 
 	curr.setLimit(_config.getClientMaxBodySize());
@@ -161,23 +167,37 @@ Server::handleWrite(int client_fd)
 			_resps[client_fd].clearBodyForHead();
 		}
 		_writeBuffs[client_fd] = _resps[client_fd].build();
+		g_bytesSent[client_fd] = 0;
 	}
 
 	const std::string	&res_str = _writeBuffs[client_fd];
-	int	bytes_sent = send(client_fd, res_str.c_str(), res_str.size(), 0);
 
-	if (bytes_sent <= 0)
+	size_t	already_sent = g_bytesSent[client_fd];
+	size_t	remaining = res_str.size() - already_sent;
+	size_t	chunk_size = remaining > 65536 ? 65536 : remaining;
+
+	int	bytes_sent = send(client_fd, res_str.c_str() + already_sent, chunk_size, 0);
+
+	if (bytes_sent == 0)
 	{
+		g_bytesSent.erase(client_fd);
 		clearClientState(client_fd);
 		return WRITE_ERROR;
 	}
-	if (static_cast<size_t>(bytes_sent) >= res_str.size())
+	if (bytes_sent < 0)
 	{
+		return Server::WRITE_INCOMPLETE;
+	}
+
+	g_bytesSent[client_fd] += bytes_sent;
+
+	if (g_bytesSent[client_fd] >= res_str.size())
+	{
+		g_bytesSent.erase(client_fd);
 		_writeBuffs.erase(client_fd);
 		_resps.erase(client_fd);
 		return WRITE_COMPLETE;
 	}
-	_writeBuffs[client_fd] = res_str.substr(bytes_sent);
 	return Server::WRITE_INCOMPLETE;
 }
 
@@ -186,6 +206,7 @@ Server::clearClientState(int client_fd)
 {
 	_resps.erase(client_fd);
 	_writeBuffs.erase(client_fd);
+	g_bytesSent.erase(client_fd);
 
 	std::map<int, CGI *>::iterator	it = _cgis.find(client_fd);
 	if (it != _cgis.end())

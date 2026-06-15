@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 17:16:00 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/15 11:19:00 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/15 14:40:06 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,7 +81,7 @@ Cluster::run()
 		while (waitpid(-1, NULL, WNOHANG) > 0);
 
 		// 2. TIMEOUT METRONOME (1 second)
-		int ret = poll(&_fds[0], _fds.size(), 1000);
+		int	ret = poll(&_fds[0], _fds.size(), 1000);
 		if (ret < 0)
 		{
 			if (g_stop == 0)
@@ -133,7 +133,7 @@ Cluster::run()
 			}
 		}
 
-		// Snapshot all file descriptors that received an event
+		// Snapshot all fds that received an event
 		std::vector<int>	ready_fds;
 		for (size_t i = 0; i < _fds.size(); ++i)
 		{
@@ -314,6 +314,14 @@ Cluster::_handleClientRead(int fd, Server &server)
 void
 Cluster::_handleClientWrite(int fd, Server &server)
 {
+	pid_t	cgi_pid = server.getCgiPid(fd);
+	if (cgi_pid > 0)
+	{
+		int	status;
+		if (waitpid(cgi_pid, &status, WNOHANG) == 0)
+			return;
+	}
+
 	// Inspect the exact transmission metrics returned by the non-blocking socket
 	Server::WriteStatus	status = server.handleWrite(fd);
 
@@ -389,29 +397,34 @@ Cluster::_handleCGIWrite(int pipe_write_fd, Server &server)
 	}
 
 	size_t	already_written = _cgiBytesWritten[pipe_write_fd];
-	size_t	total_chunk_written = 0;
+	if (already_written >= body.size())
+		return;
 
-	while (already_written + total_chunk_written < body.size())
+	size_t	remaining = body.size() - already_written;
+	size_t	chunk_size = remaining > 65536 ? 65536 : remaining;
+
+	int		ret = write(pipe_write_fd, body.c_str() + already_written, chunk_size);
+
+	if (ret > 0)
 	{
-		size_t	remaining = body.size() - (already_written + total_chunk_written);
-		size_t	chunk_size = remaining > 65536 ? 65536 : remaining;
-
-		int	ret = write(pipe_write_fd,
-						body.c_str() + already_written + total_chunk_written,
-						chunk_size);
-
-		if (ret > 0)
-		{
-			total_chunk_written += ret;
-		}
-		else
-		{
-			break;
-		}
+		_cgiBytesWritten[pipe_write_fd] += ret;
 	}
-
-	_cgiBytesWritten[pipe_write_fd] += total_chunk_written;
-
+	else
+	{
+		pid_t	cgi_pid = server.getCgiPid(client_fd);
+		if (cgi_pid > 0)
+		{
+			int	status;
+			if (waitpid(cgi_pid, &status, WNOHANG) > 0)
+			{
+				close(pipe_write_fd);
+				_removePipeFromPoll(pipe_write_fd);
+				_pipeToClientMap.erase(pipe_write_fd);
+				_cgiBytesWritten.erase(pipe_write_fd);
+			}
+		}
+		return;
+	}
 	if (_cgiBytesWritten[pipe_write_fd] == body.size())
 	{
 		close(pipe_write_fd);
@@ -437,6 +450,16 @@ Cluster::_handleCGIRead(int pipe_read_fd, Server &server)
 	}
 	if (bytes_read < 0)
 	{
+		pid_t	cgi_pid = server.getCgiPid(client_fd);
+		if (cgi_pid > 0)
+		{
+			int	status;
+			if (waitpid(cgi_pid, &status, WNOHANG) == 0)
+			{
+				return;
+			}
+		}
+
 		_cgiBuffs.erase(client_fd);
 		close(pipe_read_fd);
 		_removePipeFromPoll(pipe_read_fd);
@@ -481,96 +504,68 @@ Cluster::_handleCGIRead(int pipe_read_fd, Server &server)
 
 	server.cleanupCgi(client_fd);
 
-	Response	response;
-	size_t		headerEnd = cgiOutput.find("\r\n\r\n");
-	size_t		delimiterLen = 4;
+	Response			response;
+	std::stringstream	cgi_ss(cgiOutput);
+	std::string			line;
+	size_t				body_start_pos = 0;
+	int					cgi_status_code = Http::OK;
+	bool				has_content_type = false;
+	bool				has_location = false;
 
-	if (headerEnd == std::string::npos)
+	while (std::getline(cgi_ss, line))
 	{
-		headerEnd = cgiOutput.find("\n\n");
-		delimiterLen = 2;
-	}
+		body_start_pos += line.size() + 1;
 
-	if (headerEnd != std::string::npos)
-	{
-		std::string	headersPart = cgiOutput.substr(0, headerEnd);
-		std::string	bodyPart = cgiOutput.substr(headerEnd + delimiterLen);
+		if (!line.empty() && line[line.size() - 1] == '\r')
+			line.erase(line.size() - 1);
+		if (line.empty())
+			break;
 
-		int			cgi_status_code = Http::OK;
-		bool		has_content_type = false;
-		bool		has_location = false;
-
-		std::stringstream	header_ss(headersPart);
-		std::string			line;
-
-		while (std::getline(header_ss, line))
+		size_t	colon = line.find(':');
+		if (colon != std::string::npos)
 		{
-			if (!line.empty() && line[line.size() - 1] == '\r')
-				line.erase(line.size() - 1);
-			if (line.empty())
-				continue;
+			std::string	key = Utils::trim(line.substr(0, colon));
+			std::string	value = Utils::trim(line.substr(colon + 1));
 
-			size_t	colon = line.find(':');
-			if (colon != std::string::npos)
+			if (key == "Status")
 			{
-				std::string	key = Utils::trim(line.substr(0, colon));
-				std::string	value = Utils::trim(line.substr(colon + 1));
-
-				if (key == "Status")
-				{
-					std::stringstream	status_ss(value);
-					status_ss >> cgi_status_code;
-				}
-				else if (key == "Location")
-				{
-					has_location = true;
-					response.setHeader("Location", value);
-				}
-				else
-				{
-					if (key == "Content-Type")
-						has_content_type = true;
-					response.setHeader(key, value);
-				}
+				std::stringstream	status_ss(value);
+				status_ss >> cgi_status_code;
+			}
+			else if (key == "Location")
+			{
+				has_location = true;
+				response.setHeader("Location", value);
+			}
+			else
+			{
+				if (key == "Content-Type")
+					has_content_type = true;
+				response.setHeader(key, value);
 			}
 		}
-
-		if (has_location && cgi_status_code == Http::OK)
-			cgi_status_code = Http::FOUND;
-
-		response.setStatus(cgi_status_code);
-
-		if (!has_content_type && !has_location && !bodyPart.empty())
-			response.setHeader("Content-Type", "text/html");
-
-		if (has_location && (cgi_status_code == Http::FOUND ||
-			cgi_status_code == Http::MOVED_PERMANENTLY))
-			bodyPart = "";
-
-		// FIX: Set the body and Content-Length explicitly from the untouched bodyPart substring
-		response.setBody(bodyPart);
-		response.setHeader("Content-Length", Utils::toStr(bodyPart.size()));
 	}
-	else if (!cgiOutput.empty())
+
+	std::string	bodyPart = "";
+	if (body_start_pos < cgiOutput.size())
 	{
-		response.setStatus(Http::OK);
-		response.setBody(cgiOutput);
+		bodyPart = cgiOutput.substr(body_start_pos);
+	}
+
+	if (has_location && cgi_status_code == Http::OK)
+		cgi_status_code = Http::FOUND;
+
+	response.setStatus(cgi_status_code);
+
+	if (!has_content_type && !has_location && !bodyPart.empty())
 		response.setHeader("Content-Type", "text/html");
-		response.setHeader("Content-Length", Utils::toStr(cgiOutput.size()));
-	}
-	else
-	{
-		response.setStatus(Http::NO_CONTENT);
-		response.setBody("");
-		response.setHeader("Content-Length", "0");
-	}
 
-	if (response.getStatus() == Http::NO_CONTENT ||
-	   (response.getStatus() >= 300 && response.getStatus() < 400))
-	{
-		response.setBody("");
-		response.setHeader("Content-Length", "0");
-	}
+	if (has_location && (cgi_status_code == Http::FOUND ||
+		cgi_status_code == Http::MOVED_PERMANENTLY))
+		bodyPart = "";
+
+	response.setBody(bodyPart);
+	response.setHeader("Content-Length", Utils::toStr(bodyPart.size()));
 
 	server.setCgiResponse(client_fd, response);
 
