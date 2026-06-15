@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/01 17:16:00 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/14 22:04:30 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/15 11:19:00 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -275,6 +275,9 @@ Cluster::_handleClientRead(int fd, Server &server)
 	{
 		int	cgi_write_fd = server.getWriteFd(fd);
 		int	cgi_read_fd = server.getReadFd(fd);
+
+		fcntl(cgi_write_fd, F_SETFL, O_NONBLOCK);
+		fcntl(cgi_read_fd, F_SETFL, O_NONBLOCK);
 
 		// Record CGI start time
 		_cgiStartTime[fd] = time(NULL);

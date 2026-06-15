@@ -6,7 +6,7 @@
 /*   By: erazumov <erazumov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/24 16:54:54 by erazumov          #+#    #+#             */
-/*   Updated: 2026/06/14 19:18:15 by erazumov         ###   ########.fr       */
+/*   Updated: 2026/06/15 12:14:59 by erazumov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,6 +125,12 @@ CGI::execute(const Request &req, const std::string &script_path,
 		// Close original FDs
 		close(_pipe_in[0]);
 		close(_pipe_out[1]);
+
+		// FIX: Close all inherited fds to prevent pipe deadlocks
+		for (int i = 3; i < 1024; i++)
+		{
+			close(i);
+		}
 
 		// Change to script directory
 		std::string	target_script = script_path;

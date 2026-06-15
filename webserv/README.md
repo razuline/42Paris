@@ -178,16 +178,7 @@ We divided the project into technical modules so the team could collaborate easi
 
 ## 📖 Documentation, Resources & AI Usage
 
-### 1. Internal Reference Manuals
-
-More detailed, low-level design specifications for this implementation are available in the `docs/` folder:
-
-* `docs/HTTP.md` — In-depth analysis of HTTP parsing states, multi-server routing matrices, and compliant status token packaging.
-
-* `docs/Event-Loop.md` — Structural tear-down of the non-blocking `poll()` cluster architecture and connection socket lifecycles.
-* `docs/CGI.md` — Practical blueprint of process isolation, environment setups, and non-blocking stream parsing for `youpi.bla` scripts.
-
-### 2. External Learning Resources
+### 1. External Learning Resources
 
 The foundational concepts behind our asynchronous architecture were built using these core system references:
 
@@ -196,7 +187,7 @@ The foundational concepts behind our asynchronous architecture were built using 
 * **IBM UNIX/Linux System Calls Reference:** Consulted for managing edge-case behaviors of `fcntl()` flags, non-blocking pipe limits, and child process inheritance.
 * **RFC 2616 (HTTP/1.1):** Utilised to cross-verify mandatory protocol constraints, chunked payload formatting rules, and semantic error code definitions.
 
-### 3. AI Assistance & Transparency Declaration
+### 2. AI Assistance & Transparency Declaration
 
 In alignment with modern coding standards and 42 evaluation policies, artificial intelligence (Large Language Models) was used as an interactive debugging, interface design, and architecture simulator during this project's development.
 
