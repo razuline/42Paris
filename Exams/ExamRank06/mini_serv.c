@@ -7,19 +7,37 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
+int		max_fd = 0;
+int		next_id = 0;
+fd_set	master_set;
+fd_set	read_set;
 bool	g_server_running = true;
+
+char	buff_write[65536];
+char	buff_read[65536];
+
+typedef struct s_client
+{
+	int		id;
+	char	*msg;
+}	t_client;
+
+t_client	clients[65536];
 
 static void
 fatal_error()
 {
-	ft_putstr_fd("Fatal error\n", 2);
-	exit(1);
+	char	*err = "Fatal error\n";
+	write(STDERR_FILENO, err, strlen(err));
+	exit(EXIT_FAILURE);
 }
 
 void
-setup_server()
+broadcast(int sender_fd, int server_fd, char *msg)
 {
-
+	for (int fd = 0; fd <= max_fd; fd++)
+		if (FD_ISSET(fd, &master_set) && fd != server_fd && fd != sender_fd)
+			send(fd, msg, strlen(msg), 0);
 }
 
 int
@@ -27,13 +45,12 @@ main(int ac, char **av)
 {
 	if (ac != 2)
 	{
-		ft_putstr_fd("Wrong number of arguments\n", 2);
+		write(2, "Wrong number of arguments\n", 26);
 		exit(1);
 	}
 
 	// Socket Creation
-	int	server_fd;
-	server_fd = socket(AF_INET, SOCK_STREAM, 0);
+	int	server_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (server_fd < 0)
 		fatal_error();
 
@@ -56,19 +73,10 @@ main(int ac, char **av)
 		fatal_error();
 	}
 
-	// FDs
-	fd_set	master_set;
-	fd_set	read_set;
-
-	// Client
-	int		client_ids[4096];
-	char	*client_buffs[4096];
-	int		next_id = 0;
-
-	memset(client_buffs, 0, sizeof(client_buffs));
+	memset((t_client *)clients, 0, sizeof(clients));
 	FD_ZERO(&master_set);
 	FD_SET(server_fd, &master_set);
-	int	max_fd = server_fd;
+	max_fd = server_fd;
 
 	// select()
 	while (g_server_running)
@@ -77,9 +85,39 @@ main(int ac, char **av)
 
 		if (select(max_fd + 1, &read_set, NULL, NULL, NULL) < 0)
 			fatal_error();
+
+		for (int fd = 0; fd <= max_fd; fd++)
+		{
+			if (!FD_ISSET(fd, &read_set))
+				continue;
+
+			if (fd == server_fd)
+			{
+				struct sockaddr_in	client_addr;
+				socklen_t			addr_len = sizeof(client_addr);
+
+				// Accept
+				int	client_fd = accept(server_fd, (struct sockaddr *)&client_addr, &addr_len);
+				if (client_fd < 0)
+					continue;
+
+				clients[client_fd].id = next_id++;
+				clients[client_fd].msg = NULL;
+				FD_SET(client_fd, &master_set);
+				if (client_fd > max_fd)
+					max_fd = client_fd;
+
+				sprintf(buff_write, "server: client %d just arrived\n", clients[client_fd].id);
+				send_all(client_fd, server_fd, buff_write);
+			}
+			else
+			{
+
+			}
+		}
 	}
 
 
 
-	return (0);
+	return 0;
 }
