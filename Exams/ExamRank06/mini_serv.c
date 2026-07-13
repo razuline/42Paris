@@ -1,20 +1,15 @@
 #include <stdbool.h>
-#include <fcntl.h>
 #include <netinet/in.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/select.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <stdio.h>
 
-int		max_fd = 0;
-int		next_id = 0;
-fd_set	master_fds;
-fd_set	read_fds;
-bool	g_server_running = true;
-
-char	buff_write[65536];
-char	buff_read[65536];
+int		max_fd = 0, next_id = 0;
+fd_set	master_fds, read_fds;
+char	buff_write[65536], buff_read[65536];
 
 typedef struct s_client
 {
@@ -27,8 +22,7 @@ t_client	clients[65536];
 static void
 fatal_error()
 {
-	char	*err = "Fatal error\n";
-	write(STDERR_FILENO, err, strlen(err));
+	write(2, "Fatal error\n", 12);
 	exit(1);
 }
 
@@ -44,12 +38,12 @@ int
 extract_message(char **buf, char **msg)
 {
 	char	*newbuf;
-	int		i;
+	int		i = 0;
 
 	*msg = 0;
 	if (*buf == 0)
 		return (0);
-	i = 0;
+
 	while ((*buf)[i])
 	{
 		if ((*buf)[i] == '\n')
@@ -72,12 +66,8 @@ char
 *str_join(char *buf, char *add)
 {
 	char	*newbuf;
-	int		len;
+	int		len = buf ? strlen(buf) : 0;
 
-	if (buf == 0)
-		len = 0;
-	else
-		len = strlen(buf);
 	newbuf = (char *)malloc(sizeof(*newbuf) * (len + strlen(add) + 1));
 	if (newbuf == 0)
 		return (0);
@@ -111,24 +101,20 @@ main(int ac, char **av)
 	server_addr.sin_port = htons(atoi(av[1]));
 
 	// Bind & Listen
-	if (bind(server_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0)
-	{
-		close(server_fd);
-		fatal_error();
-	}
-	if (listen(server_fd, 128) < 0)
+	if (bind(server_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0 ||
+		listen(server_fd, 128) < 0)
 	{
 		close(server_fd);
 		fatal_error();
 	}
 
-	memset((t_client *)clients, 0, sizeof(clients));
+	memset(clients, 0, sizeof(clients));
 	FD_ZERO(&master_fds);
 	FD_SET(server_fd, &master_fds);
 	max_fd = server_fd;
 
 	// select()
-	while (g_server_running)
+	while (true)
 	{
 		read_fds = master_fds;
 
@@ -140,14 +126,13 @@ main(int ac, char **av)
 			if (!FD_ISSET(fd, &read_fds))
 				continue;
 
-			int	client_fd;
 			if (fd == server_fd)
 			{
 				struct sockaddr_in	client_addr;
 				socklen_t			addr_len = sizeof(client_addr);
 
 				// Accept
-				client_fd = accept(server_fd, (struct sockaddr *)&client_addr, &addr_len);
+				int	client_fd = accept(server_fd, (struct sockaddr *)&client_addr, &addr_len);
 				if (client_fd < 0)
 					continue;
 
@@ -168,12 +153,10 @@ main(int ac, char **av)
 					sprintf(buff_write, "server: client %d just left\n", clients[fd].id);
 					broadcast(fd, server_fd, buff_write);
 
+					free(clients[fd].msg);
+					clients[fd].msg = NULL;
 					FD_CLR(fd, &master_fds);
 					close(fd);
-
-					if (clients[fd].msg)
-						free(clients[fd].msg);
-					clients[fd].msg = NULL;
 				}
 				else
 				{
@@ -188,7 +171,6 @@ main(int ac, char **av)
 					{
 						sprintf(buff_write, "client %d: %s", clients[fd].id, msg_to_send);
 						broadcast(fd, server_fd, buff_write);
-
 						free(msg_to_send);
 						msg_to_send = NULL;
 					}
